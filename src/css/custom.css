@@ -1,0 +1,64 @@
+/* inter-latin-400-normal */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-400-normal.woff2) format('woff2'), url(https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-400-normal.woff) format('woff');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+/* inter-latin-500-normal */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-500-normal.woff2) format('woff2'), url(https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-500-normal.woff) format('woff');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+/* inter-latin-600-normal */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-600-normal.woff2) format('woff2'), url(https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-600-normal.woff) format('woff');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+:root {
+  --ifm-font-family-base: 'Inter';
+
+
+  --w-brand-300: hsl(217 5% 66%);
+  --w-brand-400: hsl(217 10% 33%);
+  --w-brand-500: hsl(217 66% 32%);
+  --w-brand-600: hsl(217 40% 30%);
+  --w-brand-700: hsl(217 10% 33%);
+}
+
+:root {
+  --ifm-color-primary: var(--w-brand-500);
+  --ifm-color-primary-dark: var(--w-brand-600);
+  --ifm-color-primary-darker: var(--w-brand-700);
+  --ifm-color-primary-darkest: var(--w-brand-700);
+  --ifm-color-primary-light: var(--w-brand-400);
+  --ifm-color-primary-lighter: var(--w-brand-300);
+  --ifm-color-primary-lightest: var(--w-brand-300);
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme='dark'] {
+  --ifm-color-primary: white;
+  --ifm-color-primary-dark: white;
+  --ifm-color-primary-darker: white;
+  --ifm-color-primary-darkest: white;
+  --ifm-color-primary-light: white;
+  --ifm-color-primary-lighter: white;
+  --ifm-color-primary-lightest: white;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
