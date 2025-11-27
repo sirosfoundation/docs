@@ -65,9 +65,15 @@ const config: Config = {
       items: [
         {
           type: 'docSidebar',
-          sidebarId: 'tutorialSidebar',
+          sidebarId: 'sirosIdSidebar',
           position: 'left',
-          label: 'Tutorial',
+          label: 'SIROS ID',
+        },
+        {
+          type: 'docSidebar',
+          sidebarId: 'wwWalletSidebar',
+          position: 'left',
+          label: 'wwWallet',
         },
         {
           href: 'https://github.com/sirosfoundation',
