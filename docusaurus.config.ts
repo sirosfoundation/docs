@@ -7,6 +7,8 @@ import type * as Preset from '@docusaurus/preset-classic';
 const config: Config = {
   title: 'SIROS Developer Docs',
   favicon: 'img/favicon.ico',
+  themes: ['@docusaurus/theme-mermaid'],
+  markdown: { mermaid: true, },
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
