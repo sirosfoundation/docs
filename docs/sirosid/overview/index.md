@@ -1,3 +1,6 @@
+---
+sidebar_position: 1
+---
 # Overview
 
 The SIROS ID platform is a multi-tenant digital credentials platform. This is an overview of the architecture:

@@ -1,3 +1,7 @@
+---
+sidebar_position: 3
+---
+
 # Integrations
 
 A SIROS ID Credential Manager Service comes with a set of demo issuers and verifiers that can be used for development and debugging.
