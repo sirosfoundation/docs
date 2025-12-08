@@ -1,4 +1,4 @@
-# Adding KeyCloak as a Verifier
+# Verifying credentials in KeyCloak
 
 1. Go to Keycloak Admin Console
 2. Select your realm
