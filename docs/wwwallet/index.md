@@ -8,9 +8,9 @@ The wwWallet project is an opensource digital credential manager (aka wallet). T
 
 The wwWallet is an opensource collaboration sponsored by SIROS Foundation with key contributions from 
 
-* [GUNet](gunet.gr)
-* [SURF](surfnet.nl)
-* [Yubico](yubico.com)
-* [SUNET](sunet.se)
+* [GUNet](https://gunet.gr)
+* [SURF](https://surfnet.nl)
+* [Yubico](https://yubico.com)
+* [SUNET](https://sunet.se)
 
 The [SIROS ID Credential Manger](../sirosid/cm.md) is based on wwWallet.
