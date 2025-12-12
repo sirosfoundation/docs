@@ -1,5 +1,4 @@
 import type {ReactNode} from 'react';
-import clsx from 'clsx';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
@@ -10,27 +9,28 @@ import styles from './index.module.css';
 function HomepageHeader() {
   const {siteConfig} = useDocusaurusContext();
   return (
-    <header className={clsx('hero hero--primary', styles.heroBanner)}>
-      <div className="container">
-        <Heading as="h1" className={clsx('hero__title', styles.heroBannerTitle)}>
-          <svg width={50} height={50} viewBox='0 0 50 50'>
+    <header className={styles.hero}>
+      <Heading as="h1" className={styles.heroTitle}>
+        <span className={styles.heroTitleBrand}>
+          <svg className={styles.heroTitleLogo} width={50} height={50} viewBox='0 0 50 50'>
             <image href='img/logo.svg' width={50} height={50} />
           </svg>
-          {siteConfig.title}
-        </Heading>
-        <p className="hero__subtitle">{siteConfig.tagline}</p>
-        <div className={styles.buttons}>
-          <Link
-            className="button button--secondary button--lg"
-            to="/docs/sirosid">
-            SIROS ID
-          </Link>
-          <Link
-            className="button button--secondary button--lg"
-            to="/docs/wwwallet">
-            wwWallet
-          </Link>
-        </div>
+          SIROS Foundation
+        </span>
+        <span>Developer Docs</span>
+      </Heading>
+      {siteConfig.tagline && <p className={styles.heroSubtitle}>{siteConfig.tagline}</p>}
+      <div className={styles.heroButtons}>
+        <Link
+          className="button button--secondary button--lg"
+          to="/docs/sirosid">
+          SIROS ID
+        </Link>
+        <Link
+          className="button button--secondary button--lg"
+          to="/docs/wwwallet">
+          wwWallet
+        </Link>
       </div>
     </header>
   );
