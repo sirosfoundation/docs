@@ -62,3 +62,160 @@
   --ifm-color-primary-lightest: white;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
+
+/* =====================================================
+   MERMAID DIAGRAM ENHANCEMENTS
+   ===================================================== */
+
+/* Container styling for all mermaid diagrams */
+.docusaurus-mermaid-container {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    0 4px 6px rgba(0, 0, 0, 0.03);
+  overflow-x: auto;
+}
+
+[data-theme='dark'] .docusaurus-mermaid-container {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border-color: #334155;
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.3),
+    0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Center the SVG within container */
+.docusaurus-mermaid-container svg {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Flowchart node enhancements */
+.mermaid .node rect,
+.mermaid .node circle,
+.mermaid .node ellipse,
+.mermaid .node polygon {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  transition: filter 0.2s ease;
+}
+
+.mermaid .node:hover rect,
+.mermaid .node:hover circle,
+.mermaid .node:hover ellipse,
+.mermaid .node:hover polygon {
+  filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.3));
+}
+
+/* Sequence diagram participant boxes */
+.mermaid .actor {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* Sequence diagram lifelines */
+.mermaid .actor-line {
+  stroke: #94a3b8;
+  stroke-dasharray: 4, 4;
+}
+
+[data-theme='dark'] .mermaid .actor-line {
+  stroke: #64748b;
+}
+
+/* Message arrows */
+.mermaid .messageText {
+  font-size: 13px !important;
+  font-weight: 500;
+}
+
+/* Subgraph/cluster styling */
+.mermaid .cluster rect {
+  rx: 8px !important;
+  ry: 8px !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.05));
+}
+
+.mermaid .cluster .label {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* Edge labels */
+.mermaid .edgeLabel {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  padding: 2px 6px !important;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+[data-theme='dark'] .mermaid .edgeLabel {
+  background-color: rgba(30, 41, 59, 0.9) !important;
+  color: #e2e8f0;
+}
+
+/* Arrow styling */
+.mermaid .arrowheadPath {
+  fill: #3b82f6;
+}
+
+.mermaid .flowchart-link {
+  stroke: #64748b !important;
+  stroke-width: 2px;
+}
+
+/* Note boxes in sequence diagrams */
+.mermaid .note {
+  fill: #fef3c7 !important;
+  stroke: #f59e0b !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+[data-theme='dark'] .mermaid .note {
+  fill: #422006 !important;
+  stroke: #d97706 !important;
+}
+
+/* Activation bars in sequence diagrams */
+.mermaid .activation0,
+.mermaid .activation1,
+.mermaid .activation2 {
+  fill: #dbeafe !important;
+  stroke: #3b82f6 !important;
+}
+
+[data-theme='dark'] .mermaid .activation0,
+[data-theme='dark'] .mermaid .activation1,
+[data-theme='dark'] .mermaid .activation2 {
+  fill: #1e3a5f !important;
+  stroke: #60a5fa !important;
+}
+
+/* Responsive scaling */
+@media (max-width: 768px) {
+  .docusaurus-mermaid-container {
+    padding: 1rem;
+    margin: 1.5rem -1rem;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+  
+  .mermaid {
+    font-size: 12px;
+  }
+}
+
+/* Print styles */
+@media print {
+  .docusaurus-mermaid-container {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+}
+

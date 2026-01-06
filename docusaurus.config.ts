@@ -93,6 +93,78 @@ const config: Config = {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
     },
+    // Mermaid diagram styling for professional appearance
+    mermaid: {
+      theme: {
+        light: 'base',
+        dark: 'dark',
+      },
+      options: {
+        // Improve rendering quality
+        securityLevel: 'loose',
+        flowchart: {
+          htmlLabels: true,
+          curve: 'basis',
+          padding: 20,
+          nodeSpacing: 50,
+          rankSpacing: 80,
+          useMaxWidth: true,
+        },
+        sequence: {
+          diagramMarginX: 50,
+          diagramMarginY: 30,
+          actorMargin: 80,
+          width: 180,
+          height: 60,
+          boxMargin: 10,
+          boxTextMargin: 8,
+          noteMargin: 15,
+          messageMargin: 45,
+          mirrorActors: true,
+          useMaxWidth: true,
+          rightAngles: false,
+          showSequenceNumbers: false,
+        },
+        themeVariables: {
+          // SIROS brand colors
+          primaryColor: '#EFF6FF',
+          primaryTextColor: '#1E40AF',
+          primaryBorderColor: '#3B82F6',
+          secondaryColor: '#F0FDF4',
+          secondaryTextColor: '#166534',
+          secondaryBorderColor: '#22C55E',
+          tertiaryColor: '#F9FAFB',
+          tertiaryTextColor: '#374151',
+          tertiaryBorderColor: '#D1D5DB',
+          
+          // Typography
+          fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+          fontSize: '14px',
+          
+          // Flowchart styling
+          lineColor: '#6B7280',
+          nodeTextColor: '#1F2937',
+          nodeBorder: '#3B82F6',
+          clusterBkg: '#F8FAFC',
+          clusterBorder: '#CBD5E1',
+          
+          // Sequence diagram styling
+          actorTextColor: '#1F2937',
+          actorBorder: '#3B82F6',
+          actorBkg: '#EFF6FF',
+          signalColor: '#3B82F6',
+          signalTextColor: '#1F2937',
+          sequenceNumberColor: '#FFFFFF',
+          
+          // Additional polish
+          noteBkgColor: '#FEF3C7',
+          noteBorderColor: '#F59E0B',
+          noteTextColor: '#92400E',
+          activationBkgColor: '#DBEAFE',
+          activationBorderColor: '#3B82F6',
+        },
+      },
+    },
   } satisfies Preset.ThemeConfig,
 };
 

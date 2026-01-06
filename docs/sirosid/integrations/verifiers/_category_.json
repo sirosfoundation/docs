@@ -1,0 +1,8 @@
+{
+  "label": "Credential Verification",
+  "position": 3,
+  "link": {
+    "type": "doc",
+    "id": "sirosid/integrations/verifiers/verifier"
+  }
+}

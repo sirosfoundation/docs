@@ -1,0 +1,8 @@
+{
+  "label": "Trust Services",
+  "position": 4,
+  "link": {
+    "type": "doc",
+    "id": "sirosid/integrations/trust/index"
+  }
+}
