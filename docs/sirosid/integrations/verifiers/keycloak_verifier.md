@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # Keycloak Integration
 
-This guide explains how to integrate SIROS ID credential verification with Keycloak, allowing users to authenticate to your applications using their digital credentials. After reading this guide, you will understand how to:
+This guide explains how to integrate SIROS ID credential verification with [Keycloak](https://www.keycloak.org/), allowing users to authenticate to your applications using their digital credentials. After reading this guide, you will understand how to:
 
 - Add SIROS ID as an identity provider in Keycloak
 - Configure claim mappings for user attributes
@@ -13,7 +13,7 @@ This guide explains how to integrate SIROS ID credential verification with Keycl
 
 ## Overview
 
-Keycloak can use the SIROS ID verifier as an external OpenID Connect identity provider. When users select "Login with SIROS ID", they present credentials from their wallet instead of entering a username and password.
+Keycloak can use the SIROS ID verifier as an external [OpenID Connect identity provider](https://www.keycloak.org/docs/latest/server_admin/index.html#_identity_broker_oidc). When users select "Login with SIROS ID", they present credentials from their wallet instead of entering a username and password.
 
 ```mermaid
 sequenceDiagram
@@ -37,7 +37,7 @@ sequenceDiagram
 ```
 
 :::tip Hosted or Self-Hosted
-This guide works with both the **SIROS ID hosted verifier** (`verifier.siros.org`) and **self-hosted deployments**. Simply replace the verifier URL as needed. See [Verifier Deployment Options](./verifier.md#deployment-options) for more information.
+This guide works with both the **SIROS ID hosted verifier** (`app.siros.org/<tenant>/<verifier>`) and **self-hosted deployments**. Simply replace the verifier URL as needed. See [Verifier Deployment Options](./verifier.md#deployment-options) for more information.
 :::
 
 ## Prerequisites
@@ -48,13 +48,13 @@ This guide works with both the **SIROS ID hosted verifier** (`verifier.siros.org
 
 ## Step 1: Register Your Keycloak Instance
 
-Register Keycloak as an OIDC client with the SIROS ID verifier. Replace `your-tenant` with your assigned tenant ID.
+Register Keycloak as an OIDC client with the SIROS ID verifier. Replace `your-tenant` and `your-verifier` with your assigned values.
 
 ### Using the Hosted Verifier
 
 ```bash
-# Replace 'your-tenant' with your tenant ID
-curl -X POST https://verifier.siros.org/your-tenant/register \
+# Replace 'your-tenant' and 'your-verifier' with your values
+curl -X POST https://app.siros.org/your-tenant/your-verifier/register \
   -H "Content-Type: application/json" \
   -d '{
     "client_name": "My Keycloak",
@@ -112,7 +112,7 @@ Configure the following settings:
 
 | Setting | Value |
 |---------|-------|
-| **Discovery Endpoint** | `https://verifier.siros.org/.well-known/openid-configuration` |
+| **Discovery Endpoint** | `https://app.siros.org/your-tenant/your-verifier/.well-known/openid-configuration` |
 | **Client ID** | *(from Step 1)* |
 | **Client Secret** | *(from Step 1)* |
 | **Client Authentication** | `Client secret sent as post` |
@@ -358,11 +358,11 @@ Export this configuration to replicate the setup:
   "config": {
     "clientId": "${CLIENT_ID}",
     "clientSecret": "${CLIENT_SECRET}",
-    "tokenUrl": "https://verifier.siros.org/${TENANT}/token",
-    "authorizationUrl": "https://verifier.siros.org/${TENANT}/authorize",
-    "jwksUrl": "https://verifier.siros.org/${TENANT}/jwks",
-    "userInfoUrl": "https://verifier.siros.org/${TENANT}/userinfo",
-    "issuer": "https://verifier.siros.org/${TENANT}",
+    "tokenUrl": "https://app.siros.org/${TENANT}/${VERIFIER}/token",
+    "authorizationUrl": "https://app.siros.org/${TENANT}/${VERIFIER}/authorize",
+    "jwksUrl": "https://app.siros.org/${TENANT}/${VERIFIER}/jwks",
+    "userInfoUrl": "https://app.siros.org/${TENANT}/${VERIFIER}/userinfo",
+    "issuer": "https://app.siros.org/${TENANT}/${VERIFIER}",
     "clientAuthMethod": "client_secret_post",
     "syncMode": "INHERIT",
     "validateSignature": "true",

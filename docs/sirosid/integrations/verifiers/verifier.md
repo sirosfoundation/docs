@@ -14,24 +14,24 @@ This guide explains how to verify digital credentials presented by users with SI
 
 ## Multi-Tenancy
 
-SIROS ID uses path-based multi-tenancy. The first path component after the domain identifies your tenant:
+SIROS ID uses path-based multi-tenancy. All services are hosted under `app.siros.org`:
 
 ```
-https://verifier.siros.org/<tenant>/...
+https://app.siros.org/<tenant>/<verifier_instance>/...
 ```
 
-For example, if your tenant ID is `acme-corp`:
+Each tenant can have multiple verifier instances. For example, tenant `acme-corp` with verifier instance `main`:
 
 | Endpoint | URL |
 |----------|-----|
-| Discovery | `https://verifier.siros.org/acme-corp/.well-known/openid-configuration` |
-| Authorization | `https://verifier.siros.org/acme-corp/authorize` |
-| Token | `https://verifier.siros.org/acme-corp/token` |
-| JWKS | `https://verifier.siros.org/acme-corp/jwks` |
-| Registration | `https://verifier.siros.org/acme-corp/register` |
+| Discovery | `https://app.siros.org/acme-corp/main/.well-known/openid-configuration` |
+| Authorization | `https://app.siros.org/acme-corp/main/authorize` |
+| Token | `https://app.siros.org/acme-corp/main/token` |
+| JWKS | `https://app.siros.org/acme-corp/main/jwks` |
+| Registration | `https://app.siros.org/acme-corp/main/register` |
 
-:::info Tenant Isolation
-Each tenant has isolated configuration, client registrations, and presentation policies. The tenant ID is included in the `iss` claim of issued tokens.
+:::info Tenant and Instance Isolation
+Each tenant has isolated configuration, and each verifier instance within a tenant has its own client registrations and presentation policies. The tenant and instance are included in the `iss` claim of issued tokens.
 :::
 
 ## Deployment Options
@@ -48,10 +48,10 @@ Start with the hosted service for development and testing. Move to self-hosted w
 
 ## Overview
 
-The SIROS ID verifier implements two interfaces:
+The SIROS ID verifier implements two protocol interfaces:
 
-1. **OpenID Connect Provider** – Standard OIDC interface for existing IAM systems
-2. **OpenID4VP** – Direct verification for custom applications
+1. **[OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.html) Provider** – Standard OIDC interface for existing IAM systems
+2. **[OpenID4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html)** – Direct verification for custom applications
 
 This means you can add credential verification to your application without changing your existing authentication flow.
 
@@ -100,8 +100,8 @@ Integrate directly as an OIDC Relying Party:
 
 ```javascript
 // Example: Standard OIDC authorization request
-// Replace 'your-tenant' with your tenant ID
-const authUrl = new URL('https://verifier.siros.org/your-tenant/authorize');
+// Replace 'your-tenant' and 'your-verifier' with your tenant and verifier instance IDs
+const authUrl = new URL('https://app.siros.org/your-tenant/your-verifier/authorize');
 authUrl.searchParams.set('response_type', 'code');
 authUrl.searchParams.set('client_id', 'your-client-id');
 authUrl.searchParams.set('redirect_uri', 'https://your-app.com/callback');
@@ -119,8 +119,8 @@ For maximum control, use the OpenID4VP API directly:
 
 ```javascript
 // Start a presentation request
-// Replace 'your-tenant' with your tenant ID
-const response = await fetch('https://verifier.siros.org/your-tenant/verification/start', {
+// Replace 'your-tenant' and 'your-verifier' with your tenant and verifier instance IDs
+const response = await fetch('https://app.siros.org/your-tenant/your-verifier/verification/start', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
@@ -136,11 +136,11 @@ const { session_id, qr_code, deep_link } = await response.json();
 
 ### Dynamic Registration (Recommended)
 
-Use RFC 7591 dynamic client registration:
+Use [RFC 7591](https://datatracker.ietf.org/doc/html/rfc7591) dynamic client registration:
 
 ```bash
-# Replace 'your-tenant' with your tenant ID
-curl -X POST https://verifier.siros.org/your-tenant/register \
+# Replace 'your-tenant' and 'your-verifier' with your tenant and verifier instance IDs
+curl -X POST https://app.siros.org/your-tenant/your-verifier/register \
   -H "Content-Type: application/json" \
   -d '{
     "client_name": "My Application",
@@ -181,7 +181,7 @@ Map OIDC scopes to credential types:
 
 ### DCQL Queries (Advanced)
 
-For fine-grained control, use Digital Credentials Query Language:
+For fine-grained control, use [Digital Credentials Query Language (DCQL)](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#name-digital-credentials-query-l):
 
 ```yaml
 # presentation_request.yaml
@@ -212,7 +212,7 @@ Verified credentials are mapped to standard OIDC claims in the ID token:
 
 ```json
 {
-  "iss": "https://verifier.siros.org/your-tenant",
+  "iss": "https://app.siros.org/your-tenant/your-verifier",
   "sub": "pairwise-user-id",
   "aud": "your-client-id",
   "exp": 1704153600,
@@ -241,7 +241,7 @@ verifier:
 
 ## W3C Digital Credentials API
 
-For browser-based verification, the SIROS ID verifier supports the W3C Digital Credentials API:
+For browser-based verification, the SIROS ID verifier supports the [W3C Digital Credentials API](https://wicg.github.io/digital-credentials/):
 
 ```javascript
 // Browser-native credential request
@@ -272,7 +272,7 @@ The verifier automatically falls back to QR code when the DC API is unavailable.
 
 ### PKCE Enforcement
 
-Public clients must use PKCE (RFC 7636):
+Public clients must use [PKCE (RFC 7636)](https://datatracker.ietf.org/doc/html/rfc7636):
 
 ```javascript
 // Generate code verifier and challenge
@@ -327,11 +327,7 @@ The verifier automatically:
 
 ### Development Environment
 
-Use the SIROS ID test verifier:
-
-```
-https://test-verifier.siros.org
-```
+Use the SIROS ID test environment at `app.siros.org`. Your test tenant will have pre-configured verifier instances.
 
 ### Test Credentials
 
@@ -345,11 +341,11 @@ Obtain test credentials from the SIROS ID demo issuer:
 ### Integration Testing
 
 ```bash
-# Test OIDC discovery
-curl https://verifier.siros.org/.well-known/openid-configuration
+# Test OIDC discovery (replace with your tenant/verifier)
+curl https://app.siros.org/your-tenant/your-verifier/.well-known/openid-configuration
 
 # Verify JWKS
-curl https://verifier.siros.org/jwks
+curl https://app.siros.org/your-tenant/your-verifier/jwks
 ```
 
 ## Self-Hosted Deployment
@@ -361,9 +357,16 @@ If you need to run the verifier in your own infrastructure, you can deploy it us
 The verifier is available as a Docker image:
 
 ```bash
-# Pull the latest image
-docker pull docker.sunet.se/dc4eu/verifier:latest
+# Pull the standard verifier image
+docker pull ghcr.io/sirosfoundation/vc-verifier:latest
+
+# Or pull the full image with SAML and VC 2.0 support
+docker pull ghcr.io/sirosfoundation/vc-verifier-full:latest
 ```
+
+:::info Image Variants
+Use `vc-verifier-full` if you need SAML authentication or W3C VC 2.0 format support. See [Docker Images](../../docker-images) for details.
+:::
 
 #### Docker Compose
 
@@ -372,7 +375,7 @@ Create a `docker-compose.yaml`:
 ```yaml
 services:
   verifier:
-    image: docker.sunet.se/dc4eu/verifier:latest
+    image: ghcr.io/sirosfoundation/vc-verifier:latest  # or vc-verifier-full for SAML support
     restart: always
     ports:
       - "8080:8080"
@@ -513,7 +516,7 @@ spec:
     spec:
       containers:
         - name: verifier
-          image: docker.sunet.se/dc4eu/verifier:latest
+          image: ghcr.io/sirosfoundation/vc-verifier:latest  # or vc-verifier-full
           ports:
             - containerPort: 8080
           env:

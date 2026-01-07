@@ -31,10 +31,10 @@ You now have a wallet with a test credential.
 
 ## Step 2: Register Your Application (5 minutes)
 
-Register your application with the SIROS ID verifier. Replace `demo` with your tenant ID:
+Register your application with the SIROS ID verifier. Replace `demo` with your tenant ID and `main` with your verifier instance:
 
 ```bash
-curl -X POST https://test-verifier.siros.org/demo/register \
+curl -X POST https://app.siros.org/demo/main/register \
   -H "Content-Type: application/json" \
   -d '{
     "client_name": "My Test App",
@@ -49,7 +49,12 @@ curl -X POST https://test-verifier.siros.org/demo/register \
 Save the returned `client_id` and `client_secret`.
 
 :::info Multi-Tenancy
-SIROS ID uses path-based multi-tenancy. The tenant ID (`demo` in this example) is the first path component after the domain. All endpoints follow this pattern: `https://verifier.siros.org/<tenant>/<endpoint>`
+SIROS ID uses path-based multi-tenancy. All services are under `app.siros.org`:
+- **Wallet**: `app.siros.org/<tenant>/...`
+- **Verifiers**: `app.siros.org/<tenant>/<verifier_instance>/...` (multiple per tenant)
+- **Issuers**: `app.siros.org/<tenant>/<issuer_instance>/...` (multiple per tenant)
+
+In this example, `demo` is the tenant and `main` is the verifier instance.
 :::
 
 ## Step 3: Configure Your IAM (5 minutes)
@@ -62,7 +67,7 @@ Add SIROS ID as an identity provider:
 2. Configure:
    - **Alias**: `sirosid`
    - **Display Name**: `SIROS ID`
-   - **Discovery URL**: `https://test-verifier.siros.org/demo/.well-known/openid-configuration`
+   - **Discovery URL**: `https://app.siros.org/demo/main/.well-known/openid-configuration`
    - **Client ID**: *(from step 2)*
    - **Client Secret**: *(from step 2)*
    - **Client Authentication**: `Client secret sent as post`
@@ -72,7 +77,7 @@ Add SIROS ID as an identity provider:
 
 1. Go to **Authentication** → **Enterprise** → **OpenID Connect**
 2. Create a new connection with:
-   - **Issuer URL**: `https://test-verifier.siros.org/demo`
+   - **Issuer URL**: `https://app.siros.org/demo/main`
    - **Client ID**: *(from step 2)*
    - **Client Secret**: *(from step 2)*
 
@@ -81,8 +86,8 @@ Add SIROS ID as an identity provider:
 If not using an IAM, redirect users directly:
 
 ```javascript
-// Replace 'demo' with your tenant ID
-const authUrl = 'https://test-verifier.siros.org/demo/authorize?' + 
+// Replace 'demo' with your tenant ID and 'main' with your verifier instance
+const authUrl = 'https://app.siros.org/demo/main/authorize?' + 
   new URLSearchParams({
     response_type: 'code',
     client_id: 'your-client-id',
@@ -153,7 +158,7 @@ scope=openid profile ehic
 
 1. **Register for production**: Contact SIROS ID to get production credentials
 2. **Configure trust**: Set up your trust framework registration
-3. **Switch endpoints**: Use `https://verifier.siros.org` instead of test
+3. **Update tenant/instance**: Use your production tenant and verifier instance at `app.siros.org`
 
 ## Next Steps
 

@@ -112,7 +112,7 @@ Download your IdP's metadata and save it:
 
 ### Option 2: MDQ (Metadata Query Protocol)
 
-For federation environments with many IdPs, use [MDQ](https://datatracker.ietf.org/doc/html/rfc8484) to fetch metadata on-demand.
+For federation environments with many IdPs, use [MDQ](https://datatracker.ietf.org/doc/draft-young-md-query/) to fetch metadata on-demand.
 
 ```yaml
 issuer:
@@ -166,12 +166,14 @@ mdq:
 
 #### Federation MDQ Endpoints
 
-| Federation | MDQ Endpoint |
-|------------|--------------|
-| **eduGAIN** | `https://mdq.edugain.org/` |
-| **InCommon** | `https://mdq.incommon.org/` |
-| **SWAMID** | `https://mdq.swamid.se/` |
-| **UK Federation** | `https://mdq.ukfederation.org.uk/` |
+| Federation | MDQ Endpoint | Documentation |
+|------------|--------------|---------------|
+| **InCommon** | `https://mdq.incommon.org/entities/` | [InCommon MDQ Service](https://spaces.at.internet2.edu/display/mdq) |
+| **SWAMID** | `https://mds.swamid.se/entities/` | [SWAMID Technical](https://wiki.sunet.se/display/SWAMID) |
+
+:::note eduGAIN Metadata
+eduGAIN provides an aggregate metadata feed at `https://mds.edugain.org/edugain-v2.xml` intended for consumption by national federations, not individual service providers. For individual entity queries, use your national federation's MDQ service. See [eduGAIN Technical](https://technical.edugain.org/metadata) for details.
+:::
 
 ### Option 3: Federation Aggregate
 
@@ -384,12 +386,16 @@ issuer:
 
 ## Docker Deployment
 
+:::important Full Image Required
+SAML IdP integration requires the full image with SAML support: `vc-issuer-full`
+:::
+
 ### Docker Compose
 
 ```yaml
 services:
   issuer:
-    image: docker.sunet.se/dc4eu/issuer:latest
+    image: ghcr.io/sirosfoundation/vc-issuer-full:latest  # Full image required for SAML
     restart: always
     ports:
       - "8080:8080"
@@ -500,7 +506,7 @@ issuer:
     # MDQ for federation
     mdq:
       enabled: true
-      base_url: "https://mdq.swamid.se/entities/"
+      base_url: "https://mds.swamid.se/entities/"
       cache:
         enabled: true
         duration: 3600

@@ -4,12 +4,12 @@ sidebar_position: 2
 
 # OpenID Connect Relying Party Integration
 
-This guide explains how to integrate the SIROS ID verifier with any application using standard OpenID Connect. After reading this guide, you will understand how to:
+This guide explains how to integrate the SIROS ID verifier with any application using standard [OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.html). After reading this guide, you will understand how to:
 
 - Add SIROS ID as an OpenID Connect identity provider
 - Configure authentication requests
 - Handle ID tokens and claims
-- Implement the authorization code flow with PKCE
+- Implement the [authorization code flow with PKCE](https://datatracker.ietf.org/doc/html/rfc7636)
 
 ## Overview
 
@@ -50,13 +50,13 @@ Use direct OIDC integration when:
 
 ## Step 1: Register Your Application
 
-Register your application with the SIROS ID verifier. Replace `your-tenant` with your assigned tenant ID.
+Register your application with the SIROS ID verifier. Replace `your-tenant` and `your-verifier` with your assigned values.
 
 ### Dynamic Registration
 
 ```bash
-# Replace 'your-tenant' with your tenant ID
-curl -X POST "https://verifier.siros.org/your-tenant/register" \
+# Replace 'your-tenant' and 'your-verifier' with your values
+curl -X POST "https://app.siros.org/your-tenant/your-verifier/register" \
   -H "Content-Type: application/json" \
   -d '{
     "client_name": "My Application",
@@ -94,8 +94,8 @@ Response:
 For applications that cannot keep secrets:
 
 ```bash
-# Replace 'your-tenant' with your tenant ID
-curl -X POST "https://verifier.siros.org/your-tenant/register" \
+# Replace 'your-tenant' and 'your-verifier' with your values
+curl -X POST "https://app.siros.org/your-tenant/your-verifier/register" \
   -H "Content-Type: application/json" \
   -d '{
     "client_name": "My SPA",
@@ -111,22 +111,22 @@ Public clients **must** use PKCE.
 
 ## Step 2: Discover Endpoints
 
-Fetch the OpenID Connect discovery document for your tenant:
+Fetch the OpenID Connect discovery document for your tenant and verifier:
 
 ```bash
-# Replace 'your-tenant' with your tenant ID
-curl "https://verifier.siros.org/your-tenant/.well-known/openid-configuration"
+# Replace 'your-tenant' and 'your-verifier' with your values
+curl "https://app.siros.org/your-tenant/your-verifier/.well-known/openid-configuration"
 ```
 
 Response:
 
 ```json
 {
-  "issuer": "https://verifier.siros.org/your-tenant",
-  "authorization_endpoint": "https://verifier.siros.org/your-tenant/authorize",
-  "token_endpoint": "https://verifier.siros.org/your-tenant/token",
-  "userinfo_endpoint": "https://verifier.siros.org/your-tenant/userinfo",
-  "jwks_uri": "https://verifier.siros.org/your-tenant/jwks",
+  "issuer": "https://app.siros.org/your-tenant/your-verifier",
+  "authorization_endpoint": "https://app.siros.org/your-tenant/your-verifier/authorize",
+  "token_endpoint": "https://app.siros.org/your-tenant/your-verifier/token",
+  "userinfo_endpoint": "https://app.siros.org/your-tenant/your-verifier/userinfo",
+  "jwks_uri": "https://app.siros.org/your-tenant/your-verifier/jwks",
   "scopes_supported": ["openid", "profile", "pid", "ehic", "diploma"],
   "response_types_supported": ["code"],
   "grant_types_supported": ["authorization_code", "refresh_token"],
@@ -190,8 +190,8 @@ async function startAuthentication() {
     code_challenge_method: 'S256'
   });
   
-  // Redirect to verifier
-  window.location.href = `https://verifier.siros.org/authorize?${params}`;
+  // Redirect to verifier (replace your-tenant/your-verifier with your values)
+  window.location.href = `https://app.siros.org/your-tenant/your-verifier/authorize?${params}`;
 }
 ```
 
@@ -218,7 +218,7 @@ async function handleCallback() {
   const code = params.get('code');
   const codeVerifier = sessionStorage.getItem('code_verifier');
   
-  const tokenResponse = await fetch('https://verifier.siros.org/token', {
+  const tokenResponse = await fetch('https://app.siros.org/your-tenant/your-verifier/token', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
@@ -246,8 +246,8 @@ async function handleCallback() {
 
 ```javascript
 async function validateIdToken(idToken) {
-  // Fetch JWKS
-  const jwksResponse = await fetch('https://verifier.siros.org/jwks');
+  // Fetch JWKS (replace your-tenant/your-verifier with your values)
+  const jwksResponse = await fetch('https://app.siros.org/your-tenant/your-verifier/jwks');
   const jwks = await jwksResponse.json();
   
   // Parse token header to find key
@@ -270,8 +270,8 @@ async function validateIdToken(idToken) {
   const [, payloadB64] = idToken.split('.');
   const claims = JSON.parse(atob(payloadB64));
   
-  // Validate issuer
-  if (claims.iss !== 'https://verifier.siros.org') {
+  // Validate issuer (replace with your actual tenant/verifier)
+  if (claims.iss !== 'https://app.siros.org/your-tenant/your-verifier') {
     throw new Error('Invalid issuer');
   }
   
@@ -328,7 +328,8 @@ const app = express();
 let client;
 
 async function initializeClient() {
-  const issuer = await Issuer.discover('https://verifier.siros.org');
+  // Replace your-tenant/your-verifier with your values
+  const issuer = await Issuer.discover('https://app.siros.org/your-tenant/your-verifier');
   client = new issuer.Client({
     client_id: 'your-client-id',
     client_secret: 'your-client-secret',
@@ -386,7 +387,8 @@ oauth.register(
     name='sirosid',
     client_id='your-client-id',
     client_secret='your-client-secret',
-    server_metadata_url='https://verifier.siros.org/.well-known/openid-configuration',
+    # Replace your-tenant/your-verifier with your values
+    server_metadata_url='https://app.siros.org/your-tenant/your-verifier/.well-known/openid-configuration',
     client_kwargs={'scope': 'openid profile'}
 )
 
@@ -417,7 +419,8 @@ import (
 func main() {
     ctx := context.Background()
     
-    provider, _ := oidc.NewProvider(ctx, "https://verifier.siros.org")
+    // Replace your-tenant/your-verifier with your values
+    provider, _ := oidc.NewProvider(ctx, "https://app.siros.org/your-tenant/your-verifier")
     
     oauth2Config := oauth2.Config{
         ClientID:     "your-client-id",
@@ -470,7 +473,8 @@ spring:
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
         provider:
           sirosid:
-            issuer-uri: https://verifier.siros.org
+            # Replace your-tenant/your-verifier with your values
+            issuer-uri: https://app.siros.org/your-tenant/your-verifier
 ```
 
 ```java
@@ -538,7 +542,7 @@ async function silentRefresh() {
     // ... PKCE params
   });
   
-  iframe.src = `https://verifier.siros.org/authorize?${params}`;
+  iframe.src = `https://app.siros.org/your-tenant/your-verifier/authorize?${params}`;
   document.body.appendChild(iframe);
   
   // Handle response in iframe
@@ -555,7 +559,7 @@ function logout() {
     state: generateState()
   });
   
-  window.location.href = `https://verifier.siros.org/logout?${params}`;
+  window.location.href = `https://app.siros.org/your-tenant/your-verifier/logout?${params}`;
 }
 ```
 

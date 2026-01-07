@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # OpenID Connect Provider Integration
 
-This guide explains how to connect any OpenID Connect provider (OP) to the SIROS ID issuer for credential issuance. After reading this guide, you will understand how to:
+This guide explains how to connect any [OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.html) provider (OP) to the SIROS ID issuer for credential issuance. After reading this guide, you will understand how to:
 
 - Configure OIDC authentication for the issuer
 - Register the issuer as an OIDC client
@@ -13,7 +13,7 @@ This guide explains how to connect any OpenID Connect provider (OP) to the SIROS
 
 ## Overview
 
-OpenID Connect is the recommended integration method for most identity providers. Users authenticate through their existing OIDC provider, and the issuer uses the identity claims to construct digital credentials.
+OpenID Connect is the recommended integration method for most identity providers. Users authenticate through their existing OIDC provider, and the issuer uses the identity claims to construct digital credentials via [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html).
 
 ```mermaid
 sequenceDiagram
@@ -66,7 +66,7 @@ Save the issued `client_id` and `client_secret`.
 
 ### Dynamic Client Registration
 
-If your OP supports RFC 7591 dynamic registration:
+If your OP supports [RFC 7591](https://datatracker.ietf.org/doc/html/rfc7591) dynamic registration:
 
 ```bash
 curl -X POST "https://op.example.com/register" \
@@ -428,7 +428,7 @@ issuer:
 ```yaml
 services:
   issuer:
-    image: docker.sunet.se/dc4eu/issuer:latest
+    image: ghcr.io/sirosfoundation/vc-issuer:latest  # or vc-issuer-full for VC 2.0 support
     restart: always
     ports:
       - "8080:8080"

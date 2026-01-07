@@ -10,9 +10,9 @@ Go-Trust is a local trust engine that provides trust decisions via an [AuthZEN](
 
 Trust evaluation in digital credential ecosystems is complex:
 
-- **ETSI TSL 119 612** requires parsing XML trust status lists, validating certificates, and tracking service status
-- **OpenID Federation** involves trust chain resolution, signature verification, and trust mark validation
-- **DID:web** needs proper HTTP resolution and JWK matching
+- **[ETSI TS 119 612](https://www.etsi.org/deliver/etsi_ts/119600_119699/119612/02.01.01_60/ts_119612v020101p.pdf)** requires parsing XML trust status lists, validating certificates, and tracking service status
+- **[OpenID Federation](https://openid.net/specs/openid-federation-1_0.html)** involves trust chain resolution, signature verification, and trust mark validation
+- **[DID:web](https://w3c-ccg.github.io/did-method-web/)** needs proper HTTP resolution and JWK matching
 
 Go-Trust handles all of this behind a simple AuthZEN API, so your services can focus on credentials.
 

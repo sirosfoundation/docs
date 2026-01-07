@@ -33,7 +33,7 @@ sequenceDiagram
 ```
 
 :::tip Hosted or Self-Hosted
-This guide works with both the **SIROS ID hosted issuer** (`issuer.siros.org`) and **self-hosted deployments**. Simply replace the issuer URL as needed. See [Issuer Deployment Options](./issuer.md#deployment-options) for more information.
+This guide works with both the **SIROS ID hosted issuer** (`app.siros.org/<tenant>/<issuer>`) and **self-hosted deployments**. Simply replace the issuer URL as needed. See [Issuer Deployment Options](./issuer.md#deployment-options) for more information.
 :::
 
 ## Prerequisites
@@ -70,14 +70,14 @@ Create an OIDC client in Keycloak for the SIROS ID issuer.
 
 ### Access Settings
 
-Replace `your-tenant` with your assigned tenant ID:
+Replace `your-tenant` and `your-issuer` with your assigned values:
 
 | Setting | Value |
 |---------|-------|
-| **Root URL** | `https://issuer.siros.org/your-tenant` |
-| **Valid redirect URIs** | `https://issuer.siros.org/your-tenant/callback` |
-| **Valid post logout redirect URIs** | `https://issuer.siros.org/your-tenant` |
-| **Web origins** | `https://issuer.siros.org` |
+| **Root URL** | `https://app.siros.org/your-tenant/your-issuer` |
+| **Valid redirect URIs** | `https://app.siros.org/your-tenant/your-issuer/callback` |
+| **Valid post logout redirect URIs** | `https://app.siros.org/your-tenant/your-issuer` |
+| **Web origins** | `https://app.siros.org` |
 
 For self-hosted issuers, replace with your issuer URL.
 
@@ -252,7 +252,7 @@ common:
 ```yaml
 services:
   issuer:
-    image: docker.sunet.se/dc4eu/issuer:latest
+    image: ghcr.io/sirosfoundation/vc-issuer:latest  # or vc-issuer-full for SAML support
     restart: always
     ports:
       - "8080:8080"

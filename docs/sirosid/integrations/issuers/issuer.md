@@ -14,23 +14,23 @@ This guide explains how to issue digital credentials to users of the SIROS ID cr
 
 ## Multi-Tenancy
 
-SIROS ID uses path-based multi-tenancy. The first path component after the domain identifies your tenant:
+SIROS ID uses path-based multi-tenancy. All services are hosted under `app.siros.org`:
 
 ```
-https://issuer.siros.org/<tenant>/...
+https://app.siros.org/<tenant>/<issuer_instance>/...
 ```
 
-For example, if your tenant ID is `acme-corp`:
+Each tenant can have multiple issuer instances. For example, tenant `acme-corp` with issuer instance `pid`:
 
 | Endpoint | URL |
 |----------|-----|
-| Credential Offer | `https://issuer.siros.org/acme-corp/credential-offer` |
-| Token | `https://issuer.siros.org/acme-corp/token` |
-| Credential | `https://issuer.siros.org/acme-corp/credential` |
-| Metadata | `https://issuer.siros.org/acme-corp/.well-known/openid-credential-issuer` |
+| Credential Offer | `https://app.siros.org/acme-corp/pid/credential-offer` |
+| Token | `https://app.siros.org/acme-corp/pid/token` |
+| Credential | `https://app.siros.org/acme-corp/pid/credential` |
+| Metadata | `https://app.siros.org/acme-corp/pid/.well-known/openid-credential-issuer` |
 
-:::info Tenant Isolation
-Each tenant has isolated configuration, credential types, and signing keys. The tenant ID is included in the `iss` claim of issued credentials.
+:::info Tenant and Instance Isolation
+Each tenant has isolated configuration, and each issuer instance within a tenant has its own credential types and signing keys. The tenant and instance are included in the `iss` claim of issued credentials.
 :::
 
 ## Deployment Options
@@ -47,7 +47,7 @@ Start with the hosted service for development and testing. Move to self-hosted w
 
 ## Overview
 
-The SIROS ID issuer implements the [OpenID for Verifiable Credential Issuance (OID4VCI)](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html) specification. This allows any SIROS ID compatible wallet to receive credentials from your issuer.
+The SIROS ID issuer implements the [OpenID for Verifiable Credential Issuance (OID4VCI)](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html) specification. This allows any OID4VCI-compatible wallet to receive credentials from your issuer.
 
 ```mermaid
 sequenceDiagram
@@ -89,14 +89,26 @@ issuer:
 
 ### 2. SAML 2.0
 
-Use existing SAML identity federations:
+Use existing [SAML 2.0](http://docs.oasis-open.org/security/saml/v2.0/) identity federations. See [SAML IdP Integration](./saml-idp) for detailed configuration:
 
 ```yaml
-issuer:
-  authentication:
-    type: saml
-    metadata_url: "https://idp.example.com/metadata"
-    entity_id: "https://issuer.siros.org/sp"
+# apigw section (SAML is configured in the API Gateway)
+apigw:
+  saml:
+    enabled: true
+    entity_id: "https://app.siros.org/your-tenant/your-issuer/sp"
+    acs_endpoint: "https://app.siros.org/your-tenant/your-issuer/saml/acs"
+    certificate_path: "/pki/sp-cert.pem"
+    private_key_path: "/pki/sp-key.pem"
+    # Use MDQ for federation metadata lookup
+    mdq_server: "https://mds.swamid.se/entities/"
+    credential_mappings:
+      pid:
+        credential_config_id: "urn:eudi:pid:1"
+        attributes:
+          "urn:oid:2.5.4.42":
+            claim: "given_name"
+            required: true
 ```
 
 ### 3. Client Credentials
@@ -119,15 +131,15 @@ issuer:
 
 SIROS ID supports issuing credentials in multiple formats:
 
-| Format | Description | Use Case |
-|--------|-------------|----------|
-| **SD-JWT VC** | SD-JWT Verifiable Credential | EU Digital Identity, general VCs |
-| **mDL/mDoc** | ISO 18013-5 mobile document | Mobile driving licenses |
-| **JWT VC** | JWT-encoded credential | Legacy systems |
+| Format | Description | Specification | Use Case |
+|--------|-------------|---------------|----------|
+| **SD-JWT VC** | SD-JWT Verifiable Credential | [draft-ietf-oauth-sd-jwt-vc](https://datatracker.ietf.org/doc/draft-ietf-oauth-sd-jwt-vc/) | EU Digital Identity, general VCs |
+| **mDL/mDoc** | ISO 18013-5 mobile document | [ISO/IEC 18013-5:2021](https://www.iso.org/standard/69084.html) | Mobile driving licenses |
+| **JWT VC** | JWT-encoded credential | [W3C VC Data Model](https://www.w3.org/TR/vc-data-model/) | Legacy systems |
 
 ### Built-in Credential Types
 
-The SIROS ID platform includes preconfigured schemas for common EU credential types:
+The SIROS ID platform includes preconfigured schemas for common EU credential types based on the [EUDI Wallet Architecture Reference Framework](https://github.com/eu-digital-identity-wallet/eudi-doc-architecture-and-reference-framework):
 
 | Credential | VCT | Description |
 |------------|-----|-------------|
@@ -135,7 +147,7 @@ The SIROS ID platform includes preconfigured schemas for common EU credential ty
 | **EHIC** | `urn:eudi:ehic:1` | European Health Insurance Card |
 | **PDA1** | `urn:eudi:pda1:1` | Portable Document A1 |
 | **Diploma** | `urn:eudi:diploma:1` | Educational credentials |
-| **ELM** | `urn:eudi:elm:1` | European Learning Model |
+| **ELM** | `urn:eudi:elm:1` | [European Learning Model](https://europa.eu/europass/en/european-learning-model) |
 
 ## Integration Steps
 
@@ -145,7 +157,7 @@ Configure your IdP to allow SIROS ID issuer as a client:
 
 **For OIDC IdPs:**
 1. Register a new OIDC client
-2. Set redirect URI to: `https://<your-issuer>.siros.org/callback`
+2. Set redirect URI to: `https://app.siros.org/<tenant>/<issuer>/callback`
 3. Enable required scopes (openid, profile, email, etc.)
 
 **For SAML IdPs:**
@@ -154,21 +166,28 @@ Configure your IdP to allow SIROS ID issuer as a client:
 
 ### Step 2: Map Identity Claims to Credential Attributes
 
-Configure how user identity maps to credential claims:
+Configure how user identity maps to credential claims using the `credential_constructor` section. Each entry defines a credential type with its [Verifiable Credential Type Metadata (VCTM)](https://datatracker.ietf.org/doc/draft-ietf-oauth-sd-jwt-vc/):
 
 ```yaml
 credential_constructor:
   ehic:
+    # Verifiable Credential Type identifier (appears in issued credential)
     vct: "urn:eudi:ehic:1"
-    claim_mapping:
-      # Map IdP claims to credential claims
-      given_name: "$.claims.given_name"
-      family_name: "$.claims.family_name"
-      birth_date: "$.claims.birthdate"
-      personal_id: "$.claims.national_id"
-      # Static values
-      document_type: "EHIC"
+    # Path to VCTM JSON file defining credential schema and display
+    vctm_file_path: "/metadata/vctm_ehic.json"
+    # Authentication method: "basic" for simple auth, "pid_auth" to require PID
+    auth_method: basic
+    # Optional: attribute transformations
+    attributes:
+      given_name:
+        source: ["$.claims.given_name"]
+      family_name:
+        source: ["$.claims.family_name"]
 ```
+
+:::tip VCTM Files
+The VCTM file defines the credential schema, including claim definitions, display names, and localization. Example files are available in the [vc repository metadata directory](https://github.com/sirosfoundation/vc/tree/main/metadata).
+:::
 
 ### Step 3: Configure Trust
 
@@ -189,10 +208,10 @@ Establish trust with the SIROS ID ecosystem. See [Trust Services](../trust/) for
 
 ### QR Code
 
-Generate a QR code containing a credential offer (replace `your-tenant` with your tenant ID):
+Generate a QR code containing a credential offer (replace `your-tenant` and `your-issuer` with your values):
 
 ```
-openid-credential-offer://?credential_offer_uri=https://issuer.siros.org/your-tenant/offers/abc123
+openid-credential-offer://?credential_offer_uri=https://app.siros.org/your-tenant/your-issuer/offers/abc123
 ```
 
 ### Deep Link
@@ -200,7 +219,7 @@ openid-credential-offer://?credential_offer_uri=https://issuer.siros.org/your-te
 For mobile apps, use a deep link:
 
 ```
-openid-credential-offer://issuer.siros.org/your-tenant/offers/abc123
+openid-credential-offer://app.siros.org/your-tenant/your-issuer/offers/abc123
 ```
 
 ### Pre-authorized Flow
@@ -230,7 +249,7 @@ The issuer exposes OpenID4VCI-compliant endpoints:
 
 Full API documentation is available at:
 ```
-https://<your-issuer>.siros.org/swagger/index.html
+https://app.siros.org/<tenant>/<issuer>/swagger/index.html
 ```
 
 ## Security Considerations
@@ -248,9 +267,16 @@ If you need to run the issuer in your own infrastructure, you can deploy it usin
 The issuer is available as a Docker image:
 
 ```bash
-# Pull the latest image
-docker pull docker.sunet.se/dc4eu/issuer:latest
+# Pull the standard issuer image
+docker pull ghcr.io/sirosfoundation/vc-issuer:latest
+
+# Or pull the full image with SAML IdP and VC 2.0 support
+docker pull ghcr.io/sirosfoundation/vc-issuer-full:latest
 ```
+
+:::info Image Variants
+Use `vc-issuer-full` if you need SAML IdP authentication or W3C VC 2.0 format support. See [Docker Images](../../docker-images) for details.
+:::
 
 #### Docker Compose
 
@@ -259,7 +285,7 @@ Create a `docker-compose.yaml`:
 ```yaml
 services:
   issuer:
-    image: docker.sunet.se/dc4eu/issuer:latest
+    image: ghcr.io/sirosfoundation/vc-issuer:latest  # or vc-issuer-full for SAML support
     restart: always
     ports:
       - "8080:8080"
@@ -373,7 +399,7 @@ spec:
     spec:
       containers:
         - name: issuer
-          image: docker.sunet.se/dc4eu/issuer:latest
+          image: ghcr.io/sirosfoundation/vc-issuer:latest  # or vc-issuer-full
           ports:
             - containerPort: 8080
           env:
