@@ -147,7 +147,7 @@ The SIROS ID platform includes preconfigured schemas for common EU credential ty
 | **EHIC** | `urn:eudi:ehic:1` | European Health Insurance Card |
 | **PDA1** | `urn:eudi:pda1:1` | Portable Document A1 |
 | **Diploma** | `urn:eudi:diploma:1` | Educational credentials |
-| **ELM** | `urn:eudi:elm:1` | [European Learning Model](https://europa.eu/europass/en/european-learning-model) |
+| **ELM** | `urn:eudi:elm:1` | [European Learning Model](https://europa.eu/europass/elm-browser/index.html) |
 
 ## Integration Steps
 
