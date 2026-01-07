@@ -20,15 +20,15 @@ SIROS ID uses path-based multi-tenancy. All services are hosted under `app.siros
 https://app.siros.org/<tenant>/<verifier_instance>/...
 ```
 
-Each tenant can have multiple verifier instances. For example, tenant `acme-corp` with verifier instance `main`:
+Each tenant can have multiple verifier instances. For example, tenant `acme-corp` with verifier instance `verifier`:
 
 | Endpoint | URL |
 |----------|-----|
-| Discovery | `https://app.siros.org/acme-corp/main/.well-known/openid-configuration` |
-| Authorization | `https://app.siros.org/acme-corp/main/authorize` |
-| Token | `https://app.siros.org/acme-corp/main/token` |
-| JWKS | `https://app.siros.org/acme-corp/main/jwks` |
-| Registration | `https://app.siros.org/acme-corp/main/register` |
+| Discovery | `https://app.siros.org/acme-corp/verifier/.well-known/openid-configuration` |
+| Authorization | `https://app.siros.org/acme-corp/verifier/authorize` |
+| Token | `https://app.siros.org/acme-corp/verifier/token` |
+| JWKS | `https://app.siros.org/acme-corp/verifier/jwks` |
+| Registration | `https://app.siros.org/acme-corp/verifier/register` |
 
 :::info Tenant and Instance Isolation
 Each tenant has isolated configuration, and each verifier instance within a tenant has its own client registrations and presentation policies. The tenant and instance are included in the `iss` claim of issued tokens.

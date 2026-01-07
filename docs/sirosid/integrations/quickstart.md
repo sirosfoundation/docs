@@ -31,10 +31,10 @@ You now have a wallet with a test credential.
 
 ## Step 2: Register Your Application (5 minutes)
 
-Register your application with the SIROS ID verifier. Replace `demo` with your tenant ID and `main` with your verifier instance:
+Register your application with the SIROS ID verifier. Replace `demo` with your tenant ID and `verifier` with your verifier instance name:
 
 ```bash
-curl -X POST https://app.siros.org/demo/main/register \
+curl -X POST https://app.siros.org/demo/verifier/register \
   -H "Content-Type: application/json" \
   -d '{
     "client_name": "My Test App",
@@ -54,7 +54,7 @@ SIROS ID uses path-based multi-tenancy. All services are under `app.siros.org`:
 - **Verifiers**: `app.siros.org/<tenant>/<verifier_instance>/...` (multiple per tenant)
 - **Issuers**: `app.siros.org/<tenant>/<issuer_instance>/...` (multiple per tenant)
 
-In this example, `demo` is the tenant and `main` is the verifier instance.
+In this example, `demo` is the tenant and `verifier` is the verifier instance.
 :::
 
 ## Step 3: Configure Your IAM (5 minutes)
@@ -67,7 +67,7 @@ Add SIROS ID as an identity provider:
 2. Configure:
    - **Alias**: `sirosid`
    - **Display Name**: `SIROS ID`
-   - **Discovery URL**: `https://app.siros.org/demo/main/.well-known/openid-configuration`
+   - **Discovery URL**: `https://app.siros.org/demo/verifier/.well-known/openid-configuration`
    - **Client ID**: *(from step 2)*
    - **Client Secret**: *(from step 2)*
    - **Client Authentication**: `Client secret sent as post`
@@ -77,7 +77,7 @@ Add SIROS ID as an identity provider:
 
 1. Go to **Authentication** → **Enterprise** → **OpenID Connect**
 2. Create a new connection with:
-   - **Issuer URL**: `https://app.siros.org/demo/main`
+   - **Issuer URL**: `https://app.siros.org/demo/verifier`
    - **Client ID**: *(from step 2)*
    - **Client Secret**: *(from step 2)*
 
@@ -86,8 +86,8 @@ Add SIROS ID as an identity provider:
 If not using an IAM, redirect users directly:
 
 ```javascript
-// Replace 'demo' with your tenant ID and 'main' with your verifier instance
-const authUrl = 'https://app.siros.org/demo/main/authorize?' + 
+// Replace 'demo' with your tenant ID and 'verifier' with your verifier instance
+const authUrl = 'https://app.siros.org/demo/verifier/authorize?' + 
   new URLSearchParams({
     response_type: 'code',
     client_id: 'your-client-id',
