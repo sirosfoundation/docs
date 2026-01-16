@@ -188,7 +188,7 @@ Go-Trust implements the AuthZEN protocol for trust evaluation.
 ### Evaluation Request
 
 ```bash
-curl -X POST http://localhost:8081/access/v1/evaluation \
+curl -X POST http://localhost:8081/evaluation \
   -H "Content-Type: application/json" \
   -d '{
     "subject": {
@@ -227,7 +227,7 @@ curl -X POST http://localhost:8081/access/v1/evaluation \
 To resolve trust metadata without key validation:
 
 ```bash
-curl -X POST http://localhost:8081/access/v1/evaluation \
+curl -X POST http://localhost:8081/evaluation \
   -H "Content-Type: application/json" \
   -d '{
     "subject": {

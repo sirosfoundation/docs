@@ -31,7 +31,7 @@ flowchart TD
     end
     
     subgraph "Go-Trust (AuthZEN PDP)"
-        API["/access/v1/evaluation"]
+        API["/evaluation"]
         ETSI[ETSI Registry]
         OIDF[OpenID Fed Registry]
         DID[DID:web Registry]
