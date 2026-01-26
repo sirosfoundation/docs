@@ -99,16 +99,16 @@ A **credential type** defines the schema and semantics of a credential. Each typ
 ```mermaid
 graph LR
     subgraph "Credential Type Definition (VCTM)"
-        VCT[VCT Identifier<br/>"urn:eudi:pid:1"]
-        Claims[Claim Schema<br/>given_name, family_name, ...]
-        Display[Display Rules<br/>Labels, logos, templates]
+        VCT["VCT Identifier<br/>urn:eudi:pid:arf-1.8:1"]
+        Claims["Claim Schema<br/>given_name, family_name, ..."]
+        Display["Display Rules<br/>Labels, logos, templates"]
     end
 
     VCT --> Claims
     VCT --> Display
 
     subgraph "Issued Credential"
-        Instance[Credential Instance<br/>with actual values]
+        Instance["Credential Instance<br/>with actual values"]
     end
 
     Claims -->|instantiate| Instance
@@ -120,9 +120,9 @@ Each credential type is defined by a **VCTM file** that specifies:
 
 ```json
 {
-  "vct": "urn:eudi:pid:1",
+  "vct": "urn:eudi:pid:arf-1.8:1",
   "name": "Person Identification Data",
-  "description": "EU Person Identification Data credential",
+  "description": "EU Person Identification Data credential (ARF 1.8)",
   "display": [
     {
       "lang": "en-US",
@@ -149,12 +149,18 @@ SIROS ID includes pre-configured types based on EU standards:
 
 | Type | VCT | Description |
 |------|-----|-------------|
-| **PID** | `urn:eudi:pid:1` | Person Identification Data (EU ARF) |
+| **PID (ARF 1.5)** | `urn:eudi:pid:arf-1.5:1` | Person Identification Data (ARF 1.5) |
+| **PID (ARF 1.8)** | `urn:eudi:pid:arf-1.8:1` | Person Identification Data (ARF 1.8+) |
 | **EHIC** | `urn:eudi:ehic:1` | European Health Insurance Card |
 | **PDA1** | `urn:eudi:pda1:1` | Portable Document A1 |
 | **Diploma** | `urn:eudi:diploma:1` | Educational credentials |
 | **ELM** | `urn:eudi:elm:1` | European Learning Model |
-| **Microcredential** | (configurable) | Short learning achievements |
+| **Microcredential** | `urn:eudi:micro_credential:1` | Short learning achievements |
+| **OpenBadge** | `urn:eudi:openbadge_complete:1` | Open Badges 3.0 |
+
+:::note ARF Version Selection
+SIROS ID supports both ARF 1.5 and ARF 1.8 PID schemas. The configuration `credential_constructor` key determines which schema is used. The generic VCT `urn:eudi:pid:1` is accepted for compatibility but maps to a configured ARF version.
+:::
 
 ### Credential Constructor
 
@@ -169,9 +175,9 @@ The **credential constructor** is the component that transforms user identity da
 ```yaml
 # Example: Map SAML attributes to PID claims
 credential_constructor:
-  pid:
-    vct: "urn:eudi:pid:1"
-    vctm_file_path: "/metadata/vctm_pid.json"
+  pid_1_8:
+    vct: "urn:eudi:pid:arf-1.8:1"
+    vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
     attributes:
       given_name:
         source: ["$.claims.given_name", "$.saml.urn:oid:2.5.4.42"]
@@ -247,21 +253,37 @@ flowchart TB
 
 The issuer can run as a single process or as separate microservices:
 
+<div className="row">
+<div className="col col--6">
+
+**Single Process Mode**
+
 ```mermaid
-flowchart LR
-    subgraph "Single Process Mode"
-        Combined[apigw + issuer + registry]
-    end
-
-    subgraph "Microservices Mode"
-        APIGW[API Gateway]
-        Issuer[Issuer Service]
-        Registry[Registry Service]
-
-        APIGW -->|gRPC| Issuer
-        Issuer -->|gRPC| Registry
-    end
+flowchart TB
+    Combined[apigw + issuer + registry]
 ```
+
+All components in one binary—simplest deployment for development and small-scale production.
+
+</div>
+<div className="col col--6">
+
+**Microservices Mode**
+
+```mermaid
+flowchart TB
+    APIGW[API Gateway]
+    Issuer[Issuer Service]
+    Registry[Registry Service]
+
+    APIGW -->|gRPC| Issuer
+    Issuer -->|gRPC| Registry
+```
+
+Separate services for independent scaling and high availability.
+
+</div>
+</div>
 
 ## Deployment Models
 
@@ -278,7 +300,7 @@ flowchart LR
     end
 
     subgraph "SIROS ID Cloud"
-        Issuer[Managed Issuer<br/>app.siros.org/tenant/issuer]
+        Issuer[Managed Issuer<br/>issuer.id.siros.org]
         Trust[Trust Services]
     end
 
@@ -402,12 +424,16 @@ flowchart LR
 | Requirement | Hosted | Self-Hosted | Hybrid | Standalone |
 |-------------|:------:|:-----------:|:------:|:----------:|
 | Quick setup | ✅ | ❌ | ⚠️ | ✅ |
-| Data sovereignty | ❌ | ✅ | ⚠️ | ✅ |
-| HSM key storage | ⚠️ | ✅ | ✅ | ❌ |
-| Custom trust | ⚠️ | ✅ | ✅ | ❌ |
+| Data sovereignty | ✅ | ✅ | ✅ | ✅ |
+| HSM key storage | ✅ | ✅ | ✅ | ❌ |
+| Custom trust | ✅ | ✅ | ✅ | ❌ |
 | High availability | ✅ | ⚠️ | ⚠️ | ❌ |
 | Zero maintenance | ✅ | ❌ | ⚠️ | ✅ |
-| GDPR compliance | ⚠️ | ✅ | ✅ | ✅ |
+| GDPR compliance | ✅ | ✅ | ✅ | ✅ |
+
+:::info EU/EES Hosting
+All SIROS ID hosted services are operated from EU/EES infrastructure, ensuring data sovereignty and GDPR compliance for European customers.
+:::
 
 Legend: ✅ Excellent | ⚠️ Possible with effort | ❌ Not recommended
 
@@ -415,31 +441,13 @@ Legend: ✅ Excellent | ⚠️ Possible with effort | ❌ Not recommended
 
 ### Key Management
 
-The issuer's signing keys are the most critical security asset:
+The issuer's signing keys are the most critical security asset. Choose the appropriate key storage based on your security requirements:
 
-```mermaid
-flowchart TB
-    subgraph "Key Options"
-        SW[Software Keys<br/>File-based, encrypted]
-        HSM[HSM Keys<br/>PKCS#11 interface]
-    end
-
-    subgraph "Security Level"
-        Dev[Development]
-        Prod[Production]
-        High[High Assurance]
-    end
-
-    SW --> Dev
-    HSM --> Prod
-    HSM --> High
-```
-
-| Environment | Recommended Key Storage |
-|-------------|------------------------|
-| Development | Software keys (encrypted file) |
-| Production | HSM via PKCS#11 |
-| High Assurance | Certified HSM (eIDAS QSCD) |
+| Key Storage | Interface | Security Level | Use Case |
+|-------------|-----------|----------------|----------|
+| **Software Keys** | Encrypted file | Development | Local testing, demos |
+| **HSM** | PKCS#11 | Production | Standard production deployments |
+| **Certified HSM** | PKCS#11 (QSCD) | High Assurance | eIDAS qualified signatures, government issuers |
 
 ### Trust Chain
 

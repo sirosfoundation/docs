@@ -1,37 +1,43 @@
 ---
-sidebar_position: 1
-sidebar_label: Overview
+sidebar_position: 3
+sidebar_label: Configuration
 ---
 
-# Verifying Credentials
+# Verifier Configuration
 
-This guide explains how to verify digital credentials presented by users with SIROS ID wallets. You can use the **SIROS ID hosted verifier service** or **deploy your own verifier** in your infrastructure. After reading this guide, you will understand how to:
+This guide provides detailed configuration options for the SIROS ID verifier. For conceptual background, see [Concepts & Architecture](./concepts). For deployment setup, see [Deployment](./deployment).
+
+After reading this guide, you will understand how to:
 
 - Connect your application to verify credentials
 - Configure presentation requests
 - Map verified claims to user sessions
 - Deploy your own verifier (optional)
 
-## Multi-Tenancy
+## Endpoints
 
-SIROS ID uses path-based multi-tenancy. All services are hosted under `app.siros.org`:
-
-```
-https://app.siros.org/<tenant>/<verifier_instance>/...
-```
-
-Each tenant can have multiple verifier instances. For example, tenant `acme-corp` with verifier instance `verifier`:
+The SIROS ID verifier exposes standard OIDC endpoints. For a self-hosted or on-premise deployment at `verifier.example.org`:
 
 | Endpoint | URL |
 |----------|-----|
-| Discovery | `https://app.siros.org/acme-corp/verifier/.well-known/openid-configuration` |
-| Authorization | `https://app.siros.org/acme-corp/verifier/authorize` |
-| Token | `https://app.siros.org/acme-corp/verifier/token` |
-| JWKS | `https://app.siros.org/acme-corp/verifier/jwks` |
-| Registration | `https://app.siros.org/acme-corp/verifier/register` |
+| Discovery | `https://verifier.example.org/.well-known/openid-configuration` |
+| Authorization | `https://verifier.example.org/authorize` |
+| Token | `https://verifier.example.org/token` |
+| JWKS | `https://verifier.example.org/jwks` |
+| Registration | `https://verifier.example.org/register` |
 
-:::info Tenant and Instance Isolation
-Each tenant has isolated configuration, and each verifier instance within a tenant has its own client registrations and presentation policies. The tenant and instance are included in the `iss` claim of issued tokens.
+:::info SIROS Hosted Service
+When using the **SIROS ID hosted service**, verifiers use subdomain-based multi-tenancy:
+
+```
+https://<instance>.<tenant>.verifier.id.siros.org
+```
+
+For example, tenant `acme-corp` with verifier instance `main`:
+- `https://main.acme-corp.verifier.id.siros.org/.well-known/openid-configuration`
+- `https://main.acme-corp.verifier.id.siros.org/authorize`
+
+Each tenant has isolated configuration, and each verifier instance has its own client registrations and presentation policies.
 :::
 
 ## Deployment Options
@@ -100,8 +106,7 @@ Integrate directly as an OIDC Relying Party:
 
 ```javascript
 // Example: Standard OIDC authorization request
-// Replace 'your-tenant' and 'your-verifier' with your tenant and verifier instance IDs
-const authUrl = new URL('https://app.siros.org/your-tenant/your-verifier/authorize');
+const authUrl = new URL('https://verifier.example.org/authorize');
 authUrl.searchParams.set('response_type', 'code');
 authUrl.searchParams.set('client_id', 'your-client-id');
 authUrl.searchParams.set('redirect_uri', 'https://your-app.com/callback');
@@ -119,12 +124,11 @@ For maximum control, use the OpenID4VP API directly:
 
 ```javascript
 // Start a presentation request
-// Replace 'your-tenant' and 'your-verifier' with your tenant and verifier instance IDs
-const response = await fetch('https://app.siros.org/your-tenant/your-verifier/verification/start', {
+const response = await fetch('https://verifier.example.org/verification/start', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    credential_types: ['urn:eudi:pid:1'],
+    credential_types: ['urn:eudi:pid:arf-1.8:1'],
     claims: ['given_name', 'family_name', 'birth_date']
   })
 });
@@ -139,8 +143,7 @@ const { session_id, qr_code, deep_link } = await response.json();
 Use [RFC 7591](https://datatracker.ietf.org/doc/html/rfc7591) dynamic client registration:
 
 ```bash
-# Replace 'your-tenant' and 'your-verifier' with your tenant and verifier instance IDs
-curl -X POST https://app.siros.org/your-tenant/your-verifier/register \
+curl -X POST https://verifier.example.org/register \
   -H "Content-Type: application/json" \
   -d '{
     "client_name": "My Application",
@@ -164,7 +167,7 @@ Response:
 
 ### Static Registration
 
-Contact SIROS ID to register your client for production use.
+For production deployments, contact your verifier administrator or use the admin API to pre-register clients.
 
 ## Configuring Presentation Requests
 
@@ -190,7 +193,7 @@ credentials:
     format: vc+sd-jwt
     meta:
       vct_values:
-        - urn:eudi:pid:1
+        - urn:eudi:pid:arf-1.8:1
     claims:
       - path: ["given_name"]
       - path: ["family_name"]
@@ -212,7 +215,7 @@ Verified credentials are mapped to standard OIDC claims in the ID token:
 
 ```json
 {
-  "iss": "https://app.siros.org/your-tenant/your-verifier",
+  "iss": "https://verifier.example.org",
   "sub": "pairwise-user-id",
   "aud": "your-client-id",
   "exp": 1704153600,
@@ -327,13 +330,19 @@ The verifier automatically:
 
 ### Development Environment
 
-Use the SIROS ID test environment at `app.siros.org`. Your test tenant will have pre-configured verifier instances.
+For testing, you can use the SIROS ID demo environment or deploy a local verifier instance.
+
+:::info SIROS Hosted Demo
+The SIROS ID demo environment is available at:
+- **Demo Verifier**: `https://main.demo.verifier.id.siros.org`
+- **Demo Wallet**: `https://id.siros.org`
+:::
 
 ### Test Credentials
 
-Obtain test credentials from the SIROS ID demo issuer:
+Obtain test credentials from a demo issuer:
 
-1. Open [app.siros.org](https://app.siros.org) on your phone
+1. Open [id.siros.org](https://id.siros.org) on your phone
 2. Navigate to "Add Credential"
 3. Scan the demo issuer QR code
 4. Accept the test credential
@@ -341,11 +350,11 @@ Obtain test credentials from the SIROS ID demo issuer:
 ### Integration Testing
 
 ```bash
-# Test OIDC discovery (replace with your tenant/verifier)
-curl https://app.siros.org/your-tenant/your-verifier/.well-known/openid-configuration
+# Test OIDC discovery
+curl https://verifier.example.org/.well-known/openid-configuration
 
 # Verify JWKS
-curl https://app.siros.org/your-tenant/your-verifier/jwks
+curl https://verifier.example.org/jwks
 ```
 
 ## Self-Hosted Deployment
@@ -441,7 +450,7 @@ verifier_proxy:
   openid4vp:
     presentation_timeout: 300
     supported_credentials:
-      - vct: "urn:eudi:pid:1"
+      - vct: "urn:eudi:pid:arf-1.8:1"
         scopes: ["openid", "profile"]
       - vct: "urn:eudi:ehic:1"
         scopes: ["ehic"]

@@ -37,7 +37,10 @@ sequenceDiagram
 ```
 
 :::tip Hosted or Self-Hosted
-This guide works with both the **SIROS ID hosted verifier** (`app.siros.org/<tenant>/<verifier>`) and **self-hosted deployments**. Simply replace the verifier URL as needed. See [Verifier Deployment Options](./verifier.md#deployment-options) for more information.
+This guide works with both the **SIROS ID hosted verifier** and **self-hosted deployments**. Simply replace the verifier URL as needed. See [Verifier Deployment Options](./verifier.md#deployment-options) for more information.
+
+When using the **SIROS ID hosted service**, verifiers use subdomain-based URLs:
+`https://<instance>.<tenant>.verifier.id.siros.org`
 :::
 
 ## Prerequisites
@@ -48,13 +51,10 @@ This guide works with both the **SIROS ID hosted verifier** (`app.siros.org/<ten
 
 ## Step 1: Register Your Keycloak Instance
 
-Register Keycloak as an OIDC client with the SIROS ID verifier. Replace `your-tenant` and `your-verifier` with your assigned values.
-
-### Using the Hosted Verifier
+Register Keycloak as an OIDC client with the verifier:
 
 ```bash
-# Replace 'your-tenant' and 'your-verifier' with your values
-curl -X POST https://app.siros.org/your-tenant/your-verifier/register \
+curl -X POST https://verifier.example.org/register \
   -H "Content-Type: application/json" \
   -d '{
     "client_name": "My Keycloak",
@@ -66,18 +66,14 @@ curl -X POST https://app.siros.org/your-tenant/your-verifier/register \
   }'
 ```
 
-### Using a Self-Hosted Verifier
-
+:::info SIROS Hosted Example
+For the SIROS hosted service with tenant `acme` and verifier instance `main`:
 ```bash
-curl -X POST https://your-verifier.example.com/register \
+curl -X POST https://main.acme.verifier.id.siros.org/register \
   -H "Content-Type: application/json" \
-  -d '{
-    "client_name": "My Keycloak",
-    "redirect_uris": ["https://keycloak.example.com/realms/myrealm/broker/sirosid/endpoint"],
-    "token_endpoint_auth_method": "client_secret_post",
-    "grant_types": ["authorization_code"],
-    "response_types": ["code"],
-    "scope": "openid profile"
+  -d '{ ... }'
+```
+:::
   }'
 ```
 
@@ -85,7 +81,7 @@ Save the returned `client_id` and `client_secret` for the next step.
 
 :::warning Redirect URI Format
 The redirect URI must exactly match Keycloak's broker endpoint format:
-```
+```text
 https://<keycloak-host>/realms/<realm-name>/broker/<alias>/endpoint
 ```
 :::
@@ -112,7 +108,7 @@ Configure the following settings:
 
 | Setting | Value |
 |---------|-------|
-| **Discovery Endpoint** | `https://app.siros.org/your-tenant/your-verifier/.well-known/openid-configuration` |
+| **Discovery Endpoint** | `https://verifier.example.org/.well-known/openid-configuration` |
 | **Client ID** | *(from Step 1)* |
 | **Client Secret** | *(from Step 1)* |
 | **Client Authentication** | `Client secret sent as post` |
@@ -247,7 +243,7 @@ Only use auto-linking if you trust the credential issuer to verify email address
 
 If you don't have credentials yet:
 
-1. Go to [app.siros.org](https://app.siros.org)
+1. Go to [id.siros.org](https://id.siros.org)
 2. Create a wallet with a passkey
 3. Add a **Demo PID** credential
 4. Use this wallet to test your Keycloak integration
@@ -358,11 +354,11 @@ Export this configuration to replicate the setup:
   "config": {
     "clientId": "${CLIENT_ID}",
     "clientSecret": "${CLIENT_SECRET}",
-    "tokenUrl": "https://app.siros.org/${TENANT}/${VERIFIER}/token",
-    "authorizationUrl": "https://app.siros.org/${TENANT}/${VERIFIER}/authorize",
-    "jwksUrl": "https://app.siros.org/${TENANT}/${VERIFIER}/jwks",
-    "userInfoUrl": "https://app.siros.org/${TENANT}/${VERIFIER}/userinfo",
-    "issuer": "https://app.siros.org/${TENANT}/${VERIFIER}",
+    "tokenUrl": "https://verifier.example.org/token",
+    "authorizationUrl": "https://verifier.example.org/authorize",
+    "jwksUrl": "https://verifier.example.org/jwks",
+    "userInfoUrl": "https://verifier.example.org/userinfo",
+    "issuer": "https://verifier.example.org",
     "clientAuthMethod": "client_secret_post",
     "syncMode": "INHERIT",
     "validateSignature": "true",

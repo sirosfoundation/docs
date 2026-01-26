@@ -29,63 +29,61 @@
 }
 
 :root {
-  --ifm-font-family-base: 'Inter';
-
-
-  --w-brand-300: hsl(217 5% 66%);
-  --w-brand-400: hsl(217 10% 33%);
-  --w-brand-500: hsl(217 66% 32%);
-  --w-brand-600: hsl(217 40% 30%);
-  --w-brand-700: hsl(217 10% 33%);
+  /* SIROS Brand Blue palette - based on #1C4587 */
+  --siros-blue-50: #E8EEF7;
+  --siros-blue-100: #D4E2F4;
+  --siros-blue-200: #A9C4E8;
+  --siros-blue-300: #7EA6DC;
+  --siros-blue-400: #5388D0;
+  --siros-blue-500: #1C4587;   /* Primary brand */
+  --siros-blue-600: #14366B;   /* Dark */
+  --siros-blue-700: #0E2750;
+  --siros-blue-800: #081935;
+  --siros-blue-900: #030B1A;
+  
+  /* Complement: Orange (for notes, highlights) */
+  --siros-orange-50: #FFF3E0;
+  --siros-orange-100: #FFE4C4;
+  --siros-orange-500: #C75A11;
+  --siros-orange-700: #7C3A00;
+  
+  /* Accent: Teal (analogous, for secondary elements) */
+  --siros-teal-50: #E6F4F1;
+  --siros-teal-500: #198754;
+  --siros-teal-700: #0F5132;
 }
 
 :root {
-  --ifm-color-primary: var(--w-brand-500);
-  --ifm-color-primary-dark: var(--w-brand-600);
-  --ifm-color-primary-darker: var(--w-brand-700);
-  --ifm-color-primary-darkest: var(--w-brand-700);
-  --ifm-color-primary-light: var(--w-brand-400);
-  --ifm-color-primary-lighter: var(--w-brand-300);
-  --ifm-color-primary-lightest: var(--w-brand-300);
+  --ifm-font-family-base: 'Inter';
+  /* SIROS Blue primary colors - using direct hex values for compatibility */
+  --ifm-color-primary: #1C4587;          /* Brand primary */
+  --ifm-color-primary-dark: #14366B;     /* Dark */
+  --ifm-color-primary-darker: #0E2750;
+  --ifm-color-primary-darkest: #081935;
+  --ifm-color-primary-light: #5388D0;
+  --ifm-color-primary-lighter: #7EA6DC;
+  --ifm-color-primary-lightest: #A9C4E8;
   --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
-}
-
-/* For readability concerns, you should choose a lighter palette in dark mode. */
-[data-theme='dark'] {
-  --ifm-color-primary: white;
-  --ifm-color-primary-dark: white;
-  --ifm-color-primary-darker: white;
-  --ifm-color-primary-darkest: white;
-  --ifm-color-primary-light: white;
-  --ifm-color-primary-lighter: white;
-  --ifm-color-primary-lightest: white;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  --docusaurus-highlighted-code-line-bg: rgba(28, 69, 135, 0.1);
 }
 
 /* =====================================================
    MERMAID DIAGRAM ENHANCEMENTS
+   SIROS Brand Colors: Blue #1C4587, Orange #C75A11
+   Light mode only - diagrams use consistent styling
    ===================================================== */
 
 /* Container styling for all mermaid diagrams */
 .docusaurus-mermaid-container {
   margin: 2rem 0;
   padding: 1.5rem;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: #FFFFFF;
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #A9C4E8;
   box-shadow: 
-    0 1px 3px rgba(0, 0, 0, 0.05),
-    0 4px 6px rgba(0, 0, 0, 0.03);
+    0 1px 3px rgba(28, 69, 135, 0.05),
+    0 4px 6px rgba(28, 69, 135, 0.03);
   overflow-x: auto;
-}
-
-[data-theme='dark'] .docusaurus-mermaid-container {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-  border-color: #334155;
-  box-shadow: 
-    0 1px 3px rgba(0, 0, 0, 0.3),
-    0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
 /* Center the SVG within container */
@@ -96,104 +94,146 @@
   height: auto;
 }
 
-/* Flowchart node enhancements */
+/* =====================================================
+   FLOWCHART NODE STYLING - SIROS Blue
+   ===================================================== */
+
+/* Node backgrounds and borders */
 .mermaid .node rect,
+.mermaid .node polygon,
 .mermaid .node circle,
-.mermaid .node ellipse,
-.mermaid .node polygon {
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-  transition: filter 0.2s ease;
+.mermaid .node ellipse {
+  fill: #E8EEF7 !important;
+  stroke: #1C4587 !important;
+  stroke-width: 2px !important;
 }
 
-.mermaid .node:hover rect,
-.mermaid .node:hover circle,
-.mermaid .node:hover ellipse,
-.mermaid .node:hover polygon {
-  filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.3));
+/* Node text */
+.mermaid .node .label,
+.mermaid .nodeLabel,
+.mermaid .node foreignObject div {
+  color: #1C4587 !important;
+  fill: #1C4587 !important;
 }
 
-/* Sequence diagram participant boxes */
-.mermaid .actor {
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-}
+/* =====================================================
+   SUBGRAPH/CLUSTER STYLING
+   ===================================================== */
 
-/* Sequence diagram lifelines */
-.mermaid .actor-line {
-  stroke: #94a3b8;
-  stroke-dasharray: 4, 4;
-}
-
-[data-theme='dark'] .mermaid .actor-line {
-  stroke: #64748b;
-}
-
-/* Message arrows */
-.mermaid .messageText {
-  font-size: 13px !important;
-  font-weight: 500;
-}
-
-/* Subgraph/cluster styling */
 .mermaid .cluster rect {
+  fill: #F1F5F9 !important;
+  stroke: #1C4587 !important;
+  stroke-width: 2px !important;
   rx: 8px !important;
   ry: 8px !important;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.05));
 }
 
-.mermaid .cluster .label {
+.mermaid .cluster .label,
+.mermaid .cluster span {
+  color: #1C4587 !important;
+  fill: #1C4587 !important;
   font-weight: 600;
   font-size: 14px;
 }
 
+/* =====================================================
+   EDGE/ARROW STYLING
+   ===================================================== */
+
+/* Arrow lines */
+.mermaid .flowchart-link,
+.mermaid .edge-pattern-solid,
+.mermaid path.path {
+  stroke: #495057 !important;
+  stroke-width: 2px;
+}
+
+/* Arrow heads */
+.mermaid .arrowheadPath,
+.mermaid .marker,
+.mermaid marker path {
+  fill: #1C4587 !important;
+  stroke: #1C4587 !important;
+}
+
 /* Edge labels */
 .mermaid .edgeLabel {
-  background-color: rgba(255, 255, 255, 0.9) !important;
+  background-color: rgba(255, 255, 255, 0.95) !important;
   padding: 2px 6px !important;
   border-radius: 4px;
   font-size: 12px;
 }
 
-[data-theme='dark'] .mermaid .edgeLabel {
-  background-color: rgba(30, 41, 59, 0.9) !important;
-  color: #e2e8f0;
+.mermaid .edgeLabel .label {
+  color: #343A40 !important;
+  fill: #343A40 !important;
 }
 
-/* Arrow styling */
-.mermaid .arrowheadPath {
-  fill: #3b82f6;
+/* =====================================================
+   SEQUENCE DIAGRAM STYLING
+   ===================================================== */
+
+/* Actor/Participant boxes */
+.mermaid .actor {
+  fill: #E8EEF7 !important;
+  stroke: #1C4587 !important;
+  stroke-width: 2px !important;
 }
 
-.mermaid .flowchart-link {
-  stroke: #64748b !important;
-  stroke-width: 2px;
+/* Actor text */
+.mermaid .actor-line + text,
+.mermaid text.actor {
+  fill: #212529 !important;
+  font-weight: 500;
 }
 
-/* Note boxes in sequence diagrams */
-.mermaid .note {
-  fill: #fef3c7 !important;
-  stroke: #f59e0b !important;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+/* Lifelines */
+.mermaid .actor-line {
+  stroke: #94a3b8 !important;
+  stroke-dasharray: 4, 4;
 }
 
-[data-theme='dark'] .mermaid .note {
-  fill: #422006 !important;
-  stroke: #d97706 !important;
+/* Signal/Message arrows */
+.mermaid .messageLine0,
+.mermaid .messageLine1 {
+  stroke: #1C4587 !important;
+  stroke-width: 2px !important;
 }
 
-/* Activation bars in sequence diagrams */
+/* Message text */
+.mermaid .messageText {
+  fill: #343A40 !important;
+  font-size: 13px !important;
+  font-weight: 500;
+}
+
+/* Activation bars */
 .mermaid .activation0,
 .mermaid .activation1,
 .mermaid .activation2 {
-  fill: #dbeafe !important;
-  stroke: #3b82f6 !important;
+  fill: #D4E2F4 !important;
+  stroke: #1C4587 !important;
 }
 
-[data-theme='dark'] .mermaid .activation0,
-[data-theme='dark'] .mermaid .activation1,
-[data-theme='dark'] .mermaid .activation2 {
-  fill: #1e3a5f !important;
-  stroke: #60a5fa !important;
+/* =====================================================
+   NOTE STYLING - Complement Orange
+   ===================================================== */
+
+.mermaid .note {
+  fill: #FFF3E0 !important;
+  stroke: #C75A11 !important;
+  stroke-width: 1.5px !important;
 }
+
+.mermaid .noteText,
+.mermaid .note text {
+  fill: #7C3A00 !important;
+  font-size: 12px;
+}
+
+/* =====================================================
+   RESPONSIVE & PRINT
+   ===================================================== */
 
 /* Responsive scaling */
 @media (max-width: 768px) {

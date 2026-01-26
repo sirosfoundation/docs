@@ -1,36 +1,42 @@
 ---
-sidebar_position: 1
-sidebar_label: Overview
+sidebar_position: 3
+sidebar_label: Configuration
 ---
 
-# Issuing Credentials
+# Issuer Configuration
 
-This guide explains how to issue digital credentials to users of the SIROS ID credential manager (wallet). You can use the **SIROS ID hosted issuer service** or **deploy your own issuer** in your infrastructure. After reading this guide, you will understand how to:
+This guide provides detailed configuration options for the SIROS ID credential issuer. For conceptual background, see [Concepts & Architecture](./concepts). For deployment setup, see [Deployment](./deployment).
+
+After reading this guide, you will understand how to:
 
 - Connect your identity provider to the issuer
 - Configure credential types
 - Issue credentials to wallets
 - Deploy your own issuer (optional)
 
-## Multi-Tenancy
+## Endpoints
 
-SIROS ID uses path-based multi-tenancy. All services are hosted under `app.siros.org`:
-
-```
-https://app.siros.org/<tenant>/<issuer_instance>/...
-```
-
-Each tenant can have multiple issuer instances. For example, tenant `acme-corp` with issuer instance `pid`:
+The SIROS ID issuer exposes standard OID4VCI endpoints. For a self-hosted or on-premise deployment at `issuer.example.org`:
 
 | Endpoint | URL |
 |----------|-----|
-| Credential Offer | `https://app.siros.org/acme-corp/pid/credential-offer` |
-| Token | `https://app.siros.org/acme-corp/pid/token` |
-| Credential | `https://app.siros.org/acme-corp/pid/credential` |
-| Metadata | `https://app.siros.org/acme-corp/pid/.well-known/openid-credential-issuer` |
+| Credential Offer | `https://issuer.example.org/credential-offer` |
+| Token | `https://issuer.example.org/token` |
+| Credential | `https://issuer.example.org/credential` |
+| Metadata | `https://issuer.example.org/.well-known/openid-credential-issuer` |
 
-:::info Tenant and Instance Isolation
-Each tenant has isolated configuration, and each issuer instance within a tenant has its own credential types and signing keys. The tenant and instance are included in the `iss` claim of issued credentials.
+:::info SIROS Hosted Service
+When using the **SIROS ID hosted service**, issuers use subdomain-based multi-tenancy:
+
+```
+https://<instance>.<tenant>.issuer.id.siros.org
+```
+
+For example, tenant `acme-corp` with issuer instance `pid`:
+- `https://pid.acme-corp.issuer.id.siros.org/credential-offer`
+- `https://pid.acme-corp.issuer.id.siros.org/.well-known/openid-credential-issuer`
+
+Each tenant has isolated configuration, and each issuer instance has its own credential types and signing keys.
 :::
 
 ## Deployment Options
@@ -91,20 +97,24 @@ issuer:
 
 Use existing [SAML 2.0](http://docs.oasis-open.org/security/saml/v2.0/) identity federations. See [SAML IdP Integration](./saml-idp) for detailed configuration:
 
+:::important SAML requires full image
+SAML support requires the `-full` image variant: `vc-issuer-full`
+:::
+
 ```yaml
-# apigw section (SAML is configured in the API Gateway)
-apigw:
+# SAML is configured in the issuer section
+issuer:
   saml:
     enabled: true
-    entity_id: "https://app.siros.org/your-tenant/your-issuer/sp"
-    acs_endpoint: "https://app.siros.org/your-tenant/your-issuer/saml/acs"
+    entity_id: "https://issuer.example.org/sp"
+    acs_endpoint: "https://issuer.example.org/saml/acs"
     certificate_path: "/pki/sp-cert.pem"
     private_key_path: "/pki/sp-key.pem"
     # Use MDQ for federation metadata lookup
     mdq_server: "https://mds.swamid.se/entities/"
     credential_mappings:
       pid:
-        credential_config_id: "urn:eudi:pid:1"
+        credential_config_id: "urn:eudi:pid:arf-1.8:1"
         attributes:
           "urn:oid:2.5.4.42":
             claim: "given_name"
@@ -143,25 +153,32 @@ The SIROS ID platform includes preconfigured schemas for common EU credential ty
 
 | Credential | VCT | Description |
 |------------|-----|-------------|
-| **PID** | `urn:eudi:pid:1` | Person Identification Data (ARF 1.5/1.8) |
+| **PID (ARF 1.5)** | `urn:eudi:pid:arf-1.5:1` | Person Identification Data (ARF 1.5) |
+| **PID (ARF 1.8)** | `urn:eudi:pid:arf-1.8:1` | Person Identification Data (ARF 1.8+) |
 | **EHIC** | `urn:eudi:ehic:1` | European Health Insurance Card |
 | **PDA1** | `urn:eudi:pda1:1` | Portable Document A1 |
 | **Diploma** | `urn:eudi:diploma:1` | Educational credentials |
 | **ELM** | `urn:eudi:elm:1` | [European Learning Model](https://europa.eu/europass/en/european-learning-model) |
+| **Microcredential** | `urn:eudi:micro_credential:1` | Short learning achievements |
+| **OpenBadge** | `urn:eudi:openbadge_complete:1` | Open Badges 3.0 (complete) |
+
+:::note Credential Type Aliases
+For backwards compatibility with some systems, the generic VCT `urn:eudi:pid:1` may be accepted and mapped to the appropriate ARF version based on configuration.
+:::
 
 ## Integration Steps
 
 ### Step 1: Configure Your Identity Provider
 
-Configure your IdP to allow SIROS ID issuer as a client:
+Configure your IdP to allow the issuer as a client:
 
 **For OIDC IdPs:**
 1. Register a new OIDC client
-2. Set redirect URI to: `https://app.siros.org/<tenant>/<issuer>/callback`
+2. Set redirect URI to: `https://issuer.example.org/callback`
 3. Enable required scopes (openid, profile, email, etc.)
 
 **For SAML IdPs:**
-1. Import SIROS ID issuer SP metadata
+1. Import issuer SP metadata
 2. Configure attribute release (name, email, etc.)
 
 ### Step 2: Map Identity Claims to Credential Attributes
@@ -199,7 +216,7 @@ Establish trust with the SIROS ID ecosystem. See [Trust Services](../trust/) for
 
 ### Step 4: Test the Integration
 
-1. **Obtain a test wallet**: Use the SIROS ID web app at [app.siros.org](https://app.siros.org)
+1. **Obtain a test wallet**: Use the SIROS ID web app at [id.siros.org](https://id.siros.org)
 2. **Trigger issuance**: Navigate to your issuer's credential offer page
 3. **Scan QR code**: Use the wallet to scan and accept the credential
 4. **Verify**: Check that the credential appears in the wallet
@@ -208,10 +225,10 @@ Establish trust with the SIROS ID ecosystem. See [Trust Services](../trust/) for
 
 ### QR Code
 
-Generate a QR code containing a credential offer (replace `your-tenant` and `your-issuer` with your values):
+Generate a QR code containing a credential offer:
 
 ```
-openid-credential-offer://?credential_offer_uri=https://app.siros.org/your-tenant/your-issuer/offers/abc123
+openid-credential-offer://?credential_offer_uri=https://issuer.example.org/offers/abc123
 ```
 
 ### Deep Link
@@ -219,7 +236,7 @@ openid-credential-offer://?credential_offer_uri=https://app.siros.org/your-tenan
 For mobile apps, use a deep link:
 
 ```
-openid-credential-offer://app.siros.org/your-tenant/your-issuer/offers/abc123
+openid-credential-offer://issuer.example.org/offers/abc123
 ```
 
 ### Pre-authorized Flow
@@ -249,7 +266,7 @@ The issuer exposes OpenID4VCI-compliant endpoints:
 
 Full API documentation is available at:
 ```
-https://app.siros.org/<tenant>/<issuer>/swagger/index.html
+https://issuer.example.org/swagger/index.html
 ```
 
 ## Security Considerations

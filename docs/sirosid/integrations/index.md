@@ -98,18 +98,25 @@ Configure trust frameworks for your deployment.
 
 ### Demo Environment
 
-A SIROS ID demo environment is available for testing at `app.siros.org`:
+A SIROS ID demo environment is available for testing:
 
 | Service | URL |
 |---------|-----|
-| Wallet | [app.siros.org](https://app.siros.org) |
-| Demo Verifier | `https://app.siros.org/demo/verifier` |
-| Demo Issuer | `https://app.siros.org/demo/issuer` |
+| Wallet | [id.siros.org](https://id.siros.org) |
+| Demo Verifier | `https://main.demo.verifier.id.siros.org` |
+| Demo Issuer | `https://main.demo.issuer.id.siros.org` |
+
+:::info Hosted Service URL Pattern
+SIROS ID hosted services use subdomain-based multi-tenancy:
+- **Wallet**: `https://id.siros.org/<tenant>`
+- **Verifiers**: `https://<instance>.<tenant>.verifier.id.siros.org`
+- **Issuers**: `https://<instance>.<tenant>.issuer.id.siros.org`
+:::
 
 ### API Documentation
 
-- **Verifier Swagger**: `https://app.siros.org/<tenant>/<verifier>/swagger/index.html`
-- **Issuer Swagger**: `https://app.siros.org/<tenant>/<issuer>/swagger/index.html`
+- **Verifier Swagger**: `https://verifier.example.org/swagger/index.html`
+- **Issuer Swagger**: `https://issuer.example.org/swagger/index.html`
 - **AuthZEN Spec**: [draft-johansson-authzen-trust](https://leifj.github.io/draft-johansson-authzen-trust/)
 
 ### Source Code

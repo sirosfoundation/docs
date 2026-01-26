@@ -50,13 +50,12 @@ Use direct OIDC integration when:
 
 ## Step 1: Register Your Application
 
-Register your application with the SIROS ID verifier. Replace `your-tenant` and `your-verifier` with your assigned values.
+Register your application with the verifier using dynamic client registration.
 
 ### Dynamic Registration
 
 ```bash
-# Replace 'your-tenant' and 'your-verifier' with your values
-curl -X POST "https://app.siros.org/your-tenant/your-verifier/register" \
+curl -X POST "https://verifier.example.org/register" \
   -H "Content-Type: application/json" \
   -d '{
     "client_name": "My Application",
@@ -94,8 +93,7 @@ Response:
 For applications that cannot keep secrets:
 
 ```bash
-# Replace 'your-tenant' and 'your-verifier' with your values
-curl -X POST "https://app.siros.org/your-tenant/your-verifier/register" \
+curl -X POST "https://verifier.example.org/register" \
   -H "Content-Type: application/json" \
   -d '{
     "client_name": "My SPA",
@@ -111,22 +109,21 @@ Public clients **must** use PKCE.
 
 ## Step 2: Discover Endpoints
 
-Fetch the OpenID Connect discovery document for your tenant and verifier:
+Fetch the OpenID Connect discovery document:
 
 ```bash
-# Replace 'your-tenant' and 'your-verifier' with your values
-curl "https://app.siros.org/your-tenant/your-verifier/.well-known/openid-configuration"
+curl "https://verifier.example.org/.well-known/openid-configuration"
 ```
 
 Response:
 
 ```json
 {
-  "issuer": "https://app.siros.org/your-tenant/your-verifier",
-  "authorization_endpoint": "https://app.siros.org/your-tenant/your-verifier/authorize",
-  "token_endpoint": "https://app.siros.org/your-tenant/your-verifier/token",
-  "userinfo_endpoint": "https://app.siros.org/your-tenant/your-verifier/userinfo",
-  "jwks_uri": "https://app.siros.org/your-tenant/your-verifier/jwks",
+  "issuer": "https://verifier.example.org",
+  "authorization_endpoint": "https://verifier.example.org/authorize",
+  "token_endpoint": "https://verifier.example.org/token",
+  "userinfo_endpoint": "https://verifier.example.org/userinfo",
+  "jwks_uri": "https://verifier.example.org/jwks",
   "scopes_supported": ["openid", "profile", "pid", "ehic", "diploma"],
   "response_types_supported": ["code"],
   "grant_types_supported": ["authorization_code", "refresh_token"],
@@ -190,8 +187,8 @@ async function startAuthentication() {
     code_challenge_method: 'S256'
   });
   
-  // Redirect to verifier (replace your-tenant/your-verifier with your values)
-  window.location.href = `https://app.siros.org/your-tenant/your-verifier/authorize?${params}`;
+  // Redirect to verifier
+  window.location.href = `https://verifier.example.org/authorize?${params}`;
 }
 ```
 
@@ -218,7 +215,7 @@ async function handleCallback() {
   const code = params.get('code');
   const codeVerifier = sessionStorage.getItem('code_verifier');
   
-  const tokenResponse = await fetch('https://app.siros.org/your-tenant/your-verifier/token', {
+  const tokenResponse = await fetch('https://verifier.example.org/token', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
@@ -246,8 +243,8 @@ async function handleCallback() {
 
 ```javascript
 async function validateIdToken(idToken) {
-  // Fetch JWKS (replace your-tenant/your-verifier with your values)
-  const jwksResponse = await fetch('https://app.siros.org/your-tenant/your-verifier/jwks');
+  // Fetch JWKS
+  const jwksResponse = await fetch('https://verifier.example.org/jwks');
   const jwks = await jwksResponse.json();
   
   // Parse token header to find key
@@ -270,8 +267,8 @@ async function validateIdToken(idToken) {
   const [, payloadB64] = idToken.split('.');
   const claims = JSON.parse(atob(payloadB64));
   
-  // Validate issuer (replace with your actual tenant/verifier)
-  if (claims.iss !== 'https://app.siros.org/your-tenant/your-verifier') {
+  // Validate issuer
+  if (claims.iss !== 'https://verifier.example.org') {
     throw new Error('Invalid issuer');
   }
   
@@ -328,8 +325,7 @@ const app = express();
 let client;
 
 async function initializeClient() {
-  // Replace your-tenant/your-verifier with your values
-  const issuer = await Issuer.discover('https://app.siros.org/your-tenant/your-verifier');
+  const issuer = await Issuer.discover('https://verifier.example.org');
   client = new issuer.Client({
     client_id: 'your-client-id',
     client_secret: 'your-client-secret',
@@ -387,8 +383,7 @@ oauth.register(
     name='sirosid',
     client_id='your-client-id',
     client_secret='your-client-secret',
-    # Replace your-tenant/your-verifier with your values
-    server_metadata_url='https://app.siros.org/your-tenant/your-verifier/.well-known/openid-configuration',
+    server_metadata_url='https://verifier.example.org/.well-known/openid-configuration',
     client_kwargs={'scope': 'openid profile'}
 )
 
@@ -419,8 +414,7 @@ import (
 func main() {
     ctx := context.Background()
     
-    // Replace your-tenant/your-verifier with your values
-    provider, _ := oidc.NewProvider(ctx, "https://app.siros.org/your-tenant/your-verifier")
+    provider, _ := oidc.NewProvider(ctx, "https://verifier.example.org")
     
     oauth2Config := oauth2.Config{
         ClientID:     "your-client-id",
@@ -473,8 +467,7 @@ spring:
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
         provider:
           sirosid:
-            # Replace your-tenant/your-verifier with your values
-            issuer-uri: https://app.siros.org/your-tenant/your-verifier
+            issuer-uri: https://verifier.example.org
 ```
 
 ```java
@@ -542,7 +535,7 @@ async function silentRefresh() {
     // ... PKCE params
   });
   
-  iframe.src = `https://app.siros.org/your-tenant/your-verifier/authorize?${params}`;
+  iframe.src = `https://verifier.example.org/authorize?${params}`;
   document.body.appendChild(iframe);
   
   // Handle response in iframe
@@ -559,7 +552,7 @@ function logout() {
     state: generateState()
   });
   
-  window.location.href = `https://app.siros.org/your-tenant/your-verifier/logout?${params}`;
+  window.location.href = `https://verifier.example.org/logout?${params}`;
 }
 ```
 

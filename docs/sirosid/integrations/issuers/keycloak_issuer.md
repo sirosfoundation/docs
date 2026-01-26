@@ -33,7 +33,15 @@ sequenceDiagram
 ```
 
 :::tip Hosted or Self-Hosted
-This guide works with both the **SIROS ID hosted issuer** (`app.siros.org/<tenant>/<issuer>`) and **self-hosted deployments**. Simply replace the issuer URL as needed. See [Issuer Deployment Options](./issuer.md#deployment-options) for more information.
+This guide works with both the **SIROS ID hosted issuer** and **self-hosted deployments**. The examples use `issuer.example.org` as a placeholder—replace with your actual issuer URL. See [Issuer Deployment Options](./issuer.md#deployment-options) for more information.
+:::
+
+:::info SIROS Hosted Service
+If using the SIROS-hosted issuer service, your URL will follow the pattern:
+```
+https://<instance>.<tenant>.issuer.id.siros.org
+```
+For example: `https://main.demo.issuer.id.siros.org`
 :::
 
 ## Prerequisites
@@ -70,14 +78,14 @@ Create an OIDC client in Keycloak for the SIROS ID issuer.
 
 ### Access Settings
 
-Replace `your-tenant` and `your-issuer` with your assigned values:
+Configure the redirect URLs for your issuer:
 
 | Setting | Value |
 |---------|-------|
-| **Root URL** | `https://app.siros.org/your-tenant/your-issuer` |
-| **Valid redirect URIs** | `https://app.siros.org/your-tenant/your-issuer/callback` |
-| **Valid post logout redirect URIs** | `https://app.siros.org/your-tenant/your-issuer` |
-| **Web origins** | `https://app.siros.org` |
+| **Root URL** | `https://issuer.example.org` |
+| **Valid redirect URIs** | `https://issuer.example.org/callback` |
+| **Valid post logout redirect URIs** | `https://issuer.example.org` |
+| **Web origins** | `https://issuer.example.org` |
 
 For self-hosted issuers, replace with your issuer URL.
 
@@ -234,7 +242,7 @@ issuer:
   # Claim mapping for credentials
   credential_constructor:
     pid:
-      vct: "urn:eudi:pid:1"
+      vct: "urn:eudi:pid:arf-1.8:1"
       claim_mapping:
         given_name: "$.claims.given_name"
         family_name: "$.claims.family_name"
@@ -284,7 +292,7 @@ Map Keycloak claims to specific credential types.
 ```yaml
 credential_constructor:
   pid:
-    vct: "urn:eudi:pid:1"
+    vct: "urn:eudi:pid:arf-1.8:1"
     format: "vc+sd-jwt"
     validity_days: 365
     claim_mapping:
@@ -328,7 +336,7 @@ credential_constructor:
 
 ### Using the Demo Wallet
 
-1. Go to [app.siros.org](https://app.siros.org) and create a wallet
+1. Go to [id.siros.org](https://id.siros.org) and create a wallet
 2. Navigate to **Add Credential**
 3. Enter your issuer URL or scan the QR code
 4. Authenticate with your Keycloak credentials
@@ -341,7 +349,7 @@ Test the OIDC flow manually:
 
 ```bash
 # 1. Start authorization (opens browser)
-open "https://issuer.example.com/authorize?client_id=wallet&redirect_uri=https://app.siros.org/callback&scope=openid%20pid&response_type=code"
+open "https://issuer.example.org/authorize?client_id=wallet&redirect_uri=https://id.siros.org/callback&scope=openid%20pid&response_type=code"
 
 # 2. After authentication, check the issued credential
 ```
@@ -444,7 +452,7 @@ public class CredentialProvisioningListener implements EventListenerProvider {
             // Trigger credential issuance via API
             issuerClient.createCredentialOffer(
                 event.getResourcePath(),
-                "urn:eudi:pid:1"
+                "urn:eudi:pid:arf-1.8:1"
             );
         }
     }
@@ -461,7 +469,7 @@ curl -X POST "https://issuer.example.com/offers" \
   -H "Authorization: Bearer ${SERVICE_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{
-    "credential_type": "urn:eudi:pid:1",
+    "credential_type": "urn:eudi:pid:arf-1.8:1",
     "user_id": "keycloak-user-uuid",
     "pre_authorized": true,
     "pin_required": false
@@ -582,7 +590,7 @@ issuer:
   # Credential types
   credential_constructor:
     pid:
-      vct: "urn:eudi:pid:1"
+      vct: "urn:eudi:pid:arf-1.8:1"
       format: "vc+sd-jwt"
       validity_days: 365
       claim_mapping:

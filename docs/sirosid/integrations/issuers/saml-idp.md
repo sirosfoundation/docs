@@ -246,7 +246,7 @@ issuer:
   # Map to credentials
   credential_constructor:
     pid:
-      vct: "urn:eudi:pid:1"
+      vct: "urn:eudi:pid:arf-1.8:1"
       claim_mapping:
         given_name: "$.saml.given_name"
         family_name: "$.saml.family_name"
@@ -531,7 +531,7 @@ issuer:
   
   credential_constructor:
     pid:
-      vct: "urn:eudi:pid:1"
+      vct: "urn:eudi:pid:arf-1.8:1"
       format: "vc+sd-jwt"
       validity_days: 365
       claim_mapping:

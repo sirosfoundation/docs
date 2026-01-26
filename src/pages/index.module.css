@@ -10,7 +10,7 @@
   overflow: hidden;
   text-align: center;
   color: white;
-  background-color: var(--w-brand-500);
+  background-color: var(--siros-blue-500);
   
   @media screen and (max-width: 996px) {
     padding: 2rem;

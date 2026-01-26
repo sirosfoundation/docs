@@ -22,7 +22,7 @@ By the end of this guide, you'll have:
 
 ## Step 1: Get a Test Wallet (2 minutes)
 
-1. Open [app.siros.org](https://app.siros.org) in your browser
+1. Open [id.siros.org](https://id.siros.org) in your browser
 2. Create a new wallet using a passkey
 3. Navigate to **Add Credential** → **Demo PID**
 4. Accept the test Person Identification credential
@@ -31,10 +31,11 @@ You now have a wallet with a test credential.
 
 ## Step 2: Register Your Application (5 minutes)
 
-Register your application with the SIROS ID verifier. Replace `demo` with your tenant ID and `verifier` with your verifier instance name:
+Register your application with a SIROS ID verifier:
 
 ```bash
-curl -X POST https://app.siros.org/demo/verifier/register \
+# For self-hosted verifier:
+curl -X POST https://verifier.example.org/register \
   -H "Content-Type: application/json" \
   -d '{
     "client_name": "My Test App",
@@ -48,18 +49,24 @@ curl -X POST https://app.siros.org/demo/verifier/register \
 
 Save the returned `client_id` and `client_secret`.
 
-:::info Multi-Tenancy
-SIROS ID uses path-based multi-tenancy. All services are under `app.siros.org`:
-- **Wallet**: `app.siros.org/<tenant>/...`
-- **Verifiers**: `app.siros.org/<tenant>/<verifier_instance>/...` (multiple per tenant)
-- **Issuers**: `app.siros.org/<tenant>/<issuer_instance>/...` (multiple per tenant)
+:::info SIROS Hosted Service
+When using the **SIROS ID hosted service**, services use subdomain-based multi-tenancy:
 
-In this example, `demo` is the tenant and `verifier` is the verifier instance.
+- **Wallet**: `https://id.siros.org/<tenant>`
+- **Verifiers**: `https://<instance>.<tenant>.verifier.id.siros.org`
+- **Issuers**: `https://<instance>.<tenant>.issuer.id.siros.org`
+
+For example, with tenant `demo` and verifier instance `main`:
+```bash
+curl -X POST https://main.demo.verifier.id.siros.org/register \
+  -H "Content-Type: application/json" \
+  -d '{ ... }'
+```
 :::
 
 ## Step 3: Configure Your IAM (5 minutes)
 
-Add SIROS ID as an identity provider:
+Add SIROS ID verifier as an identity provider:
 
 ### Keycloak
 
@@ -67,7 +74,7 @@ Add SIROS ID as an identity provider:
 2. Configure:
    - **Alias**: `sirosid`
    - **Display Name**: `SIROS ID`
-   - **Discovery URL**: `https://app.siros.org/demo/verifier/.well-known/openid-configuration`
+   - **Discovery URL**: `https://verifier.example.org/.well-known/openid-configuration`
    - **Client ID**: *(from step 2)*
    - **Client Secret**: *(from step 2)*
    - **Client Authentication**: `Client secret sent as post`
@@ -77,7 +84,7 @@ Add SIROS ID as an identity provider:
 
 1. Go to **Authentication** → **Enterprise** → **OpenID Connect**
 2. Create a new connection with:
-   - **Issuer URL**: `https://app.siros.org/demo/verifier`
+   - **Issuer URL**: `https://verifier.example.org`
    - **Client ID**: *(from step 2)*
    - **Client Secret**: *(from step 2)*
 
@@ -86,8 +93,8 @@ Add SIROS ID as an identity provider:
 If not using an IAM, redirect users directly:
 
 ```javascript
-// Replace 'demo' with your tenant ID and 'verifier' with your verifier instance
-const authUrl = 'https://app.siros.org/demo/verifier/authorize?' + 
+// Replace with your verifier URL
+const authUrl = 'https://verifier.example.org/authorize?' + 
   new URLSearchParams({
     response_type: 'code',
     client_id: 'your-client-id',
@@ -156,9 +163,9 @@ scope=openid profile ehic
 
 ## Going to Production
 
-1. **Register for production**: Contact SIROS ID to get production credentials
+1. **Register for production**: Contact SIROS ID to get production credentials or deploy your own infrastructure
 2. **Configure trust**: Set up your trust framework registration
-3. **Update tenant/instance**: Use your production tenant and verifier instance at `app.siros.org`
+3. **Update URLs**: Point to your production verifier endpoint
 
 ## Next Steps
 
@@ -171,7 +178,7 @@ scope=openid profile ehic
 
 ### QR Code Not Scanning
 
-- Ensure the wallet app has camera permissions
+- Ensure the wallet has camera permissions
 - Try the deep link option for mobile browsers
 
 ### Claims Not Appearing

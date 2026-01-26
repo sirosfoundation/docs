@@ -58,7 +58,9 @@ const config: Config = {
 
   themeConfig: {
     colorMode: {
-      respectPrefersColorScheme: true,
+      defaultMode: 'light',
+      disableSwitch: true,
+      respectPrefersColorScheme: false,
     },
     navbar: {
       title: 'SIROS Developer Docs',
@@ -94,14 +96,71 @@ const config: Config = {
       darkTheme: prismThemes.dracula,
     },
     // Mermaid diagram styling for professional appearance
+    // Using 'base' theme for both light and dark to ensure consistent styling
     mermaid: {
       theme: {
         light: 'base',
-        dark: 'dark',
+        dark: 'base',
       },
       options: {
         // Improve rendering quality
         securityLevel: 'loose',
+        // Theme variables for base theme customization
+        theme: 'base',
+        themeVariables: {
+          // ===========================================
+          // SIROS Brand Mermaid Theme
+          // Base: SIROS Blue #1C4587
+          // Complement: Orange #C75A11 (for notes/highlights)
+          // ===========================================
+          
+          // Primary palette (SIROS Blue family)
+          primaryColor: '#E8EEF7',           // Light blue-gray background
+          primaryTextColor: '#1C4587',       // SIROS brand blue text
+          primaryBorderColor: '#1C4587',     // SIROS brand blue border
+          
+          // Secondary palette (Teal/Cyan - analogous for variety)
+          secondaryColor: '#E6F4F1',         // Light teal background
+          secondaryTextColor: '#0F5132',     // Dark teal text
+          secondaryBorderColor: '#198754',   // Teal border
+          
+          // Tertiary palette (Neutral grays)
+          tertiaryColor: '#F8F9FA',          // Very light gray
+          tertiaryTextColor: '#343A40',      // Dark gray text
+          tertiaryBorderColor: '#ADB5BD',    // Medium gray border
+          
+          // Typography
+          fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+          fontSize: '14px',
+          
+          // Flowchart styling
+          lineColor: '#495057',              // Dark gray for good contrast
+          nodeTextColor: '#212529',          // Near-black for readability
+          nodeBorder: '#1C4587',             // SIROS blue
+          clusterBkg: '#F1F5F9',             // Light slate
+          clusterBorder: '#1C4587',          // SIROS blue
+          
+          // Sequence diagram styling
+          actorTextColor: '#212529',         // Near-black
+          actorBorder: '#1C4587',            // SIROS blue
+          actorBkg: '#E8EEF7',               // Light SIROS blue
+          signalColor: '#1C4587',            // SIROS blue arrows
+          signalTextColor: '#343A40',        // Dark gray for readability
+          sequenceNumberColor: '#FFFFFF',    // White on blue
+          labelBoxBkgColor: '#E8EEF7',       // Light SIROS blue
+          labelBoxBorderColor: '#1C4587',    // SIROS blue
+          labelTextColor: '#1C4587',         // SIROS blue
+          loopTextColor: '#1C4587',          // SIROS blue
+          
+          // Notes - Complement orange for contrast/attention
+          noteBkgColor: '#FFF3E0',           // Light orange/cream
+          noteBorderColor: '#C75A11',        // Complement orange
+          noteTextColor: '#7C3A00',          // Dark orange-brown
+          
+          // Activation bars
+          activationBkgColor: '#D4E2F4',     // Medium SIROS blue
+          activationBorderColor: '#1C4587',  // SIROS blue
+        },
         flowchart: {
           htmlLabels: true,
           curve: 'basis',
@@ -124,44 +183,6 @@ const config: Config = {
           useMaxWidth: true,
           rightAngles: false,
           showSequenceNumbers: false,
-        },
-        themeVariables: {
-          // SIROS brand colors
-          primaryColor: '#EFF6FF',
-          primaryTextColor: '#1E40AF',
-          primaryBorderColor: '#3B82F6',
-          secondaryColor: '#F0FDF4',
-          secondaryTextColor: '#166534',
-          secondaryBorderColor: '#22C55E',
-          tertiaryColor: '#F9FAFB',
-          tertiaryTextColor: '#374151',
-          tertiaryBorderColor: '#D1D5DB',
-          
-          // Typography
-          fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-          fontSize: '14px',
-          
-          // Flowchart styling
-          lineColor: '#6B7280',
-          nodeTextColor: '#1F2937',
-          nodeBorder: '#3B82F6',
-          clusterBkg: '#F8FAFC',
-          clusterBorder: '#CBD5E1',
-          
-          // Sequence diagram styling
-          actorTextColor: '#1F2937',
-          actorBorder: '#3B82F6',
-          actorBkg: '#EFF6FF',
-          signalColor: '#3B82F6',
-          signalTextColor: '#1F2937',
-          sequenceNumberColor: '#FFFFFF',
-          
-          // Additional polish
-          noteBkgColor: '#FEF3C7',
-          noteBorderColor: '#F59E0B',
-          noteTextColor: '#92400E',
-          activationBkgColor: '#DBEAFE',
-          activationBorderColor: '#3B82F6',
         },
       },
     },
