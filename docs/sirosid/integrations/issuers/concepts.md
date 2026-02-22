@@ -11,6 +11,11 @@ This document provides a conceptual introduction to the SIROS ID Issuer, explain
 
 A **credential issuer** is a service that creates digitally signed credentials and delivers them to user wallets. The issuer acts as a bridge between your existing identity infrastructure and the emerging world of verifiable credentials.
 
+<div className="row">
+<div className="col col--6">
+
+**Mermaid Diagram**
+
 ```mermaid
 flowchart LR
     subgraph "Your Organization"
@@ -32,6 +37,16 @@ flowchart LR
     Constructor --> Signer
     Signer -->|Signed Credential| Wallet
 ```
+
+</div>
+<div className="col col--6">
+
+**Lucid Diagram**
+
+![Issuer Flow](/img/issuer-flow-lucid.svg)
+
+</div>
+</div>
 
 The issuer:
 - **Authenticates** users via existing identity providers (SAML, OIDC)

@@ -11,6 +11,11 @@ This document provides a conceptual introduction to the SIROS ID Verifier, expla
 
 A **credential verifier** is a service that validates digital credentials presented by users and extracts verified claims for your applications. The verifier acts as a bridge between user wallets and your existing identity infrastructure, enabling privacy-preserving authentication based on verifiable credentials.
 
+<div className="row">
+<div className="col col--6">
+
+**Mermaid Diagram**
+
 ```mermaid
 flowchart LR
     subgraph "User"
@@ -35,6 +40,16 @@ flowchart LR
     Claims -->|OIDC Token| IAM
     IAM --> App
 ```
+
+</div>
+<div className="col col--6">
+
+**Lucid Diagram**
+
+![Verifier Flow](/img/verifier-flow-lucid.svg)
+
+</div>
+</div>
 
 The verifier:
 - **Requests** specific credentials and claims from user wallets
