@@ -66,11 +66,11 @@ flowchart TB
 
 | Component | Description | Learn More |
 |-----------|-------------|------------|
-| **Issuer** | Creates and signs digital credentials using OID4VCI protocol | [Issuer Integration](./integrations/issuers/) |
-| **Credential Manager** | wwWallet-based wallet for storing and presenting credentials | [Credential Manager](./cm) |
-| **Verifier** | Validates credentials and provides OIDC/OID4VP interfaces | [Verifier Integration](./integrations/verifiers/) |
-| **Trust Framework** | OpenID Federation and ETSI TSL support for trust validation | [Trust Architecture](./trust/) |
-| **VCTM Registry** | Aggregated credential type metadata | [registry.siros.org](./vctm-registry) |
+| **Issuer** | Creates and signs digital credentials using OID4VCI protocol | [Issuer Integration](../integrations/issuers/) |
+| **Credential Manager** | wwWallet-based wallet for storing and presenting credentials | [Credential Manager](../cm) |
+| **Verifier** | Validates credentials and provides OIDC/OID4VP interfaces | [Verifier Integration](../integrations/verifiers/) |
+| **Trust Framework** | OpenID Federation and ETSI TSL support for trust validation | [Trust Architecture](../integrations/trust/) |
+| **VCTM Registry** | Aggregated credential type metadata | [registry.siros.org](../vctm-registry) |
 
 ## Supported Standards
 
@@ -124,6 +124,6 @@ Add credential verification to your applications:
 1. **Try the demo**: Use the hosted service at [id.siros.org](https://id.siros.org)
 2. **Issue a credential**: Connect your IdP and issue your first credential
 3. **Verify a credential**: Add SIROS ID verifier to your IAM
-4. **Deploy your own**: Use our [Docker images](./docker-images) for self-hosting
+4. **Deploy your own**: Use our [Docker images](../docker-images) for self-hosting
 
 **SIROS ID makes it super-easy to get started building services on digital identity credentials.**

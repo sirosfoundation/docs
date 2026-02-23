@@ -181,5 +181,5 @@ Cache-Control: max-age=43200
 
 ## Next Steps
 
-- [Registry Configuration](./registry) – Full registry setup
+- [VCTM Registry](../vctm-registry) – Credential type metadata registry
 - [Trust Services](./trust/) – Configure trust for status list issuers
