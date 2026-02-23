@@ -35,7 +35,7 @@ flowchart TB
         
         subgraph "Trust Infrastructure"
             TrustConfig[Trust Configuration]
-            Registry[VCTM Registry]
+            Registry[Credential Type Registry]
             TSL[Token Status Lists]
         end
     end
@@ -70,7 +70,7 @@ flowchart TB
 | **Credential Manager** | wwWallet-based wallet for storing and presenting credentials | [Credential Manager](../cm) |
 | **Verifier** | Validates credentials and provides OIDC/OID4VP interfaces | [Verifier Integration](../integrations/verifiers/concepts) |
 | **Trust Framework** | OpenID Federation and ETSI TSL support for trust validation | [Trust Architecture](../integrations/trust/) |
-| **VCTM Registry** | Aggregated credential type metadata | [registry.siros.org](../vctm-registry) |
+| **Credential Type Registry** | Aggregated credential type metadata | [registry.siros.org](../vctm-registry) |
 
 ## Supported Standards
 
