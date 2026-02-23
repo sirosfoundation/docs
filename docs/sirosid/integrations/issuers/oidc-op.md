@@ -9,7 +9,7 @@ This guide explains how to connect any [OpenID Connect](https://openid.net/specs
 - Configure OIDC authentication for the issuer
 - Register the issuer as an OIDC client
 - Map OIDC claims to credential claims
-- Handle different grant types and flows
+- Use dynamic client registration
 
 ## Overview
 
@@ -39,411 +39,290 @@ sequenceDiagram
 Use OIDC integration when:
 - Your identity provider supports OpenID Connect
 - You want the simplest integration path
-- You need to leverage OIDC-specific features (PKCE, dynamic registration)
+- You need modern features like PKCE and dynamic registration
 :::
 
 ## Prerequisites
 
 - An OpenID Connect compliant identity provider
-- Admin access to register OIDC clients
+- Admin access to register OIDC clients (or OP supports dynamic registration)
 - A SIROS ID issuer (hosted or self-hosted)
 
-## Step 1: Register the Issuer as OIDC Client
+:::note OIDC RP Build Tag
+OIDC RP support may require building with the \`oidcrp\` build tag depending on your deployment.
+:::
 
-### Manual Registration
+## Configuration
 
-Register the issuer with your OpenID Provider:
-
-| Setting | Value |
-|---------|-------|
-| **Client Type** | Confidential |
-| **Redirect URI** | `https://issuer.example.com/callback` |
-| **Grant Types** | `authorization_code` |
-| **Response Types** | `code` |
-| **Token Auth Method** | `client_secret_post` or `client_secret_basic` |
-
-Save the issued `client_id` and `client_secret`.
-
-### Dynamic Client Registration
-
-If your OP supports [RFC 7591](https://datatracker.ietf.org/doc/html/rfc7591) dynamic registration:
-
-```bash
-curl -X POST "https://op.example.com/register" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "client_name": "SIROS ID Credential Issuer",
-    "redirect_uris": ["https://issuer.example.com/callback"],
-    "grant_types": ["authorization_code"],
-    "response_types": ["code"],
-    "token_endpoint_auth_method": "client_secret_post",
-    "scope": "openid profile email"
-  }'
-```
-
-## Step 2: Configure the Issuer
+OIDC Relying Party authentication is configured in the \`apigw.oidcrp\` section.
 
 ### Basic Configuration
 
 ```yaml
-issuer:
-  api_server:
-    addr: :8080
-  external_url: "https://issuer.example.com"
-  
-  authentication:
-    type: oidc
+apigw:
+  oidcrp:
+    # Enable OIDC RP support
+    enabled: true
     
-    # OpenID Provider discovery
-    issuer_url: "https://op.example.com"
+    # OAuth2 client credentials
+    client_id: "your-client-id"
+    client_secret: "your-client-secret"
     
-    # Client credentials
-    client_id: "siros-issuer"
-    client_secret: "${OIDC_CLIENT_SECRET}"
+    # Callback URL for authorization responses
+    redirect_uri: "https://issuer.example.org/oidcrp/callback"
+    
+    # OIDC Provider issuer URL (for discovery)
+    issuer_url: "https://accounts.google.com"
     
     # Scopes to request
     scopes:
       - openid
       - profile
       - email
+    
+    # Session duration in seconds (default: 3600)
+    session_duration: 3600
+    
+    # Credential mappings
+    credential_mappings:
+      pid:
+        credential_config_id: "urn:eudi:pid:arf-1.8:1"
+        attributes:
+          given_name:
+            claim: "given_name"
+            required: true
+          family_name:
+            claim: "family_name"
+            required: true
 ```
 
-### With Explicit Endpoints
+### Dynamic Client Registration
 
-If your OP doesn't support discovery:
+For OIDC Providers supporting [RFC 7591](https://datatracker.ietf.org/doc/html/rfc7591):
 
 ```yaml
-issuer:
-  authentication:
-    type: oidc
+apigw:
+  oidcrp:
+    enabled: true
+    redirect_uri: "https://issuer.example.org/oidcrp/callback"
+    issuer_url: "https://op.example.org"
     
-    # Explicit endpoint configuration
-    endpoints:
-      authorization: "https://op.example.com/authorize"
-      token: "https://op.example.com/token"
-      userinfo: "https://op.example.com/userinfo"
-      jwks: "https://op.example.com/.well-known/jwks.json"
+    # Dynamic registration (instead of static client_id/client_secret)
+    dynamic_registration:
+      enabled: true
+      # Optional: initial access token if required by OP
+      initial_access_token: "your-registration-token"
+      # Optional: persist registered credentials
+      storage_path: "/var/lib/vc/oidcrp-registration.json"
     
-    client_id: "siros-issuer"
-    client_secret: "${OIDC_CLIENT_SECRET}"
     scopes:
       - openid
       - profile
       - email
-```
-
-### Security Options
-
-```yaml
-issuer:
-  authentication:
-    type: oidc
-    issuer_url: "https://op.example.com"
-    client_id: "siros-issuer"
-    client_secret: "${OIDC_CLIENT_SECRET}"
     
-    # Security settings
-    security:
-      # Use PKCE (recommended)
-      use_pkce: true
-      pkce_method: "S256"
-      
-      # State parameter (always enabled)
-      state_length: 32
-      
-      # Nonce for ID token replay protection
-      use_nonce: true
-      
-      # Token endpoint authentication
-      token_auth_method: "client_secret_post"  # or client_secret_basic, private_key_jwt
-      
-      # Response mode
-      response_mode: "query"  # or fragment, form_post
+    # Optional client metadata for registration
+    client_name: "SIROS ID Credential Issuer"
+    client_uri: "https://issuer.example.org"
+    logo_uri: "https://issuer.example.org/logo.png"
+    contacts:
+      - "admin@example.org"
+    
+    credential_mappings:
+      # ...
 ```
 
-## Step 3: Claim Mapping
+## Claim Mapping
 
-Map OIDC claims to credential claims.
-
-### Standard Claims
+### Standard OIDC Claims
 
 OpenID Connect defines standard claims:
 
 | OIDC Claim | Description |
 |------------|-------------|
-| `sub` | Subject identifier |
-| `given_name` | First name |
-| `family_name` | Last name |
-| `email` | Email address |
-| `email_verified` | Email verification status |
-| `birthdate` | Birth date (YYYY-MM-DD) |
-| `address` | Address object |
-| `phone_number` | Phone number |
+| \`sub\` | Subject identifier |
+| \`given_name\` | First name |
+| \`family_name\` | Last name |
+| \`email\` | Email address |
+| \`email_verified\` | Email verification status |
+| \`birthdate\` | Birth date (YYYY-MM-DD) |
+| \`address\` | Address object |
+| \`phone_number\` | Phone number |
 
-### Configuration
+### Credential Mappings Configuration
 
 ```yaml
-issuer:
-  authentication:
-    type: oidc
-    issuer_url: "https://op.example.com"
-    client_id: "siros-issuer"
+apigw:
+  oidcrp:
+    enabled: true
+    issuer_url: "https://accounts.google.com"
+    client_id: "${OIDC_CLIENT_ID}"
     client_secret: "${OIDC_CLIENT_SECRET}"
+    redirect_uri: "https://issuer.example.org/oidcrp/callback"
+    
     scopes:
       - openid
       - profile
       - email
-      - address
     
-    # Claim sources
-    claim_sources:
-      # Claims from ID token (default)
-      - type: id_token
-      # Additional claims from userinfo
-      - type: userinfo
-    
-    # Claim mapping (optional transformations)
-    claim_mapping:
-      # Direct mapping (no transformation)
-      given_name: "given_name"
-      family_name: "family_name"
-      email: "email"
-      birthdate: "birthdate"
+    credential_mappings:
+      # Key matches credential_constructor scope
+      pid:
+        # OpenID4VCI credential configuration ID
+        credential_config_id: "urn:eudi:pid:arf-1.8:1"
+        
+        # Attribute mappings: OIDC claim -> credential claim
+        attributes:
+          # Direct claim mapping
+          given_name:
+            claim: "given_name"
+            required: true
+          family_name:
+            claim: "family_name"
+            required: true
+          email:
+            claim: "email"
+            required: false
+          # Subject identifier with transformation
+          sub:
+            claim: "personal_id"
+            required: true
+            transform: "lowercase"
+          # Claim with default value
+          locale:
+            claim: "locale"
+            required: false
+            default: "en-US"
       
-      # Custom claim names
-      personal_id: "custom:personal_id"
-      
-      # Nested claims
-      country: "address.country"
-      
-      # Transformation
-      full_name:
-        source: ["given_name", "family_name"]
-        transform: "concat"
-        separator: " "
-
-  credential_constructor:
-    pid:
-      vct: "urn:eudi:pid:arf-1.8:1"
-      claim_mapping:
-        given_name: "$.oidc.given_name"
-        family_name: "$.oidc.family_name"
-        birth_date: "$.oidc.birthdate"
-        email: "$.oidc.email"
+      # Example: diploma credential
+      diploma:
+        credential_config_id: "urn:eudi:diploma:1"
+        attributes:
+          given_name:
+            claim: "student_first_name"
+            required: true
+          # ...
 ```
 
-### Custom Scopes and Claims
+### Attribute Configuration Options
 
-Request provider-specific claims:
-
-```yaml
-issuer:
-  authentication:
-    type: oidc
-    issuer_url: "https://op.example.com"
-    client_id: "siros-issuer"
-    client_secret: "${OIDC_CLIENT_SECRET}"
-    
-    # Standard + custom scopes
-    scopes:
-      - openid
-      - profile
-      - email
-      - custom:employee_info    # Provider-specific scope
-      - custom:department       # Provider-specific scope
-    
-    # Request specific claims via claims parameter
-    claims:
-      id_token:
-        birthdate:
-          essential: true
-        nationality:
-          essential: false
-      userinfo:
-        employee_id: null
-        department: null
-```
+| Option | Type | Description |
+|--------|------|-------------|
+| \`claim\` | string | Target credential claim name (supports dot-notation) |
+| \`required\` | boolean | Whether the OIDC claim must be present |
+| \`transform\` | string | Optional: \`lowercase\`, \`uppercase\`, \`trim\` |
+| \`default\` | string | Default value if claim is missing |
 
 ## Provider-Specific Examples
 
-### Azure AD / Entra ID
+### Google
 
 ```yaml
-issuer:
-  authentication:
-    type: oidc
+apigw:
+  oidcrp:
+    enabled: true
+    issuer_url: "https://accounts.google.com"
+    client_id: "${GOOGLE_CLIENT_ID}"
+    client_secret: "${GOOGLE_CLIENT_SECRET}"
+    redirect_uri: "https://issuer.example.org/oidcrp/callback"
+    scopes:
+      - openid
+      - profile
+      - email
+    credential_mappings:
+      pid:
+        credential_config_id: "urn:eudi:pid:arf-1.8:1"
+        attributes:
+          given_name:
+            claim: "given_name"
+            required: true
+          family_name:
+            claim: "family_name"
+            required: true
+          email:
+            claim: "email"
+            required: true
+```
+
+### Azure AD / Microsoft Entra ID
+
+```yaml
+apigw:
+  oidcrp:
+    enabled: true
     issuer_url: "https://login.microsoftonline.com/{tenant-id}/v2.0"
     client_id: "${AZURE_CLIENT_ID}"
     client_secret: "${AZURE_CLIENT_SECRET}"
+    redirect_uri: "https://issuer.example.org/oidcrp/callback"
     scopes:
       - openid
       - profile
       - email
       - User.Read
-    
-    # Azure-specific settings
-    extra_params:
-      prompt: "select_account"
+    credential_mappings:
+      # ...
 ```
 
-### Google
+### Keycloak
 
 ```yaml
-issuer:
-  authentication:
-    type: oidc
-    issuer_url: "https://accounts.google.com"
-    client_id: "${GOOGLE_CLIENT_ID}"
-    client_secret: "${GOOGLE_CLIENT_SECRET}"
+apigw:
+  oidcrp:
+    enabled: true
+    issuer_url: "https://keycloak.example.org/realms/myrealm"
+    client_id: "${KEYCLOAK_CLIENT_ID}"
+    client_secret: "${KEYCLOAK_CLIENT_SECRET}"
+    redirect_uri: "https://issuer.example.org/oidcrp/callback"
     scopes:
       - openid
       - profile
       - email
-```
-
-### Okta
-
-```yaml
-issuer:
-  authentication:
-    type: oidc
-    issuer_url: "https://{your-domain}.okta.com"
-    client_id: "${OKTA_CLIENT_ID}"
-    client_secret: "${OKTA_CLIENT_SECRET}"
-    scopes:
-      - openid
-      - profile
-      - email
-      - groups  # Get group membership
+    credential_mappings:
+      # ...
 ```
 
 ### Auth0
 
 ```yaml
-issuer:
-  authentication:
-    type: oidc
+apigw:
+  oidcrp:
+    enabled: true
     issuer_url: "https://{your-domain}.auth0.com/"
     client_id: "${AUTH0_CLIENT_ID}"
     client_secret: "${AUTH0_CLIENT_SECRET}"
+    redirect_uri: "https://issuer.example.org/oidcrp/callback"
     scopes:
       - openid
       - profile
       - email
-    
-    # Auth0-specific: audience for API access
-    extra_params:
-      audience: "https://your-api.example.com"
-```
-
-### Generic Self-Hosted (Authelia, Authentik, etc.)
-
-```yaml
-issuer:
-  authentication:
-    type: oidc
-    issuer_url: "https://auth.example.com"
-    client_id: "siros-issuer"
-    client_secret: "${OIDC_CLIENT_SECRET}"
-    scopes:
-      - openid
-      - profile
-      - email
-      - groups
-```
-
-## Advanced Configuration
-
-### Multiple Providers
-
-Support authentication from multiple OPs:
-
-```yaml
-issuer:
-  authentication:
-    type: oidc
-    
-    providers:
-      - name: "corporate"
-        display_name: "Corporate Login"
-        issuer_url: "https://idp.corporate.example.com"
-        client_id: "${CORP_CLIENT_ID}"
-        client_secret: "${CORP_CLIENT_SECRET}"
-        scopes: ["openid", "profile", "email"]
-        
-      - name: "partner"
-        display_name: "Partner Login"
-        issuer_url: "https://idp.partner.example.org"
-        client_id: "${PARTNER_CLIENT_ID}"
-        client_secret: "${PARTNER_CLIENT_SECRET}"
-        scopes: ["openid", "profile"]
-    
-    # Provider selection
-    discovery:
-      type: user_choice  # or email_domain
-```
-
-### Private Key JWT Authentication
-
-For enhanced security:
-
-```yaml
-issuer:
-  authentication:
-    type: oidc
-    issuer_url: "https://op.example.com"
-    client_id: "siros-issuer"
-    
-    # Private key JWT authentication (RFC 7523)
-    security:
-      token_auth_method: "private_key_jwt"
-      private_key_path: "/pki/client-key.pem"
-      key_id: "issuer-key-1"
-      algorithm: "RS256"  # or ES256
-```
-
-### Refresh Tokens
-
-For long-lived sessions or token refresh:
-
-```yaml
-issuer:
-  authentication:
-    type: oidc
-    issuer_url: "https://op.example.com"
-    client_id: "siros-issuer"
-    client_secret: "${OIDC_CLIENT_SECRET}"
-    scopes:
-      - openid
-      - profile
-      - offline_access  # Request refresh token
-    
-    token_handling:
-      use_refresh_tokens: true
-      refresh_threshold: 300  # Refresh when < 5 min remaining
+    credential_mappings:
+      # ...
 ```
 
 ## Docker Deployment
 
 ```yaml
 services:
-  issuer:
-    image: ghcr.io/sirosfoundation/vc-issuer:latest  # or vc-issuer-full for VC 2.0 support
+  apigw:
+    image: ghcr.io/sirosfoundation/vc-apigw:latest
     restart: always
     ports:
       - "8080:8080"
     environment:
-      - VC_CONFIG_YAML=config.yaml
+      - OIDC_CLIENT_ID=${OIDC_CLIENT_ID}
       - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}
     volumes:
       - ./config.yaml:/config.yaml:ro
       - ./pki:/pki:ro
     depends_on:
       - mongo
+      - issuer
+
+  issuer:
+    image: ghcr.io/sirosfoundation/vc-issuer:latest
+    # ...
 
   mongo:
     image: mongo:7
-    restart: always
     volumes:
       - mongo-data:/data/db
 
@@ -451,105 +330,81 @@ volumes:
   mongo-data:
 ```
 
-## Troubleshooting
-
-### Invalid Client
-
-**Error**: `invalid_client`
-
-**Solutions**:
-1. Verify client_id and client_secret are correct
-2. Check token_auth_method matches OP configuration
-3. Ensure client is not expired or disabled
-
-### Invalid Redirect URI
-
-**Error**: `redirect_uri_mismatch`
-
-**Solutions**:
-1. Verify redirect URI exactly matches registered URI
-2. Check for trailing slashes
-3. Ensure HTTPS is used (required by most OPs)
-
-### Claims Missing
-
-**Symptoms**: Credential missing expected claims
-
-**Solutions**:
-1. Verify scopes include the claims you need
-2. Check if claims come from userinfo (add userinfo to claim_sources)
-3. Verify claim names match OP's claim structure
-4. Test with OP's token inspection endpoint
-
-### Token Signature Verification Failed
-
-**Error**: `invalid_token` or signature verification error
-
-**Solutions**:
-1. Verify issuer_url matches the token's `iss` claim
-2. Check JWKS endpoint is accessible
-3. Ensure server time is synchronized
-
-## Configuration Reference
-
-### Complete Example
+## Complete Configuration Example
 
 ```yaml
-issuer:
-  api_server:
-    addr: :8080
-  external_url: "https://issuer.example.com"
+apigw:
+  external_server_url: "https://issuer.example.org"
   
-  authentication:
-    type: oidc
-    issuer_url: "https://op.example.com"
-    client_id: "siros-issuer"
+  oidcrp:
+    enabled: true
+    client_id: "${OIDC_CLIENT_ID}"
     client_secret: "${OIDC_CLIENT_SECRET}"
+    redirect_uri: "https://issuer.example.org/oidcrp/callback"
+    issuer_url: "https://accounts.google.com"
     
     scopes:
       - openid
       - profile
       - email
     
-    security:
-      use_pkce: true
-      pkce_method: "S256"
-      use_nonce: true
-      token_auth_method: "client_secret_post"
+    session_duration: 3600
     
-    claim_sources:
-      - type: id_token
-      - type: userinfo
-    
-    claim_mapping:
-      given_name: "given_name"
-      family_name: "family_name"
-      email: "email"
-      birthdate: "birthdate"
-  
-  signing:
-    key_path: "/pki/issuer_key.pem"
-    algorithm: "ES256"
-  
-  credential_constructor:
-    pid:
-      vct: "urn:eudi:pid:arf-1.8:1"
-      format: "vc+sd-jwt"
-      validity_days: 365
-      claim_mapping:
-        given_name: "$.oidc.given_name"
-        family_name: "$.oidc.family_name"
-        birth_date: "$.oidc.birthdate"
-        email: "$.oidc.email"
+    credential_mappings:
+      pid:
+        credential_config_id: "urn:eudi:pid:arf-1.8:1"
+        attributes:
+          given_name:
+            claim: "given_name"
+            required: true
+          family_name:
+            claim: "family_name"
+            required: true
+          email:
+            claim: "email"
+            required: true
+          sub:
+            claim: "subject_id"
+            required: true
+
+# Credential constructor must match credential_mappings keys
+credential_constructor:
+  pid:
+    vct: "urn:eudi:pid:arf-1.8:1"
+    vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
+    auth_method: basic
+    format: "dc+sd-jwt"
 
 common:
   mongo:
     uri: mongodb://mongo:27017
 ```
 
+## Troubleshooting
+
+### Invalid Client
+
+**Solutions:**
+1. Verify \`client_id\` and \`client_secret\` are correct
+2. Ensure the client is not expired or disabled at the OP
+3. Check redirect URI exactly matches what's registered
+
+### Claims Missing
+
+**Solutions:**
+1. Verify scopes include the claims you need
+2. Some claims require explicit consent or additional scopes
+3. Check OP documentation for claim availability
+
+### Token Signature Verification Failed
+
+**Solutions:**
+1. Verify \`issuer_url\` matches the token's \`iss\` claim
+2. Check JWKS endpoint is accessible from your issuer
+3. Ensure server time is synchronized
+
 ## Next Steps
 
-- [Issuer Configuration](./issuer.md) – Full issuer documentation
-- [SAML IdP Integration](./saml-idp.md) – Use SAML instead of OIDC
-- [Keycloak Issuer Integration](./keycloak_issuer.md) – Keycloak-specific guide
+- [Issuer Configuration](./issuer) – Full issuer documentation
+- [SAML IdP Integration](./saml-idp) – Use SAML instead of OIDC
 - [Trust Services](../trust/) – Configure trust framework integration

@@ -51,15 +51,33 @@ The standard build provides core OID4VC functionality:
 
 The full build includes additional features via Go build tags:
 
-| Build Tag | Feature |
-|-----------|---------|
-| `saml` | SAML 2.0 Service Provider support for issuer authentication |
-| `vc20` | W3C Verifiable Credentials Data Model 2.0 support |
+| Build Tag | Feature | Description |
+|-----------|---------|-------------|
+| `saml` | SAML 2.0 SP | SAML Service Provider support for issuer authentication |
+| `vc20` | W3C VC 2.0 | Verifiable Credentials Data Model 2.0 support |
+| `didcomm` | DIDComm 2.1 | DIDComm messaging protocol for credential exchange |
+| `oidcrp` | OIDC RP | OpenID Connect Relying Party for issuer authentication |
 
 **Use the full build when:**
 - Integrating with SAML-based Identity Providers (eduGAIN, InCommon, etc.)
-- Issuing credentials in W3C VC 2.0 format
+- Issuing credentials in W3C VC 2.0 format with Data Integrity proofs
+- Using DIDComm 2.1 for credential issuance or presentation
 - Supporting both SD-JWT VC and VC 2.0 credential formats
+
+#### Custom Builds
+
+For specialized deployments, you can build images with specific tag combinations:
+
+```bash
+# Build with only SAML support
+go build -tags saml -o vc-issuer ./cmd/issuer
+
+# Build with SAML and OIDC RP support
+go build -tags "saml oidcrp" -o vc-apigw ./cmd/apigw
+
+# Build with all features
+go build -tags "saml vc20 didcomm oidcrp" -o vc-issuer-full ./cmd/issuer
+```
 
 ### Version Tags
 

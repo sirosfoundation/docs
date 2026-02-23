@@ -123,7 +123,7 @@ SIROS ID hosted services use subdomain-based multi-tenancy:
 
 For advanced integrations and self-hosting:
 
-- **Issuer/Verifier**: [github.com/dc4eu/vc](https://github.com/dc4eu/vc)
+- **Issuer/Verifier**: [github.com/SUNET/vc](https://github.com/SUNET/vc)
 - **Wallet**: [github.com/wwWallet](https://github.com/wwWallet)
 
 ## Support

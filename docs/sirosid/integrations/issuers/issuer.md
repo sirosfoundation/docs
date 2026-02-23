@@ -77,33 +77,38 @@ The SIROS ID issuer supports multiple ways to authenticate users before issuing 
 
 ### 1. OpenID Connect (OIDC)
 
-Connect any OIDC-compliant identity provider to issue credentials:
+Connect any OIDC-compliant identity provider to issue credentials. See [OIDC Provider Integration](./oidc-op) for detailed configuration:
+
+:::important OIDC RP requires build tag
+OIDC RP support requires the `oidcrp` build tag: `vc-issuer-oidcrp` or custom build
+:::
 
 ```yaml
 # Example OIDC configuration
-issuer:
-  authentication:
-    type: oidc
+apigw:
+  oidcrp:
+    enabled: true
     client_id: "your-client-id"
     client_secret: "your-client-secret"
-    issuer_url: "https://your-idp.example.com"
+    provider_metadata_url: "https://your-idp.example.com/.well-known/openid-configuration"
     scopes:
       - openid
       - profile
       - email
+    credential_config_id: "urn:eudi:pid:arf-1.8:1"
 ```
 
 ### 2. SAML 2.0
 
 Use existing [SAML 2.0](http://docs.oasis-open.org/security/saml/v2.0/) identity federations. See [SAML IdP Integration](./saml-idp) for detailed configuration:
 
-:::important SAML requires full image
-SAML support requires the `-full` image variant: `vc-issuer-full`
+:::important SAML requires build tag
+SAML support requires the `saml` build tag: `vc-issuer-full` or custom build with `-tags saml`
 :::
 
 ```yaml
-# SAML is configured in the issuer section
-issuer:
+# SAML is configured under apigw.saml
+apigw:
   saml:
     enabled: true
     entity_id: "https://issuer.example.org/sp"
@@ -113,29 +118,30 @@ issuer:
     # Use MDQ for federation metadata lookup
     mdq_server: "https://mds.swamid.se/entities/"
     credential_mappings:
-      pid:
-        credential_config_id: "urn:eudi:pid:arf-1.8:1"
+      - credential_config_id: "urn:eudi:pid:arf-1.8:1"
+        entity_ids:
+          - "https://idp.example.org/idp/shibboleth"
         attributes:
           "urn:oid:2.5.4.42":
             claim: "given_name"
             required: true
+          "urn:oid:2.5.4.4":
+            claim: "family_name"
+            required: true
 ```
 
-### 3. Client Credentials
+### 3. Pre-Authorized Code
 
-For server-to-server issuance (e.g., automated credential provisioning):
+For server-to-server issuance (e.g., automated credential provisioning), use the pre-authorized code flow:
 
 ```yaml
 issuer:
-  authentication:
-    type: client_credentials
-    clients:
-      - id: "your-system-id"
-        secret: "your-system-secret"
-        scopes:
-          - ehic
-          - diploma
+  # Pre-authorized code flow is enabled by default
+  # Credentials are issued via API with pre-generated codes
+  enabled: true
 ```
+
+Pre-authorized codes are generated via the API and can be used once to retrieve a credential without additional authentication.
 
 ## Supported Credential Types
 
@@ -384,7 +390,7 @@ For non-Docker environments:
 
 ```bash
 # Clone the repository
-git clone https://github.com/dc4eu/vc.git
+git clone https://github.com/SUNET/vc.git
 cd vc
 
 # Build the issuer

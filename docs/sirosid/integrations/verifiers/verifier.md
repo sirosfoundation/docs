@@ -493,7 +493,7 @@ For non-Docker environments:
 
 ```bash
 # Clone the repository
-git clone https://github.com/dc4eu/vc.git
+git clone https://github.com/SUNET/vc.git
 cd vc
 
 # Build the verifier
