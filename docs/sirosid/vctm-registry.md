@@ -22,10 +22,4 @@ The registry is a publication mechanism, not a VCTM resolution service. VCTM res
 
 Verifiable Credential Type Metadata (VCTM) files define how credentials should be displayed and what claims they contain. They follow the [IETF SD-JWT VC specification](https://datatracker.ietf.org/doc/draft-ietf-oauth-sd-jwt-vc/).
 
-## Resources
-
-- **Registry Website**: [registry.siros.org](https://registry.siros.org)
-- **Source Repository**: [github.com/sirosfoundation/registry.siros.org](https://github.com/sirosfoundation/registry.siros.org)
-- **VCTM Publishing Action**: [github.com/sirosfoundation/mtcvctm](https://github.com/sirosfoundation/mtcvctm)
-
 Visit [registry.siros.org](https://registry.siros.org) for details on available VCTMs and how to publish your own.
