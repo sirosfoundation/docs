@@ -66,9 +66,9 @@ flowchart TB
 
 | Component | Description | Learn More |
 |-----------|-------------|------------|
-| **Issuer** | Creates and signs digital credentials using OID4VCI protocol | [Issuer Integration](../integrations/issuers/) |
+| **Issuer** | Creates and signs digital credentials using OID4VCI protocol | [Issuer Integration](../integrations/issuers/concepts) |
 | **Credential Manager** | wwWallet-based wallet for storing and presenting credentials | [Credential Manager](../cm) |
-| **Verifier** | Validates credentials and provides OIDC/OID4VP interfaces | [Verifier Integration](../integrations/verifiers/) |
+| **Verifier** | Validates credentials and provides OIDC/OID4VP interfaces | [Verifier Integration](../integrations/verifiers/concepts) |
 | **Trust Framework** | OpenID Federation and ETSI TSL support for trust validation | [Trust Architecture](../integrations/trust/) |
 | **VCTM Registry** | Aggregated credential type metadata | [registry.siros.org](../vctm-registry) |
 
