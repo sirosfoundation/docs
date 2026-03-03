@@ -132,6 +132,50 @@ trust:
       - "issuer.trusted.org"
 ```
 
+### DID:webvh (Verifiable History)
+
+An extension of DID:web that adds cryptographic integrity through verifiable history. Each DID maintains a tamper-evident log of all changes, enabling:
+
+- **Self-certifying identifiers (SCIDs)** – The identifier is derived from initial content
+- **Version history** – Complete audit trail of DID document changes
+- **Pre-rotation keys** – Secure key rotation with hash commitments
+- **Witness support** – Third-party attestation of DID state
+
+```mermaid
+graph TD
+    DID[did:webvh:example.com:abc123] --> Log[DID Log File]
+    Log --> V1[Version 1<br/>Initial State]
+    Log --> V2[Version 2<br/>Key Rotation]
+    Log --> V3[Version 3<br/>Service Update]
+    V1 -->|Proof| V2
+    V2 -->|Proof| V3
+```
+
+**Use when:**
+- You need verifiable history of DID changes
+- Key rotation security is critical (pre-rotation)
+- Compliance requires audit trails
+- Upgrading from DID:web with stronger guarantees
+
+**Configuration:**
+```yaml
+trust:
+  did_webvh:
+    enabled: true
+    timeout: "30s"
+    # Allow HTTP only for testing (HTTPS required in production)
+    allow_http: false
+```
+
+**How it works:**
+
+1. The DID resolves to a JSON Lines log file at the web location
+2. Each entry contains the DID document state and a cryptographic proof
+3. Go-Trust verifies the entire chain from the first entry (which establishes the SCID)
+4. Key bindings are validated against the current DID document
+
+**Specification:** [did:webvh v1.0](https://identity.foundation/didwebvh/v1.0/)
+
 ### X.509 Certificate Chains
 
 Traditional PKI-based trust using certificate chains.

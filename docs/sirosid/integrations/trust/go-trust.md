@@ -13,6 +13,7 @@ Trust evaluation in digital credential ecosystems is complex:
 - **[ETSI TS 119 612](https://www.etsi.org/deliver/etsi_ts/119600_119699/119612/02.01.01_60/ts_119612v020101p.pdf)** requires parsing XML trust status lists, validating certificates, and tracking service status
 - **[OpenID Federation](https://openid.net/specs/openid-federation-1_0.html)** involves trust chain resolution, signature verification, and trust mark validation
 - **[DID:web](https://w3c-ccg.github.io/did-method-web/)** needs proper HTTP resolution and JWK matching
+- **[DID:webvh](https://identity.foundation/didwebvh/v1.0/)** adds verifiable history with cryptographic integrity validation
 
 Go-Trust handles all of this behind a simple AuthZEN API, so your services can focus on credentials.
 
@@ -28,12 +29,14 @@ flowchart LR
         ETSI[ETSI TSL Registry]
         OIDF[OpenID Federation]
         DIDWeb[DID:web Registry]
+        DIDWebVH[DID:webvh Registry]
     end
     
     subgraph Trust Sources
         TSL[(EU Trust Lists)]
         Fed[(Federation Anchors)]
         DID[(DID Documents)]
+        DIDVH[(DID Logs)]
     end
     
     Issuer -->|evaluate| API
@@ -41,9 +44,11 @@ flowchart LR
     API --> ETSI
     API --> OIDF
     API --> DIDWeb
+    API --> DIDWebVH
     ETSI --> TSL
     OIDF --> Fed
     DIDWeb --> DID
+    DIDWebVH --> DIDVH
 ```
 
 ## Quick Start
@@ -491,6 +496,34 @@ did_web:
   require_tls: true
   min_tls_version: "1.2"
 ```
+
+### DID:webvh
+
+Resolves DIDs with verifiable history – an extension of DID:web providing cryptographic integrity:
+
+```yaml
+did_webvh:
+  enabled: true
+  
+  # HTTP timeout for DID log resolution
+  timeout: "30s"
+  
+  # TLS verification (disable only for testing)
+  insecure_skip_verify: false
+  
+  # Allow HTTP (only for testing - production requires HTTPS)
+  allow_http: false
+```
+
+**Features:**
+- **Self-certifying identifiers** – DID is derived from initial log entry
+- **Verifiable history** – Validates entire chain of DID document changes
+- **Pre-rotation keys** – Supports secure key rotation with hash commitments
+- **Witness support** – Third-party attestation of DID state changes
+
+**Resource types:** `did_document`, `jwk`, `verification_method`
+
+**Resolution-only:** Yes – Can resolve DID documents without key binding validation
 
 ## Observability
 
