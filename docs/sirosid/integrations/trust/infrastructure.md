@@ -414,27 +414,6 @@ A properly configured OpenID Federation entity exposes these endpoints:
 | `/federation/resolve` | Resolve complete trust chain |
 | `/federation/trust_mark_status` | Check trust mark validity |
 
-### Alternative: go-oidf-ta
-
-For Go-based deployments, [go-oidf-ta](https://github.com/sirosfoundation/go-oidf-ta) provides a multi-tenant OpenID Federation trust anchor implementation:
-
-```yaml
-# go-oidf-ta config.yaml
-server:
-  port: 8080
-  host: "0.0.0.0"
-
-storage:
-  type: "sqlite"  # or mongodb for production
-  dsn: "file:oidf-ta.db"
-
-trust_anchors:
-  default:
-    entity_id: "https://trust-anchor.example.org"
-    organization_name: "Example Trust Anchor"
-    signing_key_path: "/keys/ta-signing-key.pem"
-```
-
 ### Registering Entities
 
 To add an entity (issuer, verifier, wallet) to your federation:
