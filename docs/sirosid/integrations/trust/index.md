@@ -151,6 +151,52 @@ trust:
     allow_self_signed: false
 ```
 
+### URL Whitelist
+
+The simplest trust model: a static list of allowed URLs for issuers and verifiers.
+
+```mermaid
+graph TD
+    Config[Whitelist Config] --> Issuers[Approved Issuer URLs]
+    Config --> Verifiers[Approved Verifier URLs]
+    Request[Trust Request] --> Check{URL in list?}
+    Check -->|Yes| Allow[✓ Trusted]
+    Check -->|No| Deny[✗ Not Trusted]
+```
+
+**Use when:**
+- You have a known, stable set of trusted partners
+- Key validation is handled by other means (e.g., TLS)
+- You want simple, file-based trust management
+- Rapid development or testing
+
+**Configuration:**
+```yaml
+trust:
+  whitelist:
+    enabled: true
+    file: "/config/trusted-entities.json"
+    watch: true  # Auto-reload on changes
+```
+
+**Whitelist file format:**
+```json
+{
+  "issuers": [
+    "https://issuer1.example.com",
+    "https://issuer2.example.org"
+  ],
+  "verifiers": [
+    "https://verifier.example.com"
+  ],
+  "trusted_subjects": []
+}
+```
+
+:::note
+Unlike other trust frameworks, whitelist registries only check the URL identifier—they don't validate cryptographic keys. For full key binding validation, use ETSI, OpenID Federation, or X.509 trust.
+:::
+
 ## Trust Configuration
 
 ### For Issuers

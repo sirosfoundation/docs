@@ -151,6 +151,78 @@ resolution:
   policy: "any_match"  # any_match, all_must_match
 ```
 
+### Static Registries
+
+Go-Trust includes static registries for simple trust scenarios, testing, and development:
+
+#### Whitelist Registry
+
+The **whitelist registry** provides a simple URL-based trust model. Rather than validating certificates or trust chains, it simply checks if the subject identifier (URL) is in a configured list.
+
+```yaml
+registries:
+  - name: "approved-issuers"
+    type: "whitelist"
+    config:
+      # Path to whitelist file (JSON or YAML)
+      file: "/config/approved-issuers.json"
+      # Watch for file changes and auto-reload
+      watch: true
+```
+
+**Whitelist file format** (`approved-issuers.json`):
+
+```json
+{
+  "issuers": [
+    "https://issuer1.example.com",
+    "https://issuer2.example.org",
+    "https://pilot.*.example.com"  
+  ],
+  "verifiers": [
+    "https://verifier.example.com",
+    "https://relying-party.example.org"
+  ],
+  "trusted_subjects": [
+    "https://any-role.example.com"
+  ]
+}
+```
+
+**Features:**
+- URLs can include wildcards (`*`) for prefix matching
+- Separate lists for **issuers**, **verifiers**, and **trusted_subjects** (catch-all)
+- The file can be hot-reloaded when `watch: true` is set
+- No key validation—only URL authorization
+
+**Use when:**
+- You have a known set of trusted partners
+- You want simple, file-based trust management
+- Key validation is handled elsewhere (e.g., TLS)
+- Rapid development or testing
+
+:::caution
+Whitelist registries only check if the identifier URL is allowed—they don't validate the actual cryptographic key material. Use ETSI, OpenID Federation, or X.509 registries when you need full key validation.
+:::
+
+#### Always-Trusted Registry
+
+Returns `decision: true` for any request. Useful for testing or when trust is handled by other means.
+
+```bash
+# From command line
+go-trust serve --registry always-trusted
+```
+
+#### Never-Trusted Registry
+
+Returns `decision: false` for any request. Useful for testing rejection scenarios.
+
+```bash
+# From command line  
+go-trust serve --registry never-trusted
+```
+
 ### Policy-Based Trust Decisions
 
 Define policies that map action names to trust requirements:
@@ -179,6 +251,83 @@ policies:
     did_web:
       allowed_domains:
         - "*.company.internal"
+        
+  # Development partners use whitelist
+  pilot-participant:
+    registries: ["pilot-whitelist"]
+```
+
+## Query Routing
+
+Go-Trust routes evaluation requests to appropriate registries based on the **action name** in the request. This allows different trust requirements for different use cases.
+
+### How Routing Works
+
+```mermaid
+flowchart TD
+    Request["Evaluation Request<br/>action.name = 'credential-issuer'"] --> Router[Policy Router]
+    Router --> Lookup["Lookup policy for 'credential-issuer'"]
+    Lookup --> Policy["Policy: use registries ['eu-tsl']"]
+    Policy --> Registry[EU TSL Registry]
+    Registry --> Response[Trust Decision]
+```
+
+1. The client sends an evaluation request with an `action.name` field (e.g., `"credential-issuer"`)
+2. Go-Trust looks up the policy associated with that action name
+3. The policy specifies which registries to query and any additional constraints
+4. Go-Trust queries the specified registries using the configured resolution strategy
+5. Returns the aggregated trust decision
+
+### Resolution Strategies
+
+When multiple registries are applicable, Go-Trust uses a **resolution strategy** to determine the outcome:
+
+| Strategy | Description |
+|----------|-------------|
+| `first_match` | Return the first registry that gives a positive decision |
+| `all_registries` | Query all registries, return positive if all agree |
+| `best_match` | Query all registries, return the highest confidence match |
+| `sequential` | Query registries in order, stop at first definitive answer |
+
+```yaml
+resolution:
+  strategy: "first_match"  # Default behavior
+```
+
+### Example: Multi-Tenant Trust
+
+Configure different trust sources for different credential types:
+
+```yaml
+policies:
+  # PID credentials (national ID) - strict EU TSL only
+  pid-provider:
+    registries: ["eu-tsl"]
+    etsi:
+      service_types:
+        - "http://uri.etsi.org/TrstSvc/Svctype/QC/QESIG"
+
+  # mDL credentials - ISO/IEC 18013-5 compliant CAs
+  mdl-issuer:
+    registries: ["mdl-ca-whitelist", "eu-tsl"]
+    
+  # Educational credentials - trust federation
+  credential-issuer:
+    registries: ["edu-federation", "eu-tsl"]
+    
+  # Internal development - simple whitelist
+  dev-issuer:
+    registries: ["dev-whitelist"]
+```
+
+### Fallback Behavior
+
+If no policy matches the action name, Go-Trust uses the default behavior:
+
+```yaml
+resolution:
+  default_policy: "credential-issuer"  # Policy to use when no match
+  fallback_registries: ["all"]  # Query all registries if no policy
 ```
 
 ## AuthZEN API
