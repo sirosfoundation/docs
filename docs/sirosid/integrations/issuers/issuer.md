@@ -266,7 +266,9 @@ The issuer exposes OpenID4VCI-compliant endpoints:
 | `/authorize` | Authorization endpoint |
 | `/token` | Token endpoint |
 | `/credential` | Credential endpoint |
-| `/batch_credential` | Batch credential endpoint |
+| `/deferred_credential` | Deferred credential endpoint |
+| `/nonce` | Nonce endpoint for proof binding |
+| `/notification` | Credential notification endpoint |
 
 ### Swagger Documentation
 
