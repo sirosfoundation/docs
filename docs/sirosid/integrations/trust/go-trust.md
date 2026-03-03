@@ -230,36 +230,56 @@ go-trust serve --registry never-trusted
 
 ### Policy-Based Trust Decisions
 
-Define policies that map action names to trust requirements:
+Define policies that map action names to trust requirements. The policy system maps application-level roles (issuer, verifier) to registry-specific constraints (ETSI service types, trust marks, DID domains, etc.):
 
 ```yaml
 policies:
-  # Credential issuers must be in EU TSL
-  credential-issuer:
-    registries: ["eu-tsl"]
-    etsi:
-      service_types:
-        - "http://uri.etsi.org/TrstSvc/Svctype/EDS/Q"
+  # Default policy used when action.name is not specified
+  default_policy: credential-verifier
+
+  policies:
+    # Credential issuers must be in EU TSL
+    credential-issuer:
+      description: "Trust requirements for credential issuers"
+      etsi:
+        service_types:
+          - "http://uri.etsi.org/TrstSvc/Svctype/QCert"
+          - "http://uri.etsi.org/TrstSvc/Svctype/QCertForESeal"
+        service_statuses:
+          - "http://uri.etsi.org/TrstSvc/TrustedList/Svcstatus/granted"
+      oidfed:
+        entity_types:
+          - "openid_credential_issuer"
+        required_trust_marks:
+          - "https://dc4eu.eu/tm/issuer"
+      did:
+        allowed_domains:
+          - "*.eudiw.dev"
+          - "*.example.com"
+        require_verifiable_history: true
     
-  # Wallet providers need federation trust mark
-  wallet-provider:
-    registries: ["edu-federation"]
-    oidfed:
-      required_trust_marks:
-        - "https://example.eu/tm/wallet-provider"
-      allowed_entity_types:
-        - "wallet_provider"
+    # Wallet providers need federation trust mark
+    wallet-provider:
+      description: "Trust requirements for wallet providers"
+      oidfed:
+        entity_types:
+          - "wallet_provider"
+        required_trust_marks:
+          - "https://dc4eu.eu/tm/wallet"
+      # Override which registries to use
+      registries:
+        - "oidfed-registry"
         
-  # Internal services use DID:web
-  internal-service:
-    registries: ["company-did"]
-    did_web:
-      allowed_domains:
-        - "*.company.internal"
-        
-  # Development partners use whitelist
-  pilot-participant:
-    registries: ["pilot-whitelist"]
+    # mDL issuers use IACA validation
+    mdl-issuer:
+      description: "Trust requirements for mDL/mDOC issuers"
+      mdociaca:
+        issuer_allowlist:
+          - "https://pid-issuer.eudiw.dev"
+          - "https://mdl-issuer.example.com"
+        require_iaca_endpoint: true
+      registries:
+        - "mdoc-iaca"
 ```
 
 ## Query Routing
@@ -305,34 +325,46 @@ Configure different trust sources for different credential types:
 
 ```yaml
 policies:
-  # PID credentials (national ID) - strict EU TSL only
-  pid-provider:
-    registries: ["eu-tsl"]
-    etsi:
-      service_types:
-        - "http://uri.etsi.org/TrstSvc/Svctype/QC/QESIG"
+  default_policy: credential-issuer
 
-  # mDL credentials - ISO/IEC 18013-5 compliant CAs
-  mdl-issuer:
-    registries: ["mdl-ca-whitelist", "eu-tsl"]
-    
-  # Educational credentials - trust federation
-  credential-issuer:
-    registries: ["edu-federation", "eu-tsl"]
-    
-  # Internal development - simple whitelist
-  dev-issuer:
-    registries: ["dev-whitelist"]
+  policies:
+    # PID credentials (national ID) - strict EU TSL only
+    pid-provider:
+      description: "PID provider validation"
+      etsi:
+        service_types:
+          - "http://uri.etsi.org/TrstSvc/Svctype/QCertForESig"
+        service_statuses:
+          - "http://uri.etsi.org/TrstSvc/TrustedList/Svcstatus/granted"
+
+    # mDL credentials - ISO/IEC 18013-5 compliant CAs via IACA
+    mdl-issuer:
+      description: "mDL issuer validation"
+      mdociaca:
+        issuer_allowlist:
+          - "https://pid-issuer.eudiw.dev"
+        require_iaca_endpoint: true
+      registries:
+        - "mdoc-iaca"
+        
+    # Educational credentials - federation trust + fallback to TSL
+    credential-issuer:
+      description: "Generic credential issuer"
+      oidfed:
+        entity_types:
+          - "openid_credential_issuer"
+      etsi:
+        service_types:
+          - "http://uri.etsi.org/TrstSvc/Svctype/QCert"
 ```
 
 ### Fallback Behavior
 
-If no policy matches the action name, Go-Trust uses the default behavior:
+If no policy matches the action name, Go-Trust uses the `default_policy`:
 
 ```yaml
-resolution:
-  default_policy: "credential-issuer"  # Policy to use when no match
-  fallback_registries: ["all"]  # Query all registries if no policy
+policies:
+  default_policy: "credential-issuer"  # Policy to use when action.name doesn't match
 ```
 
 ## AuthZEN API

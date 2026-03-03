@@ -199,13 +199,14 @@ location /trust-list.xml {
 ```yaml
 # go-trust config.yaml
 registries:
-  - type: etsi_tsl
-    config:
-      trust_list_url: "https://tsl.example.org/trust-list.xml"
-      cache_ttl: 1h
-      verify_signatures: true
-      accepted_service_types:
-        - "http://uri.etsi.org/TrstSvc/Svctype/EDS/Q"
+  etsi:
+    enabled: true
+    name: "ETSI-TSL"
+    description: "European Trust Status List"
+    cert_bundle: "/etc/go-trust/trusted-certs.pem"
+    # Or load from TSL URL (requires allow_network_access: true)
+    # tsl_urls:
+    #   - "https://tsl.example.org/trust-list.xml"
 ```
 
 ### Role-to-Service-Type Mapping
@@ -244,49 +245,75 @@ The trust evaluation API uses these standard roles:
 
 #### Configuring Role-Based Policies
 
-Define policies in Go-Trust to map roles to ETSI service types:
+Define policies in Go-Trust to map roles to registry-specific constraints:
 
 ```yaml
 # go-trust config.yaml
 policies:
-  # Policy for credential issuers
-  credential-issuer:
-    description: "Validates credential issuers against qualified certificates"
-    registries:
-      - etsi_tsl
-    etsi:
-      service_types:
-        - "http://uri.etsi.org/TrstSvc/Svctype/QCert"
-        - "http://uri.etsi.org/TrstSvc/Svctype/CA/QC"
-      service_statuses:
-        - "http://uri.etsi.org/TrstSvc/TrustedList/Svcstatus/granted"
-  
-  # Policy for PID providers (stricter)
-  pid-provider:
-    description: "Validates PID providers with qualified certificate requirements"
-    registries:
-      - etsi_tsl
-    etsi:
-      service_types:
-        - "http://uri.etsi.org/TrstSvc/Svctype/QCert"
-      countries:
-        - "DE"
-        - "FR"
-        - "SE"
-  
-  # Policy for verifiers
-  credential-verifier:
-    description: "Validates relying parties"
-    registries:
-      - etsi_tsl
-      - whitelist  # Fallback to whitelist for non-qualified verifiers
-    etsi:
-      service_types:
-        - "http://uri.etsi.org/TrstSvc/Svctype/EDS/Q"
-        - "http://uri.etsi.org/TrstSvc/Svctype/TSA/QTST"
+  # Default policy when no role matches
+  default_policy: credential-verifier
 
-# Default policy when no role matches
-default_policy: credential-verifier
+  policies:
+    # Policy for credential issuers
+    credential-issuer:
+      description: "Validates credential issuers against qualified certificates"
+      etsi:
+        service_types:
+          - "http://uri.etsi.org/TrstSvc/Svctype/QCert"
+          - "http://uri.etsi.org/TrstSvc/Svctype/CA/QC"
+        service_statuses:
+          - "http://uri.etsi.org/TrstSvc/TrustedList/Svcstatus/granted"
+      oidfed:
+        entity_types:
+          - "openid_credential_issuer"
+        required_trust_marks:
+          - "https://dc4eu.eu/tm/issuer"
+      did:
+        allowed_domains:
+          - "*.eudiw.dev"
+          - "*.example.com"
+        require_verifiable_history: true
+    
+    # Policy for PID providers (stricter)
+    pid-provider:
+      description: "Validates PID providers with qualified certificate requirements"
+      etsi:
+        service_types:
+          - "http://uri.etsi.org/TrstSvc/Svctype/QCert"
+        countries:
+          - "DE"
+          - "FR"
+          - "SE"
+    
+    # Policy for verifiers
+    credential-verifier:
+      description: "Validates relying parties"
+      etsi:
+        service_types:
+          - "http://uri.etsi.org/TrstSvc/Svctype/EDS/Q"
+          - "http://uri.etsi.org/TrstSvc/Svctype/TSA/QTST"
+        service_statuses:
+          - "http://uri.etsi.org/TrstSvc/TrustedList/Svcstatus/granted"
+      oidfed:
+        entity_types:
+          - "openid_relying_party"
+        required_trust_marks:
+          - "https://dc4eu.eu/tm/verifier"
+      did:
+        allowed_domains:
+          - "*.eudiw.dev"
+          - "*.example.com"
+
+    # Policy for mDL issuers
+    mdl-issuer:
+      description: "Validates mDL/mDOC issuers via IACA"
+      mdociaca:
+        issuer_allowlist:
+          - "https://pid-issuer.eudiw.dev"
+          - "https://mdl-issuer.example.com"
+        require_iaca_endpoint: true
+      registries:
+        - "mdoc-iaca"
 ```
 
 #### ETSI Service Type Reference
