@@ -309,16 +309,6 @@ trust:
   allow_self_signed: true
 ```
 
-### Test Trust List
-
-SIROS ID provides a test trust list for development:
-
-```yaml
-trust:
-  etsi_tsl:
-    trust_list_url: "https://test-tsl.siros.org/tsl.xml"
-```
-
 ## Troubleshooting
 
 ### "Issuer not trusted"
