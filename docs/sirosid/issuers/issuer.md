@@ -300,7 +300,7 @@ docker pull ghcr.io/sirosfoundation/vc-issuer-full:latest
 ```
 
 :::info Image Variants
-Use `vc-issuer-full` if you need SAML IdP authentication or W3C VC 2.0 format support. See [Docker Images](../../docker-images) for details.
+Use `vc-issuer-full` if you need SAML IdP authentication or W3C VC 2.0 format support. See [Docker Images](../docker-images) for details.
 :::
 
 #### Docker Compose

@@ -22,7 +22,7 @@ The issuer deployment uses the following container images:
 Use `vc-issuer-full` if you need to authenticate users via **SAML IdPs** (e.g., eduGAIN, InCommon, government federations) or issue **W3C VC 2.0** format credentials. Otherwise, the standard `vc-issuer` image is sufficient.
 :::
 
-For complete image documentation, see [Docker Images](../../docker-images).
+For complete image documentation, see [Docker Images](../docker-images).
 
 ## Directory Structure
 

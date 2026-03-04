@@ -11,5 +11,5 @@ Here you will find all the information you need in order to manage, observe and 
 The SIROS ID platform consists of the followin parts:
 
 * [SIROS ID Credential Manager](/docs/sirosid/cm)  built on the [wwWallet](/docs/wwwallet) project
-* [SIROS ID Issuer and Verifier](/docs/sirosid/integrations/) built on https://github.com/SUNET/vc
-* [SIROS ID Trust Services](/docs/sirosid/integrations/trust)
+* [SIROS ID Issuer and Verifier](/docs/sirosid/issuers/concepts) built on https://github.com/SUNET/vc
+* [SIROS ID Trust Services](/docs/sirosid/trust)

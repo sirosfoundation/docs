@@ -374,7 +374,7 @@ docker pull ghcr.io/sirosfoundation/vc-verifier-full:latest
 ```
 
 :::info Image Variants
-Use `vc-verifier-full` if you need SAML authentication or W3C VC 2.0 format support. See [Docker Images](../../docker-images) for details.
+Use `vc-verifier-full` if you need SAML authentication or W3C VC 2.0 format support. See [Docker Images](../docker-images) for details.
 :::
 
 #### Docker Compose

@@ -22,7 +22,7 @@ The verifier deployment uses the following container images:
 Use `vc-verifier-full` if you need to verify **W3C VC 2.0** format credentials or integrate with **SAML service providers**. Otherwise, the standard `vc-verifier` image is sufficient for SD-JWT VC and OIDC integrations.
 :::
 
-For complete image documentation, see [Docker Images](../../docker-images).
+For complete image documentation, see [Docker Images](../docker-images).
 
 ## Directory Structure
 

@@ -1,8 +1,8 @@
 {
   "label": "Credential Verification",
-  "position": 3,
+  "position": 6,
   "link": {
     "type": "doc",
-    "id": "sirosid/integrations/verifiers/concepts"
+    "id": "sirosid/verifiers/concepts"
   }
 }

@@ -1,8 +1,8 @@
 {
   "label": "Credential Issuance",
-  "position": 2,
+  "position": 5,
   "link": {
     "type": "doc",
-    "id": "sirosid/integrations/issuers/concepts"
+    "id": "sirosid/issuers/concepts"
   }
 }

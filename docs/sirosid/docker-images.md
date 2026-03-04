@@ -289,6 +289,6 @@ volumes:
 
 ## Next Steps
 
-- [Verifier Configuration](./integrations/verifiers/verifier)
-- [Issuer Configuration](./integrations/issuers/issuer)
-- [Trust Services](./integrations/trust/)
+- [Verifier Configuration](./verifiers/verifier)
+- [Issuer Configuration](./issuers/issuer)
+- [Trust Services](./trust/)
