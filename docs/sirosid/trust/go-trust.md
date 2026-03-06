@@ -79,7 +79,7 @@ services:
       - ./trust-data:/data:ro  # For local TSL files
     command: ["serve", "--config", "/config.yaml"]
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8081/healthz"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -579,10 +579,10 @@ go_trust_registry_healthy{registry="eu-tsl"} 1
 
 ```bash
 # Liveness
-curl http://localhost:8081/health
+curl http://localhost:8081/healthz
 
 # Readiness (checks all registries)
-curl http://localhost:8081/ready
+curl http://localhost:8081/readyz
 ```
 
 ## Kubernetes Deployment
@@ -616,12 +616,12 @@ spec:
               mountPath: /config
           livenessProbe:
             httpGet:
-              path: /health
+              path: /healthz
               port: 8081
             initialDelaySeconds: 10
           readinessProbe:
             httpGet:
-              path: /ready
+              path: /readyz
               port: 8081
           resources:
             requests:
