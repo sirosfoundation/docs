@@ -35,12 +35,16 @@ flowchart TD
         ETSI[ETSI Registry]
         OIDF[OpenID Fed Registry]
         DID[DID:web Registry]
+        DIDVH[DID:webvh Registry]
+        IACA[mDOC IACA Registry]
     end
     
     subgraph "Trust Sources"
         TSL[(EU Trust Lists)]
         Fed[(Federation Anchors)]
         Web[(DID Documents)]
+        Log[(DID Logs)]
+        CA[(IACA Certificates)]
     end
     
     Issuer -->|"Is wallet trusted?"| API
@@ -49,10 +53,14 @@ flowchart TD
     API --> ETSI
     API --> OIDF
     API --> DID
+    API --> DIDVH
+    API --> IACA
     
     ETSI --> TSL
     OIDF --> Fed
     DID --> Web
+    DIDVH --> Log
+    IACA --> CA
 ```
 
 ## Supported Trust Frameworks

@@ -286,6 +286,39 @@ policies:
 
 Go-Trust routes evaluation requests to appropriate registries based on the **action name** in the request. This allows different trust requirements for different use cases.
 
+### Trust Evaluation Architecture
+
+Every trust evaluation follows a canonical pattern:
+
+```mermaid
+flowchart LR
+    Action["action.name<br/>(role)"] --> PolicyMapper["Policy Mapper"]
+    PolicyMapper --> Context["Request Context<br/>(constraints)"]
+    Context --> Registry["Registry"]
+    Registry --> FilteredAnchors["Filtered Trust Anchors"]
+    FilteredAnchors --> KeyCheck["Key Validation"]
+    KeyCheck --> Decision["Trust Decision"]
+```
+
+1. The **action name** (e.g., `credential-issuer`) identifies the role being evaluated
+2. The **policy mapper** looks up the policy for that role and injects registry-specific constraints into the request context
+3. Each **registry** reads its constraints from the context and filters its trust anchors accordingly
+4. The registry evaluates the presented key material against the **filtered** trust anchors
+5. The registry returns a trust decision with diagnostic information in the response context
+
+This ensures that the same registry instance can enforce different trust requirements depending on the role, without needing separate registry configurations per role.
+
+#### How Each Registry Uses Policy Constraints
+
+| Registry | Constraint Fields | Enforcement |
+|----------|-------------------|-------------|
+| **ETSI TSL** | `service_types`, `service_statuses` | Builds a **dynamic cert pool** filtered to only include certificates from trust services matching the specified types and statuses. Falls back to the full cert pool when no constraints are present. |
+| **OpenID Federation** | `entity_types`, `required_trust_marks` | Validates trust marks and entity types during chain resolution. Additionally performs **key binding verification** — the presented key must match a key in the resolved entity's JWKS. |
+| **DID:web** | `allowed_domains`, `required_services` | Extracts the domain from the DID and checks it against allowed domain patterns (supports wildcards like `*.example.com`). Verifies the DID document contains required service types. |
+| **DID:webvh** | `allowed_domains`, `required_services` | Same domain and service filtering as DID:web, adapted for the `did:webvh` method format. |
+| **DID (generic)** | `allowed_domains`, `required_services` | Applies domain and service constraints for both `did:web` and `did:webvh` methods. DIDs without extractable domains (e.g., `did:key`) pass domain checks automatically. |
+| **mDOC IACA** | `issuer_allowlist`, `require_iaca_endpoint` | Checks the issuer URL against a **policy allowlist** in addition to any static allowlist. Normalizes trailing slashes for consistent matching. |
+
 ### How Routing Works
 
 ```mermaid
