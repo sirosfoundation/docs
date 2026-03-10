@@ -52,7 +52,7 @@ Save the returned `client_id` and `client_secret`.
 :::info SIROS Hosted Service
 When using the **SIROS ID hosted service**, services use subdomain-based multi-tenancy:
 
-- **Wallet**: `https://id.siros.org/<tenant>`
+- **Wallet**: `https://id.siros.org/id/<tenant>`
 - **Verifiers**: `https://<instance>.<tenant>.verifier.id.siros.org`
 - **Issuers**: `https://<instance>.<tenant>.issuer.id.siros.org`
 
