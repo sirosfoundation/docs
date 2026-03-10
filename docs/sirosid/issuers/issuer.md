@@ -29,7 +29,7 @@ The SIROS ID issuer exposes standard OID4VCI endpoints. For a self-hosted or on-
 When using the **SIROS ID hosted service**, issuers use subdomain-based multi-tenancy:
 
 ```
-https://<instance>.<tenant>.issuer.id.siros.org
+https://<tenant>.issuer.id.siros.org
 ```
 
 For example, tenant `acme-corp` with issuer instance `pid`:

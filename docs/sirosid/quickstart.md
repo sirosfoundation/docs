@@ -53,8 +53,8 @@ Save the returned `client_id` and `client_secret`.
 When using the **SIROS ID hosted service**, services use subdomain-based multi-tenancy:
 
 - **Wallet**: `https://id.siros.org/id/<tenant>`
-- **Verifiers**: `https://<instance>.<tenant>.verifier.id.siros.org`
-- **Issuers**: `https://<instance>.<tenant>.issuer.id.siros.org`
+- **Verifiers**: `https://<tenant>.verifier.id.siros.org`
+- **Issuers**: `https://<tenant>.issuer.id.siros.org`
 
 For example, with tenant `demo` and verifier instance `main`:
 ```bash
