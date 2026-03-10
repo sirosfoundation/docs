@@ -243,6 +243,7 @@ issuer:
   credential_constructor:
     pid:
       vct: "urn:eudi:pid:arf-1.8:1"
+      auth_method: oidc
       claim_mapping:
         given_name: "$.claims.given_name"
         family_name: "$.claims.family_name"
@@ -260,7 +261,7 @@ common:
 ```yaml
 services:
   issuer:
-    image: ghcr.io/sirosfoundation/vc-issuer:latest  # or vc-issuer-full for SAML support
+    image: ghcr.io/sirosfoundation/vc-issuer:latest
     restart: always
     ports:
       - "8080:8080"
@@ -293,6 +294,7 @@ Map Keycloak claims to specific credential types.
 credential_constructor:
   pid:
     vct: "urn:eudi:pid:arf-1.8:1"
+    auth_method: oidc
     format: "vc+sd-jwt"
     validity_days: 365
     claim_mapping:
@@ -318,6 +320,7 @@ credential_constructor:
 credential_constructor:
   ehic:
     vct: "urn:eudi:ehic:1"
+    auth_method: oidc
     format: "vc+sd-jwt"
     validity_days: 730
     claim_mapping:
@@ -591,6 +594,7 @@ issuer:
   credential_constructor:
     pid:
       vct: "urn:eudi:pid:arf-1.8:1"
+      auth_method: oidc
       format: "vc+sd-jwt"
       validity_days: 365
       claim_mapping:

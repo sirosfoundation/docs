@@ -79,10 +79,6 @@ The SIROS ID issuer supports multiple ways to authenticate users before issuing 
 
 Connect any OIDC-compliant identity provider to issue credentials. See [OIDC Provider Integration](./oidc-op) for detailed configuration:
 
-:::important OIDC RP requires build tag
-OIDC RP support requires the `oidcrp` build tag: `vc-issuer-oidcrp` or custom build
-:::
-
 ```yaml
 # Example OIDC configuration
 apigw:
@@ -101,10 +97,6 @@ apigw:
 ### 2. SAML 2.0
 
 Use existing [SAML 2.0](http://docs.oasis-open.org/security/saml/v2.0/) identity federations. See [SAML IdP Integration](./saml-idp) for detailed configuration:
-
-:::important SAML requires build tag
-SAML support requires the `saml` build tag: `vc-issuer-full` or custom build with `-tags saml`
-:::
 
 ```yaml
 # SAML is configured under apigw.saml
@@ -191,21 +183,40 @@ Configure your IdP to allow the issuer as a client:
 
 Configure how user identity maps to credential claims using the `credential_constructor` section. Each entry defines a credential type with its [Verifiable Credential Type Metadata (VCTM)](https://datatracker.ietf.org/doc/draft-ietf-oauth-sd-jwt-vc/):
 
+The `auth_method` field determines how the user is authenticated before the credential is issued:
+
+| `auth_method` | Description |
+|---------------|-------------|
+| `basic`       | Internal lookup from the issuer's own datastore |
+| `pid_auth`    | User proves identity by presenting a Verifiable Credential (PID) via OpenID4VP |
+| `saml`        | User is redirected to a SAML IdP; claims from the assertion become credential attributes. Requires `apigw.saml` |
+| `oidc`        | User is redirected to an OIDC Provider; claims from the ID token become credential attributes. Requires `apigw.oidcrp` |
+
 ```yaml
 credential_constructor:
-  ehic:
-    # Verifiable Credential Type identifier (appears in issued credential)
-    vct: "urn:eudi:ehic:1"
-    # Path to VCTM JSON file defining credential schema and display
-    vctm_file_path: "/metadata/vctm_ehic.json"
-    # Authentication method: "basic" for simple auth, "pid_auth" to require PID
+  # Basic auth – identity from local datastore
+  pid_1_5:
+    vctm_file_path: "/metadata/vctm_pid_arf_1_5.json"
     auth_method: basic
-    # Optional: attribute transformations
-    attributes:
-      given_name:
-        source: ["$.claims.given_name"]
-      family_name:
-        source: ["$.claims.family_name"]
+    format: "dc+sd-jwt"
+  
+  # PID-based auth – wallet presents a Verifiable Credential
+  ehic:
+    vctm_file_path: "/metadata/vctm_ehic.json"
+    auth_method: pid_auth
+    format: "dc+sd-jwt"
+
+  # SAML auth – redirect to SAML IdP, claims from assertion
+  diploma:
+    vctm_file_path: "/metadata/vctm_diploma.json"
+    auth_method: saml
+    format: "dc+sd-jwt"
+
+  # OIDC auth – redirect to OIDC Provider, claims from ID token
+  eduid:
+    vctm_file_path: "/metadata/vctm_eduid.json"
+    auth_method: oidc
+    format: "dc+sd-jwt"
 ```
 
 :::tip VCTM Files
@@ -292,16 +303,9 @@ If you need to run the issuer in your own infrastructure, you can deploy it usin
 The issuer is available as a Docker image:
 
 ```bash
-# Pull the standard issuer image
+# Pull the issuer image (includes SAML, OIDC, and all credential formats)
 docker pull ghcr.io/sirosfoundation/vc-issuer:latest
-
-# Or pull the full image with SAML IdP and VC 2.0 support
-docker pull ghcr.io/sirosfoundation/vc-issuer-full:latest
 ```
-
-:::info Image Variants
-Use `vc-issuer-full` if you need SAML IdP authentication or W3C VC 2.0 format support. See [Docker Images](../docker-images) for details.
-:::
 
 #### Docker Compose
 
@@ -310,7 +314,7 @@ Create a `docker-compose.yaml`:
 ```yaml
 services:
   issuer:
-    image: ghcr.io/sirosfoundation/vc-issuer:latest  # or vc-issuer-full for SAML support
+    image: ghcr.io/sirosfoundation/vc-issuer:latest
     restart: always
     ports:
       - "8080:8080"
@@ -424,7 +428,7 @@ spec:
     spec:
       containers:
         - name: issuer
-          image: ghcr.io/sirosfoundation/vc-issuer:latest  # or vc-issuer-full
+          image: ghcr.io/sirosfoundation/vc-issuer:latest
           ports:
             - containerPort: 8080
           env:

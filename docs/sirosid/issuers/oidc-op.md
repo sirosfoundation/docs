@@ -46,10 +46,16 @@ Use OIDC integration when:
 
 - An OpenID Connect compliant identity provider
 - Admin access to register OIDC clients (or OP supports dynamic registration)
-- A SIROS ID issuer (hosted or self-hosted)
+- A SIROS ID issuer (hosted or self-hosted) with OIDC RP configured (`apigw.oidcrp` section)
 
-:::note OIDC RP Build Tag
-OIDC RP support may require building with the \`oidcrp\` build tag depending on your deployment.
+## Integration Mode
+
+OIDC authentication is integrated into the standard **OpenID4VCI** credential issuance pipeline. When a `credential_constructor` entry has `auth_method: oidc`, the OID4VCI consent step redirects the user to the OIDC Provider. After successful authentication, the ID token claims are transformed into credential claims via the `credential_mappings` configuration, and the standard OID4VCI token/credential flow continues.
+
+This means OIDC-authenticated credentials benefit from the same DPoP binding, token lifecycle, and wallet protocol support as every other auth method.
+
+:::tip Credential Constructor Key
+The `credential_mappings` key under `apigw.oidcrp` must match the `credential_constructor` key for the credential type. For example, if the constructor key is `pid`, the mapping key must also be `pid`.
 :::
 
 ## Configuration
@@ -368,11 +374,12 @@ apigw:
             required: true
 
 # Credential constructor must match credential_mappings keys
+# auth_method: oidc triggers the OIDC redirect during OID4VCI consent
 credential_constructor:
   pid:
     vct: "urn:eudi:pid:arf-1.8:1"
     vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
-    auth_method: basic
+    auth_method: oidc
     format: "dc+sd-jwt"
 
 common:

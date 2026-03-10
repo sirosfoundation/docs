@@ -13,14 +13,9 @@ The verifier deployment uses the following container images:
 
 | Image | Purpose | Required |
 |-------|---------|:--------:|
-| `ghcr.io/sirosfoundation/vc-verifier` | Credential verifier service | ✅ |
-| `ghcr.io/sirosfoundation/vc-verifier-full` | Verifier with SAML & VC 2.0 support | ✅ (if using SAML/VC 2.0) |
+| `ghcr.io/sirosfoundation/vc-verifier` | Credential verifier service (includes SAML & all format support) | ✅ |
 | `mongo:7` | Database for sessions and state | ✅ |
 | `ghcr.io/sirosfoundation/go-trust` | Trust evaluation (AuthZEN) | Recommended |
-
-:::tip Which verifier image?
-Use `vc-verifier-full` if you need to verify **W3C VC 2.0** format credentials or integrate with **SAML service providers**. Otherwise, the standard `vc-verifier` image is sufficient for SD-JWT VC and OIDC integrations.
-:::
 
 For complete image documentation, see [Docker Images](../docker-images).
 
@@ -213,14 +208,7 @@ volumes:
 
 ### With VC 2.0 / SAML Support
 
-For W3C VC 2.0 format or SAML integration, use the full image:
-
-```yaml
-services:
-  verifier:
-    image: ghcr.io/sirosfoundation/vc-verifier-full:latest
-    # ... rest of configuration
-```
+SAML and all credential format support is included in the standard image.
 
 ## Environment Variables
 

@@ -16,68 +16,25 @@ ghcr.io/sirosfoundation/<image-name>
 
 ## VC Platform Images
 
-The Verifiable Credentials (VC) platform provides multiple services, each with standard and full variants.
-
-### Image Naming Convention
-
-| Image | Description |
-|-------|-------------|
-| `ghcr.io/sirosfoundation/vc-<service>` | Standard build |
-| `ghcr.io/sirosfoundation/vc-<service>-full` | Full build with SAML and VC 2.0 support |
+The Verifiable Credentials (VC) platform provides multiple services.
 
 ### Available Services
 
-| Service | Standard Image | Full Image |
-|---------|---------------|------------|
-| **Verifier** | `ghcr.io/sirosfoundation/vc-verifier` | `ghcr.io/sirosfoundation/vc-verifier-full` |
-| **Issuer** | `ghcr.io/sirosfoundation/vc-issuer` | `ghcr.io/sirosfoundation/vc-issuer-full` |
-| **API Gateway** | `ghcr.io/sirosfoundation/vc-apigw` | `ghcr.io/sirosfoundation/vc-apigw-full` |
-| **Registry** | `ghcr.io/sirosfoundation/vc-registry` | — |
-| **Persistent** | `ghcr.io/sirosfoundation/vc-persistent` | — |
-| **Mock AS** | `ghcr.io/sirosfoundation/vc-mockas` | — |
-| **UI** | `ghcr.io/sirosfoundation/vc-ui` | — |
+| Service | Image |
+|---------|-------|
+| **Verifier** | `ghcr.io/sirosfoundation/vc-verifier` |
+| **Issuer** | `ghcr.io/sirosfoundation/vc-issuer` |
+| **API Gateway** | `ghcr.io/sirosfoundation/vc-apigw` |
+| **Registry** | `ghcr.io/sirosfoundation/vc-registry` |
+| **Persistent** | `ghcr.io/sirosfoundation/vc-persistent` |
+| **Mock AS** | `ghcr.io/sirosfoundation/vc-mockas` |
+| **UI** | `ghcr.io/sirosfoundation/vc-ui` |
 
-### Build Variants
+All images include SAML 2.0 SP, OIDC RP, and all credential format support.
 
-#### Standard Build
-
-The standard build provides core OID4VC functionality:
-- OpenID for Verifiable Credentials (OID4VCI, OID4VP)
-- SD-JWT VC credential format
-- OIDC authentication for issuers
-- Basic trust evaluation
-
-#### Full Build (`-full` suffix)
-
-The full build includes additional features via Go build tags:
-
-| Build Tag | Feature | Description |
-|-----------|---------|-------------|
-| `saml` | SAML 2.0 SP | SAML Service Provider support for issuer authentication |
-| `vc20` | W3C VC 2.0 | Verifiable Credentials Data Model 2.0 support |
-| `didcomm` | DIDComm 2.1 | DIDComm messaging protocol for credential exchange |
-| `oidcrp` | OIDC RP | OpenID Connect Relying Party for issuer authentication |
-
-**Use the full build when:**
-- Integrating with SAML-based Identity Providers (eduGAIN, InCommon, etc.)
-- Issuing credentials in W3C VC 2.0 format with Data Integrity proofs
-- Using DIDComm 2.1 for credential issuance or presentation
-- Supporting both SD-JWT VC and VC 2.0 credential formats
-
-#### Custom Builds
-
-For specialized deployments, you can build images with specific tag combinations:
-
-```bash
-# Build with only SAML support
-go build -tags saml -o vc-issuer ./cmd/issuer
-
-# Build with SAML and OIDC RP support
-go build -tags "saml oidcrp" -o vc-apigw ./cmd/apigw
-
-# Build with all features
-go build -tags "saml vc20 didcomm oidcrp" -o vc-issuer-full ./cmd/issuer
-```
+:::info Deprecated `-full` variants
+Previous versions shipped separate `-full` images that included SAML, OIDC RP, and VC 2.0 support via Go build tags. As of the current release, **all features are included in the standard images** and the `-full` suffix is no longer needed. Existing `-full` image references will continue to work as aliases but should be updated.
+:::
 
 ### Version Tags
 
@@ -144,14 +101,8 @@ echo $GITHUB_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
 # Standard verifier (latest)
 docker pull ghcr.io/sirosfoundation/vc-verifier:latest
 
-# Full verifier with SAML support (specific version)
-docker pull ghcr.io/sirosfoundation/vc-verifier-full:v1.2.3
-
 # Standard issuer
 docker pull ghcr.io/sirosfoundation/vc-issuer:latest
-
-# Full issuer with SAML support
-docker pull ghcr.io/sirosfoundation/vc-issuer-full:latest
 
 # Trust service
 docker pull ghcr.io/sirosfoundation/go-trust:latest
@@ -178,27 +129,22 @@ Docker automatically selects the correct platform for your system.
 ```mermaid
 flowchart TD
     A[What are you deploying?] --> B{Service Type}
-    B -->|Verifier| C{Need SAML auth?}
-    B -->|Issuer| D{Need SAML IdP?}
+    B -->|Verifier| C[vc-verifier]
+    B -->|Issuer| D[vc-issuer]
     B -->|Trust| E[go-trust]
     B -->|Wallet Backend| F[go-wallet-backend]
-    
-    C -->|Yes| G[vc-verifier-full]
-    C -->|No| H[vc-verifier]
-    
-    D -->|Yes| I[vc-issuer-full]
-    D -->|No| J[vc-issuer]
 ```
 
 ### Common Deployment Scenarios
 
+All features (SAML, OIDC, SD-JWT VC, VC 2.0) are included in every image.
+
 | Scenario | Verifier Image | Issuer Image |
 |----------|---------------|--------------|
 | Basic OID4VC deployment | `vc-verifier` | `vc-issuer` |
-| Academic federation (eduGAIN) | `vc-verifier-full` | `vc-issuer-full` |
-| Government identity (SAML) | `vc-verifier-full` | `vc-issuer-full` |
-| Enterprise OIDC only | `vc-verifier` | `vc-issuer` |
-| Multi-format credentials | `vc-verifier-full` | `vc-issuer-full` |
+| Academic federation (eduGAIN/SAML) | `vc-verifier` | `vc-issuer` |
+| Government identity (SAML) | `vc-verifier` | `vc-issuer` |
+| Enterprise OIDC | `vc-verifier` | `vc-issuer` |
 
 ## Example Docker Compose
 
@@ -243,12 +189,12 @@ volumes:
   mongo-data:
 ```
 
-### Full SAML Deployment
+### SAML Deployment
 
 ```yaml
 services:
   verifier:
-    image: ghcr.io/sirosfoundation/vc-verifier-full:latest
+    image: ghcr.io/sirosfoundation/vc-verifier:latest
     restart: always
     ports:
       - "8080:8080"
@@ -259,7 +205,7 @@ services:
       - VC_CONFIG_YAML=config.yaml
 
   issuer:
-    image: ghcr.io/sirosfoundation/vc-issuer-full:latest
+    image: ghcr.io/sirosfoundation/vc-issuer:latest
     restart: always
     ports:
       - "8081:8080"

@@ -366,16 +366,9 @@ If you need to run the verifier in your own infrastructure, you can deploy it us
 The verifier is available as a Docker image:
 
 ```bash
-# Pull the standard verifier image
+# Pull the verifier image (includes SAML and all credential format support)
 docker pull ghcr.io/sirosfoundation/vc-verifier:latest
-
-# Or pull the full image with SAML and VC 2.0 support
-docker pull ghcr.io/sirosfoundation/vc-verifier-full:latest
 ```
-
-:::info Image Variants
-Use `vc-verifier-full` if you need SAML authentication or W3C VC 2.0 format support. See [Docker Images](../docker-images) for details.
-:::
 
 #### Docker Compose
 
@@ -384,7 +377,7 @@ Create a `docker-compose.yaml`:
 ```yaml
 services:
   verifier:
-    image: ghcr.io/sirosfoundation/vc-verifier:latest  # or vc-verifier-full for SAML support
+    image: ghcr.io/sirosfoundation/vc-verifier:latest
     restart: always
     ports:
       - "8080:8080"
@@ -525,7 +518,7 @@ spec:
     spec:
       containers:
         - name: verifier
-          image: ghcr.io/sirosfoundation/vc-verifier:latest  # or vc-verifier-full
+          image: ghcr.io/sirosfoundation/vc-verifier:latest
           ports:
             - containerPort: 8080
           env:

@@ -13,14 +13,9 @@ The issuer deployment uses the following container images:
 
 | Image | Purpose | Required |
 |-------|---------|:--------:|
-| `ghcr.io/sirosfoundation/vc-issuer` | Credential issuer service | ✅ |
-| `ghcr.io/sirosfoundation/vc-issuer-full` | Issuer with SAML & VC 2.0 support | ✅ (if using SAML) |
+| `ghcr.io/sirosfoundation/vc-issuer` | Credential issuer service (includes SAML & OIDC support) | ✅ |
 | `mongo:7` | Database for sessions and state | ✅ |
 | `ghcr.io/sirosfoundation/go-trust` | Trust evaluation (AuthZEN) | Optional |
-
-:::tip Which issuer image?
-Use `vc-issuer-full` if you need to authenticate users via **SAML IdPs** (e.g., eduGAIN, InCommon, government federations) or issue **W3C VC 2.0** format credentials. Otherwise, the standard `vc-issuer` image is sufficient.
-:::
 
 For complete image documentation, see [Docker Images](../docker-images).
 
@@ -39,7 +34,7 @@ issuer/
 │   ├── vctm_pid.json        # PID credential type metadata
 │   ├── vctm_ehic.json       # EHIC credential type metadata
 │   └── ...                  # Additional VCTM files
-└── saml/                    # Only for vc-issuer-full
+└── saml/                    # Only if using SAML auth_method
     ├── sp-cert.pem          # SAML SP certificate
     ├── sp-key.pem           # SAML SP private key
     └── idp-metadata/        # Trusted IdP metadata files
@@ -71,7 +66,7 @@ issuer:
     key_path: "/pki/issuer_key.pem"
     algorithm: "ES256"
   authentication:
-    type: oidc  # or "saml" with vc-issuer-full
+    type: oidc  # or "saml"
     # ... authentication settings
 
 credential_constructor:
@@ -166,12 +161,12 @@ volumes:
 
 ### With SAML Support
 
-For SAML IdP authentication, use the full image and mount SAML configuration:
+For SAML IdP authentication, mount the SAML SP certificate and key:
 
 ```yaml
 services:
   issuer:
-    image: ghcr.io/sirosfoundation/vc-issuer-full:latest
+    image: ghcr.io/sirosfoundation/vc-issuer:latest
     volumes:
       - ./config.yaml:/config.yaml:ro
       - ./pki:/pki:ro

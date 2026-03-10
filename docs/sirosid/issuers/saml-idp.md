@@ -43,12 +43,16 @@ Use SAML integration when:
 
 - A SAML 2.0 compliant identity provider
 - IdP metadata (URL or file)
-- A SIROS ID issuer built with SAML support (\`vc-issuer-full\` or \`vc-apigw-full\` image)
+- A SIROS ID issuer with SAML configured (`apigw.saml` section)
 
-:::important Full Image Required
-SAML support requires the \`-full\` image variant which includes the \`saml\` build tag:
-- \`ghcr.io/sirosfoundation/vc-issuer-full\`
-- \`ghcr.io/sirosfoundation/vc-apigw-full\`
+## Integration Mode
+
+SAML authentication is integrated into the standard **OpenID4VCI** credential issuance pipeline. When a `credential_constructor` entry has `auth_method: saml`, the OID4VCI consent step redirects the user to the SAML IdP. After successful authentication, the SAML assertion attributes are transformed into credential claims via the `credential_mappings` configuration, and the standard OID4VCI token/credential flow continues.
+
+This means SAML-authenticated credentials benefit from the same DPoP binding, token lifecycle, and wallet protocol support as every other auth method.
+
+:::tip Credential Constructor Key
+The `credential_mappings` key under `apigw.saml` must match the `credential_constructor` key for the credential type. For example, if the constructor key is `diploma`, the mapping key must also be `diploma`.
 :::
 
 ## Configuration
@@ -229,7 +233,7 @@ Each attribute mapping supports:
 ```yaml
 services:
   apigw:
-    image: ghcr.io/sirosfoundation/vc-apigw-full:latest
+    image: ghcr.io/sirosfoundation/vc-apigw:latest
     restart: always
     ports:
       - "8080:8080"
@@ -242,7 +246,7 @@ services:
       - issuer
 
   issuer:
-    image: ghcr.io/sirosfoundation/vc-issuer-full:latest
+    image: ghcr.io/sirosfoundation/vc-issuer:latest
     # ...
 
   mongo:
@@ -299,11 +303,12 @@ apigw:
             required: true
 
 # Credential constructor must match credential_mappings keys
+# auth_method: saml triggers the SAML IdP redirect during OID4VCI consent
 credential_constructor:
   pid:
     vct: "urn:eudi:pid:arf-1.8:1"
     vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
-    auth_method: basic
+    auth_method: saml
     format: "dc+sd-jwt"
 
 common:
