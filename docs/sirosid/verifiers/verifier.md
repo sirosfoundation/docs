@@ -403,10 +403,10 @@ services:
     image: ghcr.io/sirosfoundation/go-trust:latest
     restart: always
     ports:
-      - "8081:8081"
+      - "6001:6001"
     volumes:
       - ./trust-config.yaml:/config.yaml:ro
-    command: ["serve", "--config", "/config.yaml"]
+    command: ["--config", "/config.yaml"]
 
 volumes:
   mongo-data:
@@ -450,8 +450,7 @@ verifier_proxy:
 
   # Trust evaluation via go-trust (AuthZEN)
   trust:
-    authzen_endpoint: "http://go-trust:8081"
-    enabled: true
+    pdp_url: "http://go-trust:6001"
 
   digital_credentials:
     enabled: true

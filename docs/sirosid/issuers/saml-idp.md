@@ -116,6 +116,9 @@ apigw:
     # Cache TTL in seconds (default: 3600)
     metadata_cache_ttl: 3600
     
+    # Optional: verify metadata XML signatures (recommended for production)
+    metadata_signing_cert_path: "/pki/federation-signing.pem"
+    
     credential_mappings:
       # ...
 ```
@@ -129,6 +132,40 @@ apigw:
 
 :::note eduGAIN Metadata
 eduGAIN provides aggregate metadata intended for national federations. For individual entity queries, use your national federation's MDQ service.
+:::
+
+#### Metadata Signature Validation
+
+When fetching IdP metadata from an MDQ service or a remote URL, you should verify that the metadata is signed by the federation operator. This prevents tampering with metadata in transit and ensures you only trust IdPs that are registered in the federation.
+
+Configure the `metadata_signing_cert_path` option to point to the federation's metadata signing certificate (PEM format):
+
+```yaml
+apigw:
+  saml:
+    # ... other SAML config ...
+    
+    # Federation metadata signing certificate
+    # When set, ALL fetched metadata (MDQ and static URL) must carry
+    # a valid XML signature from this certificate.
+    metadata_signing_cert_path: "/pki/federation-signing.pem"
+```
+
+**Behavior:**
+- When `metadata_signing_cert_path` is set, the issuer validates the enveloped XML signature on every metadata document before parsing it.
+- Metadata without a valid signature from the configured certificate is **rejected**.
+- When not set, metadata is accepted without signature verification (suitable for testing or environments where transport security is sufficient).
+
+:::tip Federation Signing Certificates
+Federation operators publish their metadata signing certificates. Common sources:
+- **SWAMID**: Available at [swamid.se](https://wiki.sunet.se/display/SWAMID/SWAMID+Metadata)
+- **InCommon**: Available at [incommon.org](https://spaces.at.internet2.edu/x/jokYAQ)
+
+Download the certificate in PEM format and mount it into your container.
+:::
+
+:::caution Production Recommendation
+Always configure `metadata_signing_cert_path` in production. Without signature verification, a compromised network path could inject malicious IdP metadata, redirecting authentication to an attacker-controlled IdP.
 :::
 
 #### Option 2: Static IdP Metadata
@@ -286,6 +323,9 @@ apigw:
     mdq_server: "https://mds.swamid.se/entities/"
     metadata_cache_ttl: 3600
     
+    # Verify metadata signatures (recommended for production)
+    metadata_signing_cert_path: "/pki/swamid-signing.pem"
+    
     session_duration: 3600
     
     credential_mappings:
@@ -339,6 +379,14 @@ common:
 1. Verify MDQ server URL ends with \`/\`
 2. Check the IdP is registered in the federation
 3. Verify network connectivity to MDQ service
+
+### Metadata Signature Verification Failed
+
+**Solutions:**
+1. Confirm the federation signing certificate is current (not expired or rotated)
+2. Verify you are using the correct certificate for your MDQ service (e.g., SWAMID cert for SWAMID MDQ)
+3. Check that the metadata is actually signed (some MDQ services may return unsigned metadata for non-federated entities)
+4. If testing, temporarily remove `metadata_signing_cert_path` to confirm the metadata itself is valid
 
 ## Next Steps
 

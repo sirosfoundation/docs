@@ -72,8 +72,7 @@ verifier_proxy:
         scopes: ["openid", "profile"]
 
   trust:
-    authzen_endpoint: "http://go-trust:8081"
-    enabled: true
+    pdp_url: "http://go-trust:6001"
 
 common:
   mongo:
@@ -118,7 +117,7 @@ Configuration for the trust evaluation service.
 ```yaml
 # trust-config.yaml
 server:
-  addr: :8081
+  addr: :6001
 
 tsl:
   sources:
@@ -191,10 +190,10 @@ services:
     image: ghcr.io/sirosfoundation/go-trust:latest
     restart: always
     ports:
-      - "8081:8081"
+      - "6001:6001"
     volumes:
       - ./trust-config.yaml:/config.yaml:ro
-    command: ["serve", "--config", "/config.yaml"]
+    command: ["--config", "/config.yaml"]
 
   mongo:
     image: mongo:7

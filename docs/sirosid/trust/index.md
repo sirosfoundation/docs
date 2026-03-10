@@ -205,48 +205,48 @@ trust:
 
 ### URL Whitelist
 
-The simplest trust model: a static list of allowed URLs for issuers and verifiers.
+A file-based trust model where you maintain a list of trusted entity URLs. The whitelist registry also fetches and caches each entity's JWKS to perform cryptographic key validation.
 
 ```mermaid
 graph TD
     Config[Whitelist Config] --> Issuers[Approved Issuer URLs]
     Config --> Verifiers[Approved Verifier URLs]
     Request[Trust Request] --> Check{URL in list?}
-    Check -->|Yes| Allow[✓ Trusted]
+    Check -->|Yes| KeyCheck{Key matches JWKS?}
     Check -->|No| Deny[✗ Not Trusted]
+    KeyCheck -->|Yes| Allow[✓ Trusted]
+    KeyCheck -->|No| Deny
 ```
 
 **Use when:**
 - You have a known, stable set of trusted partners
-- Key validation is handled by other means (e.g., TLS)
 - You want simple, file-based trust management
-- Rapid development or testing
+- Standard JWKS metadata discovery works for your entities
 
 **Configuration:**
 ```yaml
 trust:
   whitelist:
     enabled: true
-    file: "/config/trusted-entities.json"
-    watch: true  # Auto-reload on changes
+    config_file: "/config/trusted-entities.yaml"
+    watch_file: true  # Auto-reload on changes
 ```
 
 **Whitelist file format:**
-```json
-{
-  "issuers": [
-    "https://issuer1.example.com",
-    "https://issuer2.example.org"
-  ],
-  "verifiers": [
-    "https://verifier.example.com"
-  ],
-  "trusted_subjects": []
-}
+```yaml
+lists:
+  issuers:
+    - "https://issuer1.example.com"
+    - "https://issuer2.example.org"
+  verifiers:
+    - "https://verifier.example.com"
+actions:
+  credential-issuer: "issuers"
+  credential-verifier: "verifiers"
 ```
 
-:::note
-Unlike other trust frameworks, whitelist registries only check the URL identifier—they don't validate cryptographic keys. For full key binding validation, use ETSI, OpenID Federation, or X.509 trust.
+:::tip
+The whitelist registry performs full key validation by fetching each entity's JWKS and computing key fingerprints. See [Go-Trust Whitelist Registry](./go-trust#whitelist-registry) for details on JWKS discovery and configuration options.
 :::
 
 ## Trust Configuration
@@ -276,23 +276,19 @@ issuer:
 Configure which issuers to trust:
 
 ```yaml
-verifier:
+verifier_proxy:
   trust:
-    # Trust framework to use
-    framework: "etsi_tsl"  # or "openid_federation", "did_web", "x509"
+    # AuthZEN PDP URL — when set, operates in "default deny" mode
+    pdp_url: "http://go-trust:6001"
     
-    # For ETSI TSL
-    etsi_tsl:
-      trust_list_url: "https://ec.europa.eu/tools/lotl/eu-lotl.xml"
-      accepted_service_types:
-        - "http://uri.etsi.org/TrstSvc/Svctype/EDS/Q"  # Qualified
-      
-    # Cache settings
-    cache_duration: 3600
-    
-    # Fallback behavior
-    allow_untrusted: false  # Reject credentials from unknown issuers
+    # Optional: restrict accepted signature algorithms
+    allowed_signature_algorithms:
+      - "ES256"
+      - "ES384"
+      - "EdDSA"
 ```
+
+When `pdp_url` is configured, the verifier delegates all trust decisions to Go-Trust. When omitted, the verifier operates in "allow all" mode. Trust policies (which registries, ETSI service types, etc.) are configured in Go-Trust, not in the verifier itself.
 
 ### For Wallet Providers
 

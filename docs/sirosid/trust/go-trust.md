@@ -60,7 +60,7 @@ flowchart LR
 docker pull ghcr.io/sirosfoundation/go-trust:latest
 
 # Run with default configuration
-docker run -p 8081:8081 ghcr.io/sirosfoundation/go-trust:latest serve
+docker run -p 6001:6001 ghcr.io/sirosfoundation/go-trust:latest
 ```
 
 ### Docker Compose
@@ -73,13 +73,13 @@ services:
     image: ghcr.io/sirosfoundation/go-trust:latest
     restart: always
     ports:
-      - "8081:8081"
+      - "6001:6001"
     volumes:
       - ./trust-config.yaml:/config.yaml:ro
       - ./trust-data:/data:ro  # For local TSL files
-    command: ["serve", "--config", "/config.yaml"]
+    command: ["--config", "/config.yaml"]
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/healthz"]
+      test: ["CMD", "curl", "-f", "http://localhost:6001/healthz"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -93,7 +93,7 @@ Create `trust-config.yaml`:
 
 ```yaml
 server:
-  addr: ":8081"
+  addr: ":6001"
   metrics_addr: ":9090"
 
 # ETSI Trust Status List support
@@ -162,27 +162,54 @@ Go-Trust includes static registries for simple trust scenarios, testing, and dev
 
 #### Whitelist Registry
 
-The **whitelist registry** provides a simple URL-based trust model. Rather than validating certificates or trust chains, it simply checks if the subject identifier (URL) is in a configured list.
+The **whitelist registry** maintains a list of trusted entity URLs and validates name-to-key bindings by fetching and caching each entity's JWKS (JSON Web Key Set). For each whitelisted entity, it:
+
+1. Discovers the entity's JWKS endpoint via standard metadata discovery
+2. Fetches and caches the public keys
+3. Computes SHA-256 fingerprints for each key
+4. Validates that incoming request keys match a whitelisted entity's keys
 
 ```yaml
 registries:
-  - name: "approved-issuers"
-    type: "whitelist"
-    config:
-      # Path to whitelist file (JSON or YAML)
-      file: "/config/approved-issuers.json"
-      # Watch for file changes and auto-reload
-      watch: true
+  whitelist:
+    enabled: true
+    config_file: "/config/approved-issuers.yaml"
+    watch_file: true  # Auto-reload on changes
 ```
 
-**Whitelist file format** (`approved-issuers.json`):
+**Whitelist file format — new format** (recommended):
+
+```yaml
+# Named entity lists
+lists:
+  pid-issuers:
+    - "https://issuer1.example.com"
+    - "https://issuer2.example.org"
+  verifiers:
+    - "https://verifier.example.com"
+    - "https://relying-party.example.org"
+
+# Map action names to lists
+actions:
+  pid-provider: "pid-issuers"
+  credential-issuer: "pid-issuers"
+  verifier: "verifiers"
+  credential-verifier: "verifiers"
+
+# JWKS discovery configuration
+jwks_endpoint_pattern: ""  # Empty: use standard metadata discovery
+fetch_timeout: "30s"
+refresh_interval: "5m"     # Background JWKS refresh interval
+allow_http: false          # Require HTTPS for JWKS endpoints
+```
+
+**Whitelist file format — legacy format** (backward compatible):
 
 ```json
 {
   "issuers": [
     "https://issuer1.example.com",
-    "https://issuer2.example.org",
-    "https://pilot.*.example.com"  
+    "https://issuer2.example.org"
   ],
   "verifiers": [
     "https://verifier.example.com",
@@ -194,20 +221,32 @@ registries:
 }
 ```
 
+The legacy format auto-maps to actions: `issuers` → `credential-issuer`/`pid-provider`, `verifiers` → `credential-verifier`/`verifier`, and `trusted_subjects` acts as a catch-all.
+
+**JWKS Discovery Order:**
+
+When no explicit `jwks_endpoint_pattern` is set, the registry discovers keys via:
+1. **SD-JWT VC §5.3** — `{entity}/.well-known/jwt-vc-issuer` (supports inline JWKS)
+2. **RFC 8414** — `{entity}/.well-known/oauth-authorization-server`
+3. **OIDC Discovery** — `{entity}/.well-known/openid-configuration`
+4. **OpenID4VCI** — `{entity}/.well-known/openid-credential-issuer`
+5. **Fallback** — `{entity}/.well-known/jwks.json`
+
 **Features:**
 - URLs can include wildcards (`*`) for prefix matching
-- Separate lists for **issuers**, **verifiers**, and **trusted_subjects** (catch-all)
-- The file can be hot-reloaded when `watch: true` is set
-- No key validation—only URL authorization
+- Named lists with action-to-list mapping for role-based trust
+- Automatic JWKS discovery and key fingerprint caching
+- Background refresh loop keeps keys up to date
+- Hot-reloadable configuration file
+- Supports resolution-only requests (URL authorization without key validation)
 
 **Use when:**
 - You have a known set of trusted partners
-- You want simple, file-based trust management
-- Key validation is handled elsewhere (e.g., TLS)
-- Rapid development or testing
+- You want simple, file-based trust management with full key validation
+- Standard metadata discovery works for your entities
 
-:::caution
-Whitelist registries only check if the identifier URL is allowed—they don't validate the actual cryptographic key material. Use ETSI, OpenID Federation, or X.509 registries when you need full key validation.
+:::tip Key Validation
+The whitelist registry performs full cryptographic key validation by default. Each entity's JWKS is fetched at startup and periodically refreshed. The registry reports healthy only when keys for all configured entities have been successfully loaded.
 :::
 
 #### Always-Trusted Registry
@@ -216,7 +255,7 @@ Returns `decision: true` for any request. Useful for testing or when trust is ha
 
 ```bash
 # From command line
-go-trust serve --registry always-trusted
+gt --registry always-trusted
 ```
 
 #### Never-Trusted Registry
@@ -225,7 +264,7 @@ Returns `decision: false` for any request. Useful for testing rejection scenario
 
 ```bash
 # From command line  
-go-trust serve --registry never-trusted
+gt --registry never-trusted
 ```
 
 ### Policy-Based Trust Decisions
@@ -407,7 +446,7 @@ Go-Trust implements the AuthZEN protocol for trust evaluation.
 ### Evaluation Request
 
 ```bash
-curl -X POST http://localhost:8081/evaluation \
+curl -X POST http://localhost:6001/evaluation \
   -H "Content-Type: application/json" \
   -d '{
     "subject": {
@@ -446,7 +485,7 @@ curl -X POST http://localhost:8081/evaluation \
 To resolve trust metadata without key validation:
 
 ```bash
-curl -X POST http://localhost:8081/evaluation \
+curl -X POST http://localhost:6001/evaluation \
   -H "Content-Type: application/json" \
   -d '{
     "subject": {
@@ -483,15 +522,11 @@ Configure the verifier to use go-trust for credential validation:
 ```yaml
 verifier_proxy:
   trust:
-    authzen_endpoint: "http://go-trust:8081"
-    enabled: true
-    
-    # Policy to use when verifying issuer trust
-    issuer_policy: "credential-issuer"
-    
-    # Cache trust decisions
-    cache_duration: 300
+    # AuthZEN PDP URL — when set, operates in "default deny" mode
+    pdp_url: "http://go-trust:6001"
 ```
+
+When `pdp_url` is set, all trust decisions are evaluated via the PDP. When omitted, the verifier operates in "allow all" mode where resolved keys are always considered trusted.
 
 ### Issuer Configuration
 
@@ -500,11 +535,7 @@ Configure the issuer to validate wallet attestations:
 ```yaml
 issuer:
   trust:
-    authzen_endpoint: "http://go-trust:8081"
-    enabled: true
-    
-    # Policy for wallet provider validation
-    wallet_policy: "wallet-provider"
+    pdp_url: "http://go-trust:6001"
 ```
 
 ## Supported Trust Frameworks
@@ -612,10 +643,10 @@ go_trust_registry_healthy{registry="eu-tsl"} 1
 
 ```bash
 # Liveness
-curl http://localhost:8081/healthz
+curl http://localhost:6001/healthz
 
 # Readiness (checks all registries)
-curl http://localhost:8081/readyz
+curl http://localhost:6001/readyz
 ```
 
 ## Kubernetes Deployment
@@ -638,9 +669,9 @@ spec:
       containers:
         - name: go-trust
           image: ghcr.io/sirosfoundation/go-trust:latest
-          args: ["serve", "--config", "/config/config.yaml"]
+          args: ["--config", "/config/config.yaml"]
           ports:
-            - containerPort: 8081
+            - containerPort: 6001
               name: http
             - containerPort: 9090
               name: metrics
@@ -650,12 +681,12 @@ spec:
           livenessProbe:
             httpGet:
               path: /healthz
-              port: 8081
+              port: 6001
             initialDelaySeconds: 10
           readinessProbe:
             httpGet:
               path: /readyz
-              port: 8081
+              port: 6001
           resources:
             requests:
               memory: "128Mi"
@@ -677,7 +708,7 @@ spec:
     app: go-trust
   ports:
     - name: http
-      port: 8081
+      port: 6001
     - name: metrics
       port: 9090
 ```

@@ -176,8 +176,7 @@ services:
     image: ghcr.io/sirosfoundation/go-trust:latest
     restart: always
     ports:
-      - "8082:8081"
-    command: ["serve"]
+      - "8082:6001"
 
   mongo:
     image: mongo:7

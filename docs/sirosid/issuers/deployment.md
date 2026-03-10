@@ -188,10 +188,10 @@ services:
     image: ghcr.io/sirosfoundation/go-trust:latest
     restart: always
     ports:
-      - "8081:8081"
+      - "6001:6001"
     volumes:
       - ./trust-config.yaml:/config.yaml:ro
-    command: ["serve", "--config", "/config.yaml"]
+    command: ["--config", "/config.yaml"]
 ```
 
 ## Environment Variables

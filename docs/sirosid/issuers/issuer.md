@@ -367,9 +367,9 @@ issuer:
       - openid
       - profile
 
-  # Trust configuration
+  # Trust configuration (optional: go-trust service)
   trust:
-    authzen_endpoint: "http://go-trust:8081"  # Optional: go-trust service
+    pdp_url: "http://go-trust:6001"
 
 common:
   mongo:

@@ -605,8 +605,7 @@ issuer:
         
   # Trust configuration (optional)
   trust:
-    authzen_endpoint: "http://go-trust:8081"
-    enabled: true
+    pdp_url: "http://go-trust:6001"
 
 common:
   mongo:
