@@ -30,7 +30,7 @@ The SIROS ID verifier exposes standard OIDC endpoints. For a self-hosted or on-p
 When using the **SIROS ID hosted service**, verifiers use subdomain-based multi-tenancy:
 
 ```
-https://<instance>.<tenant>.verifier.id.siros.org
+https://<tenant>.verifier.id.siros.org
 ```
 
 For example, tenant `acme-corp` with verifier instance `main`:

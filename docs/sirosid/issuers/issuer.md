@@ -29,14 +29,14 @@ The SIROS ID issuer exposes standard OID4VCI endpoints. For a self-hosted or on-
 When using the **SIROS ID hosted service**, issuers use subdomain-based multi-tenancy:
 
 ```
-https://<instance>.<tenant>.issuer.id.siros.org
+https://<tenant>.issuer.id.siros.org
 ```
 
-For example, tenant `acme-corp` with issuer instance `pid`:
-- `https://pid.acme-corp.issuer.id.siros.org/credential-offer`
-- `https://pid.acme-corp.issuer.id.siros.org/.well-known/openid-credential-issuer`
+For example, tenant `acme-corp`:
+- `https://acme-corp.issuer.id.siros.org/credential-offer`
+- `https://acme-corp.issuer.id.siros.org/.well-known/openid-credential-issuer`
 
-Each tenant has isolated configuration, and each issuer instance has its own credential types and signing keys.
+Each tenant has isolated configuration and its own credential types and signing keys.
 :::
 
 ## Deployment Options

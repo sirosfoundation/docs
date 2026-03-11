@@ -39,7 +39,7 @@ This guide works with both the **SIROS ID hosted issuer** and **self-hosted depl
 :::info SIROS Hosted Service
 If using the SIROS-hosted issuer service, your URL will follow the pattern:
 ```
-https://<instance>.<tenant>.issuer.id.siros.org
+https://<tenant>.issuer.id.siros.org
 ```
 For example: `https://main.demo.issuer.id.siros.org`
 :::
