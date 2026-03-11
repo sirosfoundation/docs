@@ -10,6 +10,7 @@ The Wallet Backend Admin API provides internal management capabilities for multi
 - Manage user memberships within tenants
 - Configure credential issuers per tenant
 - Configure verifiers per tenant
+- Manage invite codes for controlled registration
 
 ## Overview
 
@@ -59,6 +60,7 @@ The wallet backend supports multiple tenants, each with complete isolation of:
 | **Credentials** | Stored credentials are scoped to tenants |
 | **Issuers** | Credential issuers available to users in the tenant |
 | **Verifiers** | Verifiers where users can present credentials |
+| **Invites** | Invite codes that pre-authorize registration into the tenant |
 
 ### Tenant IDs
 
@@ -327,6 +329,146 @@ DELETE /admin/tenants/{tenantId}/verifiers/{verifierId}
 
 ---
 
+## Invite Management
+
+Invite codes provide controlled access to tenant registration. When a tenant has `require_invite` enabled, users must present a valid invite code to register.
+
+### How Invites Work
+
+```mermaid
+sequenceDiagram
+    participant Admin
+    participant AdminAPI as Admin API
+    participant User
+    participant Wallet as Wallet Frontend
+    participant Backend as Wallet Backend
+
+    Admin->>AdminAPI: POST /admin/tenants/{id}/invites
+    AdminAPI-->>Admin: { code: "abc123..." }
+    Admin->>User: Share invite link
+    Note over Admin,User: e.g. https://wallet.example.com/?invite=abc123...
+    User->>Wallet: Open invite link
+    Wallet->>Backend: POST /user/register-webauthn-begin<br/>{ tenantId, inviteCode }
+    Backend->>Backend: Validate invite (active, not expired)
+    Backend-->>Wallet: Challenge
+    Wallet->>Backend: POST /user/register-webauthn-finish
+    Backend->>Backend: Re-validate invite + mark completed
+    Backend-->>Wallet: Registration success
+```
+
+**Key properties:**
+
+- Invite codes are 256-bit cryptographically random values (base64url encoded)
+- Each code can only be used once — it is atomically marked as `completed` on successful registration
+- Invites are validated both at registration start **and** finish to prevent race conditions
+- The code is only returned once at creation time and cannot be retrieved again via the API
+
+### Invite Lifecycle
+
+| Status | Description |
+|--------|-------------|
+| `active` | Available for use (can be revoked or will expire) |
+| `completed` | Successfully used for a registration (terminal state) |
+| `revoked` | Administratively disabled (can be renewed) |
+
+### List Invites
+
+```bash
+GET /admin/tenants/{tenantId}/invites
+```
+
+**Response:**
+```json
+{
+  "invites": [
+    {
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "tenant_id": "acme-corp",
+      "status": "active",
+      "expires_at": "2025-01-22T10:00:00Z",
+      "created_at": "2025-01-15T10:00:00Z",
+      "updated_at": "2025-01-15T10:00:00Z"
+    }
+  ]
+}
+```
+
+### Create an Invite
+
+```bash
+POST /admin/tenants/{tenantId}/invites
+Content-Type: application/json
+
+{
+  "expires_in": 604800,
+  "metadata": {
+    "email": "new-user@example.com",
+    "department": "Engineering"
+  }
+}
+```
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `expires_in` | No | Seconds until expiry (default: 7 days / 604800) |
+| `metadata` | No | Arbitrary JSON attached to the invite |
+
+**Response (201):**
+```json
+{
+  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "tenant_id": "acme-corp",
+  "code": "dGhpcyBpcyBhIHNhbXBsZSBpbnZpdGUgY29kZSB2YWw",
+  "status": "active",
+  "metadata": {"email": "new-user@example.com", "department": "Engineering"},
+  "expires_at": "2025-01-22T10:00:00Z",
+  "created_at": "2025-01-15T10:00:00Z",
+  "updated_at": "2025-01-15T10:00:00Z"
+}
+```
+
+:::warning
+The `code` field is only returned at creation time. Store it securely — it cannot be retrieved again.
+:::
+
+### Get an Invite
+
+```bash
+GET /admin/tenants/{tenantId}/invites/{inviteId}
+```
+
+Returns invite details without the code.
+
+### Update an Invite (Renew / Revoke)
+
+Invites use action-based updates:
+
+```bash
+PUT /admin/tenants/{tenantId}/invites/{inviteId}
+Content-Type: application/json
+
+{
+  "action": "revoke"
+}
+```
+
+| Action | Description |
+|--------|-------------|
+| `renew` | Reset to `active` and extend expiry (optional `expires_in`) |
+| `revoke` | Mark as `revoked`, preventing further use |
+
+:::note
+Completed invites cannot be renewed or revoked — they are in a terminal state.
+:::
+
+### Delete an Invite
+
+```bash
+DELETE /admin/tenants/{tenantId}/invites/{inviteId}
+```
+
+---
+
 ## Example: Setting Up a New Tenant
 
 Here's a complete example of setting up a new tenant with issuers and verifiers:
@@ -334,16 +476,19 @@ Here's a complete example of setting up a new tenant with issuers and verifiers:
 ```bash
 # 1. Create the tenant
 curl -X POST http://localhost:8081/admin/tenants \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "id": "university-demo",
     "name": "University Demo",
     "display_name": "University Digital Wallet",
-    "enabled": true
+    "enabled": true,
+    "require_invite": true
   }'
 
 # 2. Add a credential issuer
 curl -X POST http://localhost:8081/admin/tenants/university-demo/issuers \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "credential_issuer_identifier": "https://issuer.university.edu",
@@ -353,23 +498,47 @@ curl -X POST http://localhost:8081/admin/tenants/university-demo/issuers \
 
 # 3. Add a verifier
 curl -X POST http://localhost:8081/admin/tenants/university-demo/verifiers \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Student Portal",
     "url": "https://portal.university.edu"
   }'
 
-# 4. List the configuration
-curl http://localhost:8081/admin/tenants/university-demo/issuers
-curl http://localhost:8081/admin/tenants/university-demo/verifiers
+# 4. Create an invite code for a new user
+curl -X POST http://localhost:8081/admin/tenants/university-demo/invites \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "metadata": {"email": "student@university.edu"}
+  }'
+# Response contains the code — share https://wallet.university.edu/?invite=<code>
+
+# 5. List the configuration
+curl -H "Authorization: Bearer $ADMIN_TOKEN" \
+  http://localhost:8081/admin/tenants/university-demo/issuers
+curl -H "Authorization: Bearer $ADMIN_TOKEN" \
+  http://localhost:8081/admin/tenants/university-demo/verifiers
+curl -H "Authorization: Bearer $ADMIN_TOKEN" \
+  http://localhost:8081/admin/tenants/university-demo/invites
 ```
 
 ---
 
 ## Security Considerations
 
+### Authentication
+
+The admin API requires bearer token authentication. Include the token in every request:
+
+```bash
+curl -H "Authorization: Bearer $ADMIN_TOKEN" http://localhost:8081/admin/tenants
+```
+
+Set `WALLET_SERVER_ADMIN_TOKEN` to configure a persistent token. If not set, a random token is generated at startup and logged to stdout.
+
 :::danger Important
-The admin API has no authentication by default. It should **never** be exposed to the public internet.
+The admin API should **never** be exposed to the public internet, even with token authentication.
 :::
 
 **Recommended security measures:**
@@ -385,6 +554,7 @@ The admin API has no authentication by default. It should **never** be exposed t
 |----------|---------|-------------|
 | `WALLET_SERVER_ADMIN_PORT` | `8081` | Port for the admin API |
 | `WALLET_SERVER_ADMIN_HOST` | `127.0.0.1` | Bind address (use `127.0.0.1` for local-only) |
+| `WALLET_SERVER_ADMIN_TOKEN` | *(generated)* | Bearer token for admin API authentication |
 
 ---
 
