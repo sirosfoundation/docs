@@ -23,12 +23,12 @@ function HomepageHeader() {
       <div className={styles.heroButtons}>
         <Link
           className="button button--secondary button--lg"
-          to="/docs/sirosid">
+          to="/sirosid">
           SIROS ID
         </Link>
         <Link
           className="button button--secondary button--lg"
-          to="/docs/wwwallet">
+          to="/wwwallet">
           wwWallet
         </Link>
       </div>

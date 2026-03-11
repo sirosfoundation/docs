@@ -3,7 +3,7 @@ sidebar_position: 3
 ---
 # Credential Manager
 
-The SIROS ID Credential Manager (CM) is a hosted version of the [wwWallet](/docs/wwwallet) opensource wallet. The wwWallet is a flexible digital credential manager that supports both native apps and web clients. The SIROS ID version can be accessed on any device and supports all major browsers and platforms.
+The SIROS ID Credential Manager (CM) is a hosted version of the [wwWallet](/wwwallet) opensource wallet. The wwWallet is a flexible digital credential manager that supports both native apps and web clients. The SIROS ID version can be accessed on any device and supports all major browsers and platforms.
 
 ## Account-Free Design
 
