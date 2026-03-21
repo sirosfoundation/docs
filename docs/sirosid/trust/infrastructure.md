@@ -15,14 +15,15 @@ Before setting up trust infrastructure, ensure you understand:
 
 ## Choosing a Trust Framework
 
-Two primary trust frameworks are commonly used in credential ecosystems:
+Two primary trust frameworks are commonly used in credential ecosystems, with a third option emerging:
 
 | Framework | Best For | Complexity | Standards |
 |-----------|----------|------------|-----------|
 | **ETSI TSL (X.509)** | EU/eIDAS compliance, government deployments | Medium | ETSI TS 119 612 |
+| **ETSI LoTE (JSON)** | Modern JSON-native ecosystems, JWK/DID identities | Low–Medium | ETSI TS 119 602 |
 | **OpenID Federation** | Dynamic ecosystems, OAuth/OIDC integration | Higher | OpenID Federation 1.0 |
 
-You can also use both frameworks simultaneously with Go-Trust acting as the unifying abstraction layer.
+You can also use multiple frameworks simultaneously with Go-Trust acting as the unifying abstraction layer.
 
 ---
 
@@ -563,6 +564,7 @@ flowchart LR
 ## Next Steps
 
 - [Go-Trust Configuration Reference](./go-trust.md) – Detailed configuration options
+- [LoTE Publishing Guide](./lote-publishing.md) – Set up, maintain, and publish LoTE lists
 - [Trust Services Overview](./index.md) – Conceptual overview
-- [g119612 Documentation](https://github.com/sirosfoundation/g119612) – TSL tool reference
+- [g119612 Documentation](https://github.com/sirosfoundation/g119612) – TSL and LoTE tool reference
 - [Inmor Documentation](https://github.com/SUNET/inmor) – OpenID Federation server

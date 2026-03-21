@@ -11,6 +11,7 @@ Go-Trust is a local trust engine that provides trust decisions via an [AuthZEN](
 Trust evaluation in digital credential ecosystems is complex:
 
 - **[ETSI TS 119 612](https://www.etsi.org/deliver/etsi_ts/119600_119699/119612/02.01.01_60/ts_119612v020101p.pdf)** requires parsing XML trust status lists, validating certificates, and tracking service status
+- **[ETSI TS 119 602](https://www.etsi.org/deliver/etsi_ts/119600_119699/119602/)** involves parsing JSON Lists of Trusted Entities (LoTE) with JWK, X.509, or DID identities
 - **[OpenID Federation](https://openid.net/specs/openid-federation-1_0.html)** involves trust chain resolution, signature verification, and trust mark validation
 - **[DID:web](https://w3c-ccg.github.io/did-method-web/)** needs proper HTTP resolution and JWK matching
 - **[DID:webvh](https://identity.foundation/didwebvh/v1.0/)** adds verifiable history with cryptographic integrity validation
@@ -27,6 +28,7 @@ flowchart LR
     subgraph Go-Trust
         API[AuthZEN API]
         ETSI[ETSI TSL Registry]
+        LOTE[LoTE Registry]
         OIDF[OpenID Federation]
         DIDWeb[DID:web Registry]
         DIDWebVH[DID:webvh Registry]
@@ -34,6 +36,7 @@ flowchart LR
     
     subgraph Trust Sources
         TSL[(EU Trust Lists)]
+        LJSON[(LoTE JSON)]
         Fed[(Federation Anchors)]
         DID[(DID Documents)]
         DIDVH[(DID Logs)]
@@ -42,10 +45,12 @@ flowchart LR
     Issuer -->|evaluate| API
     Verifier -->|evaluate| API
     API --> ETSI
+    API --> LOTE
     API --> OIDF
     API --> DIDWeb
     API --> DIDWebVH
     ETSI --> TSL
+    LOTE --> LJSON
     OIDF --> Fed
     DIDWeb --> DID
     DIDWebVH --> DIDVH
@@ -155,6 +160,36 @@ resolution:
   strategy: "first_match"
   policy: "any_match"  # any_match, all_must_match
 ```
+
+### LoTE Registry Configuration
+
+Go-Trust can evaluate trust from ETSI TS 119 602 Lists of Trusted Entities (LoTE) — JSON documents that list trusted entities with their digital identities.
+
+```yaml
+registries:
+  lote:
+    enabled: true
+    name: "LoTE Registry"
+    description: "ETSI TS 119 602 List of Trusted Entities"
+    sources:
+      - "https://lote.example.org/lote-SE.json"
+      - "https://lote.example.org/lote-DE.json"
+      - "/etc/go-trust/local-lote.json"    # Local files also supported
+    verify_jws: false            # Set to true for JWS-signed LoTEs
+    fetch_timeout: "30s"
+    refresh_interval: "1h"       # How often to re-fetch sources
+```
+
+The LoTE registry evaluates trust by:
+1. Looking up the entity by `subject.id` (the entity's identifier)
+2. Checking the entity's status is active (granted)
+3. Validating the resource key against the entity's digital identities:
+   - **X.509 (`x5c`)**: PKIX path validation against entity certificates
+   - **JWK (`jwk`)**: SHA-256 fingerprint matching against entity JWK keys
+
+:::tip
+To create and publish LoTE documents, use `tsl-tool` from [g119612](https://github.com/sirosfoundation/g119612). See the [LoTE Publishing Guide](./lote-publishing) for a complete walkthrough.
+:::
 
 ### Static Registries
 

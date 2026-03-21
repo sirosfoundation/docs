@@ -8,7 +8,7 @@ sidebar_label: Overview
 A digital credential ecosystem requires mechanisms for issuers, wallets, and verifiers to recognize and trust each other. This is called **technical trust management**. SIROS ID supports multiple trust frameworks to meet different regulatory and deployment requirements.
 
 :::tip Go-Trust Abstraction Layer
-For production deployments, we recommend using **[Go-Trust](./go-trust)** as a trust abstraction layer. Go-Trust provides a unified AuthZEN API that handles the complexity of ETSI TSL, OpenID Federation, and DID resolution, so your services don't need to implement trust logic directly.
+For production deployments, we recommend using **[Go-Trust](./go-trust)** as a trust abstraction layer. Go-Trust provides a unified AuthZEN API that handles the complexity of ETSI TSL, ETSI LoTE, OpenID Federation, and DID resolution, so your services don't need to implement trust logic directly.
 :::
 
 ## Why Trust Matters
@@ -33,6 +33,7 @@ flowchart TD
     subgraph "Go-Trust (AuthZEN PDP)"
         API["/evaluation"]
         ETSI[ETSI Registry]
+        LOTE[LoTE Registry]
         OIDF[OpenID Fed Registry]
         DID[DID:web Registry]
         DIDVH[DID:webvh Registry]
@@ -41,6 +42,7 @@ flowchart TD
     
     subgraph "Trust Sources"
         TSL[(EU Trust Lists)]
+        LJSON[(LoTE JSON)]
         Fed[(Federation Anchors)]
         Web[(DID Documents)]
         Log[(DID Logs)]
@@ -51,12 +53,14 @@ flowchart TD
     Verifier -->|"Is issuer trusted?"| API
     
     API --> ETSI
+    API --> LOTE
     API --> OIDF
     API --> DID
     API --> DIDVH
     API --> IACA
     
     ETSI --> TSL
+    LOTE --> LJSON
     OIDF --> Fed
     DID --> Web
     DIDVH --> Log
@@ -93,6 +97,40 @@ trust:
     accepted_schemes:
       - "http://uri.etsi.org/TrstSvc/TrustedList/schemerules/EUcommon"
 ```
+
+### ETSI Lists of Trusted Entities (LoTE — TS 119 602)
+
+The JSON-based successor to ETSI TSLs. LoTE documents list trusted entities with their digital identities (X.509, JWK, or DID) and signed with JWS instead of XML Digital Signatures.
+
+```mermaid
+graph TD
+    LoTE[LoTE Document] --> Entity1[Trusted Entity]
+    LoTE --> Entity2[Trusted Entity]
+    Entity1 --> X509[X.509 Certificate]
+    Entity1 --> JWK[JWK Key]
+    Entity2 --> DID[DID Identifier]
+```
+
+**Use when:**
+- Deploying in modern credential ecosystems using JSON/JWS
+- Needing to publish trust lists with JWK or DID identities (not just X.509)
+- Converting existing ETSI TSLs to a JSON-native format
+- Requiring simpler tooling (JSON vs XML+XMLDsig)
+
+**Configuration:**
+```yaml
+trust:
+  lote:
+    enabled: true
+    sources:
+      - "https://example.com/lote.json"
+    verify_jws: false
+    refresh_interval: "1h"
+```
+
+:::info
+LoTE documents can be created and published using `tsl-tool` from the [g119612](https://github.com/sirosfoundation/g119612) project. See the [LoTE Publishing Guide](./lote-publishing) for a complete walkthrough.
+:::
 
 ### OpenID Federation
 
