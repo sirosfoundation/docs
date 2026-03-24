@@ -24,14 +24,12 @@ function HomepageHeader() {
         <Link
           className="button button--secondary button--lg"
           to="/sirosid">
-          SIROS ID
-        </Link>
-        <Link
-          className="button button--secondary button--lg"
-          to="/wwwallet">
-          wwWallet
+          SIROS ID Documentation
         </Link>
       </div>
+      <p className={styles.heroFootnote}>
+        Based on <Link to="/wwwallet">wwWallet</Link> open source
+      </p>
     </header>
   );
 }
