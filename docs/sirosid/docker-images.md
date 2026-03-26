@@ -43,14 +43,9 @@ Images are tagged with multiple version identifiers:
 | Tag Pattern | Description | Example |
 |-------------|-------------|---------|
 | `latest` | Latest build from main branch | `vc-verifier:latest` |
-| `main` | Current main branch | `vc-verifier:main` |
-| `v{version}` | Semantic version release | `vc-verifier:v1.2.3` |
-| `v{major}.{minor}` | Minor version (latest patch) | `vc-verifier:v1.2` |
-| `v{major}` | Major version (latest minor) | `vc-verifier:v1` |
-| `{sha}` | Git commit SHA | `vc-verifier:abc1234` |
-| `YYYYMMDD_HHmmss` | Timestamp build | `vc-verifier:20260107_143052` |
+| `{major}.{minor}.{patch}` | Semantic version release | `vc-verifier:1.2.3` |
 
-**Recommended for production:** Use semantic version tags (e.g., `v1.2.3`) for reproducible deployments.
+**Recommended for production:** Use semantic version tags (e.g., `1.2.3`) for reproducible deployments.
 
 ## Trust Service Images
 
@@ -62,7 +57,7 @@ AuthZEN-compliant trust evaluation service.
 |-------|-------------|
 | `ghcr.io/sirosfoundation/go-trust` | Trust evaluation service |
 
-**Tags:** Same tagging scheme as VC images (`latest`, `main`, `v{version}`, `{sha}`)
+**Tags:** Same tagging scheme as VC images (`latest`, `{major}.{minor}.{patch}`)
 
 ```bash
 docker pull ghcr.io/sirosfoundation/go-trust:latest
@@ -78,7 +73,7 @@ Backend service for the SIROS ID wallet application.
 |-------|-------------|
 | `ghcr.io/sirosfoundation/go-wallet-backend` | Wallet backend service |
 
-**Tags:** Same tagging scheme as VC images (`latest`, `main`, `v{version}`, `{sha}`)
+**Tags:** Same tagging scheme as VC images (`latest`, `{major}.{minor}.{patch}`)
 
 ```bash
 docker pull ghcr.io/sirosfoundation/go-wallet-backend:latest
