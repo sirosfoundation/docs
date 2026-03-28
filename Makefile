@@ -41,12 +41,12 @@ install:
 # Start development server
 start:
 	@echo "Starting development server on http://$(HOST):$(PORT)"
-	npx docusaurus start --host $(HOST) --port $(PORT)
+	pnpm start --host $(HOST) --port $(PORT)
 
 # Start development server in background
 start-bg:
 	@echo "Starting development server in background..."
-	@nohup npx docusaurus start --host $(HOST) --port $(PORT) > .docusaurus.log 2>&1 &
+	@nohup pnpm start --host $(HOST) --port $(PORT) > .docusaurus.log 2>&1 &
 	@sleep 2
 	@echo "Server started. View logs with: tail -f .docusaurus.log"
 
@@ -70,18 +70,18 @@ watch: stop
 # Build production site
 build:
 	@echo "Building production site..."
-	npm run build
+	pnpm run build
 	@echo "Build complete. Output in ./build/"
 
 # Serve production build
 serve: build
 	@echo "Serving production build on http://localhost:3000"
-	npm run serve
+	pnpm run serve
 
 # Clear cache and build output
 clean:
 	@echo "Clearing cache and build output..."
-	npm run clear
+	pnpm run clear
 	rm -rf build/
 	rm -rf .docusaurus/
 	rm -f .docusaurus.log
@@ -90,7 +90,7 @@ clean:
 # TypeScript type checking
 typecheck:
 	@echo "Running TypeScript type check..."
-	npm run typecheck
+	pnpm run typecheck
 
 # Check for broken links (runs build with strict mode)
 lint: build
@@ -99,7 +99,7 @@ lint: build
 # Deploy to GitHub Pages
 deploy:
 	@echo "Deploying to GitHub Pages..."
-	npm run deploy
+	pnpm run deploy
 
 # Show server status
 status:
