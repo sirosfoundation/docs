@@ -1,5 +1,5 @@
 ---
-sidebar_position: 3
+sidebar_position: 2
 sidebar_label: Configuration
 ---
 
@@ -53,12 +53,21 @@ Start with the hosted service for development and testing. Move to self-hosted w
 
 ## Overview
 
-The SIROS ID issuer implements the [OpenID for Verifiable Credential Issuance (OID4VCI)](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html) specification. This allows any OID4VCI-compatible wallet to receive credentials from your issuer.
+The SIROS ID issuer implements the [OpenID for Verifiable Credential Issuance (OID4VCI)](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html) specification. This allows **any OID4VCI-compatible wallet** to receive credentials from your issuer—not just the SIROS ID Credential Manager.
+
+:::info Wallet Compatibility
+The SIROS ID Issuer works with any wallet that implements the OID4VCI specification, including:
+- **SIROS ID Credential Manager** (based on wwWallet) – used in examples throughout this documentation
+- **EUDI Reference Wallet** – the EU Digital Identity reference implementation
+- **Third-party wallets** – any wallet implementing OID4VCI with supported credential formats
+
+The diagrams below show the SIROS ID Wallet as an example, but the flows apply to any compatible wallet.
+:::
 
 ```mermaid
 sequenceDiagram
     participant User
-    participant Wallet as SIROS ID Wallet
+    participant Wallet as User's Wallet
     participant Issuer as SIROS ID Issuer
     participant IdP as Your Identity Provider
 
@@ -122,15 +131,22 @@ apigw:
             required: true
 ```
 
-### 3. Pre-Authorized Code
+### 3. Pre-Authorized Code (API Integration)
 
-For server-to-server issuance (e.g., automated credential provisioning), use the pre-authorized code flow:
+For server-to-server issuance where authentic sources push data directly, use the pre-authorized code flow. This enables credential issuance without requiring user authentication via IdP.
+
+See [API Integration](./api-integration) for complete documentation on:
+- REST API for document upload and management
+- gRPC API for direct credential signing
+- Batch issuance workflows
+- Pre-authorized code configuration
 
 ```yaml
 issuer:
-  # Pre-authorized code flow is enabled by default
-  # Credentials are issued via API with pre-generated codes
-  enabled: true
+  pre_authorized_code:
+    enabled: true
+    pin_required: false  # Optional: require PIN confirmation
+    code_ttl: 300        # Code expiration in seconds
 ```
 
 Pre-authorized codes are generated via the API and can be used once to retrieve a credential without additional authentication.
@@ -185,36 +201,68 @@ Configure how user identity maps to credential claims using the `credential_cons
 
 The `auth_method` field determines how the user is authenticated before the credential is issued:
 
-| `auth_method` | Description |
-|---------------|-------------|
-| `basic`       | Internal lookup from the issuer's own datastore |
-| `pid_auth`    | User proves identity by presenting a Verifiable Credential (PID) via OpenID4VP |
-| `saml`        | User is redirected to a SAML IdP; claims from the assertion become credential attributes. Requires `apigw.saml` |
-| `oidc`        | User is redirected to an OIDC Provider; claims from the ID token become credential attributes. Requires `apigw.oidcrp` |
+| `auth_method` | Description | Integration Guide |
+|---------------|-------------|-------------------|
+| `basic`       | Document data from datastore (pre-authorized code flow) | [API Integration](./api-integration) |
+| `openid4vp`   | User proves identity by presenting a Verifiable Credential via OpenID4VP | [API Integration](./api-integration) |
+| `saml`        | User redirected to SAML IdP; claims from assertion | [SAML IdP](./saml-idp) |
+| `oidc`        | User redirected to OIDC Provider; claims from ID token | [OIDC Provider](./oidc-op) |
+
+#### Choosing the Right Auth Method
+
+**`basic`** – Use when your backend system already has verified user data and controls the issuance flow:
+- Diplomas issued by a university after graduation processing
+- Employee badges issued via HR system integration
+- Government documents issued after in-person verification
+- Any scenario where the issuer pushes pre-authorized credential offers via API
+
+**`openid4vp`** – Use when the user must prove their identity by presenting an existing credential:
+- Issuing derived credentials (e.g., EHIC based on PID)
+- Cross-border credential issuance requiring identity verification
+- Self-service credential requests where users prove eligibility via existing credentials
+- Scenarios requiring multiple credential types for identity matching (configurable via `auth_scopes`)
+
+**`saml`** – Use when integrating with existing SAML-based identity infrastructure:
+- Academic institutions with eduGAIN/SAML federation
+- Government agencies with national eID SAML gateways
+- Enterprise environments with SAML-based SSO (ADFS, Shibboleth, etc.)
+- PIDs issued via national identity schemes (e.g., Swedish BankID via SAML proxy)
+
+**`oidc`** – Use when integrating with modern OAuth 2.0/OIDC identity providers:
+- Social login providers (Google, Microsoft, etc.)
+- Cloud-based identity platforms (Auth0, Okta, Azure AD B2C)
+- Mobile-first identity providers
+- OpenID Connect federation scenarios
+
+When using `openid4vp`, you must also configure:
+- **`auth_scopes`**: List of acceptable credential types that can be presented for authentication (e.g., `["pid_1_5", "pid_1_8", "eduid"]`)
+- **`auth_claims`**: List of claims required from the presented credential (e.g., `["given_name", "birthdate", "family_name"]`)
 
 ```yaml
 credential_constructor:
-  # Basic auth – identity from local datastore
-  pid_1_5:
-    vctm_file_path: "/metadata/vctm_pid_arf_1_5.json"
+  # API-based auth – document data pushed via REST API, pre-authorized code flow
+  diploma:
+    vctm_file_path: "/metadata/vctm_diploma.json"
     auth_method: basic
     format: "dc+sd-jwt"
   
-  # PID-based auth – wallet presents a Verifiable Credential
+  # OpenID4VP auth – wallet presents a Verifiable Credential for identity matching
   ehic:
     vctm_file_path: "/metadata/vctm_ehic.json"
-    auth_method: pid_auth
+    auth_method: openid4vp
+    auth_scopes: ["pid_1_5", "pid_1_8", "eduid"]
+    auth_claims: ["given_name", "birthdate", "family_name"]
     format: "dc+sd-jwt"
 
   # SAML auth – redirect to SAML IdP, claims from assertion
-  diploma:
-    vctm_file_path: "/metadata/vctm_diploma.json"
+  pid_saml:
+    vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
     auth_method: saml
     format: "dc+sd-jwt"
 
   # OIDC auth – redirect to OIDC Provider, claims from ID token
-  eduid:
-    vctm_file_path: "/metadata/vctm_eduid.json"
+  pid_oidc:
+    vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
     auth_method: oidc
     format: "dc+sd-jwt"
 ```
