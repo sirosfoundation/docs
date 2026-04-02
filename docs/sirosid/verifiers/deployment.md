@@ -1,5 +1,5 @@
 ---
-sidebar_position: 2
+sidebar_position: 6
 sidebar_label: Deployment
 ---
 
@@ -17,7 +17,7 @@ The verifier deployment uses the following container images:
 | `mongo:7` | Database for sessions and state | ✅ |
 | `ghcr.io/sirosfoundation/go-trust` | Trust evaluation (AuthZEN) | Recommended |
 
-For complete image documentation, see [Docker Images](../docker-images).
+For complete image documentation, see [Docker Images](/sirosid/operations/docker-images).
 
 ## Directory Structure
 

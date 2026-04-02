@@ -1,5 +1,5 @@
 ---
-sidebar_position: 5
+sidebar_position: 3
 ---
 
 # Token Status Lists
@@ -182,4 +182,4 @@ Cache-Control: max-age=43200
 ## Next Steps
 
 - [Credential Type Registry](./vctm-registry) – Credential type metadata registry
-- [Trust Services](./trust/) – Configure trust for status list issuers
+- [Trust Services](/sirosid/trust/) – Configure trust for status list issuers

@@ -77,9 +77,9 @@ const config: Config = {
         },
         {
           type: 'docSidebar',
-          sidebarId: 'wwWalletSidebar',
+          sidebarId: 'openSourceSidebar',
           position: 'left',
-          label: 'wwWallet',
+          label: 'Open Source',
         },
         {
           href: 'https://github.com/sirosfoundation',

@@ -1,5 +1,5 @@
 ---
-sidebar_position: 4
+sidebar_position: 3
 ---
 
 # Quick Start Guide
@@ -22,12 +22,18 @@ By the end of this guide, you'll have:
 
 ## Step 1: Get a Test Wallet (2 minutes)
 
+You can use any OID4VCI/OID4VP-compatible wallet for testing. The simplest option is the SIROS ID Credential Manager:
+
 1. Open [id.siros.org](https://id.siros.org) in your browser
 2. Create a new wallet using a passkey
 3. Navigate to **Add Credential** → **Demo PID**
 4. Accept the test Person Identification credential
 
 You now have a wallet with a test credential.
+
+:::tip Alternative Wallets
+The SIROS ID Verifier works with any OID4VP-compatible wallet. If you have an EUDI Reference Wallet or another compatible wallet, you can use that instead. The verification flow is identical.
+:::
 
 ## Step 2: Register Your Application (5 minutes)
 

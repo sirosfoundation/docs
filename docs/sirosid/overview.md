@@ -5,6 +5,20 @@ sidebar_position: 2
 
 The SIROS ID platform is an open-source, multi-tenant digital credentials platform built around the [OpenID4VC](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html) ecosystem. It enables organizations to issue, manage, and verify digital credentials following EU Digital Identity Wallet (EUDIW) standards.
 
+## Wallet Interoperability
+
+The SIROS ID Issuer and Verifier are designed to work with **any standards-compliant digital wallet**, not just the SIROS ID Credential Manager. As long as a wallet implements the required OpenID4VC protocols (OID4VCI for issuance, OID4VP for verification), it can interact with SIROS ID services.
+
+This includes:
+- **SIROS ID Credential Manager** (based on [wwWallet](/opensource#wwwallet-project)) – the reference wallet used throughout this documentation
+- **EUDI Reference Wallet** – the EU Digital Identity reference implementation
+- **Third-party wallets** – any wallet implementing OID4VCI/OID4VP and supported credential formats
+- **Native mobile wallets** – iOS and Android applications with protocol support
+
+:::tip Interoperability
+When integrating with SIROS ID, you can support multiple wallets simultaneously. Users choose their preferred wallet, and the protocols ensure consistent behavior across implementations.
+:::
+
 ## Architecture
 
 ```mermaid
@@ -27,7 +41,7 @@ flowchart LR
     end
 
     subgraph User
-        Wallet[SIROS ID Wallet<br/>wwWallet]
+        Wallet[Digital Wallet<br/>OID4VCI/OID4VP Compatible]
     end
 
     IdP -->|Authenticate| Issuer
@@ -43,9 +57,9 @@ flowchart LR
 
 **How it works:**
 
-1. **Issuance**: Your identity provider authenticates users, and the issuer creates digital credentials stored in user wallets.
+1. **Issuance**: Your identity provider authenticates users, and the issuer creates digital credentials stored in the user's wallet of choice. Any OID4VCI-compatible wallet can receive credentials.
 
-2. **Verification**: When users access your application, they present credentials from their wallet. The verifier validates them and returns standard OIDC tokens to your app.
+2. **Verification**: When users access your application, they present credentials from their wallet. The verifier validates them and returns standard OIDC tokens to your app. Any OID4VP-compatible wallet can participate.
 
 3. **Trust**: Go-Trust provides unified trust evaluation via AuthZEN, querying ETSI Trust Lists, OpenID Federation, and DID documents.
 
@@ -53,13 +67,17 @@ flowchart LR
 
 | Component | Description | Learn More |
 |-----------|-------------|------------|
-| **Issuer** | Creates and signs digital credentials using OID4VCI protocol | [Issuer Integration](./issuers/concepts) |
-| **Credential Manager** | wwWallet-based wallet for storing and presenting credentials | [Credential Manager](./cm) |
-| **Verifier** | Validates credentials and provides OIDC/OID4VP interfaces | [Verifier Integration](./verifiers/concepts) |
+| **Issuer** | Creates and signs digital credentials using OID4VCI protocol. Works with any compatible wallet. | [Issuer Integration](./issuers/concepts) |
+| **Credential Manager** | Digital wallet based on wwWallet with significant SIROS enhancements. The SIROS ID Credential Manager is one example of a compatible wallet. | [Credential Manager](./reference/cm) |
+| **Verifier** | Validates credentials and provides OIDC/OID4VP interfaces. Accepts presentations from any compatible wallet. | [Verifier Integration](./verifiers/concepts) |
 | **Trust Framework** | OpenID Federation and ETSI TSL support for trust validation | [Trust Architecture](./trust/) |
-| **Credential Type Registry** | Aggregated credential type metadata | [registry.siros.org](./vctm-registry) |
+| **Credential Type Registry** | Aggregated credential type metadata | [registry.siros.org](./reference/vctm-registry) |
 
 ## Supported Standards
+
+For a comprehensive list of implemented standards and specifications, see the [Standards & Specifications](./reference/standards) page.
+
+### Protocol Summary
 
 | Standard | Description | Use Case |
 |----------|-------------|----------|

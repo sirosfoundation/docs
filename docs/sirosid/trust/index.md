@@ -149,6 +149,10 @@ graph LR
 - Needing dynamic trust updates
 - Integrating with OpenID-based infrastructure
 
+:::tip
+For detailed setup instructions including Trust Anchor deployment with [Inmor](https://github.com/SUNET/inmor), see the [OpenID Federation Guide](./openid-federation).
+:::
+
 **Configuration:**
 ```yaml
 trust:

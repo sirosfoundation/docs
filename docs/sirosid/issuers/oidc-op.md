@@ -1,5 +1,6 @@
 ---
-sidebar_position: 3
+sidebar_position: 4
+sidebar_label: OIDC Provider Integration
 ---
 
 # OpenID Connect Provider Integration

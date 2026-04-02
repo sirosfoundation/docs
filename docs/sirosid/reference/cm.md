@@ -1,9 +1,21 @@
 ---
-sidebar_position: 3
+sidebar_position: 4
 ---
 # Credential Manager
 
-The SIROS ID Credential Manager (CM) is a hosted version of the [wwWallet](/wwwallet) opensource wallet. The wwWallet is a flexible digital credential manager that supports both native apps and web clients. The SIROS ID version can be accessed on any device and supports all major browsers and platforms.
+The SIROS ID Credential Manager (CM) is based on the [wwWallet](/opensource#wwwallet-project) open source project, with significant enhancements developed by SIROS Foundation. While wwWallet provides a flexible foundation for digital credential management, SIROS ID CM includes substantial improvements in security architecture, protocol support, and scalability that go beyond the original implementation.
+
+The SIROS ID CM supports both native apps and web clients, can be accessed on any device, and supports all major browsers and platforms.
+
+:::info Alternative Wallets
+The SIROS ID Credential Manager is **one example** of an OID4VCI/OID4VP compatible wallet. The [SIROS ID Issuer](/sirosid/issuers/concepts) and [Verifier](/sirosid/verifiers/concepts) work with **any standards-compliant wallet**, including:
+
+- **EUDI Reference Wallet** – EU Digital Identity reference implementation
+- **Third-party commercial wallets** – Any wallet implementing OID4VCI/OID4VP
+- **Custom enterprise wallets** – Your own wallet implementation
+
+This page documents the SIROS ID Credential Manager specifically. For general wallet requirements, see the [Standards & Specifications](./standards#wallet-standards) page.
+:::
 
 ## Account-Free Design
 

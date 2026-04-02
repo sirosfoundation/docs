@@ -1,5 +1,6 @@
 ---
-sidebar_position: 4
+sidebar_position: 5
+sidebar_label: Digital Credentials API
 ---
 
 # W3C Digital Credentials API

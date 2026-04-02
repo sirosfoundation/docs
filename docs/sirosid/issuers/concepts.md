@@ -1,11 +1,25 @@
 ---
-sidebar_position: 0
+sidebar_position: 1
 sidebar_label: Concepts & Architecture
 ---
 
 # Issuer Concepts & Architecture
 
 This document provides a conceptual introduction to the SIROS ID Issuer, explaining key concepts, components, and deployment models. For hands-on configuration, see [Issuing Credentials](./issuer).
+
+## Wallet Interoperability
+
+The SIROS ID Issuer is designed to work with **any standards-compliant digital wallet**—not just the SIROS ID Credential Manager. Any wallet implementing the OID4VCI specification with supported credential formats can receive credentials from a SIROS ID Issuer.
+
+Compatible wallets include:
+- **SIROS ID Credential Manager** (based on [wwWallet](/opensource#wwwallet-project)) – used in examples throughout this documentation
+- **EUDI Reference Wallet** – the EU Digital Identity reference implementation
+- **Native mobile wallets** – iOS and Android applications with OID4VCI support
+- **Third-party wallets** – any wallet implementing OID4VCI and supported formats (SD-JWT VC, mDL, JWT VC)
+
+:::tip Multi-Wallet Support
+A single issuer deployment can issue credentials to multiple different wallet implementations. The OID4VCI protocol ensures consistent behavior across all compliant wallets.
+:::
 
 ## What is a Credential Issuer?
 
@@ -24,7 +38,7 @@ flowchart LR
         Signer[Signing<br/>Service]
     end
 
-    Wallet[User Wallet]
+    Wallet[User Wallet<br/>OID4VCI Compatible]
 
     IdP -->|User Identity| Auth
     AS -.->|Attributes| Constructor
@@ -34,11 +48,32 @@ flowchart LR
 ```
 
 The issuer:
-- **Authenticates** users via existing identity providers (SAML, OIDC)
-- **Collects** claims from your authoritative sources
+- **Authenticates** users via existing identity providers (SAML, OIDC) or API-based flows
+- **Collects** claims from your authoritative sources (via IdP or direct API integration)
 - **Constructs** credentials following standardized schemas
 - **Signs** credentials using cryptographic keys
 - **Delivers** credentials to user wallets via OID4VCI protocol
+
+## Integration Patterns
+
+The SIROS ID Issuer supports two main integration patterns:
+
+| Pattern | Best For | Documentation |
+|---------|----------|---------------|
+| **IAM-Centric** | Existing IdPs, SSO, federation | [SAML IdP](./saml-idp), [OIDC Provider](./oidc-op) |
+| **API-Centric** | Backend systems, batch issuance, pre-authorized flows | [API Integration](./api-integration) |
+
+### IAM-Centric Integration
+
+Users authenticate via your identity provider (SAML or OIDC), and the issuer constructs credentials from the identity claims. This is the traditional model for organizations with established IdP infrastructure.
+
+### API-Centric Integration
+
+Authentic sources (HR systems, registries, databases) push document data via REST/gRPC APIs. Users collect credentials using pre-authorized codes without additional authentication. This is ideal for:
+
+- **Batch issuance**: Provisioning credentials for many users at once
+- **Non-IAM workflows**: Where identity is established outside the IdP
+- **Authentic source systems**: Direct integration with authoritative data
 
 ## Core Concepts
 

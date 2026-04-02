@@ -1,11 +1,25 @@
 ---
-sidebar_position: 0
+sidebar_position: 1
 sidebar_label: Concepts & Architecture
 ---
 
 # Verifier Concepts & Architecture
 
 This document provides a conceptual introduction to the SIROS ID Verifier, explaining key concepts, components, and deployment models. For hands-on configuration, see [Verifying Credentials](./verifier).
+
+## Wallet Interoperability
+
+The SIROS ID Verifier is designed to accept credential presentations from **any standards-compliant digital wallet**—not just the SIROS ID Credential Manager. Any wallet implementing the OpenID4VP specification with supported credential formats can participate in verification flows.
+
+Compatible wallets include:
+- **SIROS ID Credential Manager** (based on [wwWallet](/opensource#wwwallet-project)) – used in examples throughout this documentation
+- **EUDI Reference Wallet** – the EU Digital Identity reference implementation
+- **Native mobile wallets** – iOS and Android applications with OID4VP support
+- **Third-party wallets** – any wallet implementing OID4VP and supported formats (SD-JWT VC, mDL)
+
+:::tip Multi-Wallet Support
+A single verifier deployment can accept presentations from multiple different wallet implementations simultaneously. Users choose their preferred wallet, and the protocols ensure consistent verification behavior.
+:::
 
 ## What is a Credential Verifier?
 
@@ -14,7 +28,7 @@ A **credential verifier** is a service that validates digital credentials presen
 ```mermaid
 flowchart LR
     subgraph "User"
-        Wallet[Digital Wallet<br/>with Credentials]
+        Wallet[Digital Wallet<br/>OID4VP Compatible]
     end
 
     subgraph "Credential Verifier"

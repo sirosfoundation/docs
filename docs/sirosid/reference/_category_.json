@@ -1,0 +1,8 @@
+{
+  "label": "Reference",
+  "position": 8,
+  "link": {
+    "type": "generated-index",
+    "description": "Technical reference documentation including standards, credential types, and wallet specifications."
+  }
+}

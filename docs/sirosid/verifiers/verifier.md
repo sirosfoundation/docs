@@ -1,5 +1,5 @@
 ---
-sidebar_position: 3
+sidebar_position: 2
 sidebar_label: Configuration
 ---
 
@@ -59,7 +59,16 @@ The SIROS ID verifier implements two protocol interfaces:
 1. **[OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.html) Provider** – Standard OIDC interface for existing IAM systems
 2. **[OpenID4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html)** – Direct verification for custom applications
 
-This means you can add credential verification to your application without changing your existing authentication flow.
+This means you can add credential verification to your application without changing your existing authentication flow. The verifier accepts presentations from **any OID4VP-compatible wallet**—not just the SIROS ID Credential Manager.
+
+:::info Wallet Interoperability
+The verification flow works identically regardless of which wallet the user chooses:
+- **SIROS ID Credential Manager** – Based on wwWallet with significant SIROS enhancements (shown in examples)
+- **EUDI Reference Wallet** – EU Digital Identity reference implementation
+- **Other OID4VP wallets** – Any wallet implementing the standard protocols
+
+The diagram below uses "User's Wallet" to represent any compatible wallet.
+:::
 
 ```mermaid
 sequenceDiagram

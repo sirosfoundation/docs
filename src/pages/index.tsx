@@ -26,10 +26,12 @@ function HomepageHeader() {
           to="/sirosid">
           SIROS ID Documentation
         </Link>
+        <Link
+          className="button button--outline button--lg"
+          to="/opensource">
+          Open Source Projects
+        </Link>
       </div>
-      <p className={styles.heroFootnote}>
-        Based on <Link to="/wwwallet">wwWallet</Link> open source
-      </p>
     </header>
   );
 }

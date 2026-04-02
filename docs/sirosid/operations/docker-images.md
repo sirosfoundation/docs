@@ -1,5 +1,5 @@
 ---
-sidebar_position: 6
+sidebar_position: 2
 ---
 
 # Docker Images
@@ -229,6 +229,6 @@ volumes:
 
 ## Next Steps
 
-- [Verifier Configuration](./verifiers/verifier)
-- [Issuer Configuration](./issuers/issuer)
-- [Trust Services](./trust/)
+- [Verifier Configuration](/sirosid/verifiers/verifier)
+- [Issuer Configuration](/sirosid/issuers/issuer)
+- [Trust Services](/sirosid/trust/)
