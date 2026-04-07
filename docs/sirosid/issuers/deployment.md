@@ -13,7 +13,7 @@ The issuer deployment uses the following container images:
 
 | Image | Purpose | Required |
 |-------|---------|:--------:|
-| `ghcr.io/sirosfoundation/vc-issuer` | Credential issuer service (includes SAML & OIDC support) | ✅ |
+| `ghcr.io/sirosfoundation/vc/issuer` | Credential issuer service (includes SAML & OIDC support) | ✅ |
 | `mongo:7` | Database for sessions and state | ✅ |
 | `ghcr.io/sirosfoundation/go-trust` | Trust evaluation (AuthZEN) | Optional |
 
@@ -136,7 +136,7 @@ openssl genrsa -out pki/issuer_key.pem 2048
 ```yaml
 services:
   issuer:
-    image: ghcr.io/sirosfoundation/vc-issuer:latest
+    image: ghcr.io/sirosfoundation/vc/issuer:latest
     restart: always
     ports:
       - "8080:8080"
@@ -166,7 +166,7 @@ For SAML IdP authentication, mount the SAML SP certificate and key:
 ```yaml
 services:
   issuer:
-    image: ghcr.io/sirosfoundation/vc-issuer:latest
+    image: ghcr.io/sirosfoundation/vc/issuer:latest
     volumes:
       - ./config.yaml:/config.yaml:ro
       - ./pki:/pki:ro

@@ -262,7 +262,7 @@ common:
 ```yaml
 services:
   issuer:
-    image: ghcr.io/sirosfoundation/vc-issuer:latest
+    image: ghcr.io/sirosfoundation/vc/issuer:latest
     restart: always
     ports:
       - "8080:8080"
