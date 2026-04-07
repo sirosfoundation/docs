@@ -13,7 +13,7 @@ The verifier deployment uses the following container images:
 
 | Image | Purpose | Required |
 |-------|---------|:--------:|
-| `ghcr.io/sirosfoundation/vc-verifier` | Credential verifier service (includes SAML & all format support) | ✅ |
+| `ghcr.io/sirosfoundation/vc/verifier` | Credential verifier service (includes SAML & all format support) | ✅ |
 | `mongo:7` | Database for sessions and state | ✅ |
 | `ghcr.io/sirosfoundation/go-trust` | Trust evaluation (AuthZEN) | Recommended |
 
@@ -150,7 +150,7 @@ openssl ecparam -name prime256v1 -genkey -noout -out pki/oidc_signing_key.pem
 ```yaml
 services:
   verifier:
-    image: ghcr.io/sirosfoundation/vc-verifier:latest
+    image: ghcr.io/sirosfoundation/vc/verifier:latest
     restart: always
     ports:
       - "8080:8080"
@@ -180,7 +180,7 @@ Add the go-trust service for credential issuer validation:
 ```yaml
 services:
   verifier:
-    image: ghcr.io/sirosfoundation/vc-verifier:latest
+    image: ghcr.io/sirosfoundation/vc/verifier:latest
     # ... verifier configuration
     depends_on:
       - mongo

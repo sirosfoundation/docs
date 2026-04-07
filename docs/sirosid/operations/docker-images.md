@@ -22,13 +22,12 @@ The Verifiable Credentials (VC) platform provides multiple services.
 
 | Service | Image |
 |---------|-------|
-| **Verifier** | `ghcr.io/sirosfoundation/vc-verifier` |
-| **Issuer** | `ghcr.io/sirosfoundation/vc-issuer` |
-| **API Gateway** | `ghcr.io/sirosfoundation/vc-apigw` |
-| **Registry** | `ghcr.io/sirosfoundation/vc-registry` |
-| **Persistent** | `ghcr.io/sirosfoundation/vc-persistent` |
-| **Mock AS** | `ghcr.io/sirosfoundation/vc-mockas` |
-| **UI** | `ghcr.io/sirosfoundation/vc-ui` |
+| **Verifier** | `ghcr.io/sirosfoundation/vc/verifier` |
+| **Issuer** | `ghcr.io/sirosfoundation/vc/issuer` |
+| **API Gateway** | `ghcr.io/sirosfoundation/vc/apigw` |
+| **Registry** | `ghcr.io/sirosfoundation/vc/registry` |
+| **Mock AS** | `ghcr.io/sirosfoundation/vc/mockas` |
+| **UI** | `ghcr.io/sirosfoundation/vc/ui` |
 
 All images include SAML 2.0 SP, OIDC RP, and all credential format support.
 
@@ -42,8 +41,8 @@ Images are tagged with multiple version identifiers:
 
 | Tag Pattern | Description | Example |
 |-------------|-------------|---------|
-| `latest` | Latest build from main branch | `vc-verifier:latest` |
-| `{major}.{minor}.{patch}` | Semantic version release | `vc-verifier:1.2.3` |
+| `latest` | Latest build from main branch | `vc/verifier:latest` |
+| `{major}.{minor}.{patch}` | Semantic version release | `vc/verifier:1.2.3` |
 
 **Recommended for production:** Use semantic version tags (e.g., `1.2.3`) for reproducible deployments.
 
@@ -94,10 +93,10 @@ echo $GITHUB_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
 
 ```bash
 # Standard verifier (latest)
-docker pull ghcr.io/sirosfoundation/vc-verifier:latest
+docker pull ghcr.io/sirosfoundation/vc/verifier:latest
 
 # Standard issuer
-docker pull ghcr.io/sirosfoundation/vc-issuer:latest
+docker pull ghcr.io/sirosfoundation/vc/issuer:latest
 
 # Trust service
 docker pull ghcr.io/sirosfoundation/go-trust:latest
@@ -124,8 +123,8 @@ Docker automatically selects the correct platform for your system.
 ```mermaid
 flowchart TD
     A[What are you deploying?] --> B{Service Type}
-    B -->|Verifier| C[vc-verifier]
-    B -->|Issuer| D[vc-issuer]
+    B -->|Verifier| C[vc/verifier]
+    B -->|Issuer| D[vc/issuer]
     B -->|Trust| E[go-trust]
     B -->|Wallet Backend| F[go-wallet-backend]
 ```
@@ -136,10 +135,10 @@ All features (SAML, OIDC, SD-JWT VC, VC 2.0) are included in every image.
 
 | Scenario | Verifier Image | Issuer Image |
 |----------|---------------|--------------|
-| Basic OID4VC deployment | `vc-verifier` | `vc-issuer` |
-| Academic federation (eduGAIN/SAML) | `vc-verifier` | `vc-issuer` |
-| Government identity (SAML) | `vc-verifier` | `vc-issuer` |
-| Enterprise OIDC | `vc-verifier` | `vc-issuer` |
+| Basic OID4VC deployment | `vc/verifier` | `vc/issuer` |
+| Academic federation (eduGAIN/SAML) | `vc/verifier` | `vc/issuer` |
+| Government identity (SAML) | `vc/verifier` | `vc/issuer` |
+| Enterprise OIDC | `vc/verifier` | `vc/issuer` |
 
 ## Example Docker Compose
 
@@ -148,7 +147,7 @@ All features (SAML, OIDC, SD-JWT VC, VC 2.0) are included in every image.
 ```yaml
 services:
   verifier:
-    image: ghcr.io/sirosfoundation/vc-verifier:latest
+    image: ghcr.io/sirosfoundation/vc/verifier:latest
     restart: always
     ports:
       - "8080:8080"
@@ -158,7 +157,7 @@ services:
       - VC_CONFIG_YAML=config.yaml
 
   issuer:
-    image: ghcr.io/sirosfoundation/vc-issuer:latest
+    image: ghcr.io/sirosfoundation/vc/issuer:latest
     restart: always
     ports:
       - "8081:8080"
@@ -188,7 +187,7 @@ volumes:
 ```yaml
 services:
   verifier:
-    image: ghcr.io/sirosfoundation/vc-verifier:latest
+    image: ghcr.io/sirosfoundation/vc/verifier:latest
     restart: always
     ports:
       - "8080:8080"
@@ -199,7 +198,7 @@ services:
       - VC_CONFIG_YAML=config.yaml
 
   issuer:
-    image: ghcr.io/sirosfoundation/vc-issuer:latest
+    image: ghcr.io/sirosfoundation/vc/issuer:latest
     restart: always
     ports:
       - "8081:8080"

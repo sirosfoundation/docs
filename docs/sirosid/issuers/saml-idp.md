@@ -271,7 +271,7 @@ Each attribute mapping supports:
 ```yaml
 services:
   apigw:
-    image: ghcr.io/sirosfoundation/vc-apigw:latest
+    image: ghcr.io/sirosfoundation/vc/apigw:latest
     restart: always
     ports:
       - "8080:8080"
@@ -284,7 +284,7 @@ services:
       - issuer
 
   issuer:
-    image: ghcr.io/sirosfoundation/vc-issuer:latest
+    image: ghcr.io/sirosfoundation/vc/issuer:latest
     # ...
 
   mongo:

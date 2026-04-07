@@ -352,7 +352,7 @@ The issuer is available as a Docker image:
 
 ```bash
 # Pull the issuer image (includes SAML, OIDC, and all credential formats)
-docker pull ghcr.io/sirosfoundation/vc-issuer:latest
+docker pull ghcr.io/sirosfoundation/vc/issuer:latest
 ```
 
 #### Docker Compose
@@ -362,7 +362,7 @@ Create a `docker-compose.yaml`:
 ```yaml
 services:
   issuer:
-    image: ghcr.io/sirosfoundation/vc-issuer:latest
+    image: ghcr.io/sirosfoundation/vc/issuer:latest
     restart: always
     ports:
       - "8080:8080"
@@ -476,7 +476,7 @@ spec:
     spec:
       containers:
         - name: issuer
-          image: ghcr.io/sirosfoundation/vc-issuer:latest
+          image: ghcr.io/sirosfoundation/vc/issuer:latest
           ports:
             - containerPort: 8080
           env:

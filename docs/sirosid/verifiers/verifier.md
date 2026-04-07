@@ -376,7 +376,7 @@ The verifier is available as a Docker image:
 
 ```bash
 # Pull the verifier image (includes SAML and all credential format support)
-docker pull ghcr.io/sirosfoundation/vc-verifier:latest
+docker pull ghcr.io/sirosfoundation/vc/verifier:latest
 ```
 
 #### Docker Compose
@@ -386,7 +386,7 @@ Create a `docker-compose.yaml`:
 ```yaml
 services:
   verifier:
-    image: ghcr.io/sirosfoundation/vc-verifier:latest
+    image: ghcr.io/sirosfoundation/vc/verifier:latest
     restart: always
     ports:
       - "8080:8080"
@@ -526,7 +526,7 @@ spec:
     spec:
       containers:
         - name: verifier
-          image: ghcr.io/sirosfoundation/vc-verifier:latest
+          image: ghcr.io/sirosfoundation/vc/verifier:latest
           ports:
             - containerPort: 8080
           env:
