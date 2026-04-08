@@ -82,6 +82,12 @@ const config: Config = {
           label: 'Open Source',
         },
         {
+          type: 'docSidebar',
+          sidebarId: 'securitySidebar',
+          position: 'left',
+          label: 'Security',
+        },
+        {
           href: 'https://github.com/sirosfoundation',
           label: 'GitHub',
           position: 'right',
