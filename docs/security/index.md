@@ -30,9 +30,7 @@ SIROS ID is designed with the following security principles:
 
 If you discover a security vulnerability, please report it responsibly:
 
-- **Email:** security@siros.org
-- **PGP Key:** Available at [/.well-known/security.txt](https://siros.org/.well-known/security.txt)
-- **Response SLA:** Initial response within 48 hours
+- **Email:** abuse@siros.org
 
 Please do not disclose vulnerabilities publicly until we have had an opportunity to address them.
 
