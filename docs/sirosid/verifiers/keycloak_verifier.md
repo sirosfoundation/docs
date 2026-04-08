@@ -41,7 +41,7 @@ sequenceDiagram
 This guide works with both the **SIROS ID hosted verifier** and **self-hosted deployments**. Simply replace the verifier URL as needed. See [Verifier Deployment Options](./verifier.md#deployment-options) for more information.
 
 When using the **SIROS ID hosted service**, verifiers use subdomain-based URLs:
-`https://<instance>.<tenant>.verifier.id.siros.org`
+`https://<tenant>.verifier.id.siros.org`
 :::
 
 ## Prerequisites
