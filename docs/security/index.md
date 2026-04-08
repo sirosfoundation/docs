@@ -20,11 +20,11 @@ SIROS ID is designed with the following security principles:
 
 | Topic | Description |
 |-------|-------------|
-| [Software Bill of Materials](./sbom) | Download and verify SBOMs for all SIROS components |
-| [Vulnerability Disclosure](./vulnerability-disclosure) | How to report security issues |
 | [Security Architecture](./architecture) | Overview of security controls and boundaries |
-| [Cryptographic Practices](./cryptography) | Key management, algorithms, and protocols |
-| [Compliance](./compliance) | Alignment with eIDAS 2.0, NIS2, and other frameworks |
+| [Software Bill of Materials](./sbom) | Download and verify SBOMs for all SIROS components |
+| Vulnerability Disclosure | How to report security issues *(see below)* |
+| Cryptographic Practices | Key management, algorithms, and protocols *(coming soon)* |
+| Compliance | Alignment with eIDAS 2.0, NIS2, and other frameworks *(coming soon)* |
 
 ## Reporting Security Issues
 
