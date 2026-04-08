@@ -194,50 +194,6 @@ A typical SIROS Foundation Go project SBOM includes:
 }
 ```
 
-## Repositories with SBOM Generation
-
-The following SIROS Foundation repositories have SBOM generation enabled:
-
-| Repository | Status |
-|------------|--------|
-| [go-cryptoutil](https://github.com/sirosfoundation/go-cryptoutil) | ✅ Active |
-| [go-trust](https://github.com/sirosfoundation/go-trust) | 🔜 Planned |
-| [go-wallet-backend](https://github.com/sirosfoundation/go-wallet-backend) | 🔜 Planned |
-| [goFF](https://github.com/sirosfoundation/goFF) | 🔜 Planned |
-| [g119612](https://github.com/sirosfoundation/g119612) | 🔜 Planned |
-
-## Adding SBOM to a Repository
-
-To add SBOM generation to a SIROS Foundation repository, create `.github/workflows/sbom.yml`:
-
-```yaml
-name: SBOM
-
-on:
-  push:
-    branches: [main]
-    tags: ['v*']
-  pull_request:
-    branches: [main]
-  release:
-    types: [published]
-  workflow_dispatch:
-
-jobs:
-  sbom:
-    uses: sirosfoundation/.github/.github/workflows/sbom.yml@main
-    with:
-      artifact-name: your-repo-name
-      scan-vulnerabilities: true
-      sign-sbom: false  # Enable after testing
-    permissions:
-      contents: write
-      id-token: write
-      security-events: write
-```
-
-See the [reusable workflow documentation](https://github.com/sirosfoundation/.github/blob/main/.github/workflows/sbom.yml) for all available options.
-
 ## Related Resources
 
 - [CycloneDX Specification](https://cyclonedx.org/specification/overview/)
