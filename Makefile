@@ -1,7 +1,7 @@
 # SIROS Documentation Makefile
 # ============================
 
-.PHONY: help install build start stop restart serve clean typecheck lint deploy watch
+.PHONY: help install build start stop restart serve clean typecheck lint deploy watch fetch-api-specs
 
 # Default target
 help:
@@ -29,10 +29,37 @@ help:
 	@echo "Deployment:"
 	@echo "  deploy     Deploy to GitHub Pages"
 	@echo ""
+	@echo "API Specs:"
+	@echo "  fetch-api-specs  Fetch latest OpenAPI/Swagger specs from source repos"
+	@echo ""
 
 # Configuration
 PORT ?= 3000
 HOST ?= 0.0.0.0
+
+# API spec sources (GitHub raw URLs, default branch)
+API_DIR := static/api
+GITHUB_RAW := https://raw.githubusercontent.com
+
+SPEC_SOURCES := \
+	$(API_DIR)/go-trust-swagger.yaml=$(GITHUB_RAW)/sirosfoundation/go-trust/main/docs/swagger/swagger.yaml \
+	$(API_DIR)/wallet-backend-admin-openapi.yaml=$(GITHUB_RAW)/sirosfoundation/go-wallet-backend/main/docs/openapi-admin.yaml \
+	$(API_DIR)/vc-apigw-swagger.yaml=$(GITHUB_RAW)/SUNET/vc/main/docs/apigw/swagger.yaml \
+	$(API_DIR)/vc-issuer-swagger.yaml=$(GITHUB_RAW)/SUNET/vc/main/docs/issuer/swagger.yaml \
+	$(API_DIR)/vc-registry-swagger.yaml=$(GITHUB_RAW)/SUNET/vc/main/docs/registry/swagger.yaml \
+	$(API_DIR)/vc-verifier-swagger.yaml=$(GITHUB_RAW)/SUNET/vc/main/docs/verifier/swagger.yaml
+
+# Fetch latest API specs from source repositories
+fetch-api-specs:
+	@echo "Fetching latest API specs..."
+	@mkdir -p $(API_DIR)
+	@for entry in $(SPEC_SOURCES); do \
+		dest=$${entry%%=*}; \
+		url=$${entry#*=}; \
+		echo "  $$dest <- $$url"; \
+		curl -sfL -o "$$dest" "$$url" || echo "  ⚠ Failed to fetch $$dest"; \
+	done
+	@echo "Done."
 
 # Install dependencies
 install:
@@ -68,7 +95,7 @@ watch: stop
 	@tail -f .docusaurus.log
 
 # Build production site
-build:
+build: fetch-api-specs
 	@echo "Building production site..."
 	pnpm run build
 	@echo "Build complete. Output in ./build/"

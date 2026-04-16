@@ -8,6 +8,9 @@
 .docusaurus
 .cache-loader
 
+# API specs (fetched at build time via `make fetch-api-specs`)
+/static/api/
+
 # Misc
 .DS_Store
 .env.local
