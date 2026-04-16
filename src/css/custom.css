@@ -259,3 +259,99 @@
   }
 }
 
+/* =====================================================
+   SWAGGER UI OVERRIDES
+   Ensure badges and text render correctly within
+   the Docusaurus theme
+   ===================================================== */
+
+/* Force SwaggerUI to use its own background */
+.swagger-ui {
+  color: #3b4151;
+}
+
+/* HTTP method badges - ensure proper colors */
+.swagger-ui .opblock.opblock-get .opblock-summary-method {
+  background: #61affe;
+  color: #fff;
+}
+
+.swagger-ui .opblock.opblock-post .opblock-summary-method {
+  background: #49cc90;
+  color: #fff;
+}
+
+.swagger-ui .opblock.opblock-put .opblock-summary-method {
+  background: #fca130;
+  color: #fff;
+}
+
+.swagger-ui .opblock.opblock-delete .opblock-summary-method {
+  background: #f93e3e;
+  color: #fff;
+}
+
+.swagger-ui .opblock.opblock-patch .opblock-summary-method {
+  background: #50e3c2;
+  color: #fff;
+}
+
+/* Operation block borders and backgrounds */
+.swagger-ui .opblock.opblock-get {
+  background: rgba(97, 175, 254, 0.1);
+  border-color: #61affe;
+}
+
+.swagger-ui .opblock.opblock-post {
+  background: rgba(73, 204, 144, 0.1);
+  border-color: #49cc90;
+}
+
+.swagger-ui .opblock.opblock-put {
+  background: rgba(252, 161, 48, 0.1);
+  border-color: #fca130;
+}
+
+.swagger-ui .opblock.opblock-delete {
+  background: rgba(249, 62, 62, 0.1);
+  border-color: #f93e3e;
+}
+
+.swagger-ui .opblock.opblock-patch {
+  background: rgba(80, 227, 194, 0.1);
+  border-color: #50e3c2;
+}
+
+/* Summary path text */
+.swagger-ui .opblock .opblock-summary-path {
+  color: #3b4151;
+}
+
+/* Ensure model/schema text is readable */
+.swagger-ui .model-title,
+.swagger-ui .model .property,
+.swagger-ui table thead tr th,
+.swagger-ui table thead tr td,
+.swagger-ui .parameter__name,
+.swagger-ui .parameter__type {
+  color: #3b4151;
+}
+
+/* Info section */
+.swagger-ui .info .title,
+.swagger-ui .info .description p {
+  color: #3b4151;
+}
+
+/* Tag/section headers */
+.swagger-ui .opblock-tag {
+  color: #3b4151;
+  border-bottom: 1px solid rgba(59, 65, 81, 0.3);
+}
+
+/* Response status badges */
+.swagger-ui .responses-inner h4,
+.swagger-ui .response-col_status {
+  color: #3b4151;
+}
+
