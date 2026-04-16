@@ -9,6 +9,7 @@ const config: Config = {
   favicon: 'img/favicon.ico',
   themes: ['@docusaurus/theme-mermaid'],
   markdown: { mermaid: true, },
+  // No additional plugins needed beyond theme-mermaid
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {

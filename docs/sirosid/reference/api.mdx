@@ -1,0 +1,89 @@
+---
+sidebar_position: 6
+---
+
+# API Reference
+
+import SwaggerUI from '@site/src/components/SwaggerUI';
+
+This page provides interactive API documentation for the SIROS ID platform services. Each API specification can be explored below, and the raw OpenAPI/Swagger files are available for download.
+
+## Go-Trust API {#go-trust}
+
+The Go-Trust API is a multi-framework trust decision engine providing AuthZEN-based trust evaluation. It supports ETSI TS 119612 trusted lists, OpenID Federation, and DID Web trust frameworks.
+
+- **Version:** 2.0
+- **License:** BSD-2-Clause
+- **Repository:** [sirosfoundation/go-trust](https://github.com/sirosfoundation/go-trust)
+- **Spec:** [Download OpenAPI spec](/api/go-trust-swagger.yaml)
+
+<details>
+<summary>Expand Go-Trust API</summary>
+
+<SwaggerUI specUrl="/api/go-trust-swagger.yaml" />
+
+</details>
+
+## Wallet Backend Admin API {#wallet-backend-admin}
+
+Internal administration API for managing the wallet backend multi-tenant infrastructure. This API manages tenants, users, credential issuers, and verifiers.
+
+- **Version:** 1.0.0
+- **License:** Apache 2.0
+- **Repository:** [sirosfoundation/go-wallet-backend](https://github.com/sirosfoundation/go-wallet-backend)
+- **Spec:** [Download OpenAPI spec](/api/wallet-backend-admin-openapi.yaml)
+
+<details>
+<summary>Expand Wallet Backend Admin API</summary>
+
+<SwaggerUI specUrl="/api/wallet-backend-admin-openapi.yaml" />
+
+</details>
+
+## VC Platform APIs {#vc-platform}
+
+The [VC platform](https://github.com/SUNET/vc) provides the core credential issuance and verification services for SIROS ID. It exposes several service-specific APIs:
+
+### API Gateway (Datastore) {#vc-apigw}
+
+The API Gateway handles core data operations for the VC platform.
+
+- **Version:** 2.8
+- **Spec:** [Download Swagger spec](/api/vc-apigw-swagger.yaml)
+
+<details>
+<summary>Expand API Gateway API</summary>
+
+<SwaggerUI specUrl="/api/vc-apigw-swagger.yaml" />
+
+</details>
+
+### Registry API {#vc-registry}
+
+The Registry service manages credential metadata and trust information.
+
+- **Version:** 0.1.0
+- **Base path:** `/api/v1`
+- **Spec:** [Download Swagger spec](/api/vc-registry-swagger.yaml)
+
+<details>
+<summary>Expand Registry API</summary>
+
+<SwaggerUI specUrl="/api/vc-registry-swagger.yaml" />
+
+</details>
+
+### Issuer API {#vc-issuer}
+
+The Issuer service handles credential issuance workflows.
+
+- **Version:** 0.1.0
+- **Base path:** `/issuer/api/v1`
+- **Spec:** [Download Swagger spec](/api/vc-issuer-swagger.yaml)
+
+<details>
+<summary>Expand Issuer API</summary>
+
+<SwaggerUI specUrl="/api/vc-issuer-swagger.yaml" />
+
+</details>
