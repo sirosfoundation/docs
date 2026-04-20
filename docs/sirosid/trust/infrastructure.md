@@ -147,6 +147,73 @@ Create a YAML pipeline configuration to generate your TSL:
 ./tsl-tool --log-level debug generate-tsl.yaml
 ```
 
+#### Directory-Based TSL Generation
+
+Alternatively, the `generate` pipeline step can create a TSL from a directory of YAML metadata and certificate files:
+
+```
+tsl-source/
+├── scheme.yaml              # TSL scheme metadata
+└── providers/               # One subdirectory per trust service provider
+    └── my-provider/
+        ├── provider.yaml    # Provider metadata
+        ├── cert1.pem        # X.509 certificate (PEM)
+        └── cert1.yaml       # Service metadata for cert1.pem
+```
+
+**scheme.yaml:**
+```yaml
+operatorNames:
+  - language: en
+    value: "Trust List Operator"
+type: "http://uri.etsi.org/TrstSvc/TrustedList/TSLType/EUgeneric"
+sequenceNumber: 1    # Optional, defaults to 1
+id: "MY-TSL-001"     # Optional, defaults to "TSL-NNN"
+```
+
+**provider.yaml:**
+```yaml
+names:
+  - language: en
+    value: "Example Trust Service Provider"
+address:                      # Optional
+  postal:
+    streetAddress: "Example Street 123"
+    locality: "Example City"
+    postalCode: "12345"
+    countryName: "SE"
+  electronic:
+    - "https://example.com"
+    - "mailto:contact@example.com"
+tradeName:                    # Optional
+  - language: en
+    value: "Example Corp"
+informationURI:               # Optional
+  - language: en
+    value: "https://example.com/info"
+```
+
+**cert.yaml** (must match a `.pem` file by base name, e.g. `cert1.yaml` ↔ `cert1.pem`):
+```yaml
+serviceNames:
+  - language: en
+    value: "Example Signing Service"
+serviceType: "http://uri.etsi.org/TrstSvc/Svctype/CA/QC"
+status: "http://uri.etsi.org/TrstSvc/TrustedList/Svcstatus/granted"
+serviceDigitalId:             # Optional additional digital IDs
+  digitalIds:
+    - "base64-encoded-cert..."
+```
+
+**Pipeline configuration:**
+```yaml
+- generate:
+    - /path/to/tsl-source
+- publish:
+    - /var/www/html/tsl
+    - my-trust-list.xml
+```
+
 #### Processing Existing TSLs
 
 You can also use `tsl-tool` to fetch, transform, and republish existing TSLs:

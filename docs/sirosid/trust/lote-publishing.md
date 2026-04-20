@@ -126,7 +126,7 @@ names:
   - language: en
     value: "Example Credential Issuer"
 
-status: "http://uri.etsi.org/TrstSvc/TrustedList/Svcstatus/granted"
+status: "http://uri.etsi.org/TrstSvc/TrustedList/Svcstatus/granted"  # Defaults to "granted" if omitted
 
 # Optional: entity type classification
 entityType: "credential-issuer"
