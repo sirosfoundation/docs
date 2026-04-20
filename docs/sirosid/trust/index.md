@@ -8,7 +8,7 @@ sidebar_label: Overview
 A digital credential ecosystem requires mechanisms for issuers, wallets, and verifiers to recognize and trust each other. This is called **technical trust management**. SIROS ID supports multiple trust frameworks to meet different regulatory and deployment requirements.
 
 :::tip Go-Trust Abstraction Layer
-For production deployments, we recommend using **[Go-Trust](./go-trust)** as a trust abstraction layer. Go-Trust provides a unified AuthZEN API that handles the complexity of ETSI TSL, ETSI LoTE, OpenID Federation, and DID resolution, so your services don't need to implement trust logic directly.
+For production deployments, we recommend using **[Go-Trust](./go-trust)** as a trust abstraction layer. Go-Trust provides a unified AuthZEN API that handles the complexity of ETSI TSL, ETSI LoTE, OpenID Federation, and DID resolution, so your services don't need to implement trust logic directly. Each registry supports **multiple input sources** that are merged into a single trust pool — for example, combining trust lists from different countries or scheme operators — and registries can be composed using **boolean logic** (AND, OR, MAJORITY, QUORUM) for advanced trust policies.
 :::
 
 ## Why Trust Matters
@@ -92,8 +92,14 @@ graph TD
 trust:
   etsi_tsl:
     enabled: true
-    trust_list_url: "https://ec.europa.eu/tools/lotl/eu-lotl.xml"
-    cache_duration: 3600
+    # Multiple sources can be combined — cert bundles, local files, and URLs
+    cert_bundle: "/var/lib/go-trust/eu-certs.pem"
+    tsl_files:
+      - "/var/lib/go-trust/se-tsl.xml"
+    tsl_urls:
+      - "https://ec.europa.eu/tools/lotl/eu-lotl.xml"
+    follow_refs: true
+    max_ref_depth: 3
     accepted_schemes:
       - "http://uri.etsi.org/TrstSvc/TrustedList/schemerules/EUcommon"
 ```
@@ -122,8 +128,11 @@ graph TD
 trust:
   lote:
     enabled: true
+    # Multiple sources are merged into a single entity index
     sources:
-      - "https://example.com/lote.json"
+      - "https://lote.example.org/lote-SE.json"
+      - "https://lote.example.org/lote-DE.json"
+      - "/etc/go-trust/local-lote.json"
     verify_jws: false
     refresh_interval: "1h"
 ```

@@ -128,6 +128,47 @@ resolution:
   strategy: "first_match"  # first_match, all_registries, best_match, sequential
 ```
 
+### ETSI TSL Multi-Source Configuration
+
+The ETSI TSL registry supports loading trust data from **multiple sources simultaneously**. You can combine any or all of these source types in a single registry:
+
+- **`cert_bundle`** — A PEM file containing pre-extracted trusted CA certificates (recommended for production)
+- **`tsl_files`** — A list of local TSL XML files
+- **`tsl_urls`** — A list of remote or local (`file://`) URLs to fetch TSL XML from
+
+All certificates from all sources are merged into a single trust pool, and the individual TSL documents are kept for filtered evaluation via policies.
+
+```yaml
+etsi:
+  enabled: true
+  name: "EU-TSL"
+
+  # PEM bundle with pre-extracted certificates (fast, no XML parsing)
+  cert_bundle: "/var/lib/go-trust/eu-trusted-certs.pem"
+
+  # Multiple local TSL XML files
+  tsl_files:
+    - "/var/lib/go-trust/eu-lotl.xml"
+    - "/var/lib/go-trust/se-tsl.xml"
+    - "/var/lib/go-trust/de-tsl.xml"
+
+  # Multiple remote (or file://) TSL URLs
+  tsl_urls:
+    - "https://ec.europa.eu/tools/lotl/eu-lotl.xml"
+    - "file:///var/lib/go-trust/backup-tsl.xml"
+
+  # Follow TSL references (pointers to member state TSLs in a LOTL)
+  follow_refs: true
+  max_ref_depth: 3
+
+  # Periodic re-fetch of all sources
+  refresh_interval: "24h"
+```
+
+:::tip
+For production, pre-process trust lists into a PEM `cert_bundle` using `tsl-tool` from [g119612](https://github.com/sirosfoundation/g119612). This avoids runtime XML parsing and reference following, giving faster startup and predictable behavior.
+:::
+
 ### Multi-Registry Configuration
 
 Go-Trust can query multiple trust frameworks simultaneously:
@@ -165,6 +206,8 @@ resolution:
 
 Go-Trust can evaluate trust from ETSI TS 119 602 Lists of Trusted Entities (LoTE) — JSON documents that list trusted entities with their digital identities.
 
+The LoTE registry supports **multiple sources**, which are all fetched and merged into a single entity index. This allows combining trust lists from different scheme operators, countries, or environments:
+
 ```yaml
 registries:
   lote:
@@ -172,13 +215,16 @@ registries:
     name: "LoTE Registry"
     description: "ETSI TS 119 602 List of Trusted Entities"
     sources:
-      - "https://lote.example.org/lote-SE.json"
-      - "https://lote.example.org/lote-DE.json"
-      - "/etc/go-trust/local-lote.json"    # Local files also supported
+      - "https://lote.example.org/lote-SE.json"    # Sweden
+      - "https://lote.example.org/lote-DE.json"    # Germany
+      - "https://lote.example.org/lote-FR.json"    # France
+      - "/etc/go-trust/local-lote.json"            # Local overrides
     verify_jws: false            # Set to true for JWS-signed LoTEs
     fetch_timeout: "30s"
-    refresh_interval: "1h"       # How often to re-fetch sources
+    refresh_interval: "1h"       # How often to re-fetch all sources
 ```
+
+All entities across sources are indexed by EntityID and by key hash (SHA-256 fingerprint), enabling efficient lookup regardless of which source the entity came from. Sources are re-fetched periodically and the index is swapped atomically.
 
 The LoTE registry evaluates trust by:
 1. Looking up the entity by `subject.id` (the entity's identifier)
@@ -424,6 +470,62 @@ When multiple registries are applicable, Go-Trust uses a **resolution strategy**
 ```yaml
 resolution:
   strategy: "first_match"  # Default behavior
+```
+
+### Composite Registries (Boolean Logic)
+
+For advanced trust policies, Go-Trust supports **composite registries** that combine multiple registries using boolean logic operators. Composite registries can be nested to express complex trust requirements.
+
+| Operator | Description |
+|----------|-------------|
+| `AND` | All child registries must return `decision: true` |
+| `OR` | At least one child registry must return `decision: true` |
+| `MAJORITY` | More than 50% of child registries must agree |
+| `QUORUM` | A configurable threshold of child registries must agree |
+
+All child registries are evaluated in parallel for optimal performance.
+
+```yaml
+# Example: require BOTH EU TSL and OpenID Federation
+composite:
+  name: "defense-in-depth"
+  operator: "AND"
+  registries:
+    - name: "eu-tsl"
+      type: "etsi_tsl"
+      config:
+        cert_bundle: "/var/lib/go-trust/eu-certs.pem"
+    - name: "oidf"
+      type: "openid_federation"
+      config:
+        trust_anchors:
+          - entity_id: "https://federation.example.com"
+```
+
+**Nesting example** — trust requires `(TSL OR LoTE) AND OpenID Federation`:
+
+```yaml
+composite:
+  name: "nested-policy"
+  operator: "AND"
+  registries:
+    - name: "any-trust-list"
+      operator: "OR"
+      registries:
+        - name: "eu-tsl"
+          type: "etsi_tsl"
+          config:
+            cert_bundle: "/var/lib/go-trust/eu-certs.pem"
+        - name: "lote"
+          type: "lote"
+          config:
+            sources:
+              - "https://lote.example.org/lote-SE.json"
+    - name: "oidf"
+      type: "openid_federation"
+      config:
+        trust_anchors:
+          - entity_id: "https://federation.example.com"
 ```
 
 ### Example: Multi-Tenant Trust
