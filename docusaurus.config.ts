@@ -78,6 +78,12 @@ const config: Config = {
         },
         {
           type: 'docSidebar',
+          sidebarId: 'howtoSidebar',
+          position: 'left',
+          label: 'How-To Guides',
+        },
+        {
+          type: 'docSidebar',
           sidebarId: 'openSourceSidebar',
           position: 'left',
           label: 'Open Source',
