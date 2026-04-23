@@ -397,6 +397,59 @@ LoTE documents can declare their distribution points in the scheme information. 
 
 This ensures filenames match the URLs consumers will use to fetch the documents.
 
+## XML Output
+
+By default, `publish-lote` produces JSON output (`.json` and optionally `.json.jws`). To also generate an XML companion, add the `xml` flag:
+
+```yaml
+- publish-lote:
+    - /path/to/output
+    - /path/to/cert.pem
+    - /path/to/key.pem
+    - xml
+```
+
+This produces both `lote-<territory>.json` (with JWS) **and** `lote-<territory>.xml` (with XAdES signature). Use `xml-only` to skip JSON output entirely.
+
+## Lists of Trusted Lists (LoTL)
+
+A LoTL aggregates pointers to multiple LoTE documents. The `generate-lotl` step reads a `lotl.yaml` file that lists the LoTE locations:
+
+```
+my-lotl/
+├── .pipeline.yaml
+└── lotl.yaml
+```
+
+**lotl.yaml:**
+```yaml
+operatorNames:
+  - language: en
+    value: "My Trust Authority"
+schemeName:
+  - language: en
+    value: "My List of Trusted Lists"
+territory: "demo"
+pointers:
+  - location: "https://trust.example.org/lote-SE.json"
+    territory: "SE"
+    operatorName:
+      - language: en
+        value: "Swedish Trust Operator"
+```
+
+**Pipeline:**
+```yaml
+- generate-lotl:
+    - ./my-lotl
+- publish-lote:
+    - /path/to/output
+    - /path/to/cert.pem
+    - /path/to/key.pem
+```
+
+The `publish-lote` step publishes both LoTEs and LoTLs from the context. LoTL output files are named `list_of_trusted_lists-<territory>.json`.
+
 ## Go-Trust Integration
 
 Configure Go-Trust to consume your published LoTE documents:
@@ -547,11 +600,15 @@ registries:
 | Step | Arguments | Description |
 |------|-----------|-------------|
 | `generate-lote` | `<source-dir>` | Generate LoTE from directory structure |
+| `generate-lotl` | `<source-dir>` | Generate a List of Trusted Lists (LoTL) from directory structure |
 | `load-lote` | `<url-or-path> [cert.pem]` | Load LoTE from URL/file, optionally verify JWS |
-| `publish-lote` | `<output-dir> [cert.pem key.pem]` or `<output-dir> [pkcs11:... key-label cert-label]` | Write LoTE JSON files, optionally sign |
+| `load-lotl` | `<url-or-path> [cert.pem]` | Load LoTL from URL/file, optionally verify JWS |
+| `publish-lote` | `<output-dir> [cert.pem key.pem] [xml]` or `<output-dir> [pkcs11:... key-label cert-label key-id] [xml]` | Write LoTE/LoTL JSON files, optionally sign. Also registered as `publish-lotl`. Pass `xml` for XML companion output. |
 | `convert-to-lote` | (none) | Convert TSLs on context stack to LoTE format |
 | `merge-lote` | (none) | Merge all LoTEs on context stack into one |
 | `increment-lote-sequence` | (none) | Increment sequence number on all LoTEs |
+| `validate-lote` | (none) | Validate all LoTEs on context stack |
+| `validate-lotl` | (none) | Validate all LoTLs on context stack |
 
 ## Further Reading
 

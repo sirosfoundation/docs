@@ -28,7 +28,8 @@ These are the core components that power the SIROS ID platform.
 |------------|-------------|
 | [**go-trust**](https://github.com/sirosfoundation/go-trust) | AuthZEN-based Policy Decision Point (PDP) for trust evaluation. Supports ETSI Trust Lists (TSL), OpenID Federation, and DID resolution. |
 | [**goFF**](https://github.com/sirosfoundation/goFF) | Go implementation of OpenID Federation. Supports entity statements, trust chains, and trust marks. |
-| [**g119612**](https://github.com/sirosfoundation/g119612) | Go implementation of ETSI TS 119 612 Trust Service Lists parser and validator. |
+| [**g119612**](https://github.com/sirosfoundation/g119612) | Go implementation of ETSI TS 119 612 (Trust Status Lists) and TS 119 602 (Lists of Trusted Entities). Provides `tsl-tool` for generating, validating, converting, and publishing trust lists. |
+| [**trust-lists**](https://github.com/sirosfoundation/trust-lists) | Published trust lists for the SIROS ecosystem. Source data and pipelines deployed to [trust.siros.org](https://trust.siros.org). |
 
 ### Credential Type Registry
 

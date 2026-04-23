@@ -106,50 +106,7 @@ make build
 
 #### Creating a TSL Pipeline
 
-Create a YAML pipeline configuration to generate your TSL:
-
-```yaml
-# generate-tsl.yaml
-- generate:
-    # TSL metadata
-    - scheme-name: "Example Trust Scheme"
-    - scheme-operator: "Example Organization"
-    - scheme-territory: "SE"
-    - tsl-type: "http://uri.etsi.org/TrstSvc/TrustedList/TSLType/EUgeneric"
-    
-    # TSL signing
-    - signing-key: "/path/to/tsl-signing-key.pem"
-    - signing-cert: "/path/to/tsl-signing-cert.pem"
-    
-    # Trust service providers
-    - providers:
-        - name: "Example Issuer"
-          trade-name: "Example Issuer Inc."
-          services:
-            - type: "http://uri.etsi.org/TrstSvc/Svctype/EDS/Q"
-              name: "Qualified Electronic Delivery Service"
-              status: "http://uri.etsi.org/TrstSvc/TrustedList/Svcstatus/granted"
-              certificate: "/path/to/issuer-cert.pem"
-              start-date: "2024-01-01T00:00:00Z"
-
-- publish:
-    - /var/www/html/tsl
-    - my-trust-list.xml
-```
-
-#### Running the Pipeline
-
-```bash
-# Generate and publish the TSL
-./tsl-tool --log-level info generate-tsl.yaml
-
-# With debug output
-./tsl-tool --log-level debug generate-tsl.yaml
-```
-
-#### Directory-Based TSL Generation
-
-Alternatively, the `generate` pipeline step can create a TSL from a directory of YAML metadata and certificate files:
+The `generate` pipeline step creates a TSL from a directory of YAML metadata and certificate files:
 
 ```
 tsl-source/
@@ -211,7 +168,41 @@ serviceDigitalId:             # Optional additional digital IDs
     - /path/to/tsl-source
 - publish:
     - /var/www/html/tsl
-    - my-trust-list.xml
+    - /path/to/signing-cert.pem
+    - /path/to/signing-key.pem
+```
+
+Or with PKCS#11/HSM signing:
+```yaml
+- generate:
+    - /path/to/tsl-source
+- publish:
+    - /var/www/html/tsl
+    - "pkcs11:module=/usr/lib/softhsm/libsofthsm2.so;pin=1234;token=trust-lists"
+    - signing-key
+    - signing-cert
+    - "01"
+```
+
+To also produce a LoTE JSON conversion alongside the XML:
+```yaml
+- generate:
+    - /path/to/tsl-source
+- publish:
+    - /var/www/html/tsl
+    - /path/to/signing-cert.pem
+    - /path/to/signing-key.pem
+- convert-to-lote: []
+- publish-lote:
+    - /var/www/html/tsl
+    - /path/to/signing-cert.pem
+    - /path/to/signing-key.pem
+    - xml
+```
+
+```bash
+# Run the pipeline
+./tsl-tool --log-level info pipeline.yaml
 ```
 
 #### Processing Existing TSLs
