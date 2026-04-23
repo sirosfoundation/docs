@@ -212,6 +212,10 @@ Content-Type: application/json
 {
   "authentic_source": "hr.example.org",
   "identity": {
+    "schema": {
+      "name": "SE",
+      "version": "1.0.0"
+    },
     "family_name": "Smith",
     "given_name": "Alice",
     "birth_date": "1990-05-15"
@@ -223,16 +227,19 @@ Content-Type: application/json
 
 ```json
 {
-  "authentic_source_person_id": "EMP-12345"
+  "data": {
+    "authentic_source_person_id": "EMP-12345"
+  }
 }
 ```
 
+The `schema` field identifies the identity schema used (e.g. `"SE"` for Sweden). The `version` must match the version used when the document was uploaded.
+
 The matching algorithm compares:
+- `schema` (required)
 - `family_name` (required)
 - `given_name` (required)
 - `birth_date` (required)
-- `family_name_birth` (optional)
-- `birth_place` (optional)
 
 ---
 
