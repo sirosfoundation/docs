@@ -650,6 +650,27 @@ Response includes the resolved DID document or entity configuration:
 }
 ```
 
+### Subject ID Normalization
+
+Go-Trust automatically normalizes `subject.id` values that use
+[OpenID4VP client_id_scheme](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#section-5.9)
+prefixes. This normalization happens in the registry manager before any
+registry receives the request, ensuring consistent matching across all
+trust backends (whitelist, LoTE, ETSI TSL, OIDFed, etc.).
+
+| Input `subject.id` | Normalized `subject.id` |
+|---|---|
+| `x509_san_dns:verifier.example.com` | `https://verifier.example.com` |
+| `x509_san_uri:https://issuer.example.com` | `https://issuer.example.com` |
+| `https://issuer.example.com` | `https://issuer.example.com` (unchanged) |
+| `did:web:issuer.example.com` | `did:web:issuer.example.com` (unchanged) |
+
+This means callers can send either the raw URL or the OpenID4VP
+`client_id_scheme`-prefixed form — both will match the same registry
+entries. For example, a whitelist entry of `https://verifier.example.com`
+will match requests with `subject.id` set to either
+`https://verifier.example.com` or `x509_san_dns:verifier.example.com`.
+
 ## Integration with Issuer/Verifier
 
 ### Verifier Configuration
