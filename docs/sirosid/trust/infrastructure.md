@@ -302,6 +302,17 @@ The trust evaluation API uses these standard roles:
 | `pid-provider` | PID (Person ID) provider | QCert (with PID constraints) |
 | `wallet_provider` | Wallet unit attestation | CA/QC |
 
+:::info Subject ID Format
+
+When OpenID4VP verifiers send trust evaluation requests, the `subject.id`
+may use the `client_id_scheme` prefix format (e.g.
+`x509_san_dns:verifier.example.com`). Go-Trust automatically normalizes
+these to standard HTTPS URLs (`https://verifier.example.com`) before
+registry matching. See [Subject ID Normalization](./go-trust.md#subject-id-normalization)
+for the full mapping.
+
+:::
+
 #### Configuring Role-Based Policies
 
 Define policies in Go-Trust to map roles to registry-specific constraints:
