@@ -1,0 +1,8 @@
+{
+  "label": "Credential Manager Deployment",
+  "position": 5,
+  "link": {
+    "type": "doc",
+    "id": "wallet/index"
+  }
+}

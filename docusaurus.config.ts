@@ -78,6 +78,12 @@ const config: Config = {
         },
         {
           type: 'docSidebar',
+          sidebarId: 'walletSidebar',
+          position: 'left',
+          label: 'Credential Manager',
+        },
+        {
+          type: 'docSidebar',
           sidebarId: 'howtoSidebar',
           position: 'left',
           label: 'How-To Guides',
