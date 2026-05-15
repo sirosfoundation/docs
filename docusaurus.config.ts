@@ -64,10 +64,11 @@ const config: Config = {
       respectPrefersColorScheme: false,
     },
     navbar: {
-      title: 'SIROS Developer Docs',
+      title: 'Developer Docs',
       logo: {
         alt: 'SIROS Foundation',
-        src: 'img/logo.svg',
+        src: 'img/siros-logo.png',
+        style: { height: '32px' },
       },
       items: [
         {
@@ -149,7 +150,7 @@ const config: Config = {
           tertiaryBorderColor: '#ADB5BD',    // Medium gray border
           
           // Typography
-          fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+          fontFamily: 'Helvetica Neue, Arial, system-ui, sans-serif',
           fontSize: '14px',
           
           // Flowchart styling
