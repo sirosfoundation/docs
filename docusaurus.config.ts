@@ -68,7 +68,7 @@ const config: Config = {
       logo: {
         alt: 'SIROS Foundation',
         src: 'img/siros-logo.png',
-        style: { height: '32px' },
+        style: { height: '40px' },
       },
       items: [
         {
@@ -114,8 +114,17 @@ const config: Config = {
         alt: 'SIROS Foundation',
         src: 'img/siros-logo.png',
         href: 'https://siros.org',
-        height: 32,
+        height: 40,
       },
+      links: [
+        {
+          title: 'Resources',
+          items: [
+            { label: 'SIROS Foundation', href: 'https://siros.org' },
+            { label: 'GitHub', href: 'https://github.com/sirosfoundation' },
+          ],
+        },
+      ],
       copyright: `© ${new Date().getFullYear()} SIROS Foundation`,
     },
     prism: {
