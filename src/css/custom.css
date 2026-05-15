@@ -39,6 +39,39 @@
 }
 
 /* =====================================================
+   NAVBAR & FOOTER — SIROS brand alignment
+   ===================================================== */
+
+/* Navbar link styling — match siros.org text-sm font-medium */
+.navbar__link {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* GitHub icon in navbar */
+.navbar-github-link {
+  display: flex;
+  align-items: center;
+  color: var(--ifm-navbar-link-color);
+  transition: color 0.2s;
+}
+.navbar-github-link:hover {
+  color: var(--ifm-color-primary);
+}
+
+/* Footer alignment — logo left, copyright right */
+.footer {
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+  padding: 2rem 0;
+}
+.footer__bottom {
+  font-size: 0.875rem;
+}
+.footer__logo {
+  margin-top: 0;
+}
+
+/* =====================================================
    MERMAID DIAGRAM ENHANCEMENTS
    SIROS Brand Colors: Blue #1C4587, Orange #C75A11
    Light mode only - diagrams use consistent styling
