@@ -62,7 +62,7 @@
 /* Footer alignment — match siros.org: logo left, links+copyright right */
 .footer {
   border-top: 1px solid var(--ifm-color-emphasis-200);
-  padding: 2rem 0;
+  padding: 3rem 0;
 }
 .footer__bottom {
   display: flex;
