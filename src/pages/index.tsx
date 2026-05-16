@@ -10,27 +10,30 @@ function HomepageHeader() {
   const {siteConfig} = useDocusaurusContext();
   return (
     <header className={styles.hero}>
-      <Heading as="h1" className={styles.heroTitle}>
-        <span className={styles.heroTitleBrand}>
-          <svg className={styles.heroTitleLogo} width={50} height={50} viewBox='0 0 50 50'>
-            <image href='img/logo.svg' width={50} height={50} />
-          </svg>
-          SIROS Foundation
-        </span>
-        <span>Developer Docs</span>
-      </Heading>
-      {siteConfig.tagline && <p className={styles.heroSubtitle}>{siteConfig.tagline}</p>}
-      <div className={styles.heroButtons}>
-        <Link
-          className="button button--secondary button--lg"
-          to="/sirosid">
-          SIROS ID Documentation
-        </Link>
-        <Link
-          className="button button--outline button--lg"
-          to="/opensource">
-          Open Source Projects
-        </Link>
+      <img
+        src="/img/hero-bg.jpg"
+        alt="Digital network visualization"
+        className={styles.heroBg}
+      />
+      <div className={styles.heroOverlay} />
+
+      <div className={styles.heroContent}>
+        <Heading as="h1" className={styles.heroTitle}>
+          <span className={styles.heroTitleAccent}>Developer Docs</span>
+          <br />
+          <span className={styles.heroTitleDark}>SIROS Foundation</span>
+        </Heading>
+        {siteConfig.tagline && (
+          <p className={styles.heroSubtitle}>{siteConfig.tagline}</p>
+        )}
+        <div className={styles.heroButtons}>
+          <Link className="button button--primary button--lg" to="/sirosid">
+            SIROS ID Documentation
+          </Link>
+          <Link className="button button--outline button--lg" to="/opensource">
+            Open Source Projects
+          </Link>
+        </div>
       </div>
     </header>
   );
