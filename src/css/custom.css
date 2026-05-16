@@ -27,21 +27,37 @@
   --ifm-font-family-base: 'Helvetica Neue', Arial, system-ui, sans-serif;
   --ifm-heading-font-family: 'Helvetica Neue', Arial, system-ui, sans-serif;
   --ifm-container-width: 1400px;
-  /* SIROS Blue primary colors - using direct hex values for compatibility */
-  --ifm-color-primary: #1C4587;          /* Brand primary */
-  --ifm-color-primary-dark: #14366B;     /* Dark */
-  --ifm-color-primary-darker: #0E2750;
-  --ifm-color-primary-darkest: #081935;
+  /* Primary blue — aligned with main site hsl(215, 60%, 40%) */
+  --ifm-color-primary: #295FA6;
+  --ifm-color-primary-dark: #1C4587;
+  --ifm-color-primary-darker: #163A72;
+  --ifm-color-primary-darkest: #0E2750;
   --ifm-color-primary-light: #5388D0;
   --ifm-color-primary-lighter: #7EA6DC;
   --ifm-color-primary-lightest: #A9C4E8;
   --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(28, 69, 135, 0.1);
+  --docusaurus-highlighted-code-line-bg: rgba(41, 95, 166, 0.1);
 }
 
 /* =====================================================
    NAVBAR & FOOTER — SIROS brand alignment
    ===================================================== */
+
+/* Navbar — transparent to frosted white on scroll (matches main site) */
+.navbar {
+  background: transparent;
+  box-shadow: none;
+  transition: background-color 0.3s, box-shadow 0.3s, border-color 0.3s;
+  border-bottom: 1px solid transparent;
+}
+
+.navbar--scrolled {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border-bottom-color: hsl(210, 15%, 88%);
+}
 
 /* Navbar container — constrain inner content to match footer/main site */
 .navbar__inner {
