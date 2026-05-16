@@ -125,6 +125,13 @@
   color: var(--ifm-font-color-base);
   margin: 0;
 }
+.footer-org a {
+  color: inherit;
+  text-decoration: none;
+}
+.footer-org a:hover {
+  color: var(--ifm-color-primary);
+}
 .footer-nav {
   display: flex;
   flex-wrap: wrap;
