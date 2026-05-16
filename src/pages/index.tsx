@@ -21,7 +21,7 @@ function HomepageHeader() {
         <Heading as="h1" className={styles.heroTitle}>
           <span className={styles.heroTitleAccent}>Developer Docs</span>
           <br />
-          <span className={styles.heroTitleDark}>SIROS Foundation</span>
+          <span className={styles.heroTitleDark}>SIROS ID</span>
         </Heading>
         {siteConfig.tagline && (
           <p className={styles.heroSubtitle}>{siteConfig.tagline}</p>
