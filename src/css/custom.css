@@ -64,8 +64,12 @@
   border-top: 1px solid var(--ifm-color-emphasis-200);
   padding: 2.5rem 0;
 }
+.footer .container {
+  padding: 0 1.5rem;
+}
 .footer__bottom {
   margin-top: 0;
+  text-align: left !important;
 }
 .footer-cols {
   display: flex;
