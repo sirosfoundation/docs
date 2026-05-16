@@ -43,6 +43,13 @@
    NAVBAR & FOOTER — SIROS brand alignment
    ===================================================== */
 
+/* Navbar container — constrain inner content to match footer/main site */
+.navbar__inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
 /* Navbar link styling — match siros.org text-sm font-medium */
 .navbar__link {
   font-size: 0.875rem;
