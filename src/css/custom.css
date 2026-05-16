@@ -49,6 +49,13 @@
   box-shadow: none;
   transition: background-color 0.3s, box-shadow 0.3s, border-color 0.3s;
   border-bottom: 1px solid transparent;
+  z-index: 200;
+}
+
+/* On doc pages, navbar is always opaque so sidebar border doesn't bleed through */
+.navbar.navbar--doc-page {
+  background: #fff;
+  border-bottom-color: hsl(210, 15%, 88%);
 }
 
 .navbar--scrolled {
@@ -57,6 +64,12 @@
   -webkit-backdrop-filter: blur(12px);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   border-bottom-color: hsl(210, 15%, 88%);
+}
+
+/* Hide the sidebar border from bleeding into the navbar area */
+.theme-doc-sidebar-container {
+  border-right-color: var(--ifm-color-emphasis-200) !important;
+  clip-path: inset(0 0 0 0);
 }
 
 /* Navbar container — constrain inner content to match footer/main site */
