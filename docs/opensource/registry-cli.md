@@ -9,6 +9,16 @@ title: Registry CLI
 
 The public [registry.siros.org](https://registry.siros.org) is built and deployed using registry-cli.
 
+:::caution Don't confuse with other "registry" components
+The SIROS ecosystem uses the word "registry" in several places:
+
+- **registry-cli** (this tool) — **publishes** credential type metadata by building a static catalogue site.
+- **go-wallet-backend's registry service** (`go-wallet-backend/cmd/registry`) — **consumes** credential type metadata from registry.siros.org and caches it for wallet operations.
+- **VC's registry service** (`vc/cmd/registry`) — manages **Token Status Lists** for credential revocation. This is an entirely separate concern and has nothing to do with credential type metadata.
+
+See also: [Credential Type Registry](../sirosid/reference/vctm-registry) for the deployer-facing documentation on registry.siros.org.
+:::
+
 ## Quick Start with Docker
 
 The fastest way to run your own registry is using the published Docker image.
