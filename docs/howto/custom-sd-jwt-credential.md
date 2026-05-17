@@ -34,17 +34,9 @@ flowchart LR
 
 A VCTM file defines everything wallets and verifiers need to know about your credential type: the claims it contains, how it should be displayed, and which claims support selective disclosure.
 
-### Option A: Use the VCTM Template Repository (Recommended)
+### Step 1: Author the Credential Definition
 
-The easiest way to create and publish a VCTM is to use the [vctm-template](https://github.com/sirosfoundation/vctm-template) repository, which automatically generates metadata files from markdown and publishes them to the [SIROS Credential Type Registry](https://registry.siros.org).
-
-#### 1. Create Your Repository
-
-Click **"Use this template"** on the [vctm-template](https://github.com/sirosfoundation/vctm-template) repository to create your own copy.
-
-#### 2. Add a Credential Definition
-
-Create a markdown file in the `credentials/` directory. For the Employee Badge example:
+Create a markdown file describing your credential. For the Employee Badge example:
 
 ```markdown title="credentials/employee-badge.md"
 ---
@@ -86,23 +78,125 @@ Key elements:
 The `vct` value is a URI that uniquely identifies your credential type. Use a domain you control. For EU-regulated credentials, URN-based identifiers following the `urn:eudi:` scheme are conventional (e.g., `urn:eudi:pid:arf-1.8:1`).
 :::
 
-#### 3. Push and Publish
+You can also write a `.vctm.json` file directly instead of markdown (see [Option B: Write VCTM JSON directly](#option-b-write-the-vctm-json-directly) below).
 
-Push your changes to the `main` branch. The included GitHub Action ([mtcvctm](https://github.com/sirosfoundation/mtcvctm)) will:
+### Step 2: Publish to a Credential Type Registry
 
-1. Parse the markdown and generate a `.vctm.json` file on the `vctm` branch
-2. Create a `.well-known/vctm-registry.json` registry index
-3. Make the metadata available for discovery by [registry.siros.org](https://registry.siros.org)
+Once you have your credential definition, you need to publish it so issuers, verifiers, and wallets can discover it. There are two approaches:
 
-After the action completes, your VCTM is available at:
+#### Option A: Publish to registry.siros.org (Recommended for Public Credentials)
+
+[registry.siros.org](https://registry.siros.org) is the public SIROS Credential Type Registry. It is built automatically by [registry-cli](https://github.com/sirosfoundation/registry-cli) and hosted on GitHub Pages. **GitHub is the write API** — there are no PUT/DELETE endpoints. Instead, you publish credentials by pushing to a GitHub repository, and the registry discovers them automatically.
+
+**How registry.siros.org works:**
+
+1. A [`sources.yaml`](https://github.com/sirosfoundation/registry.siros.org/blob/main/sources.yaml) file declares which GitHub repositories to scan
+2. Repositories tagged with the `vctm` GitHub topic are **autodiscovered** — no manual registration needed
+3. A GitHub Actions workflow runs `registry-cli build` every 6 hours, cloning all source repositories and detecting credential definitions
+4. The built site is deployed to GitHub Pages at `https://registry.siros.org`
+
+**To get your credential listed on registry.siros.org:**
+
+1. Use the [vctm-template](https://github.com/sirosfoundation/vctm-template) — click **"Use this template"** to create your own repository
+2. Place your credential markdown file(s) in the `credentials/` directory
+3. Push to the `main` branch — the included GitHub Action ([mtcvctm](https://github.com/sirosfoundation/mtcvctm)) converts your markdown to `.vctm.json` on the `vctm` branch
+4. Tag your repository with the `vctm` GitHub topic so the registry autodiscovers it
+
+After the next registry build cycle (up to 6 hours), your credential appears at:
 
 ```
-https://github.com/<your-org>/<your-repo>/raw/vctm/employee-badge.vctm.json
+https://registry.siros.org/<your-org>/<slug>.vctm.json
 ```
+
+The registry also provides a TS11-compliant API with JWS-signed responses:
+
+```
+https://registry.siros.org/api/v1/schemas.json          # All schemas
+https://registry.siros.org/api/v1/schemas/<id>.json      # Individual schema
+```
+
+:::info Authorization on registry.siros.org
+Since GitHub is the write API, access control is handled through GitHub's standard mechanisms: repository permissions, branch protection rules, and pull request reviews. To add or update a credential, you push a commit. To remove one, you delete or untag the repository.
+:::
+
+#### Option B: Run Your Own Registry (For Private or On-Premise Deployments)
+
+If you need a private credential catalogue, want full control over the build pipeline, or operate in an air-gapped environment, you can run [registry-cli](https://github.com/sirosfoundation/registry-cli) yourself. A Docker image is published to `ghcr.io/sirosfoundation/registry-cli` for every release.
+
+**Key differences from registry.siros.org:**
+
+| | registry.siros.org | Self-hosted registry |
+|---|---|---|
+| **Hosting** | GitHub Pages (static) | You choose: any static file server, S3, Caddy, nginx, etc. |
+| **Source discovery** | GitHub topic autodiscovery | Any mix of GitHub topics, explicit git URLs, or local directories |
+| **Build trigger** | GitHub Actions (every 6 hours) | You decide: cron, CI/CD, manual |
+| **Access control** | GitHub repository permissions | Your infrastructure's access controls |
+| **JWS signing** | PKCS#11 with production HSM | Dev keys, SoftHSM, or your own HSM |
+| **Credential sources** | Public GitHub repositories only | Git repos (public or private), local directories (`file://`) |
+
+**Quick start with Docker Compose:**
+
+1. Create a `sources.yaml`:
+
+```yaml title="sources/sources.yaml"
+defaults:
+  branch: vctm
+
+sources:
+  # Autodiscover from your GitHub org
+  - "github:topic/vctm?org=your-org"
+
+  # Explicit private repository
+  - "git:https://github.com/your-org/private-credentials.git"
+
+  # Local directory (useful for air-gapped environments)
+  - url: "file:///data/sources/local-creds"
+    organization: "MyOrg"
+```
+
+2. Run with Docker Compose:
+
+```yaml title="docker-compose.yml"
+services:
+  registry:
+    image: ghcr.io/sirosfoundation/registry-cli:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./sources:/data/sources:ro
+      - ./output:/data/output
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+```
+
+```bash
+docker compose up
+# Open http://localhost:8080
+```
+
+Set `GITHUB_TOKEN` if your sources include GitHub topic searches or private repositories.
+
+3. For production, build the static site and deploy it to your web server:
+
+```bash
+docker run --rm \
+  -v ./sources:/data/sources:ro \
+  -v ./output:/data/output \
+  -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
+  ghcr.io/sirosfoundation/registry-cli:latest \
+  registry-cli build \
+    --sources /data/sources/sources.yaml \
+    --output /data/output \
+    --base-url https://registry.your-org.com
+```
+
+Then serve the `./output` directory with any static file server.
+
+See the [registry-cli documentation](https://github.com/sirosfoundation/registry-cli) for full configuration options including JWS signing, SoftHSM setup, and TS11 compliance testing.
 
 ### Option B: Write the VCTM JSON Directly
 
-If you prefer not to use the template repository, you can author a VCTM JSON file manually following the [SD-JWT VC Type Metadata specification](https://datatracker.ietf.org/doc/draft-ietf-oauth-sd-jwt-vc/). A minimal example:
+If you prefer not to use the markdown authoring workflow, you can write a VCTM JSON file directly following the [SD-JWT VC Type Metadata specification](https://datatracker.ietf.org/doc/draft-ietf-oauth-sd-jwt-vc/). A minimal example:
 
 ```json title="employee-badge.vctm.json"
 {
@@ -166,7 +260,7 @@ If you prefer not to use the template repository, you can author a VCTM JSON fil
 }
 ```
 
-Host this file at a stable URL accessible to your issuer. If you want it discoverable through the SIROS registry, see [Credential Type Registry](../sirosid/reference/vctm-registry).
+Host this file at a stable URL accessible to your issuer, or place it in a repository that your registry discovers. Both registry.siros.org and self-hosted registries detect `.vctm.json` files automatically.
 
 ## Phase 2: Configure the Issuer
 
@@ -449,6 +543,8 @@ Test that selective disclosure works correctly:
 
 ## Next Steps
 
+- [registry-cli](https://github.com/sirosfoundation/registry-cli) — Self-hosted credential type registry
+- [registry.siros.org](https://registry.siros.org) — Public SIROS Credential Type Registry
 - [Issuer Configuration](../sirosid/issuers/issuer) — Full issuer configuration reference
 - [Verifier Configuration](../sirosid/verifiers/verifier) — Full verifier configuration reference
 - [API Integration](../sirosid/issuers/api-integration) — Server-to-server credential issuance
