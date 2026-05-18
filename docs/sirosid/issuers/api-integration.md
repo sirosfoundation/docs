@@ -70,9 +70,14 @@ https://issuer.example.org/api/v1
 
 ### Authentication
 
-API requests require authentication via:
-- **API Key**: `X-API-Key: <your-api-key>` header
-- **mTLS**: Client certificate authentication (recommended for production)
+The `/api/v1` endpoints support two authentication methods (exactly one must be enabled):
+
+- **JWT Bearer Token** (recommended for production): Requests include an `Authorization: Bearer <JWT>` header. Tokens are validated against a JWKS endpoint. Optional [SPOCP](https://github.com/sirosfoundation/go-spocp) rules enable fine-grained per-endpoint authorization.
+- **HTTP Basic Auth** (development / simple deployments): Standard username/password via `Authorization: Basic <base64>` header.
+
+:::tip Production recommendation
+Use JWT Bearer with SPOCP rules for production. This allows you to define per-endpoint access policies (e.g., only certain subjects can call `/upload` or `/revoke`). See [Configuration](#configuration) below for examples.
+:::
 
 ### Endpoint Summary
 
@@ -100,7 +105,7 @@ Upload the credential data before the user requests it:
 ```bash
 POST /api/v1/upload
 Content-Type: application/json
-X-API-Key: your-api-key
+Authorization: Bearer <your-jwt-token>
 
 {
   "meta": {
@@ -146,7 +151,7 @@ Get a QR code and deep link to send to the user:
 ```bash
 POST /api/v1/notification
 Content-Type: application/json
-X-API-Key: your-api-key
+Authorization: Bearer <your-jwt-token>
 
 {
   "authentic_source": "hr.example.org",
@@ -405,7 +410,7 @@ reply, err := client.MakeSDJWT(ctx, &pb.MakeSDJWTRequest{
 
 ## Batch Issuance
 
-For large-scale credential provisioning:
+For large-scale credential provisioning, upload documents in a loop and generate offers individually:
 
 ### 1. Bulk Upload
 
@@ -413,27 +418,23 @@ For large-scale credential provisioning:
 # Upload multiple documents
 for doc in documents/*.json; do
   curl -X POST https://issuer.example.org/api/v1/upload \
-    -H "X-API-Key: $API_KEY" \
+    -H "Authorization: Bearer $JWT_TOKEN" \
     -H "Content-Type: application/json" \
     -d @"$doc"
 done
 ```
 
-### 2. Generate Offers in Batch
+### 2. Generate Offers
+
+Generate a credential offer for each uploaded document:
 
 ```bash
-POST /api/v1/notification/batch
-Content-Type: application/json
-
-{
-  "authentic_source": "hr.example.org",
-  "vct": "urn:eudi:diploma:1",
-  "document_ids": [
-    "diploma-2025-001234",
-    "diploma-2025-001235",
-    "diploma-2025-001236"
-  ]
-}
+for doc_id in diploma-2025-001234 diploma-2025-001235 diploma-2025-001236; do
+  curl -X POST https://issuer.example.org/api/v1/notification \
+    -H "Authorization: Bearer $JWT_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d "{\"authentic_source\": \"hr.example.org\", \"vct\": \"urn:eudi:diploma:1\", \"document_id\": \"$doc_id\"}"
+done
 ```
 
 ### 3. Bulk Notification
@@ -444,60 +445,76 @@ Integrate with your notification system to send credential offers to all recipie
 
 ## Configuration
 
-### Authentic Source Configuration
+### API Authentication
 
-Register your authentic source in the issuer configuration:
+Configure authentication for the `/api/v1` route group. Exactly one of `jwt` or `basic_auth` may be enabled:
 
-```yaml
-authentic_sources:
-  hr.example.org:
-    identifier: "hr.example.org"
-    country_code: "SE"
-    
-    # API key for authentication
-    api_key_hash: "$2a$12$..."
-    
-    # Supported credential types
-    credential_types:
-      diploma:
-        vct: "urn:eudi:diploma:1"
-        vctm_path: "/metadata/vctm_diploma.json"
-        format: "dc+sd-jwt"
-      
-      employee_badge:
-        vct: "urn:example:employee:1"
-        vctm_path: "/metadata/vctm_employee.json"
-        format: "dc+sd-jwt"
-    
-    # Optional: webhook for status updates
-    notification_endpoint:
-      url: "https://hr.example.org/webhooks/credential-status"
-      auth_header: "X-Webhook-Secret"
-```
-
-### Identity Matching Rules
-
-Configure how identity attributes are matched:
+#### JWT Bearer Token (Recommended)
 
 ```yaml
-identity_matching:
-  # Required attributes for matching
-  required_attributes:
-    - family_name
-    - given_name
-    - birth_date
-  
-  # Fuzzy matching tolerance
-  fuzzy_matching:
-    enabled: true
-    threshold: 0.85
-  
-  # Date format normalization
-  date_formats:
-    - "2006-01-02"      # ISO 8601
-    - "02/01/2006"      # European
-    - "01/02/2006"      # US
+apigw:
+  api_auth:
+    jwt:
+      enable: true
+      jwks_url: "https://auth.example.com/.well-known/jwks.json"
+      issuer: "https://auth.example.com"
+      audience: "vc-issuer"
+      # Optional: SPOCP rules for per-endpoint authorization
+      rules:
+        - "(api (service apigw)(method POST)(path /api/v1/upload)(subject hr-system))"
+        - "(api (service apigw)(method POST)(path /api/v1/notification)(subject hr-system))"
+        - "(api (service apigw)(method POST)(path /api/v1/document/revoke)(subject hr-admin))"
+      # Or load rules from a file:
+      # rules_file: "/etc/vc/spocp-rules.txt"
 ```
+
+When SPOCP rules are configured, each request is evaluated as:
+
+```
+(api (service <SERVICE>)(method <HTTP_METHOD>)(path <REQUEST_PATH>)(subject <JWT_SUBJECT>))
+```
+
+If no rules are configured, any valid JWT grants full access.
+
+#### HTTP Basic Auth (Development)
+
+```yaml
+apigw:
+  api_auth:
+    basic_auth:
+      enable: true
+      users:
+        hr-system: "secret-password"
+        admin: "admin-password"
+```
+
+:::caution
+HTTP Basic Auth stores passwords in plaintext in the configuration file. Use JWT Bearer authentication for production deployments.
+:::
+
+### Credential Metadata
+
+Map credential scopes to VCTM files:
+
+```yaml
+common:
+  credential_metadata:
+    diploma:
+      vctm_file_path: "/metadata/vctm_diploma.json"
+      format: "dc+sd-jwt"
+    employee_badge:
+      vctm_file_path: "/metadata/vctm_employee.json"
+      format: "dc+sd-jwt"
+```
+
+### Identity Matching
+
+Identity matching uses exact comparison on the following attributes:
+
+- `family_name` (required)
+- `given_name` (required)
+- `birth_date` (required)
+- `schema.name` and `schema.version` (required)
 
 ---
 
@@ -526,18 +543,19 @@ identity_matching:
 | `IDENTITY_MISMATCH` | 403 | Identity attributes do not match |
 | `ALREADY_REVOKED` | 409 | Credential already revoked |
 | `INVALID_FORMAT` | 400 | Request body is malformed |
-| `UNAUTHORIZED` | 401 | Invalid or missing API key |
+| `UNAUTHORIZED` | 401 | Invalid or missing credentials |
 | `RATE_LIMITED` | 429 | Too many requests |
 
 ---
 
 ## Security Considerations
 
-1. **API Key Rotation**: Rotate API keys regularly and use environment variables
-2. **mTLS**: Use mutual TLS for production deployments
-3. **Input Validation**: The issuer validates all document data against VCTM schemas
-4. **Audit Logging**: All API operations are logged for compliance
-5. **Rate Limiting**: Implement rate limiting to prevent abuse
+1. **JWT Token Security**: Use short-lived tokens, validate issuer/audience claims, and rotate signing keys regularly
+2. **SPOCP Authorization**: Define fine-grained rules to restrict which subjects can access which endpoints
+3. **mTLS for gRPC**: Use mutual TLS for the internal Issuer gRPC service (configurable via `grpc_server.tls`)
+4. **Input Validation**: The issuer validates all document data against VCTM schemas
+5. **Audit Logging**: All API operations are logged for compliance (configurable webhook destinations)
+6. **Rate Limiting**: Implement rate limiting at the reverse proxy level to prevent abuse
 
 ---
 
