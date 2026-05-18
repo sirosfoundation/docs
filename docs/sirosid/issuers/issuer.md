@@ -89,18 +89,22 @@ The SIROS ID issuer supports multiple ways to authenticate users before issuing 
 Connect any OIDC-compliant identity provider to issue credentials. See [OIDC Provider Integration](./oidc-op) for detailed configuration:
 
 ```yaml
-# Example OIDC configuration
+# OIDC is configured under apigw.auth_providers.oidc
 apigw:
-  oidcrp:
-    enabled: true
-    client_id: "your-client-id"
-    client_secret: "your-client-secret"
-    provider_metadata_url: "https://your-idp.example.com/.well-known/openid-configuration"
-    scopes:
-      - openid
-      - profile
-      - email
-    credential_config_id: "urn:eudi:pid:arf-1.8:1"
+  auth_providers:
+    oidc:
+      enable: true
+      issuer_url: "https://your-idp.example.com"
+      redirect_uri: "https://issuer.example.org/oidcrp/callback"
+      registration:
+        preconfigured:
+          enable: true
+          client_id: "your-client-id"
+          client_secret: "your-client-secret"
+      scopes:
+        - openid
+        - profile
+        - email
 ```
 
 ### 2. SAML 2.0
@@ -108,27 +112,22 @@ apigw:
 Use existing [SAML 2.0](http://docs.oasis-open.org/security/saml/v2.0/) identity federations. See [SAML IdP Integration](./saml-idp) for detailed configuration:
 
 ```yaml
-# SAML is configured under apigw.saml
+# SAML is configured under apigw.auth_providers.saml
 apigw:
-  saml:
-    enabled: true
-    entity_id: "https://issuer.example.org/sp"
-    acs_endpoint: "https://issuer.example.org/saml/acs"
-    certificate_path: "/pki/sp-cert.pem"
-    private_key_path: "/pki/sp-key.pem"
-    # Use MDQ for federation metadata lookup
-    mdq_server: "https://mds.swamid.se/entities/"
-    credential_mappings:
-      - credential_config_id: "urn:eudi:pid:arf-1.8:1"
-        entity_ids:
-          - "https://idp.example.org/idp/shibboleth"
-        attributes:
-          "urn:oid:2.5.4.42":
-            claim: "given_name"
-            required: true
-          "urn:oid:2.5.4.4":
-            claim: "family_name"
-            required: true
+  auth_providers:
+    saml:
+      enable: true
+      entity_id: "https://issuer.example.org/sp"
+      acs_endpoint: "https://issuer.example.org/saml/acs"
+      certificate_path: "/pki/sp-cert.pem"
+      private_key_path: "/pki/sp-key.pem"
+      # Use MDQ for federation metadata lookup
+      mdq_server: "https://mds.swamid.se/md"
+      attribute_mapping:
+        "urn:oid:2.5.4.42":
+          claim: "given_name"
+        "urn:oid:2.5.4.4":
+          claim: "family_name"
 ```
 
 ### 3. Pre-Authorized Code (API Integration)
@@ -195,76 +194,94 @@ Configure your IdP to allow the issuer as a client:
 1. Import issuer SP metadata
 2. Configure attribute release (name, email, etc.)
 
-### Step 2: Map Identity Claims to Credential Attributes
+### Step 2: Configure Credential Types and Data Sources
 
-Configure how user identity maps to credential claims using the `credential_constructor` section. Each entry defines a credential type with its [Verifiable Credential Type Metadata (VCTM)](https://datatracker.ietf.org/doc/draft-ietf-oauth-sd-jwt-vc/):
+The SIROS ID issuer uses two configuration sections to define credentials:
 
-The `auth_method` field determines how the user is authenticated before the credential is issued:
+1. **`common.credential_metadata`** — Defines credential types (VCTM path and format)
+2. **`apigw.data_sources`** — Binds credential scopes to authentication providers and data source categories
 
-| `auth_method` | Description | Integration Guide |
-|---------------|-------------|-------------------|
-| `basic`       | Document data from datastore (pre-authorized code flow) | [API Integration](./api-integration) |
-| `openid4vp`   | User proves identity by presenting a Verifiable Credential via OpenID4VP | [API Integration](./api-integration) |
-| `saml`        | User redirected to SAML IdP; claims from assertion | [SAML IdP](./saml-idp) |
-| `oidc`        | User redirected to OIDC Provider; claims from ID token | [OIDC Provider](./oidc-op) |
+#### Data Source Categories
 
-#### Choosing the Right Auth Method
+| Category | Description | Integration Guide |
+|----------|-------------|-------------------|
+| `datastore` | Document data pre-loaded in MongoDB by an authentic source | [API Integration](./api-integration) |
+| `assertion` | Claims come directly from the auth provider (SAML assertion or OIDC token) | [SAML IdP](./saml-idp), [OIDC Provider](./oidc-op) |
+| `external_api` | Data fetched from a remote API at issuance time | [API Integration](./api-integration) |
 
-**`basic`** – Use when your backend system already has verified user data and controls the issuance flow:
+#### Auth Providers
+
+The `auth_provider` field in each data source scope determines how the user is authenticated:
+
+| `auth_provider` | Description | Integration Guide |
+|-----------------|-------------|-------------------|
+| `oidc`          | User redirected to OIDC Provider; claims from ID token | [OIDC Provider](./oidc-op) |
+| `saml`          | User redirected to SAML IdP; claims from assertion | [SAML IdP](./saml-idp) |
+| `openid4vp`     | User presents a Verifiable Credential via OpenID4VP | [API Integration](./api-integration) |
+
+#### Choosing the Right Data Source
+
+**`datastore`** – Use when your backend system already has verified user data and controls the issuance flow:
 - Diplomas issued by a university after graduation processing
 - Employee badges issued via HR system integration
 - Government documents issued after in-person verification
 - Any scenario where the issuer pushes pre-authorized credential offers via API
 
-**`openid4vp`** – Use when the user must prove their identity by presenting an existing credential:
+**`assertion`** – Use when the credential data comes directly from an IdP:
+- PIDs issued via national identity schemes (e.g., Swedish BankID via SAML proxy)
+- Credentials where the OIDC token or SAML assertion contains all needed claims
+- Social login providers (Google, Microsoft, etc.) for simple identity credentials
+
+**`external_api`** – Use when credential data is fetched from a remote API:
+- Educational credentials fetched from Ladok or similar registries
+- Credentials requiring data from multiple external systems
+
+**`openid4vp` auth** – Use when the user must prove their identity by presenting an existing credential:
 - Issuing derived credentials (e.g., EHIC based on PID)
 - Cross-border credential issuance requiring identity verification
 - Self-service credential requests where users prove eligibility via existing credentials
 - Scenarios requiring multiple credential types for identity matching (configurable via `auth_scopes`)
 
-**`saml`** – Use when integrating with existing SAML-based identity infrastructure:
-- Academic institutions with eduGAIN/SAML federation
-- Government agencies with national eID SAML gateways
-- Enterprise environments with SAML-based SSO (ADFS, Shibboleth, etc.)
-- PIDs issued via national identity schemes (e.g., Swedish BankID via SAML proxy)
-
-**`oidc`** – Use when integrating with modern OAuth 2.0/OIDC identity providers:
-- Social login providers (Google, Microsoft, etc.)
-- Cloud-based identity platforms (Auth0, Okta, Azure AD B2C)
-- Mobile-first identity providers
-- OpenID Connect federation scenarios
-
-When using `openid4vp`, you must also configure:
-- **`auth_scopes`**: List of acceptable credential types that can be presented for authentication (e.g., `["pid_1_5", "pid_1_8", "eduid"]`)
-- **`auth_claims`**: List of claims required from the presented credential (e.g., `["given_name", "birthdate", "family_name"]`)
+When using `openid4vp` auth_provider, you must also configure:
+- **`auth_scopes`**: List of acceptable credential types that can be presented for authentication (e.g., `["pid_1_5", "pid_1_8"]`)
+- **`auth_claims`**: List of claims required from the presented credential (e.g., `["given_name", "birth_date", "family_name"]`)
 
 ```yaml
-credential_constructor:
-  # API-based auth – document data pushed via REST API, pre-authorized code flow
-  diploma:
-    vctm_file_path: "/metadata/vctm_diploma.json"
-    auth_method: basic
-    format: "dc+sd-jwt"
-  
-  # OpenID4VP auth – wallet presents a Verifiable Credential for identity matching
-  ehic:
-    vctm_file_path: "/metadata/vctm_ehic.json"
-    auth_method: openid4vp
-    auth_scopes: ["pid_1_5", "pid_1_8", "eduid"]
-    auth_claims: ["given_name", "birthdate", "family_name"]
-    format: "dc+sd-jwt"
+common:
+  credential_metadata:
+    # Credential type definitions (VCTM path + format)
+    pid:
+      vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
+      format: "dc+sd-jwt"
+    ehic:
+      vctm_file_path: "/metadata/vctm_ehic.json"
+      format: "dc+sd-jwt"
+    diploma:
+      vctm_file_path: "/metadata/vctm_diploma.json"
+      format: "dc+sd-jwt"
 
-  # SAML auth – redirect to SAML IdP, claims from assertion
-  pid_saml:
-    vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
-    auth_method: saml
-    format: "dc+sd-jwt"
+apigw:
+  data_sources:
+    # Assertion: claims from auth provider ARE the credential data
+    assertion:
+      scopes:
+        pid:
+          auth_provider: saml
 
-  # OIDC auth – redirect to OIDC Provider, claims from ID token
-  pid_oidc:
-    vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
-    auth_method: oidc
-    format: "dc+sd-jwt"
+    # Datastore: pre-loaded document data, auth used for identity lookup
+    datastore:
+      scopes:
+        ehic:
+          auth_provider: openid4vp
+          auth_scopes: ["pid"]
+          auth_claims: ["given_name", "family_name", "birth_date"]
+
+    # External API: data fetched from a remote API
+    external_api:
+      scopes:
+        diploma:
+          auth_provider: oidc
+          remote: ladok
 ```
 
 :::tip VCTM Files
@@ -392,37 +409,64 @@ volumes:
 Create `config.yaml`:
 
 ```yaml
-issuer:
-  api_server:
-    addr: :8080
-    tls:
-      enabled: false  # Use reverse proxy for TLS in production
-  
-  external_url: "https://issuer.example.com"
-  
-  # Signing key for credentials
-  signing:
-    key_path: "/pki/issuer_key.pem"
-    algorithm: "ES256"
-  
-  # Authentication backend
-  authentication:
-    type: oidc
-    client_id: "issuer-client"
-    client_secret: "${OIDC_CLIENT_SECRET}"
-    issuer_url: "https://your-idp.example.com"
-    scopes:
-      - openid
-      - profile
-
-  # Trust configuration (optional: go-trust service)
-  trust:
-    pdp_url: "http://go-trust:6001"
-
 common:
   mongo:
     uri: mongodb://mongo:27017
   production: true
+
+  credential_metadata:
+    pid:
+      vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
+      format: "dc+sd-jwt"
+
+issuer:
+  issuer_url: "https://issuer.example.com"
+  api_server:
+    addr: :8080
+  grpc_server:
+    addr: :8090
+  key_config:
+    private_key_path: "/pki/signing_ec_private.pem"
+    chain_path: "/pki/signing_ec_chain.pem"
+
+apigw:
+  api_server:
+    addr: :8080
+  public_url: "https://issuer.example.com"
+  key_config:
+    private_key_path: "/pki/signing_ec_private.pem"
+    chain_path: "/pki/signing_ec_chain.pem"
+  issuer_client:
+    addr: issuer:8090
+  registry_client:
+    addr: registry:8090
+  auth_providers:
+    oidc:
+      enable: true
+      issuer_url: "https://your-idp.example.com"
+      redirect_uri: "https://issuer.example.com/oidcrp/callback"
+      registration:
+        preconfigured:
+          enable: true
+          client_id: "issuer-client"
+          client_secret: "${OIDC_CLIENT_SECRET}"
+      scopes:
+        - openid
+        - profile
+  data_sources:
+    assertion:
+      scopes:
+        pid:
+          auth_provider: oidc
+  delivery:
+    openid4vci:
+      token_endpoint: "https://issuer.example.com/token"
+      clients:
+        "1003":
+          type: "public"
+          redirect_uri: "https://wallet.example.com"
+          scopes:
+            - "pid"
 ```
 
 #### Start the Service

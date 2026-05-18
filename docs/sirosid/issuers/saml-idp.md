@@ -44,54 +44,78 @@ Use SAML integration when:
 
 - A SAML 2.0 compliant identity provider
 - IdP metadata (URL or file)
-- A SIROS ID issuer with SAML configured (`apigw.saml` section)
+- A SIROS ID issuer with SAML configured (`apigw.auth_providers.saml` section)
 
 ## Integration Mode
 
-SAML authentication is integrated into the standard **OpenID4VCI** credential issuance pipeline. When a `credential_constructor` entry has `auth_method: saml`, the OID4VCI consent step redirects the user to the SAML IdP. After successful authentication, the SAML assertion attributes are transformed into credential claims via the `credential_mappings` configuration, and the standard OID4VCI token/credential flow continues.
+SAML authentication is integrated into the standard **OpenID4VCI** credential issuance pipeline. When a data source scope has `auth_provider: saml`, the OID4VCI consent step redirects the user to the SAML IdP. After successful authentication, the SAML assertion attributes are normalized via `attribute_mapping` and then used to construct the credential (for `assertion` data sources) or to perform an identity lookup (for `datastore` data sources), and the standard OID4VCI token/credential flow continues.
 
 This means SAML-authenticated credentials benefit from the same DPoP binding, token lifecycle, and wallet protocol support as every other auth method.
 
-:::tip Credential Constructor Key
-The `credential_mappings` key under `apigw.saml` must match the `credential_constructor` key for the credential type. For example, if the constructor key is `diploma`, the mapping key must also be `diploma`.
+:::tip Data Source Scope Key
+The scope key under `apigw.data_sources` must match the key in `common.credential_metadata`. For example, if credential metadata defines `pid`, the data source scope must also be `pid`.
 :::
 
 ## Configuration
 
-SAML authentication is configured in the \`apigw.saml\` section of your configuration file.
+SAML authentication is configured in the `apigw.auth_providers.saml` section. Credential types are defined separately in `common.credential_metadata`, and authentication bindings are configured in `apigw.data_sources`.
 
 ### Basic Configuration
 
 ```yaml
+common:
+  credential_metadata:
+    pid:
+      vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
+      format: "dc+sd-jwt"
+    diploma:
+      vctm_file_path: "/metadata/vctm_diploma.json"
+      format: "dc+sd-jwt"
+
 apigw:
-  saml:
-    # Enable SAML support
-    enabled: true
-    
-    # Service Provider entity ID (your issuer's identifier)
-    entity_id: "https://issuer.example.org/sp"
-    
-    # Assertion Consumer Service endpoint (where IdP sends responses)
-    acs_endpoint: "https://issuer.example.org/saml/acs"
-    
-    # SP signing/encryption certificates
-    certificate_path: "/pki/sp-cert.pem"
-    private_key_path: "/pki/sp-key.pem"
-    
-    # Session duration in seconds (default: 3600)
-    session_duration: 3600
-    
-    # Credential mappings (see below)
-    credential_mappings:
-      pid:
-        credential_config_id: "urn:eudi:pid:arf-1.8:1"
-        attributes:
-          "urn:oid:2.5.4.42":
-            claim: "given_name"
-            required: true
-          "urn:oid:2.5.4.4":
-            claim: "family_name"
-            required: true
+  auth_providers:
+    saml:
+      # Enable SAML support
+      enable: true
+
+      # Service Provider entity ID (your issuer's identifier)
+      entity_id: "https://issuer.example.org/sp"
+
+      # Assertion Consumer Service endpoint (where IdP sends responses)
+      acs_endpoint: "https://issuer.example.org/saml/acs"
+
+      # SP signing/encryption certificates
+      certificate_path: "/pki/sp-cert.pem"
+      private_key_path: "/pki/sp-key.pem"
+
+      # Session duration in seconds (default: 300)
+      session_duration: 300
+
+      # Attribute mapping normalizes SAML attribute OIDs to canonical claim names
+      attribute_mapping:
+        "urn:oid:2.5.4.42":
+          claim: "given_name"
+        "urn:oid:2.5.4.4":
+          claim: "family_name"
+        "urn:oid:1.3.6.1.5.5.7.9.1":
+          claim: "birth_date"
+        "urn:oid:0.9.2342.19200300.100.1.3":
+          claim: "email_address"
+          transform: "lowercase"
+
+  # Data sources bind credential scopes to auth providers
+  data_sources:
+    assertion:
+      scopes:
+        pid:
+          auth_provider: saml
+        diploma:
+          auth_provider: saml
+    datastore:
+      scopes:
+        ehic:
+          auth_provider: saml
+          auth_claims: ["given_name", "family_name", "birth_date"]
 ```
 
 ### IdP Metadata Configuration
@@ -104,24 +128,22 @@ For federation environments with many IdPs, use [MDQ](https://datatracker.ietf.o
 
 ```yaml
 apigw:
-  saml:
-    enabled: true
-    entity_id: "https://issuer.example.org/sp"
-    acs_endpoint: "https://issuer.example.org/saml/acs"
-    certificate_path: "/pki/sp-cert.pem"
-    private_key_path: "/pki/sp-key.pem"
+  auth_providers:
+    saml:
+      enable: true
+      entity_id: "https://issuer.example.org/sp"
+      acs_endpoint: "https://issuer.example.org/saml/acs"
+      certificate_path: "/pki/sp-cert.pem"
+      private_key_path: "/pki/sp-key.pem"
     
-    # MDQ configuration
-    mdq_server: "https://mds.swamid.se/entities/"
+      # MDQ configuration
+      mdq_server: "https://mds.swamid.se/md"
     
-    # Cache TTL in seconds (default: 3600)
-    metadata_cache_ttl: 3600
+      # Cache TTL in seconds (default: 86400)
+      metadata_cache_ttl: 86400
     
-    # Optional: verify metadata XML signatures (recommended for production)
-    metadata_signing_cert_path: "/pki/federation-signing.pem"
-    
-    credential_mappings:
-      # ...
+      # Optional: verify metadata XML signatures (recommended for production)
+      metadata_signing_cert_path: "/pki/federation-signing.pem"
 ```
 
 **Federation MDQ Endpoints:**
@@ -143,13 +165,14 @@ Configure the `metadata_signing_cert_path` option to point to the federation's m
 
 ```yaml
 apigw:
-  saml:
-    # ... other SAML config ...
+  auth_providers:
+    saml:
+      # ... other SAML config ...
     
-    # Federation metadata signing certificate
-    # When set, ALL fetched metadata (MDQ and static URL) must carry
-    # a valid XML signature from this certificate.
-    metadata_signing_cert_path: "/pki/federation-signing.pem"
+      # Federation metadata signing certificate
+      # When set, ALL fetched metadata (MDQ and static URL) must carry
+      # a valid XML signature from this certificate.
+      metadata_signing_cert_path: "/pki/federation-signing.pem"
 ```
 
 **Behavior:**
@@ -175,27 +198,28 @@ For single IdP setups or testing:
 
 ```yaml
 apigw:
-  saml:
-    enabled: true
-    entity_id: "https://issuer.example.org/sp"
-    acs_endpoint: "https://issuer.example.org/saml/acs"
-    certificate_path: "/pki/sp-cert.pem"
-    private_key_path: "/pki/sp-key.pem"
+  auth_providers:
+    saml:
+      enable: true
+      entity_id: "https://issuer.example.org/sp"
+      acs_endpoint: "https://issuer.example.org/saml/acs"
+      certificate_path: "/pki/sp-cert.pem"
+      private_key_path: "/pki/sp-key.pem"
     
-    # Static IdP configuration (mutually exclusive with mdq_server)
-    static_idp_metadata:
-      entity_id: "https://idp.example.org"
-      # Use file path OR URL (not both)
-      metadata_path: "/metadata/idp-metadata.xml"
-      # metadata_url: "https://idp.example.org/metadata"
-    
-    credential_mappings:
-      # ...
+      # Static IdP configuration (mutually exclusive with mdq_server)
+      static_idp_metadata:
+        entity_id: "https://idp.example.org"
+        # Use file path OR URL (not both)
+        metadata_path: "/metadata/idp-metadata.xml"
+        # metadata_url: "https://idp.example.org/metadata"
 ```
 
 ## Attribute Mapping
 
-Configure how SAML attributes map to credential claims using the \`credential_mappings\` section.
+Attribute mapping is configured in `apigw.auth_providers.saml.attribute_mapping` and normalizes SAML attribute OIDs to canonical claim names. The mapping is applied globally to ALL attributes in the SAML assertion. Which normalized attributes are used depends on the data source:
+- **assertion**: VCTM determines which claims go into the credential
+- **datastore**: `auth_claims` determines which are used for DB identity lookup
+- **external_api**: `auth_claims` determine identity, remote API provides data
 
 ### Standard Attribute Names
 
@@ -203,56 +227,43 @@ SAML uses OID-based attribute names. Common mappings:
 
 | Credential Claim | SAML Attribute (OID) | Friendly Name |
 |------------------|---------------------|---------------|
-| \`given_name\` | \`urn:oid:2.5.4.42\` | \`givenName\` |
-| \`family_name\` | \`urn:oid:2.5.4.4\` | \`sn\` |
-| \`email\` | \`urn:oid:0.9.2342.19200300.100.1.3\` | \`mail\` |
-| \`personal_id\` | \`urn:oid:1.3.6.1.4.1.5923.1.1.1.6\` | \`eduPersonPrincipalName\` |
-| \`affiliation\` | \`urn:oid:1.3.6.1.4.1.5923.1.1.1.1\` | \`eduPersonAffiliation\` |
+| `given_name` | `urn:oid:2.5.4.42` | `givenName` |
+| `family_name` | `urn:oid:2.5.4.4` | `sn` |
+| `email_address` | `urn:oid:0.9.2342.19200300.100.1.3` | `mail` |
+| `personal_administrative_number` | `urn:oid:1.2.752.29.4.13` | Swedish personnummer |
+| `birth_date` | `urn:oid:1.3.6.1.5.5.7.9.1` | `dateOfBirth` |
+| `affiliation` | `urn:oid:1.3.6.1.4.1.5923.1.1.1.1` | `eduPersonAffiliation` |
+| `principal_name` | `urn:oid:1.3.6.1.4.1.5923.1.1.1.6` | `eduPersonPrincipalName` |
+| `institution` | `urn:oid:2.5.4.10` | `organizationName` |
 
-### Credential Mappings Configuration
+### Attribute Mapping Configuration
 
-Each entry in \`credential_mappings\` maps a credential type to its configuration:
+The `attribute_mapping` section normalizes provider-specific attribute names to canonical claim names:
 
 ```yaml
-credential_mappings:
-  # Key matches credential_constructor scope
-  pid:
-    # OpenID4VCI credential configuration ID
-    credential_config_id: "urn:eudi:pid:arf-1.8:1"
-    
-    # Optional: default IdP for this credential type
-    default_idp: "https://idp.example.org"
-    
-    # Attribute mappings: SAML attribute -> credential claim
-    attributes:
-      "urn:oid:2.5.4.42":
-        claim: "given_name"
-        required: true
-      "urn:oid:2.5.4.4":
-        claim: "family_name"
-        required: true
-      "urn:oid:0.9.2342.19200300.100.1.3":
-        claim: "email"
-        required: false
-      "urn:oid:1.3.6.1.5.5.7.9.1":
-        claim: "birth_date"
-        required: true
-        # Optional: transform the value
-        transform: "lowercase"
-      # Attribute with default value
-      "urn:oid:2.5.4.6":
-        claim: "nationality"
-        required: false
-        default: "SE"
-  
-  # Additional credential types
-  diploma:
-    credential_config_id: "urn:eudi:diploma:1"
-    attributes:
-      "urn:oid:2.5.4.42":
-        claim: "given_name"
-        required: true
-      # ...
+apigw:
+  auth_providers:
+    saml:
+      attribute_mapping:
+        "urn:oid:2.5.4.42":
+          claim: "given_name"
+        "urn:oid:2.5.4.4":
+          claim: "family_name"
+        "urn:oid:0.9.2342.19200300.100.1.3":
+          claim: "email_address"
+          transform: "lowercase"
+        "urn:oid:1.2.752.29.4.13":
+          claim: "personal_administrative_number"
+        "urn:oid:2.5.4.6":
+          claim: "nationality"
+        "urn:oid:1.3.6.1.5.5.7.9.1":
+          claim: "birth_date"
+        "urn:oid:1.3.6.1.4.1.5923.1.1.1.1":
+          claim: "affiliation"
+        "urn:oid:1.3.6.1.4.1.5923.1.1.1.6":
+          claim: "principal_name"
+        "urn:oid:2.5.4.10":
+          claim: "institution"
 ```
 
 ### Attribute Configuration Options
@@ -261,10 +272,9 @@ Each attribute mapping supports:
 
 | Option | Type | Description |
 |--------|------|-------------|
-| \`claim\` | string | Target claim name (supports dot-notation for nesting) |
-| \`required\` | boolean | Whether the attribute must be present |
-| \`transform\` | string | Optional transformation: \`lowercase\`, \`uppercase\`, \`trim\` |
-| \`default\` | string | Default value if attribute is missing |
+| `claim` | string | Canonical claim name to map to |
+| `required` | boolean | Whether the attribute must be present |
+| `transform` | string | Optional transformation: `lowercase`, `uppercase`, `trim` |
 
 ## Docker Deployment
 
@@ -310,51 +320,72 @@ openssl req -x509 -newkey rsa:2048 \
 ## Complete Configuration Example
 
 ```yaml
-apigw:
-  external_server_url: "https://issuer.example.org"
-  
-  saml:
-    enabled: true
-    entity_id: "https://issuer.example.org/sp"
-    acs_endpoint: "https://issuer.example.org/saml/acs"
-    certificate_path: "/pki/sp-cert.pem"
-    private_key_path: "/pki/sp-key.pem"
-    
-    # MDQ for SWAMID federation
-    mdq_server: "https://mds.swamid.se/entities/"
-    metadata_cache_ttl: 3600
-    
-    # Verify metadata signatures (recommended for production)
-    metadata_signing_cert_path: "/pki/swamid-signing.pem"
-    
-    session_duration: 3600
-    
-    credential_mappings:
-      pid:
-        credential_config_id: "urn:eudi:pid:arf-1.8:1"
-        attributes:
-          "urn:oid:2.5.4.42":
-            claim: "given_name"
-            required: true
-          "urn:oid:2.5.4.4":
-            claim: "family_name"
-            required: true
-          "urn:oid:1.3.6.1.4.1.25178.1.2.3":
-            claim: "personal_id"
-            required: true
-
-# Credential constructor must match credential_mappings keys
-# auth_method: saml triggers the SAML IdP redirect during OID4VCI consent
-credential_constructor:
-  pid:
-    vct: "urn:eudi:pid:arf-1.8:1"
-    vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
-    auth_method: saml
-    format: "dc+sd-jwt"
-
 common:
   mongo:
     uri: mongodb://mongo:27017
+
+  credential_metadata:
+    pid:
+      vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
+      format: "dc+sd-jwt"
+    diploma:
+      vctm_file_path: "/metadata/vctm_diploma.json"
+      format: "dc+sd-jwt"
+
+apigw:
+  public_url: "https://issuer.example.org"
+  key_config:
+    private_key_path: "/pki/signing_ec_private.pem"
+    chain_path: "/pki/signing_ec_chain.pem"
+
+  auth_providers:
+    saml:
+      enable: true
+      entity_id: "https://issuer.example.org/sp"
+      acs_endpoint: "https://issuer.example.org/saml/acs"
+      certificate_path: "/pki/sp-cert.pem"
+      private_key_path: "/pki/sp-key.pem"
+
+      # MDQ for SWAMID federation
+      mdq_server: "https://mds.swamid.se/md"
+      metadata_cache_ttl: 86400
+
+      # Verify metadata signatures (recommended for production)
+      metadata_signing_cert_path: "/pki/swamid-signing.pem"
+
+      session_duration: 300
+
+      attribute_mapping:
+        "urn:oid:2.5.4.42":
+          claim: "given_name"
+        "urn:oid:2.5.4.4":
+          claim: "family_name"
+        "urn:oid:1.3.6.1.5.5.7.9.1":
+          claim: "birth_date"
+        "urn:oid:1.2.752.29.4.13":
+          claim: "personal_administrative_number"
+        "urn:oid:0.9.2342.19200300.100.1.3":
+          claim: "email_address"
+          transform: "lowercase"
+
+  data_sources:
+    assertion:
+      scopes:
+        pid:
+          auth_provider: saml
+        diploma:
+          auth_provider: saml
+
+  delivery:
+    openid4vci:
+      token_endpoint: "https://issuer.example.org/token"
+      clients:
+        "1003":
+          type: "public"
+          redirect_uri: "https://dev.wallet.sunet.se"
+          scopes:
+            - "pid"
+            - "diploma"
 ```
 
 ## Troubleshooting

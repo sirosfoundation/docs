@@ -47,60 +47,73 @@ Use OIDC integration when:
 
 - An OpenID Connect compliant identity provider
 - Admin access to register OIDC clients (or OP supports dynamic registration)
-- A SIROS ID issuer (hosted or self-hosted) with OIDC RP configured (`apigw.oidcrp` section)
+- A SIROS ID issuer (hosted or self-hosted) with OIDC configured (`apigw.auth_providers.oidc` section)
 
 ## Integration Mode
 
-OIDC authentication is integrated into the standard **OpenID4VCI** credential issuance pipeline. When a `credential_constructor` entry has `auth_method: oidc`, the OID4VCI consent step redirects the user to the OIDC Provider. After successful authentication, the ID token claims are transformed into credential claims via the `credential_mappings` configuration, and the standard OID4VCI token/credential flow continues.
+OIDC authentication is integrated into the standard **OpenID4VCI** credential issuance pipeline. When a data source scope has `auth_provider: oidc`, the OID4VCI consent step redirects the user to the OIDC Provider. After successful authentication, the ID token claims are used to construct the credential (for `assertion` data sources) or to perform an identity lookup (for `datastore` data sources), and the standard OID4VCI token/credential flow continues.
 
 This means OIDC-authenticated credentials benefit from the same DPoP binding, token lifecycle, and wallet protocol support as every other auth method.
 
-:::tip Credential Constructor Key
-The `credential_mappings` key under `apigw.oidcrp` must match the `credential_constructor` key for the credential type. For example, if the constructor key is `pid`, the mapping key must also be `pid`.
+:::tip Data Source Scope Key
+The scope key under `apigw.data_sources` must match the key in `common.credential_metadata`. For example, if credential metadata defines `pid`, the data source scope must also be `pid`.
 :::
 
 ## Configuration
 
-OIDC Relying Party authentication is configured in the \`apigw.oidcrp\` section.
+OIDC Relying Party authentication is configured in the `apigw.auth_providers.oidc` section. Credential types are defined separately in `common.credential_metadata`, and authentication bindings are configured in `apigw.data_sources`.
 
 ### Basic Configuration
 
 ```yaml
+common:
+  credential_metadata:
+    pid:
+      vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
+      format: "dc+sd-jwt"
+
 apigw:
-  oidcrp:
-    # Enable OIDC RP support
-    enabled: true
-    
-    # OAuth2 client credentials
-    client_id: "your-client-id"
-    client_secret: "your-client-secret"
-    
-    # Callback URL for authorization responses
-    redirect_uri: "https://issuer.example.org/oidcrp/callback"
-    
-    # OIDC Provider issuer URL (for discovery)
-    issuer_url: "https://accounts.google.com"
-    
-    # Scopes to request
-    scopes:
-      - openid
-      - profile
-      - email
-    
-    # Session duration in seconds (default: 3600)
-    session_duration: 3600
-    
-    # Credential mappings
-    credential_mappings:
-      pid:
-        credential_config_id: "urn:eudi:pid:arf-1.8:1"
-        attributes:
-          given_name:
-            claim: "given_name"
-            required: true
-          family_name:
-            claim: "family_name"
-            required: true
+  auth_providers:
+    oidc:
+      # Enable OIDC RP support
+      enable: true
+
+      # OIDC Provider issuer URL (for discovery)
+      issuer_url: "https://accounts.google.com"
+
+      # Callback URL for authorization responses
+      redirect_uri: "https://issuer.example.org/oidcrp/callback"
+
+      # Client credentials (preconfigured or dynamic registration)
+      registration:
+        preconfigured:
+          enable: true
+          client_id: "your-client-id"
+          client_secret: "your-client-secret"
+
+      # Scopes to request
+      scopes:
+        - openid
+        - profile
+        - email
+
+      # Session duration in seconds (default: 300)
+      session_duration: 300
+
+  # Data sources bind credential scopes to auth providers
+  data_sources:
+    # Assertion: claims from OIDC token ARE the credential data
+    assertion:
+      scopes:
+        pid:
+          auth_provider: oidc
+
+    # Datastore: OIDC identifies the user; document data is in MongoDB
+    datastore:
+      scopes:
+        ehic:
+          auth_provider: oidc
+          auth_claims: ["given_name", "family_name", "birthdate"]
 ```
 
 ### Dynamic Client Registration
@@ -109,33 +122,30 @@ For OIDC Providers supporting [RFC 7591](https://datatracker.ietf.org/doc/html/r
 
 ```yaml
 apigw:
-  oidcrp:
-    enabled: true
-    redirect_uri: "https://issuer.example.org/oidcrp/callback"
-    issuer_url: "https://op.example.org"
-    
-    # Dynamic registration (instead of static client_id/client_secret)
-    dynamic_registration:
-      enabled: true
-      # Optional: initial access token if required by OP
-      initial_access_token: "your-registration-token"
-      # Optional: persist registered credentials
-      storage_path: "/var/lib/vc/oidcrp-registration.json"
-    
-    scopes:
-      - openid
-      - profile
-      - email
-    
-    # Optional client metadata for registration
-    client_name: "SIROS ID Credential Issuer"
-    client_uri: "https://issuer.example.org"
-    logo_uri: "https://issuer.example.org/logo.png"
-    contacts:
-      - "admin@example.org"
-    
-    credential_mappings:
-      # ...
+  auth_providers:
+    oidc:
+      enable: true
+      redirect_uri: "https://issuer.example.org/oidcrp/callback"
+      issuer_url: "https://op.example.org"
+
+      # Dynamic registration (instead of preconfigured client_id/client_secret)
+      registration:
+        dynamic:
+          enable: true
+          # Optional: initial access token if required by OP
+          initial_access_token: "your-registration-token"
+
+      scopes:
+        - openid
+        - profile
+        - email
+
+      # Optional client metadata for registration
+      client_name: "SIROS ID Credential Issuer"
+      client_uri: "https://issuer.example.org"
+      logo_uri: "https://issuer.example.org/logo.png"
+      contacts:
+        - "admin@example.org"
 ```
 
 ## Claim Mapping
@@ -155,69 +165,46 @@ OpenID Connect defines standard claims:
 | \`address\` | Address object |
 | \`phone_number\` | Phone number |
 
-### Credential Mappings Configuration
+### Attribute Mapping (Optional)
+
+Attribute mapping normalizes OIDC claim names to canonical claim names. It is **optional** for OIDC — when omitted, OIDC claims pass through as-is since standard claim names already match canonical names. Only specify `attribute_mapping` when OIDC claim names differ from the canonical names expected by VCTM.
 
 ```yaml
 apigw:
-  oidcrp:
-    enabled: true
-    issuer_url: "https://accounts.google.com"
-    client_id: "${OIDC_CLIENT_ID}"
-    client_secret: "${OIDC_CLIENT_SECRET}"
-    redirect_uri: "https://issuer.example.org/oidcrp/callback"
-    
-    scopes:
-      - openid
-      - profile
-      - email
-    
-    credential_mappings:
-      # Key matches credential_constructor scope
-      pid:
-        # OpenID4VCI credential configuration ID
-        credential_config_id: "urn:eudi:pid:arf-1.8:1"
-        
-        # Attribute mappings: OIDC claim -> credential claim
-        attributes:
-          # Direct claim mapping
-          given_name:
-            claim: "given_name"
-            required: true
-          family_name:
-            claim: "family_name"
-            required: true
-          email:
-            claim: "email"
-            required: false
-          # Subject identifier with transformation
-          sub:
-            claim: "personal_id"
-            required: true
-            transform: "lowercase"
-          # Claim with default value
-          locale:
-            claim: "locale"
-            required: false
-            default: "en-US"
-      
-      # Example: diploma credential
-      diploma:
-        credential_config_id: "urn:eudi:diploma:1"
-        attributes:
-          given_name:
-            claim: "student_first_name"
-            required: true
-          # ...
+  auth_providers:
+    oidc:
+      enable: true
+      issuer_url: "https://accounts.google.com"
+      redirect_uri: "https://issuer.example.org/oidcrp/callback"
+      registration:
+        preconfigured:
+          enable: true
+          client_id: "${OIDC_CLIENT_ID}"
+          client_secret: "${OIDC_CLIENT_SECRET}"
+
+      scopes:
+        - openid
+        - profile
+        - email
+
+      # attribute_mapping is optional for OIDC. When omitted, OIDC claims
+      # pass through as-is (standard claim names already match canonical names).
+      # Only needed when OIDC claim names differ from canonical claim names:
+      #
+      # attribute_mapping:
+      #   sub:
+      #     claim: "subject_id"
+      #     required: true
+      #     transform: "lowercase"
 ```
 
 ### Attribute Configuration Options
 
 | Option | Type | Description |
 |--------|------|-------------|
-| \`claim\` | string | Target credential claim name (supports dot-notation) |
-| \`required\` | boolean | Whether the OIDC claim must be present |
-| \`transform\` | string | Optional: \`lowercase\`, \`uppercase\`, \`trim\` |
-| \`default\` | string | Default value if claim is missing |
+| `claim` | string | Canonical claim name to map to |
+| `required` | boolean | Whether the OIDC claim must be present |
+| `transform` | string | Optional: `lowercase`, `uppercase`, `trim` |
 
 ## Provider-Specific Examples
 
@@ -225,84 +212,81 @@ apigw:
 
 ```yaml
 apigw:
-  oidcrp:
-    enabled: true
-    issuer_url: "https://accounts.google.com"
-    client_id: "${GOOGLE_CLIENT_ID}"
-    client_secret: "${GOOGLE_CLIENT_SECRET}"
-    redirect_uri: "https://issuer.example.org/oidcrp/callback"
-    scopes:
-      - openid
-      - profile
-      - email
-    credential_mappings:
-      pid:
-        credential_config_id: "urn:eudi:pid:arf-1.8:1"
-        attributes:
-          given_name:
-            claim: "given_name"
-            required: true
-          family_name:
-            claim: "family_name"
-            required: true
-          email:
-            claim: "email"
-            required: true
+  auth_providers:
+    oidc:
+      enable: true
+      issuer_url: "https://accounts.google.com"
+      registration:
+        preconfigured:
+          enable: true
+          client_id: "${GOOGLE_CLIENT_ID}"
+          client_secret: "${GOOGLE_CLIENT_SECRET}"
+      redirect_uri: "https://issuer.example.org/oidcrp/callback"
+      scopes:
+        - openid
+        - profile
+        - email
 ```
 
 ### Azure AD / Microsoft Entra ID
 
 ```yaml
 apigw:
-  oidcrp:
-    enabled: true
-    issuer_url: "https://login.microsoftonline.com/{tenant-id}/v2.0"
-    client_id: "${AZURE_CLIENT_ID}"
-    client_secret: "${AZURE_CLIENT_SECRET}"
-    redirect_uri: "https://issuer.example.org/oidcrp/callback"
-    scopes:
-      - openid
-      - profile
-      - email
-      - User.Read
-    credential_mappings:
-      # ...
+  auth_providers:
+    oidc:
+      enable: true
+      issuer_url: "https://login.microsoftonline.com/{tenant-id}/v2.0"
+      registration:
+        preconfigured:
+          enable: true
+          client_id: "${AZURE_CLIENT_ID}"
+          client_secret: "${AZURE_CLIENT_SECRET}"
+      redirect_uri: "https://issuer.example.org/oidcrp/callback"
+      scopes:
+        - openid
+        - profile
+        - email
+        - User.Read
 ```
 
 ### Keycloak
 
 ```yaml
 apigw:
-  oidcrp:
-    enabled: true
-    issuer_url: "https://keycloak.example.org/realms/myrealm"
-    client_id: "${KEYCLOAK_CLIENT_ID}"
-    client_secret: "${KEYCLOAK_CLIENT_SECRET}"
-    redirect_uri: "https://issuer.example.org/oidcrp/callback"
-    scopes:
-      - openid
-      - profile
-      - email
-    credential_mappings:
-      # ...
+  auth_providers:
+    oidc:
+      enable: true
+      issuer_url: "https://keycloak.example.org/realms/myrealm"
+      registration:
+        preconfigured:
+          enable: true
+          client_id: "${KEYCLOAK_CLIENT_ID}"
+          client_secret: "${KEYCLOAK_CLIENT_SECRET}"
+      redirect_uri: "https://issuer.example.org/oidcrp/callback"
+      scopes:
+        - openid
+        - profile
+        - email
 ```
 
 ### Auth0
 
 ```yaml
 apigw:
-  oidcrp:
-    enabled: true
-    issuer_url: "https://{your-domain}.auth0.com/"
-    client_id: "${AUTH0_CLIENT_ID}"
-    client_secret: "${AUTH0_CLIENT_SECRET}"
-    redirect_uri: "https://issuer.example.org/oidcrp/callback"
-    scopes:
+  auth_providers:
+    oidc:
+      enable: true
+      issuer_url: "https://{your-domain}.auth0.com/"
+      registration:
+        preconfigured:
+          enable: true
+          client_id: "${AUTH0_CLIENT_ID}"
+          client_secret: "${AUTH0_CLIENT_SECRET}"
+      redirect_uri: "https://issuer.example.org/oidcrp/callback"
+      scopes:
       - openid
       - profile
       - email
-    credential_mappings:
-      # ...
 ```
 
 ## Docker Deployment
@@ -340,52 +324,52 @@ volumes:
 ## Complete Configuration Example
 
 ```yaml
-apigw:
-  external_server_url: "https://issuer.example.org"
-  
-  oidcrp:
-    enabled: true
-    client_id: "${OIDC_CLIENT_ID}"
-    client_secret: "${OIDC_CLIENT_SECRET}"
-    redirect_uri: "https://issuer.example.org/oidcrp/callback"
-    issuer_url: "https://accounts.google.com"
-    
-    scopes:
-      - openid
-      - profile
-      - email
-    
-    session_duration: 3600
-    
-    credential_mappings:
-      pid:
-        credential_config_id: "urn:eudi:pid:arf-1.8:1"
-        attributes:
-          given_name:
-            claim: "given_name"
-            required: true
-          family_name:
-            claim: "family_name"
-            required: true
-          email:
-            claim: "email"
-            required: true
-          sub:
-            claim: "subject_id"
-            required: true
-
-# Credential constructor must match credential_mappings keys
-# auth_method: oidc triggers the OIDC redirect during OID4VCI consent
-credential_constructor:
-  pid:
-    vct: "urn:eudi:pid:arf-1.8:1"
-    vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
-    auth_method: oidc
-    format: "dc+sd-jwt"
-
 common:
   mongo:
     uri: mongodb://mongo:27017
+
+  credential_metadata:
+    pid:
+      vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
+      format: "dc+sd-jwt"
+
+apigw:
+  public_url: "https://issuer.example.org"
+  key_config:
+    private_key_path: "/pki/signing_ec_private.pem"
+    chain_path: "/pki/signing_ec_chain.pem"
+
+  auth_providers:
+    oidc:
+      enable: true
+      issuer_url: "https://accounts.google.com"
+      redirect_uri: "https://issuer.example.org/oidcrp/callback"
+      registration:
+        preconfigured:
+          enable: true
+          client_id: "${OIDC_CLIENT_ID}"
+          client_secret: "${OIDC_CLIENT_SECRET}"
+      scopes:
+        - openid
+        - profile
+        - email
+      session_duration: 300
+
+  data_sources:
+    assertion:
+      scopes:
+        pid:
+          auth_provider: oidc
+
+  delivery:
+    openid4vci:
+      token_endpoint: "https://issuer.example.org/token"
+      clients:
+        "1003":
+          type: "public"
+          redirect_uri: "https://dev.wallet.sunet.se"
+          scopes:
+            - "pid"
 ```
 
 ## Troubleshooting

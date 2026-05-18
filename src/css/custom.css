@@ -165,6 +165,15 @@
   display: flex;
   align-items: center;
 }
+.build-info {
+  font-size: 0.75rem;
+  color: var(--ifm-color-emphasis-400);
+  margin-top: 1.5rem;
+  text-align: center;
+}
+.build-info a {
+  color: inherit;
+}
 @media (max-width: 640px) {
   .footer-cols {
     flex-direction: column;
