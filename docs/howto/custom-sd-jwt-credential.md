@@ -366,22 +366,32 @@ issuer:
 Then issue credentials using the REST API:
 
 ```bash
-# Push document data and get a credential offer
-curl -X POST https://issuer.example.com/api/v1/upload \
+# 1. Create an identity mapping (if not already created)
+curl -X POST https://issuer.example.com/api/v1/identity/mapping \
+  -H "Authorization: Bearer ${JWT_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "authentic_source": "hr.example.org",
+    "authentic_source_person_id": "EMP-12345",
+    "attributes": {
+      "family_name": "Smith",
+      "given_name": "Alice",
+      "birth_date": "1990-05-15"
+    }
+  }'
+# Response includes an "id" field — use it in the next step
+
+# 2. Upload document data to the datastore
+curl -X POST https://issuer.example.com/api/v1/datastore \
   -H "Authorization: Bearer ${JWT_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{
     "meta": {
       "authentic_source": "hr.example.org",
-      "vct": "https://example.com/credentials/employee-badge",
+      "scope": "employee-badge",
       "document_id": "emp-badge-001"
     },
-    "identities": [{
-      "authentic_source_person_id": "EMP-12345",
-      "family_name": "Smith",
-      "given_name": "Alice",
-      "birth_date": "1990-05-15"
-    }],
+    "identity_mapping_ids": ["<mapping_id_from_step_1>"],
     "document_data": {
       "given_name": "Alice",
       "family_name": "Smith",
@@ -390,22 +400,11 @@ curl -X POST https://issuer.example.com/api/v1/upload \
       "department": "Engineering",
       "role": "Senior Developer",
       "hire_date": "2023-03-15"
-    },
-    "document_data_version": "1.0.0"
-  }'
-
-# Then get the credential offer (QR code + deep link)
-curl -X POST https://issuer.example.com/api/v1/notification \
-  -H "Authorization: Bearer ${JWT_TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "authentic_source": "hr.example.org",
-    "vct": "https://example.com/credentials/employee-badge",
-    "document_id": "emp-badge-001"
+    }
   }'
 ```
 
-The response includes a QR code and deep link that can be delivered to the user.
+Once uploaded, the credential offer is available at the issuer's `/offers` UI endpoint. Users can scan the QR code or follow the deep link to receive the credential in their wallet.
 
 See [API Integration](../sirosid/issuers/api-integration) for the full API reference.
 
