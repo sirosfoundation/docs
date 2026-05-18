@@ -366,13 +366,23 @@ issuer:
 Then issue credentials using the REST API:
 
 ```bash
-# Push document data and get a pre-authorized code
-curl -X POST https://issuer.example.com/api/v1/documents \
-  -H "Authorization: Bearer ${API_TOKEN}" \
+# Push document data and get a credential offer
+curl -X POST https://issuer.example.com/api/v1/upload \
+  -H "Authorization: Bearer ${JWT_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{
-    "credential_config_id": "employee_badge",
-    "claims": {
+    "meta": {
+      "authentic_source": "hr.example.org",
+      "vct": "https://example.com/credentials/employee-badge",
+      "document_id": "emp-badge-001"
+    },
+    "identities": [{
+      "authentic_source_person_id": "EMP-12345",
+      "family_name": "Smith",
+      "given_name": "Alice",
+      "birth_date": "1990-05-15"
+    }],
+    "document_data": {
       "given_name": "Alice",
       "family_name": "Smith",
       "email": "alice.smith@example.com",
@@ -380,11 +390,22 @@ curl -X POST https://issuer.example.com/api/v1/documents \
       "department": "Engineering",
       "role": "Senior Developer",
       "hire_date": "2023-03-15"
-    }
+    },
+    "document_data_version": "1.0.0"
+  }'
+
+# Then get the credential offer (QR code + deep link)
+curl -X POST https://issuer.example.com/api/v1/notification \
+  -H "Authorization: Bearer ${JWT_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "authentic_source": "hr.example.org",
+    "vct": "https://example.com/credentials/employee-badge",
+    "document_id": "emp-badge-001"
   }'
 ```
 
-The response includes a credential offer URI that can be delivered to the user as a QR code or deep link.
+The response includes a QR code and deep link that can be delivered to the user.
 
 See [API Integration](../sirosid/issuers/api-integration) for the full API reference.
 
