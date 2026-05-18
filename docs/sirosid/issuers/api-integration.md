@@ -81,146 +81,52 @@ Use JWT Bearer with SPOCP rules for production. This allows you to define per-en
 
 ### Endpoint Summary
 
+The API is organized into two resource groups under `/api/v1`:
+
+#### Datastore Endpoints (`/api/v1/datastore`)
+
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/upload` | Upload document data for future credential issuance |
-| POST | `/notification` | Get QR code and deep link for credential pickup |
-| PUT | `/document/identity` | Add identity mapping to a document |
-| DELETE | `/document/identity` | Remove identity mapping from a document |
-| DELETE | `/document` | Delete a document |
-| POST | `/document/collect_id` | Retrieve document with identity matching |
-| POST | `/identity/mapping` | Map identity attributes to internal person ID |
-| POST | `/document/list` | List available documents for a person |
-| POST | `/document` | Retrieve a specific document by ID |
-| POST | `/document/revoke` | Revoke a credential |
+| POST | `/datastore/` | Upload a document |
+| POST | `/datastore/bulk` | Bulk upload multiple documents |
+| GET | `/datastore/` | Get document by key (query params) |
+| POST | `/datastore` | Get document (body) |
+| PUT | `/datastore/` | Replace an existing document |
+| DELETE | `/datastore` | Delete a document (body) |
+| POST | `/datastore/list` | List documents for an identity |
+| POST | `/datastore/resolve` | Resolve identity attributes to documents |
+| GET | `/datastore/search` | Search documents |
+| PUT | `/datastore/identity` | Add identity mapping IDs to a document |
+| DELETE | `/datastore/identity` | Remove identity mapping from a document |
+
+#### Identity Mapping Endpoints (`/api/v1/identity/mapping`)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/identity/mapping` | Create an identity mapping |
+| POST | `/identity/mapping/bulk` | Bulk create identity mappings |
+| POST | `/identity/mapping/resolve` | Resolve attributes → person ID |
+| PUT | `/identity/mapping` | Update an identity mapping |
+| DELETE | `/identity/mapping` | Delete an identity mapping |
+| GET | `/identity/mapping/search` | Search identity mappings |
 
 ---
 
-## Document Upload Flow
+## Identity Mapping
 
-### Step 1: Upload Document Data
+Identity mappings link external identity attributes (name, birth date, etc.) to an internal `authentic_source_person_id`. Documents reference these IDs to establish who can collect a credential.
 
-Upload the credential data before the user requests it:
-
-```bash
-POST /api/v1/upload
-Content-Type: application/json
-Authorization: Bearer <your-jwt-token>
-
-{
-  "meta": {
-    "authentic_source": "hr.example.org",
-    "vct": "urn:eudi:diploma:1",
-    "document_id": "diploma-2025-001234",
-    "real_data": true,
-    "credential_valid_from": 1735689600,
-    "credential_valid_to": 1767225600
-  },
-  "identities": [
-    {
-      "authentic_source_person_id": "EMP-12345",
-      "family_name": "Smith",
-      "given_name": "Alice",
-      "birth_date": "1990-05-15"
-    }
-  ],
-  "document_display": {
-    "description_short": "Bachelor of Science in Computer Science",
-    "description_long": "Awarded by Example University, May 2025",
-    "valid_from": 1735689600,
-    "valid_to": 1767225600
-  },
-  "document_data": {
-    "degree_type": "Bachelor of Science",
-    "field_of_study": "Computer Science",
-    "issuing_institution": "Example University",
-    "graduation_date": "2025-05-15",
-    "gpa": "3.8",
-    "credits_earned": 120
-  },
-  "document_data_version": "1.0.0"
-}
-```
-
-**Response:** `200 OK` on success
-
-### Step 2: Generate Credential Offer
-
-Get a QR code and deep link to send to the user:
-
-```bash
-POST /api/v1/notification
-Content-Type: application/json
-Authorization: Bearer <your-jwt-token>
-
-{
-  "authentic_source": "hr.example.org",
-  "vct": "urn:eudi:diploma:1",
-  "document_id": "diploma-2025-001234"
-}
-```
-
-**Response:**
-
-```json
-{
-  "qr": {
-    "base64_image": "data:image/png;base64,iVBORw0KGgo...",
-    "deep_link": "openid-credential-offer://?credential_offer_uri=https://issuer.example.org/offers/abc123"
-  }
-}
-```
-
-### Step 3: Notify the User
-
-Send the QR code or deep link to the user via:
-- Email notification
-- Portal display
-- SMS with deep link
-- In-app notification
-
-The user scans the QR or clicks the link to initiate credential collection in their wallet.
-
----
-
-## Identity Management
-
-### Adding Identity to a Document
-
-If multiple people can collect a credential (e.g., legal representatives), add identities:
-
-```bash
-PUT /api/v1/document/identity
-Content-Type: application/json
-
-{
-  "authentic_source": "hr.example.org",
-  "vct": "urn:eudi:diploma:1",
-  "document_id": "diploma-2025-001234",
-  "identity": {
-    "authentic_source_person_id": "REP-67890",
-    "family_name": "Jones",
-    "given_name": "Bob",
-    "birth_date": "1985-03-22"
-  }
-}
-```
-
-### Identity Matching
-
-When a user presents their PID (Person Identification Data) credential to collect a document, the issuer performs identity matching:
+### Create an Identity Mapping
 
 ```bash
 POST /api/v1/identity/mapping
 Content-Type: application/json
+Authorization: Bearer <your-jwt-token>
 
 {
   "authentic_source": "hr.example.org",
-  "identity": {
-    "schema": {
-      "name": "SE",
-      "version": "1.0.0"
-    },
+  "authentic_source_person_id": "EMP-12345",
+  "attributes": {
     "family_name": "Smith",
     "given_name": "Alice",
     "birth_date": "1990-05-15"
@@ -232,19 +138,242 @@ Content-Type: application/json
 
 ```json
 {
-  "data": {
-    "authentic_source_person_id": "EMP-12345"
+  "authentic_source_person_id": "EMP-12345"
+}
+```
+
+If `authentic_source_person_id` is omitted, a UUIDv7 is generated automatically.
+
+### Resolve Attributes to a Person ID
+
+When a user presents their PID credential, resolve their identity to an internal person ID:
+
+```bash
+POST /api/v1/identity/mapping/resolve
+Content-Type: application/json
+
+{
+  "authentic_source": "hr.example.org",
+  "attributes": {
+    "family_name": "Smith",
+    "given_name": "Alice",
+    "birth_date": "1990-05-15"
   }
 }
 ```
 
-The `schema` field identifies the identity schema used (e.g. `"SE"` for Sweden). The `version` must match the version used when the document was uploaded.
+**Response:**
 
-The matching algorithm compares:
-- `schema` (required)
-- `family_name` (required)
-- `given_name` (required)
-- `birth_date` (required)
+```json
+{
+  "authentic_source_person_id": "EMP-12345"
+}
+```
+
+### Bulk Create Mappings
+
+```bash
+POST /api/v1/identity/mapping/bulk
+Content-Type: application/json
+
+{
+  "mappings": {
+    "emp1": {
+      "authentic_source": "hr.example.org",
+      "authentic_source_person_id": "EMP-001",
+      "attributes": { "family_name": "Smith", "given_name": "Alice", "birth_date": "1990-05-15" }
+    },
+    "emp2": {
+      "authentic_source": "hr.example.org",
+      "authentic_source_person_id": "EMP-002",
+      "attributes": { "family_name": "Jones", "given_name": "Bob", "birth_date": "1985-03-22" }
+    }
+  }
+}
+```
+
+**Response:** `{ "count": 2 }`
+
+### Update / Delete / Search
+
+```bash
+# Update attributes
+PUT /api/v1/identity/mapping
+{ "authentic_source": "hr.example.org", "authentic_source_person_id": "EMP-12345", "attributes": { "family_name": "Smith-Jones" } }
+
+# Delete
+DELETE /api/v1/identity/mapping
+{ "authentic_source": "hr.example.org", "authentic_source_person_id": "EMP-12345" }
+
+# Search (query params)
+GET /api/v1/identity/mapping/search?authentic_source=hr.example.org&search=Smith&limit=50
+```
+
+---
+
+## Document Upload Flow
+
+### Step 1: Upload Document Data
+
+Upload the credential data before the user requests it. Documents reference identity mappings by their `authentic_source_person_id`:
+
+```bash
+POST /api/v1/datastore/
+Content-Type: application/json
+Authorization: Bearer <your-jwt-token>
+
+{
+  "meta": {
+    "authentic_source": "hr.example.org",
+    "scope": "diploma",
+    "document_id": "diploma-2025-001234"
+  },
+  "identity_mapping_ids": ["EMP-12345"],
+  "document_data": {
+    "degree_type": "Bachelor of Science",
+    "field_of_study": "Computer Science",
+    "issuing_institution": "Example University",
+    "graduation_date": "2025-05-15",
+    "gpa": "3.8",
+    "credits_earned": 120
+  }
+}
+```
+
+**Response:**
+
+```json
+{
+  "document_id": "diploma-2025-001234"
+}
+```
+
+If `document_id` is omitted from `meta`, a UUIDv7 is generated automatically.
+
+### Step 2: Generate Credential Offer
+
+Navigate to the credential offer UI or use the API to create an offer for the user:
+
+```
+GET /offers/<scope>/<wallet_id>
+```
+
+The user scans the QR code or clicks the deep link to initiate credential collection in their wallet.
+
+### Step 3: Notify the User
+
+Send the credential offer link to the user via:
+- Email notification
+- Portal display
+- SMS with deep link
+- In-app notification
+
+---
+
+## Document Management
+
+### Get a Document by Key
+
+```bash
+GET /api/v1/datastore/?authentic_source=hr.example.org&scope=diploma&document_id=diploma-2025-001234
+Authorization: Bearer <your-jwt-token>
+```
+
+### List Documents for an Identity
+
+```bash
+POST /api/v1/datastore/list
+Content-Type: application/json
+
+{
+  "authentic_source": "hr.example.org",
+  "identity_mapping_id": "EMP-12345",
+  "scope": "diploma"
+}
+```
+
+### Resolve Identity Attributes to Documents
+
+```bash
+POST /api/v1/datastore/resolve
+Content-Type: application/json
+
+{
+  "authentic_source": "hr.example.org",
+  "attributes": {
+    "family_name": "Smith",
+    "given_name": "Alice",
+    "birth_date": "1990-05-15"
+  },
+  "scope": "diploma"
+}
+```
+
+### Replace a Document
+
+```bash
+PUT /api/v1/datastore/
+Content-Type: application/json
+
+{
+  "meta": {
+    "authentic_source": "hr.example.org",
+    "scope": "diploma",
+    "document_id": "diploma-2025-001234"
+  },
+  "identity_mapping_ids": ["EMP-12345"],
+  "document_data": {
+    "degree_type": "Bachelor of Science",
+    "field_of_study": "Computer Science",
+    "gpa": "3.9"
+  }
+}
+```
+
+### Delete a Document
+
+```bash
+DELETE /api/v1/datastore
+Content-Type: application/json
+
+{
+  "authentic_source": "hr.example.org",
+  "scope": "diploma",
+  "document_id": "diploma-2025-001234"
+}
+```
+
+### Add/Remove Identity Mappings on a Document
+
+```bash
+# Add identities to an existing document
+PUT /api/v1/datastore/identity
+Content-Type: application/json
+
+{
+  "authentic_source": "hr.example.org",
+  "scope": "diploma",
+  "document_id": "diploma-2025-001234",
+  "identity_mapping_ids": ["EMP-67890"]
+}
+
+# Remove an identity from a document
+DELETE /api/v1/datastore/identity
+Content-Type: application/json
+
+{
+  "authentic_source": "hr.example.org",
+  "scope": "diploma",
+  "document_id": "diploma-2025-001234",
+  "identity_mapping_ids": ["EMP-67890"]
+}
+```
+
+### Search Documents
+
+```bash
+GET /api/v1/datastore/search?authentic_source=hr.example.org&scope=diploma&search=Smith&limit=50
+```
 
 ---
 
@@ -260,9 +389,10 @@ sequenceDiagram
     participant Wallet
 
     AS->>AS: User completes process<br/>(e.g., graduation, employment)
-    AS->>Issuer: POST /upload (document data)
-    AS->>Issuer: POST /notification (get offer)
-    Issuer->>AS: QR code + deep link
+    AS->>Issuer: POST /api/v1/identity/mapping (create mapping)
+    AS->>Issuer: POST /api/v1/datastore/ (upload document)
+    AS->>Issuer: GET /offers/scope/wallet_id (get offer link)
+    Issuer->>AS: Credential offer URL
     AS->>User: Email with credential offer
     User->>Wallet: Open link / scan QR
     Wallet->>Issuer: Pre-authorized code grant
@@ -308,42 +438,21 @@ The deep link contains a credential offer with pre-authorized code grant:
 
 ## Revocation
 
-### Revoking a Credential
-
-When a credential needs to be revoked (e.g., employee termination, certificate withdrawal):
+Credential revocation is managed via [Token Status Lists](/sirosid/reference/token-status-lists). When a credential needs to be revoked, delete the underlying document and the issuer updates the status list entry:
 
 ```bash
-POST /api/v1/document/revoke
+DELETE /api/v1/datastore
 Content-Type: application/json
+Authorization: Bearer <your-jwt-token>
 
 {
   "authentic_source": "hr.example.org",
-  "vct": "urn:eudi:diploma:1",
-  "revocation": {
-    "id": "diploma-2025-001234",
-    "reason": "Certificate withdrawn due to academic misconduct",
-    "revoke_at": 1735689600
-  }
+  "scope": "diploma",
+  "document_id": "diploma-2025-001234"
 }
 ```
 
-The issuer updates the Token Status List, and verifiers will see the credential as revoked.
-
-### Revocation with Replacement
-
-If issuing a replacement credential:
-
-```json
-{
-  "revocation": {
-    "id": "diploma-2025-001234",
-    "reference": {
-      "authentic_source": "hr.example.org",
-      "vct": "urn:eudi:diploma:1",
-      "document_id": "diploma-2025-001234-v2"
-    }
-  }
-}
+Verifiers checking the Token Status List will see the credential as revoked.
 ```
 
 ---
@@ -410,36 +519,43 @@ reply, err := client.MakeSDJWT(ctx, &pb.MakeSDJWTRequest{
 
 ## Batch Issuance
 
-For large-scale credential provisioning, upload documents in a loop and generate offers individually:
+For large-scale credential provisioning, use the bulk upload and bulk identity mapping endpoints:
 
-### 1. Bulk Upload
-
-```bash
-# Upload multiple documents
-for doc in documents/*.json; do
-  curl -X POST https://issuer.example.org/api/v1/upload \
-    -H "Authorization: Bearer $JWT_TOKEN" \
-    -H "Content-Type: application/json" \
-    -d @"$doc"
-done
-```
-
-### 2. Generate Offers
-
-Generate a credential offer for each uploaded document:
+### 1. Bulk Create Identity Mappings
 
 ```bash
-for doc_id in diploma-2025-001234 diploma-2025-001235 diploma-2025-001236; do
-  curl -X POST https://issuer.example.org/api/v1/notification \
-    -H "Authorization: Bearer $JWT_TOKEN" \
-    -H "Content-Type: application/json" \
-    -d "{\"authentic_source\": \"hr.example.org\", \"vct\": \"urn:eudi:diploma:1\", \"document_id\": \"$doc_id\"}"
-done
+curl -X POST https://issuer.example.org/api/v1/identity/mapping/bulk \
+  -H "Authorization: Bearer $JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "mappings": {
+      "emp1": { "authentic_source": "hr.example.org", "authentic_source_person_id": "EMP-001", "attributes": { "family_name": "Smith", "given_name": "Alice", "birth_date": "1990-05-15" } },
+      "emp2": { "authentic_source": "hr.example.org", "authentic_source_person_id": "EMP-002", "attributes": { "family_name": "Jones", "given_name": "Bob", "birth_date": "1985-03-22" } }
+    }
+  }'
 ```
 
-### 3. Bulk Notification
+### 2. Bulk Upload Documents
 
-Integrate with your notification system to send credential offers to all recipients.
+```bash
+curl -X POST https://issuer.example.org/api/v1/datastore/bulk \
+  -H "Authorization: Bearer $JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "documents": {
+      "doc1": { "meta": { "authentic_source": "hr.example.org", "scope": "diploma", "document_id": "diploma-001" }, "identity_mapping_ids": ["EMP-001"], "document_data": { "degree": "BSc" } },
+      "doc2": { "meta": { "authentic_source": "hr.example.org", "scope": "diploma", "document_id": "diploma-002" }, "identity_mapping_ids": ["EMP-002"], "document_data": { "degree": "MSc" } }
+    }
+  }'
+```
+
+### 3. Generate Offers
+
+Navigate users to the credential offer UI:
+
+```
+https://issuer.example.org/offers/diploma/<wallet_id>
+```
 
 ---
 
@@ -447,50 +563,46 @@ Integrate with your notification system to send credential offers to all recipie
 
 ### API Authentication
 
-Configure authentication for the `/api/v1` route group. Exactly one of `jwt` or `basic_auth` may be enabled:
+Configure authentication for the `/api/v1` route group. Use `jwks` or `oidc` for token-based auth:
 
-#### JWT Bearer Token (Recommended)
+#### JWT Bearer Token via Static JWKS (Recommended)
 
 ```yaml
 apigw:
-  api_auth:
-    jwt:
-      enable: true
-      jwks_url: "https://auth.example.com/.well-known/jwks.json"
-      issuer: "https://auth.example.com"
-      audience: "vc-issuer"
+  api_server:
+    api_auth:
+      jwks:
+        enable: true
+        jwks_url: "https://auth.example.com/.well-known/jwks.json"
+        issuer: "https://auth.example.com"
+        audience: "vc-issuer"
       # Optional: SPOCP rules for per-endpoint authorization
       rules:
-        - "(api (service apigw)(method POST)(path /api/v1/upload)(subject hr-system))"
-        - "(api (service apigw)(method POST)(path /api/v1/notification)(subject hr-system))"
-        - "(api (service apigw)(method POST)(path /api/v1/document/revoke)(subject hr-admin))"
+        - "(vc (service apigw)(method POST)(path /api/v1/datastore/)(subject hr-system)(authentic_source SUNET)(scope diploma))"
+        - "(vc (service apigw)(method DELETE)(path /api/v1/datastore)(subject hr-admin)(authentic_source *)(scope *))"
       # Or load rules from a file:
       # rules_file: "/etc/vc/spocp-rules.txt"
+```
+
+#### JWT Bearer via OIDC Discovery
+
+```yaml
+apigw:
+  api_server:
+    api_auth:
+      oidc:
+        enable: true
+        issuer_url: "https://auth.example.com"
+        audience: "vc-issuer"
 ```
 
 When SPOCP rules are configured, each request is evaluated as:
 
 ```
-(api (service <SERVICE>)(method <HTTP_METHOD>)(path <REQUEST_PATH>)(subject <JWT_SUBJECT>))
+(vc (service apigw)(method <HTTP_METHOD>)(path <REQUEST_PATH>)(subject <JWT_SUBJECT>)(authentic_source <AS>)(scope <SCOPE>))
 ```
 
-If no rules are configured, any valid JWT grants full access.
-
-#### HTTP Basic Auth (Development)
-
-```yaml
-apigw:
-  api_auth:
-    basic_auth:
-      enable: true
-      users:
-        hr-system: "secret-password"
-        admin: "admin-password"
-```
-
-:::caution
-HTTP Basic Auth stores passwords in plaintext in the configuration file. Use JWT Bearer authentication for production deployments.
-:::
+If no rules are configured, any valid JWT grants full access. The `subject` is resolved from the `eppn` or `email` claim in the JWT (not the standard `sub` claim).
 
 ### Credential Metadata
 
@@ -509,12 +621,13 @@ common:
 
 ### Identity Matching
 
-Identity matching uses exact comparison on the following attributes:
+Identity matching uses the `attributes` map stored in identity mappings. When resolving, all provided attributes must match exactly. Common attributes:
 
-- `family_name` (required)
-- `given_name` (required)
-- `birth_date` (required)
-- `schema.name` and `schema.version` (required)
+- `family_name`
+- `given_name`
+- `birth_date`
+
+The authentic source defines which attributes to store when creating identity mappings.
 
 ---
 
