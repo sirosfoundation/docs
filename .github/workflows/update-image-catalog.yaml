@@ -121,9 +121,9 @@ jobs:
             .repo as $repo |
             ($all | map(select(test("^v?[0-9]+[.][0-9]")))) as $versions |
             ($versions | join(", ")) as $release |
-            ($versions[0] // $all[0] // "-") as $latest |
+            ($versions[0] // "-") as $latest |
             ($all | map(select(test("^([0-9a-f]{7,9}|sha-[0-9a-f]+|unstable-[0-9a-f]+|dev-[0-9a-f]+)$")))[0] // "-") as $build |
-            "| `\(.image)` | [\($repo)](https://github.com/\($repo)) | `\($latest)` | \(if $build == "-" then "-" else "`\($build)`" end) | \($release) |"' >> "$MD"
+            "| `\(.image)` | [\($repo)](https://github.com/\($repo)) | \(if $latest == "-" then "-" else "`\($latest)`" end) | \(if $build == "-" then "-" else "`\($build)`" end) | \($release) |"' >> "$MD"
 
           echo "" >> "$MD"
           echo "_Last updated: ${TIMESTAMP}_" >> "$MD"
