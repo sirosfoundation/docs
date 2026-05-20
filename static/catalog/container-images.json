@@ -1,10 +1,6 @@
 {
-  "generated": "2026-05-20T18:23:53Z",
+  "generated": "2026-05-20T18:27:18Z",
   "images": [
-    {
-      "image": "ghcr.io/sirosfoundation/confit",
-      "tags": []
-    },
     {
       "image": "ghcr.io/sirosfoundation/facetec-api",
       "tags": [
