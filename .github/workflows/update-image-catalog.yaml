@@ -23,28 +23,22 @@ jobs:
           set -euo pipefail
 
           ORG="sirosfoundation"
-          TOPIC="container"
 
-          # Step 1: Discover non-archived public repos tagged with the topic
-          echo "Discovering repos with topic '${TOPIC}'..."
-          TOPIC_REPOS=$(gh api --paginate "/orgs/${ORG}/repos?per_page=100&type=public" \
-            --jq ".[] | select(.archived == false and (.topics // [] | any(. == \"${TOPIC}\"))) | .full_name")
+          # Step 1: Discover non-archived public repos with container topics.
+          # Convention:
+          #   - topic "container"          → single image, name = lowercased repo name
+          #   - topic "container-<suffix>" → sub-image at <reponame>/<suffix>
+          # A repo may have both or multiple container-* topics.
+          echo "Discovering repos with container topics..."
+          REPO_DATA=$(gh api --paginate "/orgs/${ORG}/repos?per_page=100&type=public" \
+            --jq '.[] | select(.archived == false and (.topics // [] | any(startswith("container")))) | "\(.full_name)\t\(.topics | map(select(startswith("container"))) | join(","))"')
 
-          if [[ -z "$TOPIC_REPOS" ]]; then
-            echo "No repos found with topic '${TOPIC}' — nothing to do."
+          if [[ -z "$REPO_DATA" ]]; then
+            echo "No repos found with container topics — nothing to do."
             exit 0
           fi
 
-          echo "Found repos:"
-          while IFS= read -r R; do
-            echo "  $R"
-          done <<< "$TOPIC_REPOS"
-
-          # Step 2: For each repo, probe GHCR for container images.
-          # Convention: image name = lowercased repo name.
-          # Multi-image repos use sub-paths (e.g. vc → vc/apigw, vc/issuer, …).
-          # We probe the base name first; if missing, enumerate known sub-paths
-          # via the OCI tags/list endpoint (no special token scopes needed).
+          # Step 2: For each repo, derive image names from topics and fetch tags.
           CATALOG_JSON="[]"
           TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
@@ -58,57 +52,37 @@ jobs:
               "https://ghcr.io/v2/${ORG}/${IMAGE}/tags/list" 2>/dev/null
           }
 
-          while IFS= read -r FULL_REPO; do
+          while IFS=$'\t' read -r FULL_REPO TOPICS; do
             REPO_NAME="${FULL_REPO#*/}"
-            IMAGE=$(echo "$REPO_NAME" | tr '[:upper:]' '[:lower:]')
+            BASE_IMAGE=$(echo "$REPO_NAME" | tr '[:upper:]' '[:lower:]')
 
-            # Try the base image name first
-            TAGS_JSON=$(fetch_tags "$IMAGE" || true)
-
-            if [[ -n "$TAGS_JSON" ]]; then
-              # Single-image repo
-              TAGS=$(echo "$TAGS_JSON" | jq -r '.tags // [] | sort | reverse')
-              echo "  ${ORG}/${IMAGE}: $(echo "$TAGS" | jq 'length') tags"
-              CATALOG_JSON=$(echo "$CATALOG_JSON" | jq \
-                --arg name "ghcr.io/${ORG}/${IMAGE}" \
-                --arg repo "$FULL_REPO" \
-                --argjson tags "$TAGS" \
-                '. + [{"image": $name, "repo": $repo, "tags": $tags}]')
-            else
-              # Multi-image repo: look for .container-images file listing sub-image
-              # names (one per line), or fall back to docker-compose.yaml image refs.
-              echo "  ${ORG}/${IMAGE}: no base image, probing sub-images..."
-
-              # Try .container-images file first
-              SUB_NAMES=$(gh api "/repos/${FULL_REPO}/contents/.container-images" \
-                --jq '.content' 2>/dev/null | base64 -d 2>/dev/null | grep -v '^\s*#' | grep -v '^\s*$' || true)
-
-              # Fall back to docker-compose.yaml
-              if [[ -z "$SUB_NAMES" ]]; then
-                COMPOSE=$(gh api "/repos/${FULL_REPO}/contents/docker-compose.yaml" \
-                  --jq '.content' 2>/dev/null | base64 -d 2>/dev/null || true)
-                if [[ -n "$COMPOSE" ]]; then
-                  SUB_NAMES=$(echo "$COMPOSE" \
-                    | grep -oP 'image:\s*\S+/[^/]+/\K[a-z0-9_-]+' 2>/dev/null \
-                    | sort -u || true)
-                fi
+            # Parse topics into image names
+            IMAGES=()
+            IFS=',' read -ra TOPIC_LIST <<< "$TOPICS"
+            for T in "${TOPIC_LIST[@]}"; do
+              if [[ "$T" == "container" ]]; then
+                IMAGES+=("$BASE_IMAGE")
+              elif [[ "$T" == container-* ]]; then
+                SUFFIX="${T#container-}"
+                IMAGES+=("${BASE_IMAGE}/${SUFFIX}")
               fi
+            done
 
-              for SUB_NAME in $SUB_NAMES; do
-                SUB_IMAGE="${IMAGE}/${SUB_NAME}"
-                SUB_TAGS_JSON=$(fetch_tags "$SUB_IMAGE" || true)
-                if [[ -n "$SUB_TAGS_JSON" ]]; then
-                  TAGS=$(echo "$SUB_TAGS_JSON" | jq -r '.tags // [] | sort | reverse')
-                  echo "    ${ORG}/${SUB_IMAGE}: $(echo "$TAGS" | jq 'length') tags"
-                  CATALOG_JSON=$(echo "$CATALOG_JSON" | jq \
-                    --arg name "ghcr.io/${ORG}/${SUB_IMAGE}" \
-                    --arg repo "$FULL_REPO" \
-                    --argjson tags "$TAGS" \
-                    '. + [{"image": $name, "repo": $repo, "tags": $tags}]')
-                fi
-              done
-            fi
-          done <<< "$TOPIC_REPOS"
+            for IMAGE in "${IMAGES[@]}"; do
+              TAGS_JSON=$(fetch_tags "$IMAGE" || true)
+              if [[ -n "$TAGS_JSON" ]]; then
+                TAGS=$(echo "$TAGS_JSON" | jq -r '.tags // [] | sort | reverse')
+                echo "  ${ORG}/${IMAGE}: $(echo "$TAGS" | jq 'length') tags"
+                CATALOG_JSON=$(echo "$CATALOG_JSON" | jq \
+                  --arg name "ghcr.io/${ORG}/${IMAGE}" \
+                  --arg repo "$FULL_REPO" \
+                  --argjson tags "$TAGS" \
+                  '. + [{"image": $name, "repo": $repo, "tags": $tags}]')
+              else
+                echo "  ${ORG}/${IMAGE}: no tags found (skipping)"
+              fi
+            done
+          done <<< "$REPO_DATA"
 
           # Write JSON catalog
           mkdir -p static/catalog
