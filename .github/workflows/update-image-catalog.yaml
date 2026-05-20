@@ -7,7 +7,6 @@ on:
 
 permissions:
   contents: write
-  packages: read
 
 jobs:
   update-catalog:
@@ -36,48 +35,64 @@ jobs:
             exit 0
           fi
 
-          # Build a lookup set of qualifying repo names
-          declare -A REPO_SET
+          echo "Found repos:"
           while IFS= read -r R; do
-            REPO_SET["$R"]=1
-            echo "  found repo: $R"
+            echo "  $R"
           done <<< "$TOPIC_REPOS"
 
-          # Step 2: List all container packages in the org and match to topic repos
-          echo "Listing container packages..."
-          PKG_DATA=$(gh api --paginate "/orgs/${ORG}/packages?package_type=container&per_page=100" \
-            --jq '.[] | "\(.name)\t\(.repository.full_name // "")"')
-
+          # Step 2: For each repo, probe GHCR for container images.
+          # Convention: image name = lowercased repo name.
+          # Multi-image repos use sub-paths (e.g. vc → vc/apigw, vc/issuer, …).
+          # We probe the base name first; if missing, enumerate known sub-paths
+          # via the OCI tags/list endpoint (no special token scopes needed).
           CATALOG_JSON="[]"
           TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-          while IFS=$'\t' read -r IMAGE REPO; do
-            [[ -z "$IMAGE" ]] && continue
-
-            # Only include packages whose source repo has the topic
-            if [[ -z "${REPO_SET[$REPO]+x}" ]]; then
-              echo "Skipping ${ORG}/${IMAGE} (repo ${REPO} lacks '${TOPIC}' topic)"
-              continue
-            fi
-
-            echo "Fetching tags for ${ORG}/${IMAGE}..."
-
-            # Get a per-image anonymous token (works for public packages)
+          fetch_tags() {
+            local IMAGE="$1"
+            local TOKEN
             TOKEN=$(curl -s "https://ghcr.io/token?service=ghcr.io&scope=repository:${ORG}/${IMAGE}:pull" \
               | jq -r '.token // empty')
-
-            TAGS_JSON=$(curl -sf \
+            curl -sf \
               -H "Authorization: Bearer ${TOKEN}" \
-              "https://ghcr.io/v2/${ORG}/${IMAGE}/tags/list" 2>/dev/null || echo '{"tags":[]}')
+              "https://ghcr.io/v2/${ORG}/${IMAGE}/tags/list" 2>/dev/null
+          }
 
-            TAGS=$(echo "$TAGS_JSON" | jq -r '.tags // [] | sort | reverse')
+          while IFS= read -r FULL_REPO; do
+            REPO_NAME="${FULL_REPO#*/}"
+            IMAGE=$(echo "$REPO_NAME" | tr '[:upper:]' '[:lower:]')
 
-            CATALOG_JSON=$(echo "$CATALOG_JSON" | jq \
-              --arg name "ghcr.io/${ORG}/${IMAGE}" \
-              --arg repo "$REPO" \
-              --argjson tags "$TAGS" \
-              '. + [{"image": $name, "repo": $repo, "tags": $tags}]')
-          done <<< "$PKG_DATA"
+            # Try the base image name first
+            TAGS_JSON=$(fetch_tags "$IMAGE")
+
+            if [[ -n "$TAGS_JSON" ]]; then
+              # Single-image repo
+              TAGS=$(echo "$TAGS_JSON" | jq -r '.tags // [] | sort | reverse')
+              echo "  ${ORG}/${IMAGE}: $(echo "$TAGS" | jq 'length') tags"
+              CATALOG_JSON=$(echo "$CATALOG_JSON" | jq \
+                --arg name "ghcr.io/${ORG}/${IMAGE}" \
+                --arg repo "$FULL_REPO" \
+                --argjson tags "$TAGS" \
+                '. + [{"image": $name, "repo": $repo, "tags": $tags}]')
+            else
+              # Multi-image repo: probe common sub-paths
+              echo "  ${ORG}/${IMAGE}: no base image, probing sub-paths..."
+              for SUB_JSON in $(curl -sf "https://api.github.com/repos/${FULL_REPO}/contents" \
+                | jq -r '.[] | select(.type == "dir") | .name' 2>/dev/null); do
+                SUB_IMAGE="${IMAGE}/${SUB_JSON}"
+                SUB_TAGS_JSON=$(fetch_tags "$SUB_IMAGE")
+                if [[ -n "$SUB_TAGS_JSON" ]]; then
+                  TAGS=$(echo "$SUB_TAGS_JSON" | jq -r '.tags // [] | sort | reverse')
+                  echo "    ${ORG}/${SUB_IMAGE}: $(echo "$TAGS" | jq 'length') tags"
+                  CATALOG_JSON=$(echo "$CATALOG_JSON" | jq \
+                    --arg name "ghcr.io/${ORG}/${SUB_IMAGE}" \
+                    --arg repo "$FULL_REPO" \
+                    --argjson tags "$TAGS" \
+                    '. + [{"image": $name, "repo": $repo, "tags": $tags}]')
+                fi
+              done
+            fi
+          done <<< "$TOPIC_REPOS"
 
           # Write JSON catalog
           mkdir -p static/catalog
