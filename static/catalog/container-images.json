@@ -1,0 +1,65 @@
+{
+  "generated": "2026-05-20T18:08:39Z",
+  "images": [
+    {
+      "image": "ghcr.io/sirosfoundation/confit",
+      "tags": []
+    },
+    {
+      "image": "ghcr.io/sirosfoundation/facetec-api",
+      "tags": []
+    },
+    {
+      "image": "ghcr.io/sirosfoundation/goff",
+      "tags": []
+    },
+    {
+      "image": "ghcr.io/sirosfoundation/go-spocp",
+      "tags": []
+    },
+    {
+      "image": "ghcr.io/sirosfoundation/go-trust",
+      "tags": []
+    },
+    {
+      "image": "ghcr.io/sirosfoundation/go-wallet-backend",
+      "tags": []
+    },
+    {
+      "image": "ghcr.io/sirosfoundation/mtcvctm",
+      "tags": []
+    },
+    {
+      "image": "ghcr.io/sirosfoundation/registry-cli",
+      "tags": []
+    },
+    {
+      "image": "ghcr.io/sirosfoundation/vc/apigw",
+      "tags": []
+    },
+    {
+      "image": "ghcr.io/sirosfoundation/vc/issuer",
+      "tags": []
+    },
+    {
+      "image": "ghcr.io/sirosfoundation/vc/mockas",
+      "tags": []
+    },
+    {
+      "image": "ghcr.io/sirosfoundation/vc/registry",
+      "tags": []
+    },
+    {
+      "image": "ghcr.io/sirosfoundation/vc/ui",
+      "tags": []
+    },
+    {
+      "image": "ghcr.io/sirosfoundation/vc/verifier",
+      "tags": []
+    },
+    {
+      "image": "ghcr.io/sirosfoundation/wallet-frontend",
+      "tags": []
+    }
+  ]
+}
