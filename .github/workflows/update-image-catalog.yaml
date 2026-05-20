@@ -106,7 +106,11 @@ jobs:
             '' \
             ':::info' \
             'This page is automatically updated daily. For programmatic access, use the' \
-            '[JSON catalog](/catalog/container-images.json).' \
+            '[JSON catalog](https://developers.siros.org/catalog/container-images.json) at the stable URL:' \
+            '' \
+            '```' \
+            'https://developers.siros.org/catalog/container-images.json' \
+            '```' \
             ':::' \
             '' > "$MD"
 
