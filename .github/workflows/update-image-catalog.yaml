@@ -1,0 +1,108 @@
+name: Update Container Image Catalog
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # Daily at 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: read
+
+jobs:
+  update-catalog:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate image catalog
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          IMAGES=(
+            "confit"
+            "facetec-api"
+            "goff"
+            "go-spocp"
+            "go-trust"
+            "go-wallet-backend"
+            "mtcvctm"
+            "registry-cli"
+            "vc/apigw"
+            "vc/issuer"
+            "vc/mockas"
+            "vc/registry"
+            "vc/ui"
+            "vc/verifier"
+            "wallet-frontend"
+          )
+
+          # Get a GHCR token for public reads
+          TOKEN=$(curl -s "https://ghcr.io/token?scope=repository:sirosfoundation/*:pull" | jq -r '.token // empty')
+
+          CATALOG_JSON="[]"
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          for IMAGE in "${IMAGES[@]}"; do
+            echo "Fetching tags for sirosfoundation/${IMAGE}..."
+            TAGS_JSON=$(curl -sf \
+              -H "Authorization: Bearer ${TOKEN}" \
+              "https://ghcr.io/v2/sirosfoundation/${IMAGE}/tags/list" 2>/dev/null || echo '{"tags":[]}')
+
+            TAGS=$(echo "$TAGS_JSON" | jq -r '.tags // [] | sort | reverse')
+
+            CATALOG_JSON=$(echo "$CATALOG_JSON" | jq \
+              --arg name "ghcr.io/sirosfoundation/${IMAGE}" \
+              --argjson tags "$TAGS" \
+              '. + [{"image": $name, "tags": $tags}]')
+          done
+
+          # Write JSON catalog
+          mkdir -p static/catalog
+          echo "$CATALOG_JSON" | jq --arg ts "$TIMESTAMP" '{generated: $ts, images: .}' \
+            > static/catalog/container-images.json
+
+          # Write Markdown catalog
+          cat > docs/docs/sirosid/container-images.md << 'HEADER'
+---
+title: Container Images
+sidebar_label: Container Images
+description: Published container image tags on GitHub Container Registry
+---
+
+# Container Image Catalog
+
+All SIROS ID platform container images are published to
+[GitHub Container Registry](https://github.com/orgs/sirosfoundation/packages?repo_name=&ecosystem=container).
+
+:::info
+This page is automatically updated daily. For programmatic access, use the
+[JSON catalog](/catalog/container-images.json).
+:::
+
+HEADER
+
+          echo "| Image | Tags |" >> docs/docs/sirosid/container-images.md
+          echo "|---|---|" >> docs/docs/sirosid/container-images.md
+
+          echo "$CATALOG_JSON" | jq -r '.[] | "| `\(.image)` | \(.tags | join(", ")) |"' \
+            >> docs/docs/sirosid/container-images.md
+
+          echo "" >> docs/docs/sirosid/container-images.md
+          echo "_Last updated: ${TIMESTAMP}_" >> docs/docs/sirosid/container-images.md
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add static/catalog/container-images.json docs/docs/sirosid/container-images.md
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: update container image catalog"
+            git push
+          fi
