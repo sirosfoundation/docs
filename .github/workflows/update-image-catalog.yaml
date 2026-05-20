@@ -67,39 +67,38 @@ jobs:
             > static/catalog/container-images.json
 
           # Write Markdown catalog
-          cat > docs/docs/sirosid/container-images.md << 'HEADER'
----
-title: Container Images
-sidebar_label: Container Images
-description: Published container image tags on GitHub Container Registry
----
+          MD="docs/sirosid/container-images.md"
+          printf '%s\n' \
+            '---' \
+            'title: Container Images' \
+            'sidebar_label: Container Images' \
+            'description: Published container image tags on GitHub Container Registry' \
+            '---' \
+            '' \
+            '# Container Image Catalog' \
+            '' \
+            'All SIROS ID platform container images are published to' \
+            '[GitHub Container Registry](https://github.com/orgs/sirosfoundation/packages?repo_name=&ecosystem=container).' \
+            '' \
+            ':::info' \
+            'This page is automatically updated daily. For programmatic access, use the' \
+            '[JSON catalog](/catalog/container-images.json).' \
+            ':::' \
+            '' > "$MD"
 
-# Container Image Catalog
+          echo "| Image | Tags |" >> "$MD"
+          echo "|---|---|" >> "$MD"
 
-All SIROS ID platform container images are published to
-[GitHub Container Registry](https://github.com/orgs/sirosfoundation/packages?repo_name=&ecosystem=container).
+          echo "$CATALOG_JSON" | jq -r '.[] | "| `\(.image)` | \(.tags | join(", ")) |"' >> "$MD"
 
-:::info
-This page is automatically updated daily. For programmatic access, use the
-[JSON catalog](/catalog/container-images.json).
-:::
-
-HEADER
-
-          echo "| Image | Tags |" >> docs/docs/sirosid/container-images.md
-          echo "|---|---|" >> docs/docs/sirosid/container-images.md
-
-          echo "$CATALOG_JSON" | jq -r '.[] | "| `\(.image)` | \(.tags | join(", ")) |"' \
-            >> docs/docs/sirosid/container-images.md
-
-          echo "" >> docs/docs/sirosid/container-images.md
-          echo "_Last updated: ${TIMESTAMP}_" >> docs/docs/sirosid/container-images.md
+          echo "" >> "$MD"
+          echo "_Last updated: ${TIMESTAMP}_" >> "$MD"
 
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add static/catalog/container-images.json docs/docs/sirosid/container-images.md
+          git add static/catalog/container-images.json docs/sirosid/container-images.md
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
