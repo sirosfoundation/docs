@@ -16,6 +16,7 @@ This page is automatically updated daily. For programmatic access, use the
 
 | Image | Tags |
 |---|---|
+| `ghcr.io/sirosfoundation/confit` |  |
 | `ghcr.io/sirosfoundation/facetec-api` | main, latest, ff05982, ed87b6d, e840f07, ceb5114, cbfc126, c80f015, c0e2ebd, b864c46, b80a980, b5fe944, a603300, a459ccc, a3f6394, 8385b5c, 8026550, 694023a, 68e6d85, 58b7ced, 57bc021, 51654f2, 4d96601, 4b459c2, 3b4a77a, 37d27da, 304d5d4, 300edb3, 0.9.0, 0.9, 0.8.0, 0.8, 0.7.0, 0.7, 0.6.0, 0.6, 0.5.0, 0.5, 0.4.0, 0.4, 0.3.0, 0.3, 0.2.0, 0.2, 0.1.0, 0.1, 0 |
 | `ghcr.io/sirosfoundation/goff` | main, latest, c708ff3, beed8dc, aa2324f, 7e5b867, 4a6db49, 3a5ecbb, 226c7e0, 113b800 |
 | `ghcr.io/sirosfoundation/go-spocp` | main, latest, f85d8c4, b8e458f, aeea6af, 944de83, 860b3a9, 50fe335, 261140b, 15693e0, 136322e, 12ac863, 0.1.0, 0.1, 0 |
@@ -31,4 +32,4 @@ This page is automatically updated daily. For programmatic access, use the
 | `ghcr.io/sirosfoundation/vc/verifier` | v0.5.0-sirosid.4, v0.5.0-sirosid.3, v0.5.0-sirosid.2, v0.5.0-sirosid.1, dev-c931893, dev-c6c7e7f, dev-c3dffed, dev-944993e, dev-824d199, dev-5caa770, dev-49699be, dev-2e0e7bd, dev-1aacd35, dev-060eae8, dev-056efd6 |
 | `ghcr.io/sirosfoundation/wallet-frontend` | unstable-f80120f, unstable-f6c5ff7, unstable-f6a71f1, unstable-f01050f, unstable-ee3696e, unstable-ec1a5c4, unstable-d9a4327, unstable-d83c651, unstable-d7bb566, unstable-d633630, unstable-d5195db, unstable-ca3bb52, unstable-c078419, unstable-bde0091, unstable-b91186a, unstable-b0c0094, unstable-aff1a36, unstable-aef1325, unstable-aa14cff, unstable-a94e198, unstable-a6802fd, unstable-a1bacfa, unstable-93e7711, unstable-90a0a85, unstable-8d43742, unstable-8bebb62, unstable-83afb6f, unstable-8045837, unstable-74a435f, unstable-7364169, unstable-71a2c88, unstable-67b0655, unstable-669f121, unstable-6645d80, unstable-5de698a, unstable-5c88565, unstable-5820b05, unstable-4a3c5d3, unstable-43508f6, unstable-3faaf09, unstable-32f6696, unstable-28e7d61, unstable-265d4c3, unstable-1d1fcd8, unstable-1cf5b05, unstable-1576960, unstable-15227f7, unstable-113accc, unstable-0405c2f, unstable-0383872, unstable-021d550, unstable, testing-c2c81e54, testing-b7a81d60, testing-b3e28f86, testing-7364169e, testing-50052b0c, testing-4a3edd1a, testing-4789da0d, testing-3800fb64, testing-0ed54cbc, testing-031b58ca, latest, 0.5.0-1-sirosid.5, 0.5.0-1-sirosid.4, 0.5.0-1-sirosid.3, 0.5.0-1-sirosid.2, 0.5.0-1-sirosid.1 |
 
-_Last updated: 2026-05-20T18:17:09Z_
+_Last updated: 2026-05-20T18:23:53Z_
