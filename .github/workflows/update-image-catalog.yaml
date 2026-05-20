@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  packages: read
 
 jobs:
   update-catalog:
@@ -22,68 +23,61 @@ jobs:
         run: |
           set -euo pipefail
 
-          # image:source_repo pairs (repo used to check archive status)
-          ENTRIES=(
-            "confit:sirosfoundation/confit"
-            "facetec-api:sirosfoundation/facetec-api"
-            "goff:sirosfoundation/goFF"
-            "go-spocp:sirosfoundation/go-spocp"
-            "go-trust:sirosfoundation/go-trust"
-            "go-wallet-backend:sirosfoundation/go-wallet-backend"
-            "mtcvctm:sirosfoundation/mtcvctm"
-            "registry-cli:sirosfoundation/registry-cli"
-            "vc/apigw:sirosfoundation/vc"
-            "vc/issuer:sirosfoundation/vc"
-            "vc/mockas:sirosfoundation/vc"
-            "vc/registry:sirosfoundation/vc"
-            "vc/ui:sirosfoundation/vc"
-            "vc/verifier:sirosfoundation/vc"
-            "wallet-frontend:sirosfoundation/wallet-frontend"
-          )
+          ORG="sirosfoundation"
+          TOPIC="container"
 
-          # Cache repo archive status to avoid redundant API calls
-          declare -A REPO_ARCHIVED
+          # Step 1: Discover non-archived public repos tagged with the topic
+          echo "Discovering repos with topic '${TOPIC}'..."
+          TOPIC_REPOS=$(gh api --paginate "/orgs/${ORG}/repos?per_page=100&type=public" \
+            --jq ".[] | select(.archived == false and (.topics // [] | any(. == \"${TOPIC}\"))) | .full_name")
+
+          if [[ -z "$TOPIC_REPOS" ]]; then
+            echo "No repos found with topic '${TOPIC}' — nothing to do."
+            exit 0
+          fi
+
+          # Build a lookup set of qualifying repo names
+          declare -A REPO_SET
+          while IFS= read -r R; do
+            REPO_SET["$R"]=1
+            echo "  found repo: $R"
+          done <<< "$TOPIC_REPOS"
+
+          # Step 2: List all container packages in the org and match to topic repos
+          echo "Listing container packages..."
+          PKG_DATA=$(gh api --paginate "/orgs/${ORG}/packages?package_type=container&per_page=100" \
+            --jq '.[] | "\(.name)\t\(.repository.full_name // "")"')
 
           CATALOG_JSON="[]"
           TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-          for ENTRY in "${ENTRIES[@]}"; do
-            IMAGE="${ENTRY%%:*}"
-            REPO="${ENTRY##*:}"
+          while IFS=$'\t' read -r IMAGE REPO; do
+            [[ -z "$IMAGE" ]] && continue
 
-            # Check archive status (cached per repo)
-            if [[ -z "${REPO_ARCHIVED[$REPO]+x}" ]]; then
-              REPO_STATUS=$(curl -s -o /dev/null -w '%{http_code}' "https://api.github.com/repos/${REPO}")
-              if [[ "$REPO_STATUS" == "200" ]]; then
-                ARCHIVED=$(curl -s "https://api.github.com/repos/${REPO}" | jq -r '.archived')
-              else
-                ARCHIVED="true"  # Inaccessible (private/404) repos treated as archived
-              fi
-              REPO_ARCHIVED[$REPO]="$ARCHIVED"
-            fi
-
-            if [[ "${REPO_ARCHIVED[$REPO]}" == "true" ]]; then
-              echo "Skipping sirosfoundation/${IMAGE} (repo ${REPO} is archived)"
+            # Only include packages whose source repo has the topic
+            if [[ -z "${REPO_SET[$REPO]+x}" ]]; then
+              echo "Skipping ${ORG}/${IMAGE} (repo ${REPO} lacks '${TOPIC}' topic)"
               continue
             fi
 
-            echo "Fetching tags for sirosfoundation/${IMAGE}..."
+            echo "Fetching tags for ${ORG}/${IMAGE}..."
 
             # Get a per-image anonymous token (works for public packages)
-            TOKEN=$(curl -s "https://ghcr.io/token?service=ghcr.io&scope=repository:sirosfoundation/${IMAGE}:pull" \
+            TOKEN=$(curl -s "https://ghcr.io/token?service=ghcr.io&scope=repository:${ORG}/${IMAGE}:pull" \
               | jq -r '.token // empty')
 
             TAGS_JSON=$(curl -sf \
               -H "Authorization: Bearer ${TOKEN}" \
-              "https://ghcr.io/v2/sirosfoundation/${IMAGE}/tags/list" 2>/dev/null || echo '{"tags":[]}')
+              "https://ghcr.io/v2/${ORG}/${IMAGE}/tags/list" 2>/dev/null || echo '{"tags":[]}')
 
             TAGS=$(echo "$TAGS_JSON" | jq -r '.tags // [] | sort | reverse')
 
             CATALOG_JSON=$(echo "$CATALOG_JSON" | jq \
-              --arg name "ghcr.io/sirosfoundation/${IMAGE}" \
+              --arg name "ghcr.io/${ORG}/${IMAGE}" \
+              --arg repo "$REPO" \
               --argjson tags "$TAGS" \
-              '. + [{"image": $name, "tags": $tags}]')
-          done
+              '. + [{"image": $name, "repo": $repo, "tags": $tags}]')
+          done <<< "$PKG_DATA"
 
           # Write JSON catalog
           mkdir -p static/catalog
@@ -114,16 +108,17 @@ jobs:
             ':::' \
             '' > "$MD"
 
-          echo "| Image | Latest | Latest Build | Release Tags |" >> "$MD"
-          echo "|---|---|---|---|" >> "$MD"
+          echo "| Image | Repository | Latest | Latest Build | Release Tags |" >> "$MD"
+          echo "|---|---|---|---|---|" >> "$MD"
 
           echo "$CATALOG_JSON" | jq -r '.[] |
             .tags as $all |
+            .repo as $repo |
             ($all | map(select(test("^v?[0-9]+[.][0-9]")))) as $versions |
             ($versions | join(", ")) as $release |
             ($versions[0] // $all[0] // "-") as $latest |
             ($all | map(select(test("^([0-9a-f]{7,9}|sha-[0-9a-f]+|unstable-[0-9a-f]+|dev-[0-9a-f]+)$")))[0] // "-") as $build |
-            "| `\(.image)` | `\($latest)` | \(if $build == "-" then "-" else "`\($build)`" end) | \($release) |"' >> "$MD"
+            "| `\(.image)` | [\($repo)](https://github.com/\($repo)) | `\($latest)` | \(if $build == "-" then "-" else "`\($build)`" end) | \($release) |"' >> "$MD"
 
           echo "" >> "$MD"
           echo "_Last updated: ${TIMESTAMP}_" >> "$MD"
