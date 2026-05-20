@@ -63,7 +63,7 @@ jobs:
             IMAGE=$(echo "$REPO_NAME" | tr '[:upper:]' '[:lower:]')
 
             # Try the base image name first
-            TAGS_JSON=$(fetch_tags "$IMAGE")
+            TAGS_JSON=$(fetch_tags "$IMAGE" || true)
 
             if [[ -n "$TAGS_JSON" ]]; then
               # Single-image repo
@@ -80,7 +80,7 @@ jobs:
               for SUB_DIR in $(gh api "/repos/${FULL_REPO}/contents" \
                 --jq '.[] | select(.type == "dir") | .name' 2>/dev/null); do
                 SUB_IMAGE="${IMAGE}/${SUB_DIR}"
-                SUB_TAGS_JSON=$(fetch_tags "$SUB_IMAGE")
+                SUB_TAGS_JSON=$(fetch_tags "$SUB_IMAGE" || true)
                 if [[ -n "$SUB_TAGS_JSON" ]]; then
                   TAGS=$(echo "$SUB_TAGS_JSON" | jq -r '.tags // [] | sort | reverse')
                   echo "    ${ORG}/${SUB_IMAGE}: $(echo "$TAGS" | jq 'length') tags"
