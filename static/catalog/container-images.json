@@ -1,5 +1,5 @@
 {
-  "generated": "2026-05-20T18:42:00Z",
+  "generated": "2026-05-20T18:53:01Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/facetec-api",
@@ -65,7 +65,10 @@
         "4a6db49",
         "3a5ecbb",
         "226c7e0",
-        "113b800"
+        "113b800",
+        "0.1.0",
+        "0.1",
+        "0"
       ]
     },
     {
