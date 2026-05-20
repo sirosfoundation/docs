@@ -1,0 +1,34 @@
+---
+title: Container Images
+sidebar_label: Container Images
+description: Published container image tags on GitHub Container Registry
+---
+
+# Container Image Catalog
+
+All SIROS ID platform container images are published to
+[GitHub Container Registry](https://github.com/orgs/sirosfoundation/packages?repo_name=&ecosystem=container).
+
+:::info
+This page is automatically updated daily. For programmatic access, use the
+[JSON catalog](/catalog/container-images.json).
+:::
+
+| Image | Tags |
+|---|---|
+| `ghcr.io/sirosfoundation/facetec-api` | main, latest, ff05982, ed87b6d, e840f07, ceb5114, cbfc126, c80f015, c0e2ebd, b864c46, b80a980, b5fe944, a603300, a459ccc, a3f6394, 8385b5c, 8026550, 694023a, 68e6d85, 58b7ced, 57bc021, 51654f2, 4d96601, 4b459c2, 3b4a77a, 37d27da, 304d5d4, 300edb3, 0.9.0, 0.9, 0.8.0, 0.8, 0.7.0, 0.7, 0.6.0, 0.6, 0.5.0, 0.5, 0.4.0, 0.4, 0.3.0, 0.3, 0.2.0, 0.2, 0.1.0, 0.1, 0 |
+| `ghcr.io/sirosfoundation/goff` | main, latest, c708ff3, beed8dc, aa2324f, 7e5b867, 4a6db49, 3a5ecbb, 226c7e0, 113b800 |
+| `ghcr.io/sirosfoundation/go-spocp` | main, latest, f85d8c4, b8e458f, aeea6af, 944de83, 860b3a9, 50fe335, 261140b, 15693e0, 136322e, 12ac863, 0.1.0, 0.1, 0 |
+| `ghcr.io/sirosfoundation/go-trust` | main, latest, fea1ff2, f8d2823, f3c1f65, efdbc12, ed2e7e9, ea12e6e, d8a99a2, d881aee, d6d47fd, cca27ca, c4a0f50, c36e16b, c0c3338, b68577c, acff5ce, acdf487, a31c2f5, a07bd72, 9f79ac8, 8ebf8ef, 8d5897c, 89492ef, 8922f6c, 871a17c, 8556626, 8495acb, 81dddc2, 8170217, 79b3240, 788db29, 6632a26, 610a1a0, 5d915fc, 570fce3, 56dc925, 561da8a, 560ab42, 557f098, 5277136, 4fca63e, 4eb92c2, 4cfb367, 4cb26f9, 4c154fd, 4327457, 41bfbde, 3f3b078, 37e31a0, 3695914, 32545b7, 2ef574f, 2c24f26, 299279a, 2745da0, 253b50b, 2458fcd, 23f8644, 2133c23, 1581193, 144dccd, 0cee7ae, 05646e4, 00ffd4f, 0.5.0, 0.5, 0.4.1, 0.4.0, 0.4, 0.2.0, 0.2, 0.1.0, 0.1, 0 |
+| `ghcr.io/sirosfoundation/go-wallet-backend` | test-oidcgate-1, main, latest, fbdd583, f9909e9, f8a395a, f774f87, f16f92e, f06a95e, ee679d8, ee5acdb, ed181d2, e9f4f00, e564adb, e10a473, da510c4, da41bcb, d8b07e6, d7cfdb7, d62aef7, d4bcb8e, cb209ac, c927251, c12dada, bee7b32, bde4a96, b5fe229, b3b26aa, b173b2e, b156303, aed5419, ae655ed, a8cb40e, a707582, a606d3a, a50bfba, a2d0a63, 9e519c5, 9e2a1de, 979a788, 975ed41, 97589b3, 9287455, 91c087e, 8a05e64, 8811c69, 866b051, 81f201b, 80124b8, 7d2a070, 7ce38c6, 7a03cdb, 78276d0, 75f07ce, 71463b4, 6c4594c, 6bef500, 6a18bc6, 680ff53, 667743e, 6286c57, 5d5e648, 5d1295e, 4d27346, 49742df, 492b5dc, 4739692, 470081a, 458b6bf, 431fd43, 3ac69e4, 34f6a5f, 34d5659, 31ba75b, 2edc172, 2709218, 26ffab3, 2668d00, 25189cf, 2229a25, 212ec37, 1e5ca91, 1b25d32, 0c8ef22, 0baead3, 047d027, 0396d45, 03777c5, 0350749, 00c2737, 0.4.1, 0.4.0, 0.4, 0.3.0, 0.2.1, 0.2.0, 0.2, 0.1.0, 0.1, 0 |
+| `ghcr.io/sirosfoundation/mtcvctm` | sha-fec321c, sha-f65a15f, sha-f1afb59, sha-e8a6ff8, sha-e6653e0, sha-c752f94, sha-c480116, sha-bb1cc93, sha-b95858d, sha-b67ad4a, sha-b4e96ca, sha-b137c8d, sha-aca71ee, sha-a19c97f, sha-983d095, sha-9248cf8, sha-907feae, sha-8c2d919, sha-7c8e334, sha-7c2cc40, sha-7419a34, sha-6ac9c32, sha-6a81e7b, sha-5b8d83e, sha-57c485e, sha-4726e07, sha-46ea7c3, sha-4557400, sha-4418e06, sha-3a87c95, sha-127208f, latest, 1.8.0, 1.8, 1.7.0, 1.7, 1.6.0, 1.6, 1.5.1, 1.5.0, 1.5, 1.4.0, 1.4, 1.3.0, 1.3, 1.2.0, 1.2, 1.1.0, 1.1, 1.0.0, 1.0, 1 |
+| `ghcr.io/sirosfoundation/registry-cli` | main, latest, fe16a2b, eb26569, e8919e6, c5e66c0, a3b5050, a32788b, 8cc4d05, 74e0b4e, 6a7d97c, 676c0d6, 2f4d4f8, 26d4164, 2273447, 04d4e68, 0433d52, 0.9.9, 0.9.8, 0.9.7, 0.9.6, 0.9.5, 0.9.4, 0.9.3, 0.9.2, 0.9.10, 0.9.1, 0.9.0, 0.9, 0.8.0, 0.8, 0.7.0, 0.7, 0 |
+| `ghcr.io/sirosfoundation/vc/apigw` | v0.5.0-sirosid.4, v0.5.0-sirosid.3, v0.5.0-sirosid.2, v0.5.0-sirosid.1, dev-c931893, dev-c6c7e7f, dev-c3dffed, dev-944993e, dev-824d199, dev-5caa770, dev-49699be, dev-2e0e7bd, dev-1aacd35, dev-060eae8, dev-056efd6 |
+| `ghcr.io/sirosfoundation/vc/issuer` | v0.5.0-sirosid.4, v0.5.0-sirosid.3, v0.5.0-sirosid.2, v0.5.0-sirosid.1, dev-c931893, dev-c6c7e7f, dev-c3dffed, dev-944993e, dev-824d199, dev-5caa770, dev-49699be, dev-2e0e7bd, dev-1aacd35, dev-060eae8, dev-056efd6 |
+| `ghcr.io/sirosfoundation/vc/mockas` | v0.5.0-sirosid.4, v0.5.0-sirosid.3, v0.5.0-sirosid.2, v0.5.0-sirosid.1, dev-c6c7e7f, dev-c3dffed, dev-944993e, dev-824d199, dev-5caa770, dev-49699be, dev-2e0e7bd, dev-1aacd35, dev-060eae8, dev-056efd6 |
+| `ghcr.io/sirosfoundation/vc/registry` | v0.5.0-sirosid.4, v0.5.0-sirosid.3, v0.5.0-sirosid.2, v0.5.0-sirosid.1, dev-c931893, dev-c6c7e7f, dev-c3dffed, dev-944993e, dev-824d199, dev-5caa770, dev-49699be, dev-2e0e7bd, dev-1aacd35, dev-060eae8, dev-056efd6 |
+| `ghcr.io/sirosfoundation/vc/ui` | v0.5.0-sirosid.4, v0.5.0-sirosid.3, v0.5.0-sirosid.2, v0.5.0-sirosid.1, dev-c6c7e7f, dev-c3dffed, dev-944993e, dev-824d199, dev-5caa770, dev-49699be, dev-2e0e7bd, dev-1aacd35, dev-060eae8, dev-056efd6 |
+| `ghcr.io/sirosfoundation/vc/verifier` | v0.5.0-sirosid.4, v0.5.0-sirosid.3, v0.5.0-sirosid.2, v0.5.0-sirosid.1, dev-c931893, dev-c6c7e7f, dev-c3dffed, dev-944993e, dev-824d199, dev-5caa770, dev-49699be, dev-2e0e7bd, dev-1aacd35, dev-060eae8, dev-056efd6 |
+| `ghcr.io/sirosfoundation/wallet-frontend` | unstable-f80120f, unstable-f6c5ff7, unstable-f6a71f1, unstable-f01050f, unstable-ee3696e, unstable-ec1a5c4, unstable-d9a4327, unstable-d83c651, unstable-d7bb566, unstable-d633630, unstable-d5195db, unstable-ca3bb52, unstable-c078419, unstable-bde0091, unstable-b91186a, unstable-b0c0094, unstable-aff1a36, unstable-aef1325, unstable-aa14cff, unstable-a94e198, unstable-a6802fd, unstable-a1bacfa, unstable-93e7711, unstable-90a0a85, unstable-8d43742, unstable-8bebb62, unstable-83afb6f, unstable-8045837, unstable-74a435f, unstable-7364169, unstable-71a2c88, unstable-67b0655, unstable-669f121, unstable-6645d80, unstable-5de698a, unstable-5c88565, unstable-5820b05, unstable-4a3c5d3, unstable-43508f6, unstable-3faaf09, unstable-32f6696, unstable-28e7d61, unstable-265d4c3, unstable-1d1fcd8, unstable-1cf5b05, unstable-1576960, unstable-15227f7, unstable-113accc, unstable-0405c2f, unstable-0383872, unstable-021d550, unstable, testing-c2c81e54, testing-b7a81d60, testing-b3e28f86, testing-7364169e, testing-50052b0c, testing-4a3edd1a, testing-4789da0d, testing-3800fb64, testing-0ed54cbc, testing-031b58ca, latest, 0.5.0-1-sirosid.5, 0.5.0-1-sirosid.4, 0.5.0-1-sirosid.3, 0.5.0-1-sirosid.2, 0.5.0-1-sirosid.1 |
+
+_Last updated: 2026-05-20T18:27:18Z_
