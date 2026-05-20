@@ -47,7 +47,6 @@ See [Registry Services](../sirosid/registry) for full documentation on how the r
 |------------|-------------|
 | [**sirosid-dev**](https://github.com/sirosfoundation/sirosid-dev) | Development environment and local deployment configurations for SIROS ID. |
 | [**sirosid-tests**](https://github.com/sirosfoundation/sirosid-tests) | End-to-end test suites and conformance tests for SIROS ID components. |
-| [**confit**](https://github.com/sirosfoundation/confit) | Configuration management tool for SIROS services. |
 
 ### Libraries & Utilities
 
@@ -55,21 +54,20 @@ See [Registry Services](../sirosid/registry) for full documentation on how the r
 |------------|-------------|
 | [**go-cryptoutil**](https://github.com/sirosfoundation/go-cryptoutil) | Cryptographic utilities for Go including key management, signing, and verification helpers. |
 | [**go-spocp**](https://github.com/sirosfoundation/go-spocp) | Go implementation of SPOCP (Simple Policy Control Protocol). |
-| [**go-siros-cli**](https://github.com/sirosfoundation/go-siros-cli) | Command-line interface for SIROS services administration and debugging. |
+| [**go-r2ps-service**](https://github.com/sirosfoundation/go-r2ps-service) | Remote WSCD service implementing R2PS (Remote to Proximity Service) for hardware-backed key operations via PKCS#11. |
 
 ### Demo & Testing
 
 | Repository | Description |
 |------------|-------------|
 | [**demo-credentials**](https://github.com/sirosfoundation/demo-credentials) | Sample credentials and VCTM definitions for testing and demonstration. |
-| [**wallet-e2e-tests**](https://github.com/sirosfoundation/wallet-e2e-tests) | End-to-end test suites for wallet functionality. |
 | [**facetec-api**](https://github.com/sirosfoundation/facetec-api) | FaceTec integration API for biometric verification. |
 
 ### Browser & Web Integration
 
 | Repository | Description |
 |------------|-------------|
-| [**web-wallet-selector**](https://github.com/sirosfoundation/web-wallet-selector) | Web component for wallet selection in browser-based credential flows. |
+| [**wallet-companion**](https://github.com/sirosfoundation/wallet-companion) | Browser extension for wallet selection in browser-based credential flows. |
 
 ---
 
