@@ -1,5 +1,5 @@
 {
-  "generated": "2026-05-20T20:16:13Z",
+  "generated": "2026-05-20T20:20:38Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -154,6 +154,130 @@
         "0.5.0-1-sirosid.3",
         "0.5.0-1-sirosid.2",
         "0.5.0-1-sirosid.1"
+      ]
+    },
+    {
+      "image": "ghcr.io/sirosfoundation/vc/apigw",
+      "repo": "sirosfoundation/vc",
+      "tags": [
+        "v0.5.0-sirosid.4",
+        "v0.5.0-sirosid.3",
+        "v0.5.0-sirosid.2",
+        "v0.5.0-sirosid.1",
+        "dev-c931893",
+        "dev-c6c7e7f",
+        "dev-c3dffed",
+        "dev-944993e",
+        "dev-824d199",
+        "dev-5caa770",
+        "dev-49699be",
+        "dev-2e0e7bd",
+        "dev-1aacd35",
+        "dev-060eae8",
+        "dev-056efd6"
+      ]
+    },
+    {
+      "image": "ghcr.io/sirosfoundation/vc/issuer",
+      "repo": "sirosfoundation/vc",
+      "tags": [
+        "v0.5.0-sirosid.4",
+        "v0.5.0-sirosid.3",
+        "v0.5.0-sirosid.2",
+        "v0.5.0-sirosid.1",
+        "dev-c931893",
+        "dev-c6c7e7f",
+        "dev-c3dffed",
+        "dev-944993e",
+        "dev-824d199",
+        "dev-5caa770",
+        "dev-49699be",
+        "dev-2e0e7bd",
+        "dev-1aacd35",
+        "dev-060eae8",
+        "dev-056efd6"
+      ]
+    },
+    {
+      "image": "ghcr.io/sirosfoundation/vc/mockas",
+      "repo": "sirosfoundation/vc",
+      "tags": [
+        "v0.5.0-sirosid.4",
+        "v0.5.0-sirosid.3",
+        "v0.5.0-sirosid.2",
+        "v0.5.0-sirosid.1",
+        "dev-c6c7e7f",
+        "dev-c3dffed",
+        "dev-944993e",
+        "dev-824d199",
+        "dev-5caa770",
+        "dev-49699be",
+        "dev-2e0e7bd",
+        "dev-1aacd35",
+        "dev-060eae8",
+        "dev-056efd6"
+      ]
+    },
+    {
+      "image": "ghcr.io/sirosfoundation/vc/registry",
+      "repo": "sirosfoundation/vc",
+      "tags": [
+        "v0.5.0-sirosid.4",
+        "v0.5.0-sirosid.3",
+        "v0.5.0-sirosid.2",
+        "v0.5.0-sirosid.1",
+        "dev-c931893",
+        "dev-c6c7e7f",
+        "dev-c3dffed",
+        "dev-944993e",
+        "dev-824d199",
+        "dev-5caa770",
+        "dev-49699be",
+        "dev-2e0e7bd",
+        "dev-1aacd35",
+        "dev-060eae8",
+        "dev-056efd6"
+      ]
+    },
+    {
+      "image": "ghcr.io/sirosfoundation/vc/ui",
+      "repo": "sirosfoundation/vc",
+      "tags": [
+        "v0.5.0-sirosid.4",
+        "v0.5.0-sirosid.3",
+        "v0.5.0-sirosid.2",
+        "v0.5.0-sirosid.1",
+        "dev-c6c7e7f",
+        "dev-c3dffed",
+        "dev-944993e",
+        "dev-824d199",
+        "dev-5caa770",
+        "dev-49699be",
+        "dev-2e0e7bd",
+        "dev-1aacd35",
+        "dev-060eae8",
+        "dev-056efd6"
+      ]
+    },
+    {
+      "image": "ghcr.io/sirosfoundation/vc/verifier",
+      "repo": "sirosfoundation/vc",
+      "tags": [
+        "v0.5.0-sirosid.4",
+        "v0.5.0-sirosid.3",
+        "v0.5.0-sirosid.2",
+        "v0.5.0-sirosid.1",
+        "dev-c931893",
+        "dev-c6c7e7f",
+        "dev-c3dffed",
+        "dev-944993e",
+        "dev-824d199",
+        "dev-5caa770",
+        "dev-49699be",
+        "dev-2e0e7bd",
+        "dev-1aacd35",
+        "dev-060eae8",
+        "dev-056efd6"
       ]
     },
     {
@@ -451,6 +575,15 @@
         "0.7.0",
         "0.7",
         "0"
+      ]
+    },
+    {
+      "image": "ghcr.io/sirosfoundation/go-r2ps-service",
+      "repo": "sirosfoundation/go-r2ps-service",
+      "tags": [
+        "main",
+        "latest",
+        "947570d"
       ]
     }
   ]
