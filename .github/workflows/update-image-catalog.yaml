@@ -53,9 +53,13 @@ jobs:
 
             # Check archive status (cached per repo)
             if [[ -z "${REPO_ARCHIVED[$REPO]+x}" ]]; then
-              ARCHIVED=$(curl -sf "https://api.github.com/repos/${REPO}" 2>/dev/null | jq -r '.archived // empty')
-              # Treat inaccessible (private) repos as archived
-              REPO_ARCHIVED[$REPO]="${ARCHIVED:-true}"
+              REPO_STATUS=$(curl -s -o /dev/null -w '%{http_code}' "https://api.github.com/repos/${REPO}")
+              if [[ "$REPO_STATUS" == "200" ]]; then
+                ARCHIVED=$(curl -s "https://api.github.com/repos/${REPO}" | jq -r '.archived')
+              else
+                ARCHIVED="true"  # Inaccessible (private/404) repos treated as archived
+              fi
+              REPO_ARCHIVED[$REPO]="$ARCHIVED"
             fi
 
             if [[ "${REPO_ARCHIVED[$REPO]}" == "true" ]]; then
