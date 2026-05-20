@@ -75,11 +75,27 @@ jobs:
                 --argjson tags "$TAGS" \
                 '. + [{"image": $name, "repo": $repo, "tags": $tags}]')
             else
-              # Multi-image repo: probe sub-paths from repo top-level dirs
-              echo "  ${ORG}/${IMAGE}: no base image, probing sub-paths..."
-              for SUB_DIR in $(gh api "/repos/${FULL_REPO}/contents" \
-                --jq '.[] | select(.type == "dir") | .name' 2>/dev/null); do
-                SUB_IMAGE="${IMAGE}/${SUB_DIR}"
+              # Multi-image repo: look for .container-images file listing sub-image
+              # names (one per line), or fall back to docker-compose.yaml image refs.
+              echo "  ${ORG}/${IMAGE}: no base image, probing sub-images..."
+
+              # Try .container-images file first
+              SUB_NAMES=$(gh api "/repos/${FULL_REPO}/contents/.container-images" \
+                --jq '.content' 2>/dev/null | base64 -d 2>/dev/null | grep -v '^\s*#' | grep -v '^\s*$' || true)
+
+              # Fall back to docker-compose.yaml
+              if [[ -z "$SUB_NAMES" ]]; then
+                COMPOSE=$(gh api "/repos/${FULL_REPO}/contents/docker-compose.yaml" \
+                  --jq '.content' 2>/dev/null | base64 -d 2>/dev/null || true)
+                if [[ -n "$COMPOSE" ]]; then
+                  SUB_NAMES=$(echo "$COMPOSE" \
+                    | grep -oP 'image:\s*\S+/[^/]+/\K[a-z0-9_-]+' 2>/dev/null \
+                    | sort -u || true)
+                fi
+              fi
+
+              for SUB_NAME in $SUB_NAMES; do
+                SUB_IMAGE="${IMAGE}/${SUB_NAME}"
                 SUB_TAGS_JSON=$(fetch_tags "$SUB_IMAGE" || true)
                 if [[ -n "$SUB_TAGS_JSON" ]]; then
                   TAGS=$(echo "$SUB_TAGS_JSON" | jq -r '.tags // [] | sort | reverse')
