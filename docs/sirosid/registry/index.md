@@ -19,6 +19,16 @@ Organizations that issue digital credentials define **Verifiable Credential Type
 
 The result is a public (or private) catalogue that any compatible client can query.
 
+## Using the Registry
+
+There are two ways to get credential type metadata into your wallet deployment:
+
+- **Use the public registry at [registry.siros.org](https://registry.siros.org).** This is the easiest option — it automatically discovers credential metadata from GitHub repositories tagged with the `vctm` topic. If your credential types are published in public GitHub repos, they will appear in the catalogue without any extra setup.
+
+- **Run your own registry with [registry-cli](./registry-cli).** Running registry-cli locally lets you choose exactly which sources to include, mix public and private repositories, and serve credential metadata to a private wallet deployment that is not connected to the public internet. This is useful for testing, for organisations that need to keep their credential types confidential, or for air-gapped environments.
+
+Both options produce the same TS11-compliant JSON API, so wallets and backends can switch between them by changing a single URL.
+
 ## How registry.siros.org is Built
 
 The public instance at [registry.siros.org](https://registry.siros.org) is produced by running `registry-cli build` against a set of source repositories — primarily those tagged with the `vctm` topic on GitHub. A CI pipeline rebuilds and deploys the site whenever source metadata changes. The site is hosted as a static site on GitHub Pages.
