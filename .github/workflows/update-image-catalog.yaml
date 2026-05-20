@@ -114,8 +114,9 @@ jobs:
           echo "|---|---|---|" >> "$MD"
 
           echo "$CATALOG_JSON" | jq -r '.[] |
-            (.tags | map(select(test("^v?[0-9]+\\.[0-9]"))) | join(", ")) as $release |
-            (.tags | map(select(test("^(main|latest|sha-)")))[0] // .tags[0] // "-") as $latest |
+            .tags as $all |
+            ($all | map(select(test("^v?[0-9]+[.][0-9]"))) | join(", ")) as $release |
+            ($all | map(select(test("^(main|latest|sha-)"))) | .[0] // $all[0] // "-") as $latest |
             "| `\(.image)` | `\($latest)` | \($release) |"' >> "$MD"
 
           echo "" >> "$MD"
