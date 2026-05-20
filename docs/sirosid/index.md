@@ -14,5 +14,6 @@ The SIROS ID platform consists of the following parts:
 
 * [SIROS ID Issuer and Verifier](/sirosid/issuers/concepts) – works with any compatible wallet, built on https://github.com/SUNET/vc
 * [SIROS ID Credential Manager](/sirosid/reference/cm) – a reference wallet built on the [wwWallet](/opensource#wwwallet-project) project
+* [Registry Services](/sirosid/registry) – credential type metadata publication and discovery via [registry.siros.org](https://registry.siros.org)
 * [SIROS ID Trust Services](/sirosid/trust)
 * [Standards & Specifications](/sirosid/reference/standards) – comprehensive list of implemented standards

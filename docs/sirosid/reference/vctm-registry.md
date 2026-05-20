@@ -23,7 +23,7 @@ The SIROS ecosystem has three components that use the word "registry" — they s
 
 | Component | Role | Description |
 |-----------|------|-------------|
-| **[registry-cli](../../../opensource/registry-cli)** | **Publisher** | CLI tool that builds the credential type catalogue (the static site at registry.siros.org). This is the _publishing side_. |
+| **[registry-cli](../registry/registry-cli)** | **Publisher** | CLI tool that builds the credential type catalogue (the static site at registry.siros.org). This is the _publishing side_. |
 | **registry.siros.org** | **Catalogue** | The public static site produced by registry-cli, hosted on GitHub Pages. |
 | **VC registry** (`vc/cmd/registry`) | **Token Status Lists** | A completely separate service in the [VC suite](https://github.com/SUNET/vc) that manages credential revocation via Token Status Lists. It has nothing to do with credential type metadata. |
 | **go-wallet-backend registry** (`go-wallet-backend/cmd/registry`) | **Consumer/cache** | A service in go-wallet-backend that _fetches and caches_ credential type metadata from registry.siros.org (or any compatible source). This is the _consuming side_. |

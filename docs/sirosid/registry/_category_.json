@@ -1,0 +1,8 @@
+{
+  "label": "Registry Services",
+  "position": 5,
+  "link": {
+    "type": "doc",
+    "id": "sirosid/registry/index"
+  }
+}
