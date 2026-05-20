@@ -75,11 +75,11 @@ jobs:
                 --argjson tags "$TAGS" \
                 '. + [{"image": $name, "repo": $repo, "tags": $tags}]')
             else
-              # Multi-image repo: probe common sub-paths
+              # Multi-image repo: probe sub-paths from repo top-level dirs
               echo "  ${ORG}/${IMAGE}: no base image, probing sub-paths..."
-              for SUB_JSON in $(curl -sf "https://api.github.com/repos/${FULL_REPO}/contents" \
-                | jq -r '.[] | select(.type == "dir") | .name' 2>/dev/null); do
-                SUB_IMAGE="${IMAGE}/${SUB_JSON}"
+              for SUB_DIR in $(gh api "/repos/${FULL_REPO}/contents" \
+                --jq '.[] | select(.type == "dir") | .name' 2>/dev/null); do
+                SUB_IMAGE="${IMAGE}/${SUB_DIR}"
                 SUB_TAGS_JSON=$(fetch_tags "$SUB_IMAGE")
                 if [[ -n "$SUB_TAGS_JSON" ]]; then
                   TAGS=$(echo "$SUB_TAGS_JSON" | jq -r '.tags // [] | sort | reverse')
