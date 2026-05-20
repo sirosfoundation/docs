@@ -91,7 +91,7 @@ jobs:
             > static/catalog/container-images.json
 
           # Write Markdown catalog
-          MD="docs/sirosid/container-images.md"
+          MD="docs/opensource/container-images.md"
           printf '%s\n' \
             '---' \
             'title: Container Images' \
@@ -110,10 +110,13 @@ jobs:
             ':::' \
             '' > "$MD"
 
-          echo "| Image | Tags |" >> "$MD"
-          echo "|---|---|" >> "$MD"
+          echo "| Image | Latest | Release Tags |" >> "$MD"
+          echo "|---|---|---|" >> "$MD"
 
-          echo "$CATALOG_JSON" | jq -r '.[] | "| `\(.image)` | \(.tags | join(", ")) |"' >> "$MD"
+          echo "$CATALOG_JSON" | jq -r '.[] |
+            (.tags | map(select(test("^v?[0-9]"))) | join(", ")) as $release |
+            (.tags[0] // "-") as $latest |
+            "| `\(.image)` | `\($latest)` | \($release) |"' >> "$MD"
 
           echo "" >> "$MD"
           echo "_Last updated: ${TIMESTAMP}_" >> "$MD"
@@ -122,7 +125,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add static/catalog/container-images.json docs/sirosid/container-images.md
+          git add static/catalog/container-images.json docs/opensource/container-images.md
+          # Clean up old location if it exists
+          git rm -f docs/sirosid/container-images.md 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
