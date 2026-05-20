@@ -17,30 +17,50 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Generate image catalog
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
 
-          IMAGES=(
-            "facetec-api"
-            "goff"
-            "go-spocp"
-            "go-trust"
-            "go-wallet-backend"
-            "mtcvctm"
-            "registry-cli"
-            "vc/apigw"
-            "vc/issuer"
-            "vc/mockas"
-            "vc/registry"
-            "vc/ui"
-            "vc/verifier"
-            "wallet-frontend"
+          # image:source_repo pairs (repo used to check archive status)
+          ENTRIES=(
+            "confit:sirosfoundation/confit"
+            "facetec-api:sirosfoundation/facetec-api"
+            "goff:sirosfoundation/goFF"
+            "go-spocp:sirosfoundation/go-spocp"
+            "go-trust:sirosfoundation/go-trust"
+            "go-wallet-backend:sirosfoundation/go-wallet-backend"
+            "mtcvctm:sirosfoundation/mtcvctm"
+            "registry-cli:sirosfoundation/registry-cli"
+            "vc/apigw:sirosfoundation/vc"
+            "vc/issuer:sirosfoundation/vc"
+            "vc/mockas:sirosfoundation/vc"
+            "vc/registry:sirosfoundation/vc"
+            "vc/ui:sirosfoundation/vc"
+            "vc/verifier:sirosfoundation/vc"
+            "wallet-frontend:sirosfoundation/wallet-frontend"
           )
+
+          # Cache repo archive status to avoid redundant API calls
+          declare -A REPO_ARCHIVED
 
           CATALOG_JSON="[]"
           TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-          for IMAGE in "${IMAGES[@]}"; do
+          for ENTRY in "${ENTRIES[@]}"; do
+            IMAGE="${ENTRY%%:*}"
+            REPO="${ENTRY##*:}"
+
+            # Check archive status (cached per repo)
+            if [[ -z "${REPO_ARCHIVED[$REPO]+x}" ]]; then
+              REPO_ARCHIVED[$REPO]=$(gh api "repos/${REPO}" --jq '.archived' 2>/dev/null || echo "false")
+            fi
+
+            if [[ "${REPO_ARCHIVED[$REPO]}" == "true" ]]; then
+              echo "Skipping sirosfoundation/${IMAGE} (repo ${REPO} is archived)"
+              continue
+            fi
+
             echo "Fetching tags for sirosfoundation/${IMAGE}..."
 
             # Get a per-image anonymous token (works for public packages)
