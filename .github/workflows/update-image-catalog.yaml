@@ -7,7 +7,6 @@ on:
 
 permissions:
   contents: write
-  packages: read
 
 jobs:
   update-catalog:
@@ -18,13 +17,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Generate image catalog
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
 
           IMAGES=(
-            "confit"
             "facetec-api"
             "goff"
             "go-spocp"
@@ -41,14 +37,16 @@ jobs:
             "wallet-frontend"
           )
 
-          # Get a GHCR token for public reads
-          TOKEN=$(curl -s "https://ghcr.io/token?scope=repository:sirosfoundation/*:pull" | jq -r '.token // empty')
-
           CATALOG_JSON="[]"
           TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
           for IMAGE in "${IMAGES[@]}"; do
             echo "Fetching tags for sirosfoundation/${IMAGE}..."
+
+            # Get a per-image anonymous token (works for public packages)
+            TOKEN=$(curl -s "https://ghcr.io/token?service=ghcr.io&scope=repository:sirosfoundation/${IMAGE}:pull" \
+              | jq -r '.token // empty')
+
             TAGS_JSON=$(curl -sf \
               -H "Authorization: Bearer ${TOKEN}" \
               "https://ghcr.io/v2/sirosfoundation/${IMAGE}/tags/list" 2>/dev/null || echo '{"tags":[]}')

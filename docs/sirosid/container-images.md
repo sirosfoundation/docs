@@ -16,7 +16,6 @@ This page is automatically updated daily. For programmatic access, use the
 
 | Image | Tags |
 |---|---|
-| `ghcr.io/sirosfoundation/confit` |  |
 | `ghcr.io/sirosfoundation/facetec-api` |  |
 | `ghcr.io/sirosfoundation/goff` |  |
 | `ghcr.io/sirosfoundation/go-spocp` |  |
