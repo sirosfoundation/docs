@@ -3,60 +3,125 @@ sidebar_position: 2
 sidebar_label: Running Conformance Tests
 ---
 
-# How to Run Conformance Tests
+# Running Conformance Tests
 
-This guide explains how to run OpenID conformance tests against the SIROS ID wallet, issuer, and verifier using the [OpenID Foundation Conformance Suite](https://openid.net/certification/).
+SIROS ID components are tested against the [OpenID Foundation Conformance Suite](https://www.certification.openid.net/).
+Results are published automatically to [sirosfoundation.github.io/siros-conformance](https://sirosfoundation.github.io/siros-conformance/).
 
-Conformance results are published automatically to [sirosfoundation.github.io/siros-conformance](https://sirosfoundation.github.io/siros-conformance/).
+## Triggering from a Pull Request
 
-## Prerequisites
+The fastest way to run conformance tests is to comment on any PR in a repo that has the conformance workflow installed (e.g. `go-wallet-backend`, `wallet-frontend`):
 
-- Docker and Docker Compose
-- Node.js 20+
-- An `/etc/hosts` entry:
-  ```
-  127.0.0.1 localhost.emobix.co.uk
-  ```
-
-## Quick Start
-
-Clone the conformance repo and install dependencies:
-
-```bash
-git clone https://github.com/sirosfoundation/siros-conformance.git
-cd siros-conformance
-make install
+```
+@conformance
 ```
 
-### Run Wallet Tests
+This triggers all conformance profiles (wallet, issuer, verifier) using `:latest` images. A rocket reaction confirms the trigger, and a summary comment is posted with a link to the running workflow.
 
-The wallet profile tests both VCI (credential issuance) and VP (credential presentation):
+:::note
+Only organisation members, collaborators, and owners can trigger `@conformance`. The comment must **start** with `@conformance`.
+:::
 
-```bash
-make up-wallet     # Start all services (wallet, VC services, conformance suite)
-make test-wallet   # Run VCI + VP wallet conformance tests
-make down          # Tear down
+### Specifying a Profile
+
+Run a single profile instead of all three:
+
+```
+@conformance wallet
+@conformance issuer
+@conformance verifier
 ```
 
-### Run Issuer Tests
+### Image Overrides
 
-Tests the SIROS ID issuer against the conformance suite acting as a wallet:
+Test a specific build by appending `service:tag` pairs. The tag is resolved to a Docker image automatically:
 
-```bash
-make up-issuer
-make test-issuer
-make down
+```
+@conformance wallet-frontend:pr-111
+@conformance go-wallet-backend:sha-abc123
+@conformance wallet vc-issuer:pr-42 go-trust:sha-def456
 ```
 
-### Run Verifier Tests
+When no profile is specified explicitly, the profile is auto-detected from the overridden services. For example, `vc-issuer:pr-42` implies the `issuer` profile.
 
-Tests the SIROS ID verifier against the conformance suite acting as a wallet:
+Recognised service names: `wallet-frontend`, `wallet-backend` / `go-wallet-backend`, `wallet-registry` / `go-wallet-registry`, `vc-issuer`, `vc-verifier`, `vc-apigw`, `vc-registry`, `vc-mockas`, `go-trust`.
+
+Full image references also work:
+
+```
+@conformance ghcr.io/sirosfoundation/vc-issuer:pr-42
+```
+
+### What Happens
+
+1. The repo's `conformance.yml` workflow fires on the PR comment
+2. It checks out `parse-comment.mjs` from `siros-conformance` and parses the comment
+3. A `repository_dispatch` event is sent to `siros-conformance` for each profile
+4. The conformance suite runs against the specified (or `:latest`) images
+5. Results are published to GitHub Pages and posted back as a PR comment
+
+### Installing the Workflow
+
+To enable `@conformance` in a new repo, copy the workflow file from `go-wallet-backend`:
 
 ```bash
-make up-verifier
-make test-verifier
-make down
+cp go-wallet-backend/.github/workflows/conformance.yml \
+   your-repo/.github/workflows/conformance.yml
 ```
+
+The workflow requires a `CONFORMANCE_DISPATCH_TOKEN` secret — a fine-grained PAT with Contents read/write on `sirosfoundation/siros-conformance`.
+
+## CI Automation
+
+Conformance tests also run automatically without manual comments:
+
+- **On push to `main`** in the conformance repo (when relevant files change)
+- **On a weekly schedule** (Monday 06:00 UTC)
+- **Via workflow dispatch** with optional image overrides
+- **Via repository dispatch** from other repos
+
+### Triggering from CI
+
+To trigger conformance tests after a deployment, add a dispatch step:
+
+```yaml
+- name: Trigger conformance tests
+  uses: peter-evans/repository-dispatch@v3
+  with:
+    token: ${{ secrets.CONFORMANCE_DISPATCH_TOKEN }}
+    repository: sirosfoundation/siros-conformance
+    event-type: conformance-wallet
+    client-payload: |
+      {
+        "image-overrides": {"wallet-frontend": "${{ github.sha }}"},
+        "target-repo": "${{ github.repository }}",
+        "target-pr": "${{ github.event.pull_request.number }}"
+      }
+```
+
+### Workflow Dispatch
+
+```bash
+gh workflow run wallet.yml \
+  -f image-overrides='{"wallet-frontend":"pr-123"}' \
+  -f target-repo="sirosfoundation/wallet-frontend" \
+  -f target-pr="123"
+```
+
+## Reading the Results
+
+After a test run, results are:
+
+1. **Published to GitHub Pages** at [sirosfoundation.github.io/siros-conformance](https://sirosfoundation.github.io/siros-conformance/) — includes an index of all runs, per-run detail pages with pass/fail bars, and exported conformance suite HTML reports
+2. **Posted as a PR comment** (if `target-repo` and `target-pr` were provided) — a summary table with pass/fail counts per module
+
+| Result | Meaning |
+|--------|---------|
+| PASSED | All conditions met |
+| WARNING | Passed with non-critical warnings |
+| FAILED | One or more conditions failed |
+| REVIEW | Manual review needed |
+| SKIPPED | Module was skipped (usually due to variant mismatch) |
 
 ## Understanding Variants
 
@@ -76,84 +141,62 @@ A VP wallet test variant specifies:
 
 The full variant reference is maintained in the [siros-conformance repo docs](https://github.com/sirosfoundation/siros-conformance/blob/main/docs/variant-reference.md).
 
-## Running a Specific Variant
+## Running Locally
 
-Use Playwright's `--grep` flag to run a single variant by name:
+### Prerequisites
 
-```bash
-# Run only the authorization_code variant
-npx playwright test specs/conformance/oid4vci-wallet.spec.ts \
-  --grep "authorization_code"
+- Docker and Docker Compose
+- Node.js 20+
+- An `/etc/hosts` entry:
+  ```
+  127.0.0.1 localhost.emobix.co.uk
+  ```
 
-# Run only the HAIP VP variant
-npx playwright test specs/conformance/oid4vp-wallet.spec.ts \
-  --grep "haip"
-
-# Run only mdoc VCI variant
-npx playwright test specs/conformance/oid4vci-wallet.spec.ts \
-  --grep "mdoc"
-```
-
-## CI / GitHub Actions
-
-Conformance tests run automatically:
-
-- **On push to `main`** in the conformance repo (when relevant files change)
-- **On a weekly schedule** (Monday 06:00 UTC)
-- **Via workflow dispatch** with optional image overrides
-- **Via repository dispatch** from other repos (e.g., when wallet-frontend or go-wallet-backend pushes a new image)
-
-### Triggering from Another Repo
-
-To trigger conformance tests after a deployment, dispatch from your CI:
-
-```yaml
-- name: Trigger conformance tests
-  uses: peter-evans/repository-dispatch@v3
-  with:
-    token: ${{ secrets.CONFORMANCE_DISPATCH_TOKEN }}
-    repository: sirosfoundation/siros-conformance
-    event-type: conformance-wallet
-    client-payload: |
-      {
-        "image-overrides": {"wallet-frontend": "${{ github.sha }}"},
-        "target-repo": "${{ github.repository }}",
-        "target-pr": "${{ github.event.pull_request.number }}"
-      }
-```
-
-### Image Overrides
-
-Override specific Docker image tags via the `image-overrides` input:
+### Quick Start
 
 ```bash
-# Via workflow dispatch
-gh workflow run wallet.yml \
-  -f image-overrides='{"wallet-frontend":"pr-123"}' \
-  -f target-repo="sirosfoundation/wallet-frontend" \
-  -f target-pr="123"
+git clone https://github.com/sirosfoundation/siros-conformance.git
+cd siros-conformance
+make install
 ```
 
-## Reading the Results
+### Run Wallet Tests
 
-After a test run, results are:
+```bash
+make up-wallet     # Start all services (wallet, VC services, conformance suite)
+make test-wallet   # Run VCI + VP wallet conformance tests
+make down          # Tear down
+```
 
-1. **Published to GitHub Pages** at [sirosfoundation.github.io/siros-conformance](https://sirosfoundation.github.io/siros-conformance/) — includes an index of all runs, per-run detail pages with pass/fail bars, and exported conformance suite HTML reports
-2. **Posted as a PR comment** (if `target-repo` and `target-pr` were provided) — a summary table with pass/fail counts per module
+### Run Issuer Tests
 
-### Result States
+```bash
+make up-issuer
+make test-issuer
+make down
+```
 
-| Result | Meaning |
-|--------|---------|
-| PASSED | All conditions met |
-| WARNING | Passed with non-critical warnings |
-| FAILED | One or more conditions failed |
-| REVIEW | Manual review needed |
-| SKIPPED | Module was skipped (usually due to variant mismatch) |
+### Run Verifier Tests
+
+```bash
+make up-verifier
+make test-verifier
+make down
+```
+
+### Running a Specific Variant
+
+Use Playwright's `--grep` flag:
+
+```bash
+npx playwright test specs/conformance/oid4vci-wallet.spec.ts --grep "authorization_code"
+npx playwright test specs/conformance/oid4vp-wallet.spec.ts --grep "haip"
+npx playwright test specs/conformance/oid4vci-wallet.spec.ts --grep "mdoc"
+```
 
 ## Adding a New Variant
 
-See the [adding-variants guide](https://github.com/sirosfoundation/siros-conformance/blob/main/docs/adding-variants.md) in the conformance repo for step-by-step instructions.
+See the [adding-variants guide](https://github.com/sirosfoundation/siros-conformance/blob/main/docs/adding-variants.md) in the conformance repo.
 
 In brief:
 
