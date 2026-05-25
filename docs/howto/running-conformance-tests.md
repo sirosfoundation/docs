@@ -32,6 +32,25 @@ Run a single profile instead of all three:
 @conformance verifier
 ```
 
+### Filtering by Variant
+
+Append `/<filter>` to a profile to run only matching variants. The filter is matched as a substring against variant names:
+
+```
+@conformance wallet/mdoc
+@conformance wallet/haip
+@conformance wallet/authorization_code
+@conformance wallet/deferred
+@conformance issuer/sd_jwt_vc
+@conformance verifier/x509_san_dns
+```
+
+Available variant dimensions depend on the profile — see [Understanding Variants](#understanding-variants) below.
+
+:::tip
+To see all variant names, look at the test spec files in [siros-conformance/specs/conformance/](https://github.com/sirosfoundation/siros-conformance/tree/main/specs/conformance).
+:::
+
 ### Image Overrides
 
 Test a specific build by appending `service:tag` pairs. The tag is resolved to a Docker image automatically:
@@ -62,14 +81,17 @@ Full image references also work:
 
 ### Installing the Workflow
 
-To enable `@conformance` in a new repo, copy the workflow file from `go-wallet-backend`:
+The conformance workflow is available as an organisation workflow template. To enable `@conformance` in a new repo:
 
-```bash
-cp go-wallet-backend/.github/workflows/conformance.yml \
-   your-repo/.github/workflows/conformance.yml
-```
+1. Go to **Actions → New workflow** in the target repo
+2. Find **"Conformance Tests"** under the organisation templates
+3. Click **Configure**, review, and commit
 
 The workflow requires a `CONFORMANCE_DISPATCH_TOKEN` secret — a fine-grained PAT with Contents read/write on `sirosfoundation/siros-conformance`.
+
+:::tip
+Other org-wide workflow templates (SBOM, Security, CodeQL) are also available from the same **Actions → New workflow** menu.
+:::
 
 ## CI Automation
 
@@ -143,67 +165,13 @@ The full variant reference is maintained in the [siros-conformance repo docs](ht
 
 ## Running Locally
 
-### Prerequisites
-
-- Docker and Docker Compose
-- Node.js 20+
-- An `/etc/hosts` entry:
-  ```
-  127.0.0.1 localhost.emobix.co.uk
-  ```
-
-### Quick Start
-
-```bash
-git clone https://github.com/sirosfoundation/siros-conformance.git
-cd siros-conformance
-make install
-```
-
-### Run Wallet Tests
-
-```bash
-make up-wallet     # Start all services (wallet, VC services, conformance suite)
-make test-wallet   # Run VCI + VP wallet conformance tests
-make down          # Tear down
-```
-
-### Run Issuer Tests
-
-```bash
-make up-issuer
-make test-issuer
-make down
-```
-
-### Run Verifier Tests
-
-```bash
-make up-verifier
-make test-verifier
-make down
-```
-
-### Running a Specific Variant
-
-Use Playwright's `--grep` flag:
-
-```bash
-npx playwright test specs/conformance/oid4vci-wallet.spec.ts --grep "authorization_code"
-npx playwright test specs/conformance/oid4vp-wallet.spec.ts --grep "haip"
-npx playwright test specs/conformance/oid4vci-wallet.spec.ts --grep "mdoc"
-```
+For local development setup (prerequisites, quick start, Make targets, variant
+filtering, and image overrides), see the
+[siros-conformance README](https://github.com/sirosfoundation/siros-conformance#readme).
 
 ## Adding a New Variant
 
 See the [adding-variants guide](https://github.com/sirosfoundation/siros-conformance/blob/main/docs/adding-variants.md) in the conformance repo.
-
-In brief:
-
-1. Add an entry to `VCI_VARIANTS` or `VP_VARIANTS` in the spec file
-2. If the variant needs different keys or endpoints, create a new config file in `configs/conformance/` and add `configPath` to the variant entry
-3. Run locally with `make up-wallet && make test-wallet`
-4. Open a PR
 
 ## Architecture
 
