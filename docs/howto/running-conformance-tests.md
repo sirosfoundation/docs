@@ -16,7 +16,9 @@ The fastest way to run conformance tests is to comment on any PR in a repo that 
 @conformance
 ```
 
-This triggers all conformance profiles (wallet, issuer, verifier) using `:latest` images. A rocket reaction confirms the trigger, and a summary comment is posted with a link to the running workflow.
+This triggers the wallet conformance profile using the golden-release baseline images.
+A rocket reaction confirms the trigger, and a summary comment is posted
+with a link to the running workflow.
 
 :::note
 Only organisation members, collaborators, and owners can trigger `@conformance`. The comment must **start** with `@conformance`.
@@ -63,12 +65,12 @@ Test a specific build by appending `service:tag` pairs. The tag is resolved to a
 
 When no profile is specified explicitly, the profile is auto-detected from the overridden services. For example, `vc-issuer:pr-42` implies the `issuer` profile.
 
-Recognised service names: `wallet-frontend`, `wallet-backend` / `go-wallet-backend`, `wallet-registry` / `go-wallet-registry`, `vc-issuer`, `vc-verifier`, `vc-apigw`, `vc-registry`, `vc-mockas`, `go-trust`.
+Recognised service names: `wallet-frontend`, `go-wallet-backend`, `vc-issuer`, `vc-verifier`, `vc-apigw`, `vc-registry`, `vc-mockas`, `go-trust`.
 
 Full image references also work:
 
 ```
-@conformance ghcr.io/sirosfoundation/vc-issuer:pr-42
+@conformance ghcr.io/sirosfoundation/go-wallet-backend:pr-42
 ```
 
 ### What Happens
@@ -76,7 +78,7 @@ Full image references also work:
 1. The repo's `conformance.yml` workflow fires on the PR comment
 2. It checks out `parse-comment.mjs` from `siros-conformance` and parses the comment
 3. A `repository_dispatch` event is sent to `siros-conformance` for each profile
-4. The conformance suite runs against the specified (or `:latest`) images
+4. The conformance suite runs against the specified (or golden-release baseline) images
 5. Results are published to GitHub Pages and posted back as a PR comment
 
 ### Installing the Workflow
@@ -88,10 +90,6 @@ The conformance workflow is available as an organisation workflow template. To e
 3. Click **Configure**, review, and commit
 
 The workflow requires a `CONFORMANCE_DISPATCH_TOKEN` secret — a fine-grained PAT with Contents read/write on `sirosfoundation/siros-conformance`.
-
-:::tip
-Other org-wide workflow templates (SBOM, Security, CodeQL) are also available from the same **Actions → New workflow** menu.
-:::
 
 ## CI Automation
 
@@ -130,6 +128,11 @@ gh workflow run wallet.yml \
   -f target-pr="123"
 ```
 
+Additional inputs:
+
+- `golden-release` — name of a release baseline from `golden-releases.yaml` (default: the file's `default` key)
+- `variant-filter` — Playwright `--grep` pattern to run only matching variants (e.g. `mdoc`, `haip`)
+
 ## Reading the Results
 
 After a test run, results are:
@@ -157,8 +160,9 @@ Each test plan runs with one or more **variants** — combinations of protocol p
 A VP wallet test variant specifies:
 
 - **Credential format**: `sd_jwt_vc` or `iso_mdl`
-- **Response mode**: `direct_post`, `direct_post.jwt`, `dc_api`, or `dc_api.jwt`
-- **Client ID scheme**: `x509_san_dns`, `redirect_uri`, `pre_registered`, etc.
+- **Response mode**: `direct_post` or `direct_post.jwt`
+- **Client ID scheme**: `x509_san_dns` or `redirect_uri`
+- **Request method**: `request_uri_signed`
 - **VP profile**: `plain_vp` or `haip`
 
 The full variant reference is maintained in the [siros-conformance repo docs](https://github.com/sirosfoundation/siros-conformance/blob/main/docs/variant-reference.md).
