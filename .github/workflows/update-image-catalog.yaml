@@ -49,7 +49,7 @@ jobs:
               | jq -r '.token // empty')
             curl -sf \
               -H "Authorization: Bearer ${TOKEN}" \
-              "https://ghcr.io/v2/${ORG}/${IMAGE}/tags/list" 2>/dev/null
+              "https://ghcr.io/v2/${ORG}/${IMAGE}/tags/list?n=1000" 2>/dev/null
           }
 
           while IFS=$'\t' read -r FULL_REPO TOPICS; do
