@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-01T07:36:55Z",
+  "generated": "2026-06-02T07:31:12Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -175,6 +175,7 @@
         "v0.5.0-sirosid.2",
         "v0.5.0-sirosid.1",
         "dev-ff23d66",
+        "dev-dfd4052",
         "dev-c931893",
         "dev-c6c7e7f",
         "dev-c3dffed",
@@ -199,6 +200,7 @@
         "v0.5.0-sirosid.2",
         "v0.5.0-sirosid.1",
         "dev-ff23d66",
+        "dev-dfd4052",
         "dev-c931893",
         "dev-c6c7e7f",
         "dev-c3dffed",
@@ -243,6 +245,7 @@
         "v0.5.0-sirosid.2",
         "v0.5.0-sirosid.1",
         "dev-ff23d66",
+        "dev-dfd4052",
         "dev-c931893",
         "dev-c6c7e7f",
         "dev-c3dffed",
@@ -287,6 +290,7 @@
         "v0.5.0-sirosid.2",
         "v0.5.0-sirosid.1",
         "dev-ff23d66",
+        "dev-dfd4052",
         "dev-c931893",
         "dev-c6c7e7f",
         "dev-c3dffed",
@@ -652,10 +656,12 @@
       "tags": [
         "main",
         "latest",
+        "e97f591",
         "d1e61c5",
         "aa20dd7",
         "947570d",
         "61c99a2",
+        "5cab062",
         "1483411",
         "07355d4",
         "0.0.1",

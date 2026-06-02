@@ -34,6 +34,6 @@ https://developers.siros.org/catalog/container-images.json
 | `ghcr.io/sirosfoundation/goff` | [sirosfoundation/goFF](https://github.com/sirosfoundation/goFF) | `0.1.0` | `c708ff3` | 0.1.0, 0.1 |
 | `ghcr.io/sirosfoundation/facetec-api` | [sirosfoundation/facetec-api](https://github.com/sirosfoundation/facetec-api) | `0.9.0` | `ff05982` | 0.9.0, 0.9, 0.8.0, 0.8, 0.7.0, 0.7, 0.6.0, 0.6, 0.5.0, 0.5, 0.4.0, 0.4, 0.3.0, 0.3, 0.2.0, 0.2, 0.1.0, 0.1 |
 | `ghcr.io/sirosfoundation/registry-cli` | [sirosfoundation/registry-cli](https://github.com/sirosfoundation/registry-cli) | `0.9.9` | `fe16a2b` | 0.9.9, 0.9.8, 0.9.7, 0.9.6, 0.9.5, 0.9.4, 0.9.3, 0.9.2, 0.9.10, 0.9.1, 0.9.0, 0.9, 0.8.0, 0.8, 0.7.0, 0.7 |
-| `ghcr.io/sirosfoundation/go-r2ps-service` | [sirosfoundation/go-r2ps-service](https://github.com/sirosfoundation/go-r2ps-service) | `0.0.1` | `d1e61c5` | 0.0.1, 0.0 |
+| `ghcr.io/sirosfoundation/go-r2ps-service` | [sirosfoundation/go-r2ps-service](https://github.com/sirosfoundation/go-r2ps-service) | `0.0.1` | `e97f591` | 0.0.1, 0.0 |
 
-_Last updated: 2026-06-01T07:36:55Z_
+_Last updated: 2026-06-02T07:31:12Z_
