@@ -1,0 +1,299 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 640" font-family="'Segoe UI', system-ui, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="108%">
+      <feDropShadow dx="1" dy="2" stdDeviation="2.5" flood-color="#000" flood-opacity="0.10"/>
+    </filter>
+    <marker id="aBlue" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto">
+      <polygon points="0 0, 6 2.5, 0 5" fill="#1C4587"/>
+    </marker>
+    <marker id="aGray" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto">
+      <polygon points="0 0, 6 2.5, 0 5" fill="#777"/>
+    </marker>
+    <marker id="aTeal" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto">
+      <polygon points="0 0, 6 2.5, 0 5" fill="#198754"/>
+    </marker>
+    <marker id="aOrange" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto">
+      <polygon points="0 0, 6 2.5, 0 5" fill="#C75A11"/>
+    </marker>
+    <linearGradient id="hdrG" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1C4587"/>
+      <stop offset="100%" stop-color="#14366B"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ======== Background ======== -->
+  <rect width="1020" height="640" fill="#FAFBFD" rx="6"/>
+
+  <!-- ======== Title bar ======== -->
+  <rect x="0" y="0" width="1020" height="44" rx="6" fill="url(#hdrG)"/>
+  <rect x="0" y="18" width="1020" height="26" fill="url(#hdrG)"/>
+  <text x="510" y="30" text-anchor="middle" fill="white" font-size="16" font-weight="600" letter-spacing="0.4">SIROS ID — Platform Architecture</text>
+
+  <!-- ================================================================ -->
+  <!-- PLATFORM BOUNDARY — dashed outline showing hosting options       -->
+  <!-- ================================================================ -->
+  <rect x="222" y="52" width="775" height="362" rx="12" fill="none" stroke="#1C4587" stroke-width="2" stroke-dasharray="8,5"/>
+  <!-- Hosting label badge -->
+  <rect x="365" y="42" width="390" height="22" rx="11" fill="#1C4587"/>
+  <text x="560" y="57" text-anchor="middle" fill="white" font-size="10" font-weight="600">SIROS ID Platform  —  Hosted at id.siros.org  ·  Self-Hosted on your premises</text>
+
+  <!-- ================================================================ -->
+  <!-- USER DOMAIN (outside platform, left)                             -->
+  <!-- ================================================================ -->
+  <g filter="url(#shadow)">
+    <rect x="28" y="68" width="178" height="118" rx="8" fill="#E8EEF7" stroke="#1C4587" stroke-width="1.4"/>
+    <rect x="28" y="68" width="178" height="26" rx="8" fill="#1C4587"/>
+    <rect x="28" y="86" width="178" height="8" fill="#1C4587"/>
+    <text x="117" y="87" text-anchor="middle" fill="white" font-size="11" font-weight="600">USER DOMAIN</text>
+    <!-- Browser -->
+    <rect x="42" y="104" width="78" height="40" rx="5" fill="white" stroke="#1C4587" stroke-width="1"/>
+    <text x="81" y="121" text-anchor="middle" fill="#1C4587" font-size="9" font-weight="600">Browser /</text>
+    <text x="81" y="133" text-anchor="middle" fill="#1C4587" font-size="9" font-weight="600">Mobile App</text>
+    <!-- Passkey -->
+    <rect x="128" y="104" width="68" height="40" rx="5" fill="#FFF3E0" stroke="#C75A11" stroke-width="1"/>
+    <text x="162" y="121" text-anchor="middle" fill="#7C3A00" font-size="9" font-weight="600">Passkey</text>
+    <text x="162" y="133" text-anchor="middle" fill="#7C3A00" font-size="8">(WSCD)</text>
+    <!-- Passkey labels -->
+    <text x="117" y="160" text-anchor="middle" fill="#555" font-size="7.5" font-style="italic">WebAuthn · FIDO2</text>
+    <text x="117" y="172" text-anchor="middle" fill="#555" font-size="7.5" font-style="italic">Zero-knowledge · E2E encrypted</text>
+  </g>
+
+  <!-- ================================================================ -->
+  <!-- CREDENTIAL MANAGER (top-left inside platform)                    -->
+  <!-- ================================================================ -->
+  <g filter="url(#shadow)">
+    <rect x="245" y="78" width="300" height="148" rx="8" fill="#E8EEF7" stroke="#1C4587" stroke-width="1.4"/>
+    <rect x="245" y="78" width="300" height="26" rx="8" fill="#1C4587"/>
+    <rect x="245" y="96" width="300" height="8" fill="#1C4587"/>
+    <text x="395" y="97" text-anchor="middle" fill="white" font-size="11" font-weight="600">CREDENTIAL MANAGER (WALLET)</text>
+    <!-- Frontend -->
+    <rect x="260" y="114" width="118" height="40" rx="5" fill="white" stroke="#1C4587" stroke-width="1"/>
+    <text x="319" y="131" text-anchor="middle" fill="#1C4587" font-size="9.5" font-weight="600">wallet-frontend</text>
+    <text x="319" y="143" text-anchor="middle" fill="#666" font-size="8">React PWA · Nginx</text>
+    <!-- Backend -->
+    <rect x="388" y="114" width="142" height="40" rx="5" fill="white" stroke="#1C4587" stroke-width="1"/>
+    <text x="459" y="131" text-anchor="middle" fill="#1C4587" font-size="9.5" font-weight="600">go-wallet-backend</text>
+    <text x="459" y="143" text-anchor="middle" fill="#666" font-size="8">Go · Gin · REST</text>
+    <!-- REST arrow FE→BE -->
+    <line x1="378" y1="134" x2="388" y2="134" stroke="#1C4587" stroke-width="1.5" marker-end="url(#aBlue)"/>
+    <!-- MongoDB -->
+    <rect x="260" y="164" width="78" height="30" rx="5" fill="white" stroke="#1C4587" stroke-width="0.8"/>
+    <text x="299" y="183" text-anchor="middle" fill="#1C4587" font-size="8.5" font-weight="600">MongoDB</text>
+    <!-- Redis -->
+    <rect x="346" y="164" width="55" height="30" rx="5" fill="white" stroke="#888" stroke-width="0.8" stroke-dasharray="3,2"/>
+    <text x="373" y="183" text-anchor="middle" fill="#888" font-size="8.5">Redis</text>
+    <!-- Admin API -->
+    <rect x="409" y="164" width="80" height="30" rx="5" fill="#FFF3E0" stroke="#C75A11" stroke-width="0.8"/>
+    <text x="449" y="179" text-anchor="middle" fill="#7C3A00" font-size="8" font-weight="600">Admin API</text>
+    <text x="449" y="190" text-anchor="middle" fill="#7C3A00" font-size="7">Port 8081</text>
+    <!-- Label -->
+    <text x="395" y="216" text-anchor="middle" fill="#555" font-size="7.5" font-style="italic">Multi-tenant · JWT · DPoP · AES-GCM encryption</text>
+  </g>
+
+  <!-- ================================================================ -->
+  <!-- CREDENTIAL REGISTRY (top-right inside platform)                  -->
+  <!-- ================================================================ -->
+  <g filter="url(#shadow)">
+    <rect x="745" y="78" width="228" height="120" rx="8" fill="#FFF3E0" stroke="#C75A11" stroke-width="1.4"/>
+    <rect x="745" y="78" width="228" height="26" rx="8" fill="#C75A11"/>
+    <rect x="745" y="96" width="228" height="8" fill="#C75A11"/>
+    <text x="859" y="97" text-anchor="middle" fill="white" font-size="11" font-weight="600">CREDENTIAL REGISTRY</text>
+    <!-- registry.siros.org -->
+    <rect x="760" y="114" width="148" height="35" rx="5" fill="white" stroke="#C75A11" stroke-width="1"/>
+    <text x="834" y="130" text-anchor="middle" fill="#7C3A00" font-size="9.5" font-weight="600">registry.siros.org</text>
+    <text x="834" y="142" text-anchor="middle" fill="#666" font-size="8">JSON API · Static catalogue</text>
+    <!-- registry-cli -->
+    <rect x="760" y="158" width="68" height="26" rx="4" fill="white" stroke="#C75A11" stroke-width="0.8"/>
+    <text x="794" y="175" text-anchor="middle" fill="#7C3A00" font-size="8" font-weight="600">registry-cli</text>
+    <!-- VCTM -->
+    <rect x="836" y="158" width="68" height="26" rx="4" fill="white" stroke="#C75A11" stroke-width="0.8"/>
+    <text x="870" y="172" text-anchor="middle" fill="#7C3A00" font-size="8" font-weight="600">VCTM</text>
+    <text x="870" y="181" text-anchor="middle" fill="#7C3A00" font-size="7">Templates</text>
+  </g>
+
+  <!-- ================================================================ -->
+  <!-- CREDENTIAL ISSUER (bottom-left inside platform)                  -->
+  <!-- ================================================================ -->
+  <g filter="url(#shadow)">
+    <rect x="245" y="262" width="218" height="118" rx="8" fill="#D4E2F4" stroke="#1C4587" stroke-width="1.4"/>
+    <rect x="245" y="262" width="218" height="26" rx="8" fill="#1C4587"/>
+    <rect x="245" y="280" width="218" height="8" fill="#1C4587"/>
+    <text x="354" y="281" text-anchor="middle" fill="white" font-size="11" font-weight="600">CREDENTIAL ISSUER</text>
+    <!-- vc-issuer -->
+    <rect x="260" y="298" width="95" height="40" rx="5" fill="white" stroke="#1C4587" stroke-width="1"/>
+    <text x="307" y="314" text-anchor="middle" fill="#1C4587" font-size="9.5" font-weight="600">vc-issuer</text>
+    <text x="307" y="326" text-anchor="middle" fill="#666" font-size="8">OID4VCI</text>
+    <!-- Signing Keys -->
+    <rect x="363" y="298" width="85" height="40" rx="5" fill="#FFF3E0" stroke="#C75A11" stroke-width="0.8"/>
+    <text x="405" y="314" text-anchor="middle" fill="#7C3A00" font-size="8.5" font-weight="600">Signing Keys</text>
+    <text x="405" y="326" text-anchor="middle" fill="#7C3A00" font-size="7.5">PKCS#11 / HSM</text>
+    <!-- TSL -->
+    <rect x="260" y="346" width="100" height="24" rx="4" fill="white" stroke="#1C4587" stroke-width="0.8"/>
+    <text x="310" y="362" text-anchor="middle" fill="#1C4587" font-size="8" font-weight="500">Token Status Lists</text>
+    <!-- Formats label -->
+    <text x="354" y="392" text-anchor="middle" fill="#555" font-size="7.5" font-style="italic">SD-JWT VC · mDL · ES256 · EdDSA</text>
+  </g>
+
+  <!-- ================================================================ -->
+  <!-- TRUST SERVICES (bottom-center inside platform)                   -->
+  <!-- ================================================================ -->
+  <g filter="url(#shadow)">
+    <rect x="498" y="262" width="205" height="118" rx="8" fill="#E6F4F1" stroke="#198754" stroke-width="1.4"/>
+    <rect x="498" y="262" width="205" height="26" rx="8" fill="#198754"/>
+    <rect x="498" y="280" width="205" height="8" fill="#198754"/>
+    <text x="600" y="281" text-anchor="middle" fill="white" font-size="11" font-weight="600">TRUST SERVICES</text>
+    <!-- go-trust -->
+    <rect x="513" y="298" width="175" height="35" rx="5" fill="white" stroke="#198754" stroke-width="1"/>
+    <text x="600" y="314" text-anchor="middle" fill="#0F5132" font-size="10" font-weight="700">go-trust</text>
+    <text x="600" y="326" text-anchor="middle" fill="#666" font-size="8">AuthZEN PDP · Fail-closed</text>
+    <!-- Trust sources -->
+    <rect x="513" y="342" width="54" height="26" rx="4" fill="white" stroke="#198754" stroke-width="0.8"/>
+    <text x="540" y="359" text-anchor="middle" fill="#0F5132" font-size="8" font-weight="600">ETSI</text>
+    <rect x="574" y="342" width="54" height="26" rx="4" fill="white" stroke="#198754" stroke-width="0.8"/>
+    <text x="601" y="359" text-anchor="middle" fill="#0F5132" font-size="8" font-weight="600">OIDF</text>
+    <rect x="635" y="342" width="54" height="26" rx="4" fill="white" stroke="#198754" stroke-width="0.8"/>
+    <text x="662" y="359" text-anchor="middle" fill="#0F5132" font-size="8" font-weight="600">DID</text>
+    <!-- Labels -->
+    <text x="600" y="392" text-anchor="middle" fill="#555" font-size="7.5" font-style="italic">TS 119 612 · OpenID Federation · did:web</text>
+  </g>
+
+  <!-- ================================================================ -->
+  <!-- CREDENTIAL VERIFIER (bottom-right inside platform)               -->
+  <!-- ================================================================ -->
+  <g filter="url(#shadow)">
+    <rect x="738" y="262" width="235" height="118" rx="8" fill="#D4E2F4" stroke="#1C4587" stroke-width="1.4"/>
+    <rect x="738" y="262" width="235" height="26" rx="8" fill="#1C4587"/>
+    <rect x="738" y="280" width="235" height="8" fill="#1C4587"/>
+    <text x="855" y="281" text-anchor="middle" fill="white" font-size="11" font-weight="600">CREDENTIAL VERIFIER</text>
+    <!-- vc-verifier -->
+    <rect x="753" y="298" width="100" height="40" rx="5" fill="white" stroke="#1C4587" stroke-width="1"/>
+    <text x="803" y="314" text-anchor="middle" fill="#1C4587" font-size="9.5" font-weight="600">vc-verifier</text>
+    <text x="803" y="326" text-anchor="middle" fill="#666" font-size="8">OID4VP · OIDC</text>
+    <!-- DC API -->
+    <rect x="861" y="298" width="98" height="40" rx="5" fill="white" stroke="#1C4587" stroke-width="1"/>
+    <text x="910" y="311" text-anchor="middle" fill="#1C4587" font-size="8.5" font-weight="600">Digital Cred.</text>
+    <text x="910" y="323" text-anchor="middle" fill="#1C4587" font-size="8.5" font-weight="600">API</text>
+    <text x="910" y="334" text-anchor="middle" fill="#666" font-size="7">W3C browser</text>
+    <!-- Presentation Exchange -->
+    <rect x="753" y="346" width="210" height="24" rx="4" fill="white" stroke="#1C4587" stroke-width="0.8"/>
+    <text x="858" y="362" text-anchor="middle" fill="#1C4587" font-size="8" font-weight="500">Presentation Exchange · Selective Disclosure</text>
+    <!-- Label -->
+    <text x="855" y="392" text-anchor="middle" fill="#555" font-size="7.5" font-style="italic">Same-device · Cross-device · QR · Deep link</text>
+  </g>
+
+  <!-- ================================================================ -->
+  <!-- CUSTOMER: IDENTITY SOURCES (bottom-left, outside platform)       -->
+  <!-- ================================================================ -->
+  <g filter="url(#shadow)">
+    <rect x="245" y="440" width="218" height="82" rx="8" fill="#F5F5F5" stroke="#777" stroke-width="1.2"/>
+    <rect x="245" y="440" width="218" height="24" rx="8" fill="#666"/>
+    <rect x="245" y="456" width="218" height="8" fill="#666"/>
+    <text x="354" y="457" text-anchor="middle" fill="white" font-size="10" font-weight="600">IDENTITY &amp; DATA</text>
+    <!-- IdP -->
+    <rect x="258" y="472" width="95" height="36" rx="4" fill="white" stroke="#777" stroke-width="0.8"/>
+    <text x="305" y="488" text-anchor="middle" fill="#444" font-size="9" font-weight="600">IdP</text>
+    <text x="305" y="499" text-anchor="middle" fill="#666" font-size="7">SAML · OIDC</text>
+    <!-- Data Sources -->
+    <rect x="360" y="472" width="90" height="36" rx="4" fill="white" stroke="#777" stroke-width="0.8"/>
+    <text x="405" y="488" text-anchor="middle" fill="#444" font-size="9" font-weight="600">Data Sources</text>
+    <text x="405" y="499" text-anchor="middle" fill="#666" font-size="7">Claims</text>
+  </g>
+
+  <!-- ================================================================ -->
+  <!-- CUSTOMER: APPLICATIONS (bottom-right, outside platform)          -->
+  <!-- ================================================================ -->
+  <g filter="url(#shadow)">
+    <rect x="738" y="440" width="235" height="82" rx="8" fill="#F5F5F5" stroke="#777" stroke-width="1.2"/>
+    <rect x="738" y="440" width="235" height="24" rx="8" fill="#666"/>
+    <rect x="738" y="456" width="235" height="8" fill="#666"/>
+    <text x="855" y="457" text-anchor="middle" fill="white" font-size="10" font-weight="600">YOUR APPLICATIONS</text>
+    <!-- Application (RP) -->
+    <rect x="753" y="472" width="110" height="36" rx="4" fill="white" stroke="#777" stroke-width="0.8"/>
+    <text x="808" y="488" text-anchor="middle" fill="#444" font-size="9" font-weight="600">Application (RP)</text>
+    <text x="808" y="499" text-anchor="middle" fill="#666" font-size="7">Your service</text>
+    <!-- CI/CD -->
+    <rect x="870" y="472" width="88" height="36" rx="4" fill="white" stroke="#777" stroke-width="0.8"/>
+    <text x="914" y="488" text-anchor="middle" fill="#444" font-size="9" font-weight="600">CI / CD</text>
+    <text x="914" y="499" text-anchor="middle" fill="#666" font-size="7">Automation</text>
+  </g>
+
+  <!-- ================================================================ -->
+  <!-- LEGEND (center-bottom, between the two customer boxes)           -->
+  <!-- ================================================================ -->
+  <rect x="490" y="440" width="222" height="82" rx="8" fill="white" stroke="#DDD" stroke-width="1"/>
+  <text x="601" y="457" text-anchor="middle" fill="#333" font-size="10" font-weight="600">Protocols</text>
+  <!-- Legend items -->
+  <line x1="502" y1="472" x2="530" y2="472" stroke="#1C4587" stroke-width="2.5" marker-end="url(#aBlue)"/>
+  <text x="538" y="476" fill="#555" font-size="8">OID4VCI / OID4VP</text>
+  <line x1="502" y1="490" x2="530" y2="490" stroke="#198754" stroke-width="2.5" stroke-dasharray="6,3" marker-end="url(#aTeal)"/>
+  <text x="538" y="494" fill="#555" font-size="8">AuthZEN trust eval</text>
+  <line x1="502" y1="508" x2="530" y2="508" stroke="#C75A11" stroke-width="2.5" stroke-dasharray="5,3" marker-end="url(#aOrange)"/>
+  <text x="538" y="512" fill="#555" font-size="8">Registry metadata</text>
+  <!-- Format badges -->
+  <rect x="636" y="466" width="52" height="16" rx="8" fill="#1C4587"/>
+  <text x="662" y="477" text-anchor="middle" fill="white" font-size="7" font-weight="600">SD-JWT</text>
+  <rect x="636" y="486" width="52" height="16" rx="8" fill="#1C4587"/>
+  <text x="662" y="497" text-anchor="middle" fill="white" font-size="7" font-weight="600">mDL</text>
+  <rect x="636" y="506" width="52" height="16" rx="8" fill="#999"/>
+  <text x="662" y="517" text-anchor="middle" fill="white" font-size="7">JWT VC</text>
+
+  <!-- ================================================================ -->
+  <!-- CONNECTING ARROWS                                                -->
+  <!-- ================================================================ -->
+
+  <!-- 1. User → CM : horizontal right -->
+  <line x1="206" y1="128" x2="245" y2="128" stroke="#1C4587" stroke-width="2.5" marker-end="url(#aBlue)"/>
+  <text x="226" y="121" text-anchor="middle" fill="#1C4587" font-size="8" font-weight="600">HTTPS</text>
+
+  <!-- 2. CM → Issuer : vertical down (left side of CM) -->
+  <line x1="340" y1="226" x2="340" y2="262" stroke="#1C4587" stroke-width="2.5" marker-end="url(#aBlue)"/>
+  <text x="318" y="248" fill="#1C4587" font-size="8" font-weight="600">OID4VCI</text>
+
+  <!-- 3. CM → Trust : diagonal down-center (AuthZEN, dashed) -->
+  <line x1="430" y1="226" x2="560" y2="262" stroke="#198754" stroke-width="2.5" stroke-dasharray="7,4" marker-end="url(#aTeal)"/>
+  <text x="480" y="238" fill="#198754" font-size="8" font-weight="600">AuthZEN</text>
+
+  <!-- 4. CM → Verifier : diagonal down-right -->
+  <line x1="510" y1="226" x2="808" y2="262" stroke="#1C4587" stroke-width="2.5" marker-end="url(#aBlue)"/>
+  <text x="680" y="238" fill="#1C4587" font-size="8" font-weight="600">OID4VP</text>
+
+  <!-- 5. Issuer → Trust : horizontal right (AuthZEN) -->
+  <line x1="463" y1="320" x2="498" y2="320" stroke="#198754" stroke-width="2.5" stroke-dasharray="7,4" marker-end="url(#aTeal)"/>
+  <text x="480" y="313" text-anchor="middle" fill="#198754" font-size="7.5">AuthZEN</text>
+
+  <!-- 6. Verifier → Trust : horizontal left (AuthZEN) -->
+  <line x1="738" y1="320" x2="703" y2="320" stroke="#198754" stroke-width="2.5" stroke-dasharray="7,4" marker-end="url(#aTeal)"/>
+  <text x="720" y="313" text-anchor="middle" fill="#198754" font-size="7.5">AuthZEN</text>
+
+  <!-- 7. Registry → CM : horizontal left (metadata) -->
+  <line x1="745" y1="148" x2="545" y2="148" stroke="#C75A11" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#aOrange)"/>
+  <text x="645" y="141" text-anchor="middle" fill="#C75A11" font-size="8">Credential metadata</text>
+
+  <!-- 8. IdP → Issuer : vertical up (through gap) -->
+  <line x1="320" y1="440" x2="330" y2="380" stroke="#777" stroke-width="2" marker-end="url(#aGray)"/>
+  <text x="305" y="422" fill="#777" font-size="8">Authenticate</text>
+
+  <!-- 9. Verifier → App : vertical down (through gap) -->
+  <line x1="830" y1="380" x2="830" y2="440" stroke="#777" stroke-width="2" marker-end="url(#aGray)"/>
+  <text x="852" y="422" fill="#777" font-size="8">OIDC login</text>
+
+  <!-- ================================================================ -->
+  <!-- DEPLOYMENT STRIP                                                 -->
+  <!-- ================================================================ -->
+  <rect x="30" y="548" width="960" height="40" rx="6" fill="#E8EEF7" stroke="#1C4587" stroke-width="1"/>
+  <text x="510" y="566" text-anchor="middle" fill="#1C4587" font-size="10" font-weight="600">Deployment: Docker Compose · Kubernetes · Hosted at id.siros.org · Self-hosted on your premises</text>
+  <text x="510" y="580" text-anchor="middle" fill="#555" font-size="8">OCI images: vc/issuer · vc/verifier · go-trust · go-wallet-backend · wallet-frontend · Nginx reverse proxy</text>
+
+  <!-- ================================================================ -->
+  <!-- SIROS logo watermark (bottom-right)                              -->
+  <!-- ================================================================ -->
+  <g transform="translate(958, 598) scale(0.05)">
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M190.286 109.335C201.858 184.5 201.858 184.5 277.023 196.127C201.884 207.695 201.858 207.865 190.298 282.896C190.294 282.922 190.29 282.948 190.286 282.974C178.658 207.754 178.658 207.754 103.494 196.127C178.658 184.5 178.658 184.5 190.286 109.335ZM196.127 326.068C327.831 305.678 327.831 305.678 348.22 173.919C368.059 302.317 368.554 305.623 490.394 324.525C496.732 302.758 500.148 279.778 500.148 256.028C500.148 121.128 390.872 11.8518 255.972 11.8518C121.128 11.8518 11.8518 121.128 11.8518 256.028C11.8518 390.872 121.128 500.148 255.972 500.148C365.909 500.148 458.818 427.573 489.458 327.721C368.499 346.457 368.003 350.314 348.22 478.106C327.831 346.402 327.831 346.402 196.127 326.068Z" fill="#1C4587" opacity="0.2"/>
+  </g>
+
+  <!-- ================================================================ -->
+  <!-- CUSTOMER INTEGRATION LABELS (below boxes)                        -->
+  <!-- ================================================================ -->
+  <text x="354" y="534" text-anchor="middle" fill="#555" font-size="7.5" font-style="italic">Keycloak · Azure AD · ADFS · Shibboleth</text>
+  <text x="855" y="534" text-anchor="middle" fill="#555" font-size="7.5" font-style="italic">Standard OIDC tokens · Claims mapping</text>
+</svg>

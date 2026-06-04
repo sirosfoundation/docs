@@ -10,6 +10,10 @@ For a quick start, users can access the SIROS ID web application at <a href="htt
 
 Here you will find all the information you need in order to manage, observe and integrate with your digital credential infrastructure.
 
+<a href="/sirosid/architecture">
+  <img src="/img/architecture-thumbnail.svg" alt="SIROS ID Architecture Overview" style={{width: '100%', maxWidth: '600px', display: 'block', margin: '1rem auto'}} />
+</a>
+
 The SIROS ID platform consists of the following parts:
 
 * [SIROS ID Issuer and Verifier](/sirosid/issuers/concepts) – works with any compatible wallet, built on https://github.com/SUNET/vc
