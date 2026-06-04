@@ -45,7 +45,7 @@ See [Registry Services](../sirosid/registry) for full documentation on how the r
 
 | Repository | Description |
 |------------|-------------|
-| [**sirosid-dev**](https://github.com/sirosfoundation/sirosid-dev) | Development environment and local deployment configurations for SIROS ID. |
+| [**sirosid-dev**](https://github.com/sirosfoundation/sirosid-dev) | Development environment and local deployment configurations for SIROS ID. See the [local dev setup guide](../howto/local-dev-environment). |
 | [**sirosid-tests**](https://github.com/sirosfoundation/sirosid-tests) | End-to-end test suites and conformance tests for SIROS ID components. |
 
 ### Libraries & Utilities
