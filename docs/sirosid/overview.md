@@ -67,15 +67,15 @@ flowchart LR
 
 | Component | Description | Learn More |
 |-----------|-------------|------------|
-| **Issuer** | Creates and signs digital credentials using OID4VCI protocol. Works with any compatible wallet. | [Issuer Integration](./issuers/concepts) |
-| **Credential Manager** | Digital wallet based on wwWallet with significant SIROS enhancements. The SIROS ID Credential Manager is one example of a compatible wallet. | [Credential Manager](./reference/cm) |
-| **Verifier** | Validates credentials and provides OIDC/OID4VP interfaces. Accepts presentations from any compatible wallet. | [Verifier Integration](./verifiers/concepts) |
-| **Trust Framework** | OpenID Federation and ETSI TSL support for trust validation | [Trust Architecture](./trust/) |
-| **Credential Type Registry** | Aggregated credential type metadata | [registry.siros.org](./reference/vctm-registry) |
+| **Issuer** | Creates and signs digital credentials using OID4VCI protocol. Works with any compatible wallet. | [Issuer Integration](/sirosid/issuers/concepts) |
+| **Credential Manager** | Digital wallet based on wwWallet with significant SIROS enhancements. The SIROS ID Credential Manager is one example of a compatible wallet. | [Credential Manager](/sirosid/reference/cm) |
+| **Verifier** | Validates credentials and provides OIDC/OID4VP interfaces. Accepts presentations from any compatible wallet. | [Verifier Integration](/sirosid/verifiers/concepts) |
+| **Trust Framework** | OpenID Federation and ETSI TSL support for trust validation | [Trust Architecture](/sirosid/trust/) |
+| **Credential Type Registry** | Aggregated credential type metadata | [registry.siros.org](/sirosid/reference/vctm-registry) |
 
 ## Supported Standards
 
-For a comprehensive list of implemented standards and specifications, see the [Standards & Specifications](./reference/standards) page.
+For a comprehensive list of implemented standards and specifications, see the [Standards & Specifications](/sirosid/reference/standards) page.
 
 ### Protocol Summary
 
@@ -106,18 +106,18 @@ For a comprehensive list of implemented standards and specifications, see the [S
 
 ## Getting Started
 
-**[Quick Start Guide](./quickstart)** – Get up and running in under 15 minutes
+**[Quick Start Guide](/sirosid/quickstart)** – Get up and running in under 15 minutes
 
 ### Integration Guides
 
 | Area | Guide | Description |
 |------|-------|-------------|
-| **Issuance** | [Issuing Credentials](./issuers/issuer) | Core guide for credential issuance |
-| | [SAML IdP](./issuers/saml-idp) | Connect SAML identity providers |
-| | [OpenID Connect Provider](./issuers/oidc-op) | Connect OIDC providers |
-| **Verification** | [Verifying Credentials](./verifiers/verifier) | Core guide for credential verification |
-| | [OpenID Connect RP](./verifiers/oidc-rp) | Integrate with OIDC applications |
-| **Trust** | [Trust Services](./trust/) | Configure trust frameworks |
+| **Issuance** | [Issuing Credentials](/sirosid/issuers/issuer) | Core guide for credential issuance |
+| | [SAML IdP](/sirosid/issuers/saml-idp) | Connect SAML identity providers |
+| | [OpenID Connect Provider](/sirosid/issuers/oidc-op) | Connect OIDC providers |
+| **Verification** | [Verifying Credentials](/sirosid/verifiers/verifier) | Core guide for credential verification |
+| | [OpenID Connect RP](/sirosid/verifiers/oidc-rp) | Integrate with OIDC applications |
+| **Trust** | [Trust Services](/sirosid/trust/) | Configure trust frameworks |
 
 ## Demo Environment
 

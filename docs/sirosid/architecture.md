@@ -92,4 +92,4 @@ Integrators connect their existing identity infrastructure:
 
 All components are available as OCI container images and can be deployed via **Docker Compose** or **Kubernetes**. A hosted instance is available at [id.siros.org](https://id.siros.org).
 
-See [Docker Images](./operations/docker-images) and [Deployment Guides](./issuers/deployment) for details.
+See [Docker Images](/sirosid/operations/docker-images) and [Deployment Guides](/sirosid/issuers/deployment) for details.

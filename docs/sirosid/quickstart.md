@@ -175,10 +175,10 @@ scope=openid profile ehic
 
 ## Next Steps
 
-- 📖 [Full Verifier Guide](verifiers/verifier) – Complete verification documentation
-- 🎫 [Issuing Credentials](issuers/issuer) – Issue your own credentials
-- 🔐 [Trust Services](./trust/) – Configure trust framework
-- 🔧 [Keycloak Integration](./verifiers/keycloak_verifier) – Detailed Keycloak setup
+- 📖 [Full Verifier Guide](/sirosid/verifiers/verifier) – Complete verification documentation
+- 🎫 [Issuing Credentials](/sirosid/issuers/issuer) – Issue your own credentials
+- 🔐 [Trust Services](/sirosid/trust/) – Configure trust framework
+- 🔧 [Keycloak Integration](/sirosid/verifiers/keycloak_verifier) – Detailed Keycloak setup
 
 ## Common Issues
 
