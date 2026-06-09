@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-08T07:32:49Z",
+  "generated": "2026-06-09T07:07:33Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -101,6 +101,7 @@
         "unstable-f01050f",
         "unstable-ee3696e",
         "unstable-ec1a5c4",
+        "unstable-e779cc0",
         "unstable-d9a4327",
         "unstable-d83c651",
         "unstable-d7bb566",
@@ -123,6 +124,7 @@
         "unstable-8bebb62",
         "unstable-83afb6f",
         "unstable-8045837",
+        "unstable-7a5e13b",
         "unstable-74a435f",
         "unstable-7364169",
         "unstable-71a2c88",
@@ -187,8 +189,10 @@
         "dev-5caa770",
         "dev-52b43c1",
         "dev-49699be",
+        "dev-45ab9e9",
         "dev-2e0e7bd",
         "dev-1aacd35",
+        "dev-0ed700c",
         "dev-060eae8",
         "dev-056efd6"
       ]
@@ -213,8 +217,10 @@
         "dev-5caa770",
         "dev-52b43c1",
         "dev-49699be",
+        "dev-45ab9e9",
         "dev-2e0e7bd",
         "dev-1aacd35",
+        "dev-0ed700c",
         "dev-060eae8",
         "dev-056efd6"
       ]
@@ -259,8 +265,10 @@
         "dev-5caa770",
         "dev-52b43c1",
         "dev-49699be",
+        "dev-45ab9e9",
         "dev-2e0e7bd",
         "dev-1aacd35",
+        "dev-0ed700c",
         "dev-060eae8",
         "dev-056efd6"
       ]
@@ -305,8 +313,10 @@
         "dev-5caa770",
         "dev-52b43c1",
         "dev-49699be",
+        "dev-45ab9e9",
         "dev-2e0e7bd",
         "dev-1aacd35",
+        "dev-0ed700c",
         "dev-060eae8",
         "dev-056efd6"
       ]
@@ -371,6 +381,7 @@
         "d62aef7",
         "d4bcb8e",
         "cb209ac",
+        "ca233bb",
         "c927251",
         "c4f61dc",
         "c12dada",
@@ -666,10 +677,13 @@
       "tags": [
         "main",
         "latest",
+        "f33f746",
         "e97f591",
+        "e2be6f3",
         "d1e61c5",
         "aa20dd7",
         "947570d",
+        "650653a",
         "61c99a2",
         "5cab062",
         "1483411",
