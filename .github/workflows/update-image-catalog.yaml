@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   update-catalog:
@@ -141,3 +142,9 @@ jobs:
             git commit -m "chore: update container image catalog"
             git push
           fi
+
+      - name: Trigger deploy
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run build-pages.yaml --ref main
