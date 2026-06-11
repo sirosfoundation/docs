@@ -39,7 +39,6 @@ See [Registry Services](../sirosid/registry) for full documentation on how the r
 |------------|-------------|
 | [**registry-cli**](https://github.com/sirosfoundation/registry-cli) | CLI tool for building TS11-compliant Catalogue of Attestations sites. Discovers VCTMs from GitHub repos and generates static sites with JSON APIs. [Documentation →](../sirosid/registry/registry-cli) |
 | [**registry.siros.org**](https://github.com/sirosfoundation/registry.siros.org) | Aggregated Verifiable Credential Type Metadata (VCTM) registry. Provides credential type definitions, display templates, and claim schemas. |
-| [**mtcvctm**](https://github.com/sirosfoundation/mtcvctm) | Merkle Tree Certificate-based VCTM distribution for efficient credential type metadata delivery. |
 
 ### Infrastructure & DevOps
 
