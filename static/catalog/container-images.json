@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-11T07:32:27Z",
+  "generated": "2026-06-11T11:05:33Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -28,6 +28,7 @@
         "b4d6b7b",
         "acff5ce",
         "acdf487",
+        "a35d6d7",
         "a31c2f5",
         "a07bd72",
         "a0278cf",
@@ -83,6 +84,8 @@
         "0cee7ae",
         "05646e4",
         "00ffd4f",
+        "0.6.0",
+        "0.6",
         "0.5.0-oidf1",
         "0.5.0",
         "0.5",
@@ -696,6 +699,60 @@
       ]
     },
     {
+      "image": "ghcr.io/sirosfoundation/go-invite-op",
+      "repo": "sirosfoundation/go-invite-op",
+      "tags": [
+        "sha-e90ba8e",
+        "sha-e4001c7",
+        "sha-d23e9b5",
+        "sha-bf0a3aa",
+        "sha-658f536",
+        "sha-210cedd",
+        "sha-0ac8cdb",
+        "sha-03e144c",
+        "main"
+      ]
+    },
+    {
+      "image": "ghcr.io/sirosfoundation/go-ztts",
+      "repo": "sirosfoundation/go-ztts",
+      "tags": [
+        "main",
+        "latest-build",
+        "latest",
+        "e9949dd",
+        "e65e5ad",
+        "a0b002f",
+        "60bfadb",
+        "1081d22",
+        "0f06e7d",
+        "05e0b87"
+      ]
+    },
+    {
+      "image": "ghcr.io/sirosfoundation/go-grc",
+      "repo": "sirosfoundation/go-grc",
+      "tags": [
+        "sha-f397a37",
+        "sha-a12d0da",
+        "sha-8d6d316",
+        "sha-87a957d",
+        "sha-70dbbeb",
+        "sha-6b22ec2",
+        "sha-6ac59f5",
+        "sha-5b49da0",
+        "sha-2ba2306",
+        "main",
+        "latest-build",
+        "latest",
+        "b00146f",
+        "0.11.0-arm64",
+        "0.11.0-amd64",
+        "0.11.0",
+        "0.11"
+      ]
+    },
+    {
       "image": "ghcr.io/sirosfoundation/registry-cli",
       "repo": "sirosfoundation/registry-cli",
       "tags": [
@@ -709,6 +766,7 @@
         "ae4f8c6",
         "a3b5050",
         "a32788b",
+        "9a75c1d",
         "92b4d52",
         "8cc4d05",
         "74e0b4e",
