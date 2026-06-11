@@ -1,11 +1,12 @@
 {
-  "generated": "2026-06-10T07:22:07Z",
+  "generated": "2026-06-11T07:32:27Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
       "repo": "sirosfoundation/go-trust",
       "tags": [
         "main",
+        "latest-build",
         "latest",
         "fea1ff2",
         "f8d2823",
@@ -24,6 +25,7 @@
         "c36e16b",
         "c0c3338",
         "b68577c",
+        "b4d6b7b",
         "acff5ce",
         "acdf487",
         "a31c2f5",
@@ -32,6 +34,7 @@
         "9f79ac8",
         "8ebf8ef",
         "8d5897c",
+        "8b00f07",
         "89492ef",
         "8922f6c",
         "871a17c",
@@ -164,6 +167,7 @@
         "testing-3800fb64",
         "testing-0ed54cbc",
         "testing-031b58ca",
+        "pr-157",
         "latest",
         "0.5.0-1-sirosid.6",
         "0.5.0-1-sirosid.5",
@@ -177,6 +181,7 @@
       "image": "ghcr.io/sirosfoundation/vc/apigw",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "v0.6.1-sirosid.0",
         "v0.6.0-sirosid.1",
         "v0.6.0-sirosid.0",
         "v0.5.0-sirosid.4",
@@ -201,6 +206,7 @@
         "dev-2e0e7bd",
         "dev-1aacd35",
         "dev-0ed700c",
+        "dev-09d83f3",
         "dev-060eae8",
         "dev-056efd6"
       ]
@@ -209,6 +215,7 @@
       "image": "ghcr.io/sirosfoundation/vc/issuer",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "v0.6.1-sirosid.0",
         "v0.6.0-sirosid.1",
         "v0.6.0-sirosid.0",
         "v0.5.0-sirosid.4",
@@ -233,6 +240,7 @@
         "dev-2e0e7bd",
         "dev-1aacd35",
         "dev-0ed700c",
+        "dev-09d83f3",
         "dev-060eae8",
         "dev-056efd6"
       ]
@@ -261,6 +269,7 @@
       "image": "ghcr.io/sirosfoundation/vc/registry",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "v0.6.1-sirosid.0",
         "v0.6.0-sirosid.1",
         "v0.6.0-sirosid.0",
         "v0.5.0-sirosid.4",
@@ -285,6 +294,7 @@
         "dev-2e0e7bd",
         "dev-1aacd35",
         "dev-0ed700c",
+        "dev-09d83f3",
         "dev-060eae8",
         "dev-056efd6"
       ]
@@ -313,6 +323,7 @@
       "image": "ghcr.io/sirosfoundation/vc/verifier",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "v0.6.1-sirosid.0",
         "v0.6.0-sirosid.1",
         "v0.6.0-sirosid.0",
         "v0.5.0-sirosid.4",
@@ -337,6 +348,7 @@
         "dev-2e0e7bd",
         "dev-1aacd35",
         "dev-0ed700c",
+        "dev-09d83f3",
         "dev-060eae8",
         "dev-056efd6"
       ]
@@ -346,6 +358,7 @@
       "repo": "sirosfoundation/go-spocp",
       "tags": [
         "main",
+        "latest-build",
         "latest",
         "fe00cf5",
         "f85d8c4",
@@ -360,6 +373,7 @@
         "15693e0",
         "136322e",
         "12ac863",
+        "0371182",
         "0.1.0",
         "0.1",
         "0"
@@ -371,6 +385,7 @@
       "tags": [
         "test-oidcgate-1",
         "main",
+        "latest-build",
         "latest",
         "fd591ed",
         "fbdd583",
@@ -492,6 +507,7 @@
         "3643c77",
         "34f6a5f",
         "34d5659",
+        "337a1b0",
         "31ba75b",
         "2fe94c8",
         "2edc172",
@@ -602,7 +618,9 @@
       "repo": "sirosfoundation/goFF",
       "tags": [
         "main",
+        "latest-build",
         "latest",
+        "d6c6394",
         "d0fff4d",
         "c708ff3",
         "beed8dc",
@@ -624,6 +642,7 @@
       "repo": "sirosfoundation/facetec-api",
       "tags": [
         "main",
+        "latest-build",
         "latest",
         "ff05982",
         "ed87b6d",
@@ -647,6 +666,7 @@
         "68e6d85",
         "58b7ced",
         "57bc021",
+        "551f7c0",
         "51654f2",
         "4d96601",
         "4b459c2",
@@ -680,6 +700,7 @@
       "repo": "sirosfoundation/registry-cli",
       "tags": [
         "main",
+        "latest-build",
         "latest",
         "fe16a2b",
         "eb26569",
@@ -693,6 +714,7 @@
         "74e0b4e",
         "6a7d97c",
         "676c0d6",
+        "523e841",
         "2f4d4f8",
         "26d4164",
         "2273447",
@@ -723,6 +745,7 @@
       "repo": "sirosfoundation/go-r2ps-service",
       "tags": [
         "main",
+        "latest-build",
         "latest",
         "f33f746",
         "e97f591",
@@ -731,6 +754,7 @@
         "c221e6f",
         "aa20dd7",
         "947570d",
+        "6dae7b9",
         "650653a",
         "61c99a2",
         "5cab062",
