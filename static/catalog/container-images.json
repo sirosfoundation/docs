@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-12T07:50:42Z",
+  "generated": "2026-06-12T15:11:23Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -184,6 +184,7 @@
       "image": "ghcr.io/sirosfoundation/vc/apigw",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "v0.6.2-sirosid.1",
         "v0.6.1-sirosid.0",
         "v0.6.0-sirosid.1",
         "v0.6.0-sirosid.0",
@@ -192,6 +193,8 @@
         "v0.5.0-sirosid.2",
         "v0.5.0-sirosid.1",
         "dev-ff23d66",
+        "dev-f58d186",
+        "dev-ed1238b",
         "dev-dfd4052",
         "dev-c931893",
         "dev-c6c7e7f",
@@ -218,6 +221,7 @@
       "image": "ghcr.io/sirosfoundation/vc/issuer",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "v0.6.2-sirosid.1",
         "v0.6.1-sirosid.0",
         "v0.6.0-sirosid.1",
         "v0.6.0-sirosid.0",
@@ -226,6 +230,8 @@
         "v0.5.0-sirosid.2",
         "v0.5.0-sirosid.1",
         "dev-ff23d66",
+        "dev-f58d186",
+        "dev-ed1238b",
         "dev-dfd4052",
         "dev-c931893",
         "dev-c6c7e7f",
@@ -272,6 +278,7 @@
       "image": "ghcr.io/sirosfoundation/vc/registry",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "v0.6.2-sirosid.1",
         "v0.6.1-sirosid.0",
         "v0.6.0-sirosid.1",
         "v0.6.0-sirosid.0",
@@ -280,6 +287,8 @@
         "v0.5.0-sirosid.2",
         "v0.5.0-sirosid.1",
         "dev-ff23d66",
+        "dev-f58d186",
+        "dev-ed1238b",
         "dev-dfd4052",
         "dev-c931893",
         "dev-c6c7e7f",
@@ -326,6 +335,7 @@
       "image": "ghcr.io/sirosfoundation/vc/verifier",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "v0.6.2-sirosid.1",
         "v0.6.1-sirosid.0",
         "v0.6.0-sirosid.1",
         "v0.6.0-sirosid.0",
@@ -334,6 +344,8 @@
         "v0.5.0-sirosid.2",
         "v0.5.0-sirosid.1",
         "dev-ff23d66",
+        "dev-f58d186",
+        "dev-ed1238b",
         "dev-dfd4052",
         "dev-c931893",
         "dev-c6c7e7f",
