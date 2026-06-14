@@ -596,13 +596,17 @@ apigw:
         audience: "vc-issuer"
 ```
 
-When SPOCP rules are configured, each request is evaluated as:
+When SPOCP rules are configured, each request is evaluated as a **six-part s-expression** (all six parts are mandatory and must appear in this exact order):
 
 ```
 (vc (service apigw)(method <HTTP_METHOD>)(path <REQUEST_PATH>)(subject <JWT_SUBJECT>)(authentic_source <AS>)(scope <SCOPE>))
 ```
 
 If no rules are configured, any valid JWT grants full access. The `subject` is resolved from the `eppn` or `email` claim in the JWT (not the standard `sub` claim).
+
+:::caution Strict Enforcement
+Since v0.6.2, the issuer strictly validates that all six s-expression parts are present and in the correct order. Rules with missing or reordered parts will be rejected at startup.
+:::
 
 ### Credential Metadata
 

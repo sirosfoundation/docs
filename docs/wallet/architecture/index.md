@@ -78,11 +78,24 @@ sequenceDiagram
     User->>FE: Open request
     FE->>BE: Resolve verifier metadata
     BE->>GT: AuthZEN: is verifier trusted?
-    GT-->>BE: Trust decision
+    Note over BE,GT: Includes credential_types in action.parameters
+    GT-->>BE: Trust decision + RP identity + over-request info
     BE-->>FE: Verifier metadata + trust status
     FE->>FE: User selects credentials to present
     FE->>Verifier: VP Token response
 ```
+
+### Trust Decision Flow with Credential Filtering
+
+When the wallet backend resolves verifier metadata, it extracts **credential types** from the issuer/verifier's OID4VCI metadata and forwards them to Go-Trust as part of the AuthZEN evaluation request. This enables trust policies that differ by credential format.
+
+The flow:
+
+1. The wallet backend receives a resolve request (e.g., `/v1/resolve` with `resource_type=credential_issuer` or `credential_offer_uri`)
+2. It fetches the entity's OID4VCI metadata and calls `collectCredentialTypes()` to extract supported credential type identifiers (VCT values, `mso_mdoc` doctypes, etc.)
+3. The extracted `credential_types` are included in `action.parameters` of the AuthZEN evaluation request to Go-Trust
+4. Go-Trust can use these parameters in policy decisions — for example, requiring qualified trust for PID credentials but allowing federation trust for educational credentials
+5. The response includes the trust decision along with any enrichment data (matched policy OIDs, RP profile, over-request detection)
 
 ## Network Topology
 

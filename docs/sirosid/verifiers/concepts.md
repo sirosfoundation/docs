@@ -164,9 +164,20 @@ flowchart LR
 | Trust Source | Standard | Use Case |
 |--------------|----------|----------|
 | **ETSI TSL** | ETSI TS 119 612 | EU trust services |
+| **LoTE** | ETSI TS 119 602 | JSON-based trusted entity lists |
 | **OpenID Federation** | OpenID Federation 1.0 | OIDC ecosystems |
 | **X.509 Chains** | RFC 5280 | Enterprise PKI |
 | **DID Resolution** | W3C DID | Decentralized identity |
+
+### RP Certificate Validation
+
+When presenting credentials to a verifier, the verifier may present an **RP Registration Certificate** (WRPRC) or **RP Access Certificate** (WRPAC) to prove its identity and entitlements. Go-Trust validates these certificates against the applicable profile (e.g., [ETSI TS 119 411-8](../trust/go-trust#rp-certificate-profiles)) and extracts:
+
+- **RP identity** — organization, country, subject type, contact information
+- **Entitlements** — which attributes the RP is authorized to request
+- **Over-request detection** — whether the RP is requesting more data than its entitlements allow
+
+This information is returned to the wallet so the user can make an informed consent decision. See [Over-Request Detection](../trust/go-trust#over-request-detection) for details.
 
 ## Verifier Components
 

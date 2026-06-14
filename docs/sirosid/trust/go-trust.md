@@ -871,6 +871,202 @@ spec:
       port: 9090
 ```
 
+## X5C Enrichment & Certificate Policy Validation
+
+When a trust evaluation involves X.509 certificates (resource type `x5c`), Go-Trust performs **post-chain-validation enrichment** — additional checks and metadata extraction after the basic certificate chain has been validated against a trust store.
+
+### Enrichment Pipeline
+
+```mermaid
+flowchart LR
+    Chain["Chain Validation<br/>(ETSI/LoTE)"] --> PolicyOID["Certificate Policy<br/>OID Check"]
+    PolicyOID --> Profile["RP Profile<br/>Matching"]
+    Profile --> Identity["RP Identity<br/>Extraction"]
+    Identity --> OverReq["Over-Request<br/>Detection"]
+    OverReq --> Intermediary["Intermediary<br/>Verification"]
+    Intermediary --> Response["Enriched<br/>Response"]
+```
+
+1. **Certificate policy OID validation** — checks the leaf certificate contains required policy OIDs (configured per policy)
+2. **RP profile matching** — matches the certificate against registered RP profiles (e.g., WRPAC) for structured validation
+3. **RP identity extraction** — extracts structured identity from the certificate (organization, subject type, contact info)
+4. **Over-request detection** — compares requested attributes against the RP's entitlements
+5. **Intermediary verification** — detects and validates proxy/broker presentation requests
+
+### Enabling Enrichment
+
+Enrichment is controlled via policy configuration. Add these fields to your policy to enable specific enrichment features:
+
+```yaml
+policies:
+  policies:
+    credential-verifier:
+      description: "Verifier trust with enrichment"
+      etsi:
+        service_types:
+          - "http://uri.etsi.org/TrstSvc/Svctype/QCert"
+      # Enrichment options
+      require_cert_policy_oids:
+        - "0.4.0.194118.1.1"   # NCP natural person
+        - "0.4.0.194118.1.2"   # NCP legal person
+        - "0.4.0.194118.1.3"   # QCP natural person
+        - "0.4.0.194118.1.4"   # QCP legal person
+      extract_rp_identity: true
+      strict_entitlement_check: false  # true = reject over-requests
+      allow_intermediaries: false
+```
+
+### Enriched Response
+
+When enrichment is active, the AuthZEN response includes additional metadata:
+
+```json
+{
+  "decision": true,
+  "context": {
+    "reason": {
+      "registry": "eu-tsl",
+      "matched_policy_oids": ["0.4.0.194118.1.3"],
+      "matched_profile": "wrpac"
+    },
+    "trust_metadata": {
+      "rp_identity": {
+        "organization": "Example Corp",
+        "country": "SE",
+        "subject_type": "legal_person",
+        "organization_identifier": "559000-1234",
+        "policy_level": "qualified",
+        "policy_id": "QCP-l-eudiwrp"
+      },
+      "matched_policy_oids": ["0.4.0.194118.1.3"],
+      "rp_profile": "wrpac"
+    }
+  }
+}
+```
+
+## RP Certificate Profiles
+
+Go-Trust supports an extensible **RP profile system** for validating different types of RP certificates. Profiles define format-specific rules for identity extraction, required extensions, and validation constraints.
+
+### WRPAC Profile
+
+The **Wallet-Relying Party Access Certificate** (WRPAC) profile implements [ETSI TS 119 411-8](https://www.etsi.org/deliver/etsi_ts/119400_119499/11941108/) for X.509 RP access certificates in the EUDI Wallet ecosystem.
+
+**Certificate Policy OIDs:**
+
+| OID | Policy | Subject Type |
+|-----|--------|--------------|
+| `0.4.0.194118.1.1` | NCP-n-eudiwrp | Natural person |
+| `0.4.0.194118.1.2` | NCP-l-eudiwrp | Legal person |
+| `0.4.0.194118.1.3` | QCP-n-eudiwrp | Natural person (qualified) |
+| `0.4.0.194118.1.4` | QCP-l-eudiwrp | Legal person (qualified) |
+
+**Profile validation checks:**
+- `keyUsage` must include `nonRepudiation`
+- `subjectAltName` must contain at least one contact method (URI or email)
+- `certificatePolicies` must contain a recognized WRPAC policy OID
+
+**Identity extraction:** The WRPAC profile extracts structured RP identity including `organization`, `country`, `organization_identifier`, `subject_type` (natural/legal person), `policy_level` (normalised/qualified), and `contact` information from subjectAltName.
+
+### Custom Profiles
+
+The profile system is extensible. Custom profiles implement the `RPProfile` interface and are registered at startup. This enables support for future RP credential formats (SD-JWT, CBOR) without changes to the evaluation pipeline.
+
+## Over-Request Detection
+
+Over-request detection compares the attributes a Relying Party is requesting against its entitled attributes, per [ETSI TS 119 475](https://www.etsi.org/deliver/etsi_ts/119400_119499/119475/). This helps wallets protect users from RPs requesting more data than they are authorized to receive.
+
+### How It Works
+
+```mermaid
+flowchart LR
+    RP["RP Request<br/>(DCQL query)"] --> Extract["Extract<br/>requested claims"]
+    Entitlements["RP Entitlements<br/>(from WRPAC or register)"] --> Compare["Compare"]
+    Extract --> Compare
+    Compare --> Decision{Over-request?}
+    Decision -->|No| Allow["Allow"]
+    Decision -->|Yes, warn| Warn["Allow with warning"]
+    Decision -->|Yes, strict| Deny["Deny"]
+```
+
+The detection pipeline:
+
+1. **Requested attributes** are extracted from the DCQL query in `action.parameters.dcql_query` or from `action.parameters.requested_attributes`
+2. **Allowed attributes** come from the RP's entitlements (extracted from the WRPAC certificate or looked up via the National Register)
+3. **Comparison** identifies any attributes requested but not in the entitlement set
+4. **Decision** depends on `strict_entitlement_check` — either warn (default) or deny
+
+### DCQL Query Support
+
+Over-request detection can parse [DCQL (Digital Credentials Query Language)](../reference/standards#dcql-digital-credentials-query-language) queries to extract the set of requested claim names. For nested claim paths like `["address", "street_address"]`, only the top-level name (`address`) is used since entitlement checks operate at the attribute level.
+
+### Configuration
+
+```yaml
+policies:
+  policies:
+    credential-verifier:
+      # Enable strict mode to reject over-requests
+      strict_entitlement_check: true
+      
+      # Allow presentations when no WRPRC/entitlement data is available
+      allow_without_wrprc: true
+```
+
+### Over-Request in Response
+
+When over-request is detected, the response includes details:
+
+```json
+{
+  "decision": true,
+  "context": {
+    "reason": {
+      "over_request": {
+        "allowed": ["given_name", "family_name", "birth_date"],
+        "requested": ["given_name", "family_name", "birth_date", "personal_number"],
+        "over_requested": ["personal_number"],
+        "is_over_request": true
+      }
+    }
+  }
+}
+```
+
+With `strict_entitlement_check: true`, the decision would be `false` instead.
+
+## Intermediary Certificate Handling
+
+Go-Trust supports **intermediary/broker** scenarios where a presentation request is proxied through a third party. An intermediary presents its own certificate alongside the RP's certificate, indicating it is acting on behalf of another party.
+
+When an intermediary certificate chain is present in the request context:
+
+1. Go-Trust checks whether intermediaries are allowed by the active policy (`allow_intermediaries`)
+2. If allowed, it extracts the intermediary's identity from the first certificate in the intermediary chain
+3. Both the RP identity and intermediary identity are included in the response metadata
+
+```yaml
+policies:
+  policies:
+    credential-verifier:
+      allow_intermediaries: false  # default: reject intermediary requests
+```
+
+:::caution
+Intermediary certificate validation is currently informational only — the intermediary chain is **not** validated against a trust store. Full intermediary chain validation will be implemented when the intermediary certificate profile is finalized.
+:::
+
+## JWKS Fetch Resilience
+
+Go-Trust implements retry and stale-cache fallback for JWKS (JSON Web Key Set) fetching. When a JWKS endpoint is temporarily unavailable:
+
+1. **Retry** — failed fetches are retried with exponential backoff
+2. **Stale cache** — if retries fail, the last successfully fetched JWKS is served from cache
+3. **Health degradation** — the registry reports degraded health but continues operating
+
+This prevents transient network issues from causing trust evaluation failures.
+
 ## Next Steps
 
 - [Trust Services Overview](./)

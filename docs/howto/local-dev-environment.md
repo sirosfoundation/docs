@@ -140,6 +140,21 @@ your-workspace/
 └── vc/                    # VC services (issuer, verifier, apigw, registry)
 ```
 
+## Developer Tools Container
+
+The VC repository includes a **developer-tools** container image with pre-built CLI utilities for bootstrapping and configuration generation:
+
+- `gen-bootstrap` — generate initial configuration and credential metadata
+- `gen-config-docs` — regenerate configuration documentation
+- `jwt-issuer` — issue test JWTs for API authentication
+
+Build the image from the vc repository:
+
+```bash
+cd vc
+docker build -f dockerfiles/developer-tools -t vc/developer-tools .
+```
+
 ## Next Steps
 
 - [Running Conformance Tests](./running-conformance-tests) — validate your changes against the OpenID Conformance Suite

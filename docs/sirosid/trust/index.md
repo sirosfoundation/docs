@@ -396,6 +396,16 @@ trust:
   policy: "first_match"  # or "all_must_match", "any_match"
 ```
 
+## RP Certificate Validation
+
+Beyond verifying issuer trust, Go-Trust can validate **Relying Party** certificates to verify that a verifier is authorized to request specific attributes. This supports the EUDI Wallet framework's user consent model:
+
+- **RP identity extraction** — structured identity from WRPAC certificates (organization, country, contact info)
+- **Over-request detection** — checks requested claims against RP entitlements per [ETSI TS 119 475](https://www.etsi.org/deliver/etsi_ts/119400_119499/119475/)
+- **Intermediary handling** — detects and validates proxy/broker presentation requests
+
+See [X5C Enrichment](./go-trust#x5c-enrichment--certificate-policy-validation) and [Over-Request Detection](./go-trust#over-request-detection) for implementation details.
+
 ## Testing Trust
 
 ### Development Mode
