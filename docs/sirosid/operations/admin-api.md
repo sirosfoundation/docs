@@ -73,7 +73,7 @@ Examples: `acme-corp`, `university-demo`, `test-tenant`
 
 ### OpenAPI Specification
 
-The complete OpenAPI 3.0 specification is available at:
+The complete OpenAPI 3.1.0 specification is available at:
 - [openapi-admin.yaml](https://github.com/sirosfoundation/go-wallet-backend/blob/main/docs/openapi-admin.yaml)
 
 You can import this into tools like Swagger UI, Postman, or Insomnia for interactive exploration.

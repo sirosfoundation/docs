@@ -126,6 +126,16 @@ For Kubernetes deployments, use `storage.mongodb.password_path` to load the pass
 | `WALLET_TRUST_PDP_URL` | `trust.pdp_url` | — | URL of the go-trust AuthZEN PDP (e.g., `http://go-trust:6001`) |
 | `WALLET_TRUST_REGISTRY_URL` | `trust.registry_url` | — | URL of the VCTM registry |
 
+When `trust.pdp_url` is set, the `/v1/resolve` endpoint includes `credential_types` extracted from issuer/verifier OID4VCI metadata in the AuthZEN evaluation request. This enables credential-type-aware trust policies in Go-Trust.
+
+### AuthZEN Proxy
+
+| Env Var | Config Key | Default | Description |
+|---------|------------|---------|-------------|
+| `WALLET_AUTHZEN_PROXY_ENABLED` | `authzen_proxy.enabled` | `false` | Expose the AuthZEN proxy on the backend API |
+
+The AuthZEN proxy allows the frontend to delegate trust evaluation to the backend, which forwards requests to Go-Trust with additional context (credential types, resource metadata). The proxy injects `credential_types` into `action.parameters`, enabling fine-grained trust decisions per credential format.
+
 ### Session Store
 
 | Env Var | Config Key | Default | Description |
@@ -170,6 +180,10 @@ external_urls:
 | Env Var | Config Key | Default | Description |
 |---------|------------|---------|-------------|
 | `WALLET_LOGGING_LEVEL` | `logging.level` | `info` | Log level: `debug`, `info`, `warn`, `error` |
+
+:::tip Complete Configuration Reference
+The wallet backend includes a [generated configuration reference](https://github.com/sirosfoundation/go-wallet-backend/blob/main/docs/CONFIGURATION.md) covering all YAML keys, environment variables, and their descriptions. Regenerate it with `go run developer_tools/scripts/gen_config_docs/main.go`.
+:::
 
 ---
 

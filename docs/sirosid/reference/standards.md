@@ -31,7 +31,9 @@ flowchart TB
     subgraph "Trust Frameworks"
         OIDF[OpenID Federation]
         TSL[ETSI Trust Lists]
+        LOTE[LoTE]
         DID[W3C DID]
+        RPATTR[RP Attributes]
     end
 
     subgraph "Status & Revocation"
@@ -266,6 +268,55 @@ EU aggregation point for member state trust lists:
 
 - **Central Registry** – Single entry point for EU trust
 - **Member State Lists** – Links to national TSLs
+
+### ETSI TS 119 602 (List of Trusted Entities)
+
+| Attribute | Value |
+|-----------|-------|
+| **Specification** | [ETSI TS 119 602](https://www.etsi.org/deliver/etsi_ts/119600_119699/119602/) |
+| **Status** | Published |
+| **Component** | go-trust |
+
+JSON-based trust lists for the EUDI Wallet ecosystem:
+
+- **Entity Indexing** – Entities indexed by EntityID and key hash (SHA-256)
+- **Multi-Source Merging** – Multiple LoTE documents merged into a single entity index
+- **Identity Matching** – X.509 (PKIX path validation) and JWK (fingerprint matching)
+- **JWS Verification** – Optional JWS signature verification on LoTE documents
+
+### ETSI TS 119 475 (RP Attributes)
+
+| Attribute | Value |
+|-----------|-------|
+| **Specification** | [ETSI TS 119 475 v1.1.1](https://www.etsi.org/deliver/etsi_ts/119400_119499/119475/) |
+| **Status** | Published |
+| **Component** | go-trust |
+
+RP attribute verification supporting wallet user authorization decisions:
+
+- **Entitlement Extraction** – Extract allowed attributes from RP registration certificates
+- **Over-Request Detection** – Compare requested claims against RP entitlements
+- **DCQL Support** – Parse Digital Credentials Query Language queries for claim extraction
+- **Strict/Warn Modes** – Configurable enforcement level for over-request violations
+
+See [Over-Request Detection](../trust/go-trust#over-request-detection) for implementation details.
+
+### ETSI TS 119 411-8 (WRPAC)
+
+| Attribute | Value |
+|-----------|-------|
+| **Specification** | [ETSI TS 119 411-8 v1.1.1](https://www.etsi.org/deliver/etsi_ts/119400_119499/11941108/) |
+| **Status** | Published |
+| **Component** | go-trust |
+
+Access certificate policy for EUDI Wallet Relying Parties:
+
+- **Certificate Profiles** – NCP and QCP for natural and legal persons
+- **Policy OIDs** – Four certificate policy OIDs (`0.4.0.194118.1.x`)
+- **Identity Extraction** – Structured RP identity from Subject DN and SANs
+- **Key Usage Constraints** – nonRepudiation required
+
+See [RP Certificate Profiles](../trust/go-trust#rp-certificate-profiles) for implementation details.
 
 ### W3C DID (Decentralized Identifiers)
 

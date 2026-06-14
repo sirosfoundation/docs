@@ -62,6 +62,15 @@ See [Registry Services](../sirosid/registry) for full documentation on how the r
 | [**demo-credentials**](https://github.com/sirosfoundation/demo-credentials) | Sample credentials and VCTM definitions for testing and demonstration. |
 | [**facetec-api**](https://github.com/sirosfoundation/facetec-api) | FaceTec integration API for biometric verification. |
 
+### Native Mobile SDKs
+
+| Repository | Description |
+|------------|-------------|
+| [**siros-sdk-kotlin**](https://github.com/sirosfoundation/siros-sdk-kotlin) | Native Android SDK (Kotlin 2.1+, Android SDK 28+). Modular architecture: WMP transport, WebAuthn/passkey auth with PRF key derivation, JWE-encrypted keystore, OID4VCI/OID4VP flow orchestration, and credential storage. Includes a sample app. |
+| [**siros-sdk-swift**](https://github.com/sirosfoundation/siros-sdk-swift) | Native iOS/macOS SDK (Swift 5.10+, iOS 16+/macOS 13+). Modules: WMP transport, passkey auth, JWE keystore with HKDF derivation, OID4VCI/OID4VP flows, DCQL matching, and a top-level `SirosWallet` API combining all modules. |
+
+Both SDKs connect to the same wallet backend infrastructure (go-wallet-backend) via the Wallet Messaging Protocol (WMP) and can be embedded into existing native applications. See [WSCA/WSCD Architecture](../wallet/architecture/wsca-wscd) for how the SDKs integrate with the `siros-wscd-manager` key management layer.
+
 ### Browser & Web Integration
 
 | Repository | Description |
