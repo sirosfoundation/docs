@@ -27,7 +27,7 @@
   <!-- User -->
   <rect x="15" y="42" width="80" height="50" rx="5" fill="#E8EEF7" stroke="#1C4587" stroke-width="1" filter="url(#s)"/>
   <text x="55" y="62" text-anchor="middle" fill="#1C4587" font-size="8" font-weight="700">User</text>
-  <text x="55" y="73" text-anchor="middle" fill="#1C4587" font-size="7">Browser + Passkey</text>
+  <text x="55" y="73" text-anchor="middle" fill="#1C4587" font-size="7">Browser · Native SDK</text>
 
   <!-- Credential Manager -->
   <rect x="120" y="38" width="145" height="58" rx="5" fill="#E8EEF7" stroke="#1C4587" stroke-width="1" filter="url(#s)"/>
@@ -43,7 +43,7 @@
   <text x="355" y="52" text-anchor="middle" fill="#0F5132" font-size="8" font-weight="700">Trust Services</text>
   <rect x="300" y="60" width="110" height="20" rx="3" fill="white" stroke="#198754" stroke-width="0.8"/>
   <text x="355" y="73" text-anchor="middle" fill="#0F5132" font-size="7" font-weight="600">go-trust (AuthZEN)</text>
-  <text x="355" y="91" text-anchor="middle" fill="#888" font-size="5.5">ETSI · OIDF · DID</text>
+  <text x="355" y="91" text-anchor="middle" fill="#888" font-size="5.5">ETSI · LoTE · OIDF · DID</text>
 
   <!-- Registry -->
   <rect x="445" y="42" width="140" height="50" rx="5" fill="#FFF3E0" stroke="#C75A11" stroke-width="1" filter="url(#s)"/>
