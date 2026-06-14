@@ -76,4 +76,15 @@ flowchart LR
 | [sirosfoundation/go-wallet-backend](https://github.com/sirosfoundation/go-wallet-backend) | Wallet backend |
 | [sirosfoundation/go-trust](https://github.com/sirosfoundation/go-trust) | Trust evaluation service |
 
+### Native Mobile SDKs
+
+For embedding wallet capabilities into existing native mobile applications, use the platform SDKs:
+
+| Repository | Platform | Description |
+|------------|----------|-------------|
+| [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin) | Android (Kotlin) | WMP transport, passkey auth, JWE keystore, OID4VCI/OID4VP flows |
+| [siros-sdk-swift](https://github.com/sirosfoundation/siros-sdk-swift) | iOS/macOS (Swift) | WMP transport, passkey auth, JWE keystore, OID4VCI/OID4VP flows |
+
+The SDKs connect to the same wallet backend and go-trust infrastructure described above. They provide modular integration — use individual modules (transport, auth, keystore, flow) or the top-level wallet API.
+
 For developing and testing changes locally, see [Setting Up a Local Development Environment](../howto/local-dev-environment).

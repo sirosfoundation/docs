@@ -39,6 +39,29 @@ A **stateless AuthZEN PDP** that evaluates trust decisions against multiple regi
 
 Go-trust has no database — it loads trust data from certificate bundles, trust lists, and federation endpoints at startup and refreshes periodically.
 
+### Native Mobile SDKs
+
+For embedding wallet functionality into existing native apps (rather than using the React PWA frontend), the SIROS Foundation provides platform-specific SDKs:
+
+| SDK | Platform | Package |
+|-----|----------|---------||
+| [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin) | Android (Kotlin 2.1+, API 28+) | Gradle dependency |
+| [siros-sdk-swift](https://github.com/sirosfoundation/siros-sdk-swift) | iOS 16+ / macOS 13+ (Swift 5.10+) | Swift Package |
+
+Both SDKs share the same modular architecture:
+
+| Module | Kotlin | Swift | Purpose |
+|--------|--------|-------|---------||
+| Transport | `sdk:transport` | `SirosTransport` | WMP client (WebSocket), JSON-RPC codec |
+| Auth | `sdk:auth` | `SirosAuth` | WebAuthn/passkey authentication, PRF key derivation |
+| Keystore | `sdk:keystore` | `SirosKeystore` | JWE-encrypted credential signing keys, HKDF derivation |
+| Flow | `sdk:flow` | `SirosFlow` | OID4VCI/OID4VP session orchestration over WMP |
+| Credentials | `sdk:credentials` | `SirosCredentials` | Credential storage, DCQL matching, VCTM, SD-JWT utilities |
+
+The SDKs connect to the same wallet backend (go-wallet-backend) via the **Wallet Messaging Protocol (WMP)** — the same WebSocket protocol used by the React frontend. This means a single backend deployment serves both web and native clients.
+
+For WSCD integration (hardware key storage, remote HSM, FIDO2), native apps use [siros-wscd-manager](./wsca-wscd) via UniFFI bindings.
+
 ## Data Flow
 
 ### Credential Issuance (OID4VCI)
