@@ -17,6 +17,80 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Fetch license policy from compliance repo
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p .license-policy
+
+          # Fetch the license policy and compliance controls from the compliance repo
+          gh api "repos/sirosfoundation/compliance/contents/catalog/technical/license-policy.yaml" \
+            --jq '.content' | base64 -d > .license-policy/license-policy.yaml
+          gh api "repos/sirosfoundation/compliance/contents/catalog/technical/license-compliance.yaml" \
+            --jq '.content' | base64 -d > .license-policy/license-compliance.yaml
+
+          echo "Fetched license policy and compliance controls"
+
+          # Build override map and dual-license selections as JSON for jq consumption
+          # Parse YAML overrides into a JSON lookup (pattern -> resolved license + reason)
+          python3 << 'PYEOF'
+          import yaml, json
+
+          with open(".license-policy/license-policy.yaml") as f:
+              policy = yaml.safe_load(f)
+
+          p = policy["policy"]
+
+          # Build overrides list
+          overrides = []
+          for o in p.get("overrides", []):
+              overrides.append({
+                  "pattern": o["pattern"],
+                  "license": o["license"],
+                  "scope": o.get("scope", "production"),
+                  "reason": o["reason"]
+              })
+
+          # Build license classification sets
+          classification = {}
+          for lic in p.get("allowed", []):
+              classification[lic] = "allowed"
+          for lic in p.get("allowed_weak_copyleft", []):
+              if isinstance(lic, str):
+                  classification[lic] = "weak-copyleft"
+          for lic in p.get("test_only", []):
+              if isinstance(lic, str):
+                  classification[lic] = "test-only"
+          for lic in p.get("build_only", []):
+              if isinstance(lic, str):
+                  classification[lic] = "build-only"
+          for lic in p.get("blocked", []):
+              if isinstance(lic, str):
+                  classification[lic] = "blocked"
+          for lic in p.get("documentation", []):
+              if isinstance(lic, str):
+                  classification[lic] = "documentation"
+
+          # Dual-license selections: OR expressions where we pick the permissive side
+          dual_license_map = {
+              "CDDL-1.0 OR GPL-2.0-only WITH Classpath-exception-2.0": "CDDL-1.0",
+              "CDDL-1.1 OR GPL-2.0-only WITH Classpath-exception-2.0": "CDDL-1.1",
+              "GPL-3.0-only OR MIT": "MIT",
+              "BSD-3-Clause OR GPL-2.0-only": "BSD-3-Clause",
+              "Apache-2.0 OR LGPL-2.1-or-later": "Apache-2.0",
+          }
+
+          with open(".license-policy/overrides.json", "w") as f:
+              json.dump(overrides, f)
+          with open(".license-policy/classification.json", "w") as f:
+              json.dump(classification, f)
+          with open(".license-policy/dual-license-map.json", "w") as f:
+              json.dump(dual_license_map, f)
+
+          print(f"Parsed {len(overrides)} overrides, {len(classification)} license classifications, {len(dual_license_map)} dual-license selections")
+          PYEOF
+
       - name: Generate license inventory from SBOMs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -86,7 +160,149 @@ jobs:
             })
           ] | .[0] | sort_by(.name)' "$WORK/all_packages.json" > "$WORK/unique_packages.json"
 
-          # License summary
+          # === Apply license policy: overrides, dual-license selections, classification ===
+          echo "Applying license policy..."
+
+          WORK="$WORK" python3 << 'PYEOF'
+          import json, fnmatch, os
+
+          WORK = os.environ["WORK"]
+
+          with open(".license-policy/overrides.json") as f:
+              overrides = json.load(f)
+          with open(".license-policy/classification.json") as f:
+              classification = json.load(f)
+          with open(".license-policy/dual-license-map.json") as f:
+              dual_license_map = json.load(f)
+
+          with open(f"{WORK}/all_packages.json") as f:
+              all_packages = json.load(f)
+          with open(f"{WORK}/unique_packages.json") as f:
+              unique_packages = json.load(f)
+
+          def classify_license(lic):
+              """Classify a license string against the policy."""
+              if lic in classification:
+                  return classification[lic]
+              # Check if it's a compound license (AND) — classify by strictest component
+              if " AND " in lic:
+                  parts = [p.strip() for p in lic.split(" AND ")]
+                  cats = [classification.get(p) for p in parts if p in classification]
+                  # Priority: blocked > build-only > test-only > weak-copyleft > allowed
+                  for cat in ["blocked", "build-only", "test-only", "weak-copyleft", "documentation", "allowed"]:
+                      if cat in cats:
+                          return cat
+              return "unclassified"
+
+          def apply_override(name):
+              """Find matching override for a package name."""
+              for o in overrides:
+                  if fnmatch.fnmatch(name, o["pattern"]):
+                      return o
+              return None
+
+          override_count = 0
+          dual_count = 0
+
+          # Apply overrides and dual-license selections to all_packages
+          for pkg in all_packages:
+              orig_license = pkg["license"]
+
+              # 1. Check overrides (for NOASSERTION resolution)
+              if orig_license == "NOASSERTION":
+                  override = apply_override(pkg["name"])
+                  if override:
+                      pkg["license_resolved"] = override["license"]
+                      pkg["license_source"] = "policy-override"
+                      pkg["override_scope"] = override.get("scope", "production")
+                      pkg["override_reason"] = override["reason"]
+                      override_count += 1
+                  else:
+                      pkg["license_resolved"] = "NOASSERTION"
+                      pkg["license_source"] = "sbom"
+              # 2. Check dual-license selections (OR expressions)
+              elif orig_license in dual_license_map:
+                  pkg["license_resolved"] = dual_license_map[orig_license]
+                  pkg["license_source"] = "dual-license-selection"
+                  dual_count += 1
+              else:
+                  pkg["license_resolved"] = orig_license
+                  pkg["license_source"] = "sbom"
+
+              # 3. Classify the resolved license
+              pkg["policy_category"] = classify_license(pkg.get("license_resolved", orig_license))
+
+          # Apply the same to unique_packages
+          for pkg in unique_packages:
+              orig_license = pkg["license"]
+              if orig_license == "NOASSERTION":
+                  override = apply_override(pkg["name"])
+                  if override:
+                      pkg["license_resolved"] = override["license"]
+                      pkg["license_source"] = "policy-override"
+                      pkg["override_scope"] = override.get("scope", "production")
+                  else:
+                      pkg["license_resolved"] = "NOASSERTION"
+                      pkg["license_source"] = "sbom"
+              elif orig_license in dual_license_map:
+                  pkg["license_resolved"] = dual_license_map[orig_license]
+                  pkg["license_source"] = "dual-license-selection"
+              else:
+                  pkg["license_resolved"] = orig_license
+                  pkg["license_source"] = "sbom"
+              pkg["policy_category"] = classify_license(pkg.get("license_resolved", orig_license))
+
+          with open(f"{WORK}/all_packages.json", "w") as f:
+              json.dump(all_packages, f)
+          with open(f"{WORK}/unique_packages.json", "w") as f:
+              json.dump(unique_packages, f)
+
+          # Build policy summary: count by category
+          from collections import Counter
+          cat_counts = Counter(p["policy_category"] for p in unique_packages)
+          resolved_counts = Counter()
+          for p in unique_packages:
+              resolved_counts[p.get("license_resolved", p["license"])] += 1
+
+          policy_summary = {
+              "overrides_applied": override_count,
+              "dual_license_selections": dual_count,
+              "noassertion_remaining": sum(1 for p in unique_packages if p.get("license_resolved") == "NOASSERTION"),
+              "categories": dict(cat_counts),
+              "classification": dict(classification),
+          }
+
+          with open(f"{WORK}/policy_summary.json", "w") as f:
+              json.dump(policy_summary, f)
+
+          # Build resolved license summary (after overrides/selections applied)
+          resolved_summary = []
+          from collections import defaultdict
+          lic_repos = defaultdict(lambda: {"usages": 0, "packages": set(), "repos": set()})
+          for p in all_packages:
+              rl = p.get("license_resolved", p["license"])
+              lic_repos[rl]["usages"] += 1
+              lic_repos[rl]["packages"].add(p["name"])
+              lic_repos[rl]["repos"].add(p["repo"])
+          for lic, data in sorted(lic_repos.items(), key=lambda x: -x[1]["usages"]):
+              cat = classify_license(lic)
+              resolved_summary.append({
+                  "license": lic,
+                  "total_usages": data["usages"],
+                  "unique_packages": len(data["packages"]),
+                  "repos": sorted(data["repos"]),
+                  "policy_category": cat,
+              })
+
+          with open(f"{WORK}/license_summary_resolved.json", "w") as f:
+              json.dump(resolved_summary, f)
+
+          print(f"Policy applied: {override_count} overrides, {dual_count} dual-license selections")
+          print(f"Categories: {dict(cat_counts)}")
+          print(f"Remaining NOASSERTION: {policy_summary['noassertion_remaining']}")
+          PYEOF
+
+          # Also keep the raw (pre-policy) license summary for reference
           jq '[
             group_by(.license) |
             map({
@@ -100,20 +316,25 @@ jobs:
 
           TOTAL_PACKAGES=$(jq 'length' "$WORK/unique_packages.json")
           TOTAL_REPOS=$(jq 'length' "$WORK/repo_summary.json")
-          TOTAL_LICENSES=$(jq 'length' "$WORK/license_summary.json")
+          TOTAL_LICENSES=$(jq 'length' "$WORK/license_summary_resolved.json")
+          NOASSERTION_REMAINING=$(jq '.noassertion_remaining' "$WORK/policy_summary.json")
 
-          # Write JSON catalog
+          # Write JSON catalog (enriched with policy data)
           mkdir -p static/catalog
           jq -n \
             --arg ts "$TIMESTAMP" \
             --arg org "$ORG" \
-            --slurpfile summary "$WORK/license_summary.json" \
+            --slurpfile summary "$WORK/license_summary_resolved.json" \
+            --slurpfile raw_summary "$WORK/license_summary.json" \
             --slurpfile repos "$WORK/repo_summary.json" \
             --slurpfile packages "$WORK/unique_packages.json" \
+            --slurpfile policy "$WORK/policy_summary.json" \
             '{
               generated: $ts,
               organization: $org,
+              policy: $policy[0],
               license_summary: $summary[0],
+              license_summary_raw: $raw_summary[0],
               repositories: $repos[0],
               packages: $packages[0]
             }' > static/catalog/license-inventory.json
@@ -135,6 +356,10 @@ jobs:
               'All open source licenses found in dependencies across SIROS Foundation' \
               'repositories, generated automatically from [GitHub dependency graph](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/about-the-dependency-graph) SBOMs.' \
               '' \
+              'Licenses are classified against the [SIROS license policy](https://github.com/sirosfoundation/compliance/blob/main/catalog/technical/license-policy.yaml),' \
+              'which defines allowed, restricted, and blocked license categories. NOASSERTION' \
+              'entries from SBOM tooling are resolved using verified overrides.' \
+              '' \
               ':::info' \
               'This page is automatically updated daily. For programmatic access, use the' \
               '[JSON catalog](https://developers.siros.org/catalog/license-inventory.json):' \
@@ -145,14 +370,25 @@ jobs:
               ':::' \
               ''
 
-            echo "**${TOTAL_REPOS}** repositories scanned · **${TOTAL_PACKAGES}** unique packages · **${TOTAL_LICENSES}** license types"
+            echo "**${TOTAL_REPOS}** repositories scanned · **${TOTAL_PACKAGES}** unique packages · **${TOTAL_LICENSES}** license types · **${NOASSERTION_REMAINING}** unresolved"
+            echo ''
+
+            # Policy compliance summary
+            echo '## Policy Compliance'
+            echo ''
+            echo '| Category | Packages | Description |'
+            echo '|----------|--------:|-------------|'
+            jq -r '.categories | to_entries | sort_by(-.value) | .[] |
+              "| \(.key) | \(.value) | |"' "$WORK/policy_summary.json"
+            echo ''
+            echo "License policy overrides applied: **$(jq '.overrides_applied' "$WORK/policy_summary.json")** · Dual-license selections: **$(jq '.dual_license_selections' "$WORK/policy_summary.json")**"
             echo ''
 
             echo '## License Summary'
             echo ''
-            echo '| License | Unique Packages | Total Usages |'
-            echo '|---------|---------------:|-------------:|'
-            jq -r '.[] | "| \(.license) | \(.unique_packages) | \(.total_usages) |"' "$WORK/license_summary.json"
+            echo '| License | Category | Unique Packages | Total Usages |'
+            echo '|---------|----------|---------------:|-------------:|'
+            jq -r '.[] | "| \(.license) | \(.policy_category) | \(.unique_packages) | \(.total_usages) |"' "$WORK/license_summary_resolved.json"
 
             echo ''
             echo '## Per-Repository Breakdown'
@@ -165,10 +401,12 @@ jobs:
 
             echo ''
             echo "_Last updated: ${TIMESTAMP}_"
+            echo ''
+            echo '_License policy: [sirosfoundation/compliance](https://github.com/sirosfoundation/compliance/blob/main/catalog/technical/license-policy.yaml)_'
           } > "$MD"
 
           echo "Markdown page: $(wc -l < "$MD") lines"
-          rm -rf "$WORK"
+          rm -rf "$WORK" .license-policy
 
       - name: Commit and push
         run: |
