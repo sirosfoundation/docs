@@ -36,20 +36,55 @@ jobs:
             {"pattern": "anchore/*", "license": "Apache-2.0", "scope": "ci-only", "reason": "Anchore actions — CI-only"},
             {"pattern": "step-security/*", "license": "Apache-2.0", "scope": "ci-only", "reason": "StepSecurity actions — CI-only"},
             {"pattern": "softprops/*", "license": "MIT", "scope": "ci-only", "reason": "Release actions — CI-only"},
-            {"pattern": "github/*", "license": "MIT", "scope": "ci-only", "reason": "GitHub official actions — CI-only"}
+            {"pattern": "github/*", "license": "MIT", "scope": "ci-only", "reason": "GitHub official actions — CI-only"},
+            {"pattern": "androidx.*", "license": "Apache-2.0", "scope": "production", "reason": "Android Jetpack libraries — Apache-2.0"},
+            {"pattern": "com.google.*", "license": "Apache-2.0", "scope": "production", "reason": "Google libraries — Apache-2.0"},
+            {"pattern": "org.jetbrains.*", "license": "Apache-2.0", "scope": "production", "reason": "JetBrains libraries — Apache-2.0"},
+            {"pattern": "org.jetbrains.kotlin*", "license": "Apache-2.0", "scope": "production", "reason": "Kotlin stdlib — Apache-2.0"},
+            {"pattern": "org.jetbrains.kotlinx*", "license": "Apache-2.0", "scope": "production", "reason": "KotlinX libraries — Apache-2.0"},
+            {"pattern": "com.android.*", "license": "Apache-2.0", "scope": "production", "reason": "Android SDK — Apache-2.0"},
+            {"pattern": "io.ktor*", "license": "Apache-2.0", "scope": "production", "reason": "Ktor — Apache-2.0"},
+            {"pattern": "com.squareup.*", "license": "Apache-2.0", "scope": "production", "reason": "Square libraries — Apache-2.0"},
+            {"pattern": "org.slf4j*", "license": "MIT", "scope": "production", "reason": "SLF4J — MIT"},
+            {"pattern": "org.bouncycastle*", "license": "MIT", "scope": "production", "reason": "Bouncy Castle — MIT"},
+            {"pattern": "com.fasterxml.*", "license": "Apache-2.0", "scope": "production", "reason": "Jackson — Apache-2.0"},
+            {"pattern": "io.github.aakira*", "license": "Apache-2.0", "scope": "production", "reason": "Napier logger — Apache-2.0"},
+            {"pattern": "co.touchlab*", "license": "Apache-2.0", "scope": "production", "reason": "Touchlab KMP libraries — Apache-2.0"},
+            {"pattern": "io.insert-koin*", "license": "Apache-2.0", "scope": "production", "reason": "Koin DI — Apache-2.0"},
+            {"pattern": "com.russhwolf*", "license": "Apache-2.0", "scope": "production", "reason": "multiplatform-settings — Apache-2.0"},
+            {"pattern": "io.mockk*", "license": "Apache-2.0", "scope": "test", "reason": "MockK — test dependency"},
+            {"pattern": "com.nimbusds*", "license": "Apache-2.0", "scope": "production", "reason": "Nimbus JOSE+JWT — Apache-2.0"},
+            {"pattern": "org.json*", "license": "JSON", "scope": "production", "reason": "org.json — permissive JSON license"},
+            {"pattern": "gradle.plugin.*", "license": "Apache-2.0", "scope": "build", "reason": "Gradle plugins — build-only"},
+            {"pattern": "net.java.dev.jna*", "license": "Apache-2.0", "scope": "production", "reason": "JNA — dual Apache-2.0/LGPL, select Apache-2.0"},
+            {"pattern": "mikepenz/*", "license": "Apache-2.0", "scope": "ci-only", "reason": "CI action — not in deliverable"},
+            {"pattern": "EnricoMi/*", "license": "Apache-2.0", "scope": "ci-only", "reason": "CI action — not in deliverable"},
+            {"pattern": "sigstore/*", "license": "Apache-2.0", "scope": "ci-only", "reason": "Sigstore actions — CI-only"},
+            {"pattern": "gradle/*", "license": "Apache-2.0", "scope": "ci-only", "reason": "Gradle actions — CI-only"}
           ]
           EOF
 
           cat > .license-policy/classification.json << 'EOF'
           {
-            "MIT": "allowed", "Apache-2.0": "allowed", "BSD-2-Clause": "allowed",
+            "MIT": "allowed", "MIT-0": "allowed", "Apache-2.0": "allowed",
+            "BSD-2-Clause": "allowed", "BSD-2-Clause-Views": "allowed",
             "BSD-3-Clause": "allowed", "ISC": "allowed", "CC0-1.0": "allowed",
             "Unlicense": "allowed", "0BSD": "allowed", "BlueOak-1.0.0": "allowed",
             "BSL-1.0": "allowed", "Zlib": "allowed", "X11": "allowed",
             "curl": "allowed", "bzip2-1.0.6": "allowed", "PostgreSQL": "allowed",
-            "MPL-2.0": "weak-copyleft",
-            "LGPL-2.1-only": "weak-copyleft", "LGPL-2.1-or-later": "weak-copyleft",
-            "LGPL-3.0-only": "weak-copyleft", "LGPL-3.0-or-later": "weak-copyleft",
+            "Unicode-3.0": "allowed", "Unicode-DFS-2016": "allowed",
+            "Python-2.0": "allowed", "PSF-2.0": "allowed",
+            "CDLA-Permissive-2.0": "allowed",
+            "JSON": "allowed",
+            "Apache-2.0 WITH LLVM-exception": "allowed",
+            "LicenseRef-scancode-public-domain": "allowed",
+            "LicenseRef-scancode-jdom": "allowed",
+            "MPL-2.0": "weak-copyleft", "MPL-1.1": "weak-copyleft",
+            "LGPL-2.0-only": "weak-copyleft",
+            "LGPL-2.1": "weak-copyleft", "LGPL-2.1-only": "weak-copyleft",
+            "LGPL-2.1-or-later": "weak-copyleft",
+            "LGPL-3.0": "weak-copyleft", "LGPL-3.0-only": "weak-copyleft",
+            "LGPL-3.0-or-later": "weak-copyleft",
             "EUPL-1.2": "weak-copyleft",
             "CDDL-1.0": "weak-copyleft", "CDDL-1.1": "weak-copyleft",
             "CPL-1.0": "weak-copyleft",
@@ -72,7 +107,23 @@ jobs:
             "CDDL-1.1 OR GPL-2.0-only WITH Classpath-exception-2.0": "CDDL-1.1",
             "GPL-3.0-only OR MIT": "MIT",
             "BSD-3-Clause OR GPL-2.0-only": "BSD-3-Clause",
-            "Apache-2.0 OR LGPL-2.1-or-later": "Apache-2.0"
+            "Apache-2.0 OR LGPL-2.1-or-later": "Apache-2.0",
+            "MIT OR Apache-2.0": "MIT",
+            "Apache-2.0 OR MIT": "Apache-2.0",
+            "Unlicense OR MIT": "MIT",
+            "BSD-2-Clause OR Apache-2.0 OR MIT": "MIT",
+            "MIT OR (Apache-2.0 AND MIT)": "MIT",
+            "(Apache-2.0 OR MIT)": "Apache-2.0",
+            "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT": "Apache-2.0",
+            "MIT OR Zlib OR Apache-2.0": "MIT",
+            "(MIT OR Apache-2.0) AND Unicode-3.0": "MIT",
+            "Apache-2.0 OR ISC OR MIT": "Apache-2.0",
+            "0BSD OR MIT OR Apache-2.0": "MIT",
+            "Apache-2.0 OR BSD-2-Clause OR MIT OR (Apache-2.0 AND BSD-2-Clause) OR (Apache-2.0 AND MIT) OR (BSD-2-Clause AND MIT)": "Apache-2.0",
+            "(EUPL-1.2 OR Apache-2.0)": "Apache-2.0",
+            "Apache-2.0 OR Unlicense OR (Apache-2.0 AND Unlicense)": "Apache-2.0",
+            "(MPL-2.0 OR Apache-2.0)": "Apache-2.0",
+            "MIT OR (CC0-1.0 AND MIT)": "MIT"
           }
           EOF
 
@@ -171,12 +222,31 @@ jobs:
               """Classify a license string against the policy."""
               if lic in classification:
                   return classification[lic]
+              # Strip outer parentheses
+              stripped = lic.strip()
+              if stripped.startswith("(") and stripped.endswith(")"):
+                  stripped = stripped[1:-1].strip()
+                  if stripped in classification:
+                      return classification[stripped]
+              # Check if it's in the dual-license map (OR expression)
+              if lic in dual_license_map:
+                  resolved = dual_license_map[lic]
+                  if resolved in classification:
+                      return classification[resolved]
               # Check if it's a compound license (AND) — classify by strictest component
               if " AND " in lic:
-                  parts = [p.strip() for p in lic.split(" AND ")]
+                  parts = [p.strip().strip("()") for p in lic.split(" AND ")]
                   cats = [classification.get(p) for p in parts if p in classification]
                   # Priority: blocked > build-only > test-only > weak-copyleft > allowed
                   for cat in ["blocked", "build-only", "test-only", "weak-copyleft", "documentation", "allowed"]:
+                      if cat in cats:
+                          return cat
+              # OR expressions not in dual-license map — classify by most permissive
+              if " OR " in lic:
+                  parts = [p.strip().strip("()") for p in lic.split(" OR ")]
+                  cats = [classification.get(p) for p in parts if p in classification]
+                  # For OR, use most permissive: allowed > documentation > weak-copyleft > test-only > build-only > blocked
+                  for cat in ["allowed", "documentation", "weak-copyleft", "test-only", "build-only", "blocked"]:
                       if cat in cats:
                           return cat
               return "unclassified"
