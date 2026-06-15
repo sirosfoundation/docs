@@ -1768,33 +1768,6 @@
       ]
     }
   ],
-  "skipped_repositories": [
-    "assets",
-    "demo-credentials",
-    "docs",
-    ".github",
-    "go-as4",
-    "go-grc",
-    "go-root-ceremony",
-    "go-siros-cli",
-    "go-wmp",
-    "go-ztts",
-    "ops_stack_utilities",
-    "registry.siros.org",
-    "signedxml",
-    "siros-conformance",
-    "sirosid-dev",
-    "sirosid-tests",
-    "siros-wscd-manager",
-    "soft-fido2",
-    "trust-lists",
-    "virtualwebauthn",
-    "wallet-android-wrapper",
-    "wallet-ios-wrapper",
-    "wallet-landing",
-    "webauthn",
-    "wmp-js"
-  ],
   "packages": [
     {
       "name": "@acemir/cssom",

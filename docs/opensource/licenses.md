@@ -126,35 +126,4 @@ https://developers.siros.org/catalog/license-inventory.json
 | [wallet-companion](https://github.com/sirosfoundation/wallet-companion) | 635 | MIT (440), Apache-2.0 (46), ISC (32), BSD-2-Clause (29), MPL-2.0 (18), BSD-3-Clause (13), LGPL-3.0-or-later (10), MIT OR Apache-2.0 (9), NOASSERTION (9), CC0-1.0 AND MIT (5), Apache-2.0 AND LGPL-3.0-or-later (3), BlueOak-1.0.0 (3), Apache-2.0 AND MIT (2), CC0-1.0 (2), MIT-0 (2), 0BSD (1), Apache-2.0 AND LGPL-3.0-or-later AND MIT (1), Apache-2.0 AND OFL-1.1 AND Ubuntu-font-1.0 (1), Apache-2.0 OR BSD-2-Clause OR MIT OR (Apache-2.0 AND BSD-2-Clause) OR (Apache-2.0 AND MIT) OR (BSD-2-Clause AND MIT) (1), BSD-2-Clause AND BSD-2-Clause-Views (1), BSD-2-Clause AND BSD-3-Clause (1), BSD-3-Clause OR GPL-2.0-only (1), GPL-3.0-only OR MIT (1), ISC AND MIT (1), LicenseRef-scancode-unicode AND MIT (1), MIT AND Zlib (1), Python-2.0 (1) |
 | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend) | 1105 | MIT (895), Apache-2.0 (50), ISC (40), BSD-2-Clause (20), BSD-3-Clause (19), NOASSERTION (15), MPL-2.0 (13), BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND LicenseRef-scancode-other-permissive AND MIT AND MPL-2.0 (10), Apache-2.0 AND BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND LicenseRef-scancode-other-permissive AND MIT AND MPL-2.0 (3), CC0-1.0 AND MIT (3), ISC AND MIT (3), (Apache-2.0 OR MIT) (2), 0BSD (2), Apache-2.0 AND BSD-2-Clause (2), BlueOak-1.0.0 (2), CC0-1.0 (2), MIT OR (Apache-2.0 AND MIT) (2), MIT-0 (2), (EUPL-1.2 OR Apache-2.0) (1), (MPL-2.0 OR Apache-2.0) (1), 0BSD AND ISC AND MIT (1), AFL-2.1 AND AFL-3.0 AND BSD-3-Clause (1), Apache-2.0 AND BSD-2-Clause AND BlueOak-1.0.0 AND CC0-1.0 AND ISC AND MIT (1), Apache-2.0 AND BSD-2-Clause AND CC0-1.0 AND ISC AND MIT (1), Apache-2.0 AND BSD-3-Clause AND ISC AND MIT (1), Apache-2.0 AND MIT (1), Apache-2.0 AND OFL-1.1 AND Ubuntu-font-1.0 (1), Apache-2.0 OR MIT (1), Apache-2.0 OR Unlicense OR (Apache-2.0 AND Unlicense) (1), BSD-2-Clause AND BSD-2-Clause-Views (1), BSD-2-Clause AND BSD-3-Clause (1), BSD-3-Clause AND MIT (1), CC-BY-4.0 (1), LicenseRef-scancode-generic-cla AND MIT (1), LicenseRef-scancode-public-domain (1), MIT AND Zlib (1), MIT OR (CC0-1.0 AND MIT) (1), Python-2.0 (1) |
 
-## Repositories Without SBOM Data
-
-The following repositories do not have the GitHub dependency graph enabled
-and are excluded from this inventory:
-
-- [assets](https://github.com/sirosfoundation/assets)
-- [demo-credentials](https://github.com/sirosfoundation/demo-credentials)
-- [docs](https://github.com/sirosfoundation/docs)
-- [.github](https://github.com/sirosfoundation/.github)
-- [go-as4](https://github.com/sirosfoundation/go-as4)
-- [go-grc](https://github.com/sirosfoundation/go-grc)
-- [go-root-ceremony](https://github.com/sirosfoundation/go-root-ceremony)
-- [go-siros-cli](https://github.com/sirosfoundation/go-siros-cli)
-- [go-wmp](https://github.com/sirosfoundation/go-wmp)
-- [go-ztts](https://github.com/sirosfoundation/go-ztts)
-- [ops_stack_utilities](https://github.com/sirosfoundation/ops_stack_utilities)
-- [registry.siros.org](https://github.com/sirosfoundation/registry.siros.org)
-- [signedxml](https://github.com/sirosfoundation/signedxml)
-- [siros-conformance](https://github.com/sirosfoundation/siros-conformance)
-- [sirosid-dev](https://github.com/sirosfoundation/sirosid-dev)
-- [sirosid-tests](https://github.com/sirosfoundation/sirosid-tests)
-- [siros-wscd-manager](https://github.com/sirosfoundation/siros-wscd-manager)
-- [soft-fido2](https://github.com/sirosfoundation/soft-fido2)
-- [trust-lists](https://github.com/sirosfoundation/trust-lists)
-- [virtualwebauthn](https://github.com/sirosfoundation/virtualwebauthn)
-- [wallet-android-wrapper](https://github.com/sirosfoundation/wallet-android-wrapper)
-- [wallet-ios-wrapper](https://github.com/sirosfoundation/wallet-ios-wrapper)
-- [wallet-landing](https://github.com/sirosfoundation/wallet-landing)
-- [webauthn](https://github.com/sirosfoundation/webauthn)
-- [wmp-js](https://github.com/sirosfoundation/wmp-js)
-
 _Last updated: 2026-06-15T14:18:23Z_

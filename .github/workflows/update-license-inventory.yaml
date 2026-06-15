@@ -109,14 +109,12 @@ jobs:
             --arg org "$ORG" \
             --slurpfile summary "$WORK/license_summary.json" \
             --slurpfile repos "$WORK/repo_summary.json" \
-            --slurpfile skipped "$WORK/skipped.json" \
             --slurpfile packages "$WORK/unique_packages.json" \
             '{
               generated: $ts,
               organization: $org,
               license_summary: $summary[0],
               repositories: $repos[0],
-              skipped_repositories: $skipped[0],
               packages: $packages[0]
             }' > static/catalog/license-inventory.json
 
@@ -164,17 +162,6 @@ jobs:
             jq -r '.[] |
               "| [\(.repo)](https://github.com/sirosfoundation/\(.repo)) | \(.package_count) | \(.licenses | map("\(.license) (\(.count))") | join(", ")) |"' \
               "$WORK/repo_summary.json"
-
-            SKIPPED_COUNT=$(jq 'length' "$WORK/skipped.json")
-            if [[ "$SKIPPED_COUNT" -gt 0 ]]; then
-              echo ''
-              echo '## Repositories Without SBOM Data'
-              echo ''
-              echo 'The following repositories do not have the GitHub dependency graph enabled'
-              echo 'and are excluded from this inventory:'
-              echo ''
-              jq -r '.[] | "- [\(.)](https://github.com/sirosfoundation/\(.))"' "$WORK/skipped.json"
-            fi
 
             echo ''
             echo "_Last updated: ${TIMESTAMP}_"
