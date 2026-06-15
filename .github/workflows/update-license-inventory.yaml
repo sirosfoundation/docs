@@ -1,0 +1,202 @@
+name: Update License Inventory
+
+on:
+  schedule:
+    - cron: "30 6 * * *" # Daily at 06:30 UTC (after image catalog at 06:00)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  update-licenses:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate license inventory from SBOMs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          ORG="sirosfoundation"
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          WORK=$(mktemp -d)
+
+          # Discover all non-archived public repos in the org
+          echo "Discovering repos..."
+          REPOS=$(gh api --paginate "/orgs/${ORG}/repos?per_page=100&type=public" \
+            --jq '.[] | select(.archived == false) | .name' | sort)
+
+          echo "Found $(echo "$REPOS" | wc -l) repos"
+
+          # Use temp files to avoid argument-list-too-long with large datasets
+          echo "[]" > "$WORK/all_packages.json"
+          echo "[]" > "$WORK/repo_summary.json"
+          echo "[]" > "$WORK/skipped.json"
+
+          while IFS= read -r REPO; do
+            echo -n "  $REPO... "
+            SBOM=$(gh api "repos/${ORG}/${REPO}/dependency-graph/sbom" 2>/dev/null || true)
+
+            if [[ -z "$SBOM" ]] || echo "$SBOM" | jq -e '.message' >/dev/null 2>&1; then
+              echo "skip"
+              jq --arg r "$REPO" '. + [$r]' "$WORK/skipped.json" > "$WORK/tmp.json" \
+                && mv "$WORK/tmp.json" "$WORK/skipped.json"
+              continue
+            fi
+
+            # Extract packages with licenses from SPDX SBOM
+            echo "$SBOM" | jq --arg repo "$REPO" '[
+              .sbom.packages[] |
+              select(.name != null and .SPDXID != "SPDXRef-DOCUMENT") |
+              {
+                name: .name,
+                version: (.versionInfo // null),
+                license: (.licenseConcluded // .licenseDeclared // "NOASSERTION"),
+                repo: $repo
+              }
+            ]' > "$WORK/pkgs.json"
+
+            PKG_COUNT=$(jq 'length' "$WORK/pkgs.json")
+            echo "$PKG_COUNT pkgs"
+
+            jq -s '.[0] + .[1]' "$WORK/all_packages.json" "$WORK/pkgs.json" \
+              > "$WORK/tmp.json" && mv "$WORK/tmp.json" "$WORK/all_packages.json"
+
+            # Per-repo license breakdown
+            REPO_LICENSES=$(jq '[.[].license] | group_by(.) | map({license: .[0], count: length}) | sort_by(-.count)' "$WORK/pkgs.json")
+            jq --arg repo "$REPO" --argjson count "$PKG_COUNT" --argjson licenses "$REPO_LICENSES" \
+              '. + [{repo: $repo, package_count: $count, licenses: $licenses}]' \
+              "$WORK/repo_summary.json" > "$WORK/tmp.json" && mv "$WORK/tmp.json" "$WORK/repo_summary.json"
+          done <<< "$REPOS"
+
+          # Deduplicate packages across repos
+          jq '[
+            group_by(.name + "@" + (.version // "")) |
+            map({
+              name: .[0].name,
+              version: .[0].version,
+              license: .[0].license,
+              repos: [.[].repo] | unique
+            })
+          ] | .[0] | sort_by(.name)' "$WORK/all_packages.json" > "$WORK/unique_packages.json"
+
+          # License summary
+          jq '[
+            group_by(.license) |
+            map({
+              license: .[0].license,
+              total_usages: length,
+              unique_packages: ([.[].name] | unique | length),
+              repos: ([.[].repo] | unique | sort)
+            }) |
+            sort_by(-.total_usages)
+          ] | .[0]' "$WORK/all_packages.json" > "$WORK/license_summary.json"
+
+          TOTAL_PACKAGES=$(jq 'length' "$WORK/unique_packages.json")
+          TOTAL_REPOS=$(jq 'length' "$WORK/repo_summary.json")
+          TOTAL_LICENSES=$(jq 'length' "$WORK/license_summary.json")
+
+          # Write JSON catalog
+          mkdir -p static/catalog
+          jq -n \
+            --arg ts "$TIMESTAMP" \
+            --arg org "$ORG" \
+            --slurpfile summary "$WORK/license_summary.json" \
+            --slurpfile repos "$WORK/repo_summary.json" \
+            --slurpfile skipped "$WORK/skipped.json" \
+            --slurpfile packages "$WORK/unique_packages.json" \
+            '{
+              generated: $ts,
+              organization: $org,
+              license_summary: $summary[0],
+              repositories: $repos[0],
+              skipped_repositories: $skipped[0],
+              packages: $packages[0]
+            }' > static/catalog/license-inventory.json
+
+          echo "JSON catalog: $(wc -c < static/catalog/license-inventory.json) bytes"
+
+          # Write Markdown page
+          MD="docs/opensource/licenses.md"
+          {
+            printf '%s\n' \
+              '---' \
+              'title: License Inventory' \
+              'sidebar_label: License Inventory' \
+              'description: Open source licenses used across SIROS Foundation repositories' \
+              '---' \
+              '' \
+              '# License Inventory' \
+              '' \
+              'All open source licenses found in dependencies across SIROS Foundation' \
+              'repositories, generated automatically from [GitHub dependency graph](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/about-the-dependency-graph) SBOMs.' \
+              '' \
+              ':::info' \
+              'This page is automatically updated daily. For programmatic access, use the' \
+              '[JSON catalog](https://developers.siros.org/catalog/license-inventory.json):' \
+              '' \
+              '```' \
+              'https://developers.siros.org/catalog/license-inventory.json' \
+              '```' \
+              ':::' \
+              ''
+
+            echo "**${TOTAL_REPOS}** repositories scanned · **${TOTAL_PACKAGES}** unique packages · **${TOTAL_LICENSES}** license types"
+            echo ''
+
+            echo '## License Summary'
+            echo ''
+            echo '| License | Unique Packages | Total Usages |'
+            echo '|---------|---------------:|-------------:|'
+            jq -r '.[] | "| \(.license) | \(.unique_packages) | \(.total_usages) |"' "$WORK/license_summary.json"
+
+            echo ''
+            echo '## Per-Repository Breakdown'
+            echo ''
+            echo '| Repository | Dependencies | Licenses |'
+            echo '|------------|------------:|----------|'
+            jq -r '.[] |
+              "| [\(.repo)](https://github.com/sirosfoundation/\(.repo)) | \(.package_count) | \(.licenses | map("\(.license) (\(.count))") | join(", ")) |"' \
+              "$WORK/repo_summary.json"
+
+            SKIPPED_COUNT=$(jq 'length' "$WORK/skipped.json")
+            if [[ "$SKIPPED_COUNT" -gt 0 ]]; then
+              echo ''
+              echo '## Repositories Without SBOM Data'
+              echo ''
+              echo 'The following repositories do not have the GitHub dependency graph enabled'
+              echo 'and are excluded from this inventory:'
+              echo ''
+              jq -r '.[] | "- [\(.)](https://github.com/sirosfoundation/\(.))"' "$WORK/skipped.json"
+            fi
+
+            echo ''
+            echo "_Last updated: ${TIMESTAMP}_"
+          } > "$MD"
+
+          echo "Markdown page: $(wc -l < "$MD") lines"
+          rm -rf "$WORK"
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add static/catalog/license-inventory.json docs/opensource/licenses.md
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: update license inventory"
+            git push
+          fi
+
+      - name: Trigger deploy
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run build-pages.yaml --ref main
