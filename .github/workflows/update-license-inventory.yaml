@@ -43,6 +43,7 @@ jobs:
             {"pattern": "org.jetbrains.kotlin*", "license": "Apache-2.0", "scope": "production", "reason": "Kotlin stdlib — Apache-2.0"},
             {"pattern": "org.jetbrains.kotlinx*", "license": "Apache-2.0", "scope": "production", "reason": "KotlinX libraries — Apache-2.0"},
             {"pattern": "com.android.*", "license": "Apache-2.0", "scope": "production", "reason": "Android SDK — Apache-2.0"},
+            {"pattern": "com.android:*", "license": "Apache-2.0", "scope": "production", "reason": "Android SDK (Maven) — Apache-2.0"},
             {"pattern": "io.ktor*", "license": "Apache-2.0", "scope": "production", "reason": "Ktor — Apache-2.0"},
             {"pattern": "com.squareup.*", "license": "Apache-2.0", "scope": "production", "reason": "Square libraries — Apache-2.0"},
             {"pattern": "org.slf4j*", "license": "MIT", "scope": "production", "reason": "SLF4J — MIT"},
