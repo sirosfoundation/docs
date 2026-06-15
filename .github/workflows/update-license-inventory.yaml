@@ -18,17 +18,16 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Fetch license policy from compliance repo
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           mkdir -p .license-policy
+          pip install -q pyyaml 2>/dev/null || true
 
-          # Fetch the license policy and compliance controls from the compliance repo
-          gh api "repos/sirosfoundation/compliance/contents/catalog/technical/license-policy.yaml" \
-            --jq '.content' | base64 -d > .license-policy/license-policy.yaml
-          gh api "repos/sirosfoundation/compliance/contents/catalog/technical/license-compliance.yaml" \
-            --jq '.content' | base64 -d > .license-policy/license-compliance.yaml
+          # Fetch from public compliance repo using raw.githubusercontent.com (no auth needed)
+          curl -fsSL "https://raw.githubusercontent.com/sirosfoundation/compliance/main/catalog/technical/license-policy.yaml" \
+            -o .license-policy/license-policy.yaml
+          curl -fsSL "https://raw.githubusercontent.com/sirosfoundation/compliance/main/catalog/technical/license-compliance.yaml" \
+            -o .license-policy/license-compliance.yaml
 
           echo "Fetched license policy and compliance controls"
 
