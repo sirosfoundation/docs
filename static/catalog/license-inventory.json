@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-15T20:09:03Z",
+  "generated": "2026-06-15T20:11:20Z",
   "organization": "sirosfoundation",
   "policy": {
     "overrides_applied": 611,
@@ -479,7 +479,7 @@
       "policy_category": "allowed"
     },
     {
-      "license": "LicenseRef-scancode-generic-cla AND MIT",
+      "license": "0BSD AND ISC AND MIT",
       "total_usages": 2,
       "unique_packages": 1,
       "repos": [
@@ -489,7 +489,7 @@
       "policy_category": "allowed"
     },
     {
-      "license": "0BSD AND ISC AND MIT",
+      "license": "LicenseRef-scancode-generic-cla AND MIT",
       "total_usages": 2,
       "unique_packages": 1,
       "repos": [
@@ -537,22 +537,13 @@
       "policy_category": "allowed"
     },
     {
-      "license": "CDDL-1.1",
+      "license": "Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND Elastic-2.0 AND LicenseRef-scancode-public-domain AND MIT AND bzip2-1.0.6",
       "total_usages": 1,
       "unique_packages": 1,
       "repos": [
         "siros-sdk-kotlin"
       ],
-      "policy_category": "weak-copyleft"
-    },
-    {
-      "license": "Apache-2.0 AND LicenseRef-scancode-public-domain AND bzip2-1.0.6",
-      "total_usages": 1,
-      "unique_packages": 1,
-      "repos": [
-        "siros-sdk-kotlin"
-      ],
-      "policy_category": "allowed"
+      "policy_category": "build-only"
     },
     {
       "license": "EPL-1.0",
@@ -564,7 +555,16 @@
       "policy_category": "test-only"
     },
     {
-      "license": "LGPL-2.1",
+      "license": "Apache-2.0 AND LGPL-2.1-only",
+      "total_usages": 1,
+      "unique_packages": 1,
+      "repos": [
+        "siros-sdk-kotlin"
+      ],
+      "policy_category": "weak-copyleft"
+    },
+    {
+      "license": "CDDL-1.1",
       "total_usages": 1,
       "unique_packages": 1,
       "repos": [
@@ -582,7 +582,25 @@
       "policy_category": "weak-copyleft"
     },
     {
-      "license": "Apache-2.0 AND LGPL-2.1-only",
+      "license": "MPL-1.1",
+      "total_usages": 1,
+      "unique_packages": 1,
+      "repos": [
+        "siros-sdk-kotlin"
+      ],
+      "policy_category": "weak-copyleft"
+    },
+    {
+      "license": "Apache-2.0 AND LicenseRef-scancode-public-domain AND bzip2-1.0.6",
+      "total_usages": 1,
+      "unique_packages": 1,
+      "repos": [
+        "siros-sdk-kotlin"
+      ],
+      "policy_category": "allowed"
+    },
+    {
+      "license": "LGPL-2.1",
       "total_usages": 1,
       "unique_packages": 1,
       "repos": [
@@ -600,25 +618,7 @@
       "policy_category": "allowed"
     },
     {
-      "license": "Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND Elastic-2.0 AND LicenseRef-scancode-public-domain AND MIT AND bzip2-1.0.6",
-      "total_usages": 1,
-      "unique_packages": 1,
-      "repos": [
-        "siros-sdk-kotlin"
-      ],
-      "policy_category": "build-only"
-    },
-    {
-      "license": "MPL-1.1",
-      "total_usages": 1,
-      "unique_packages": 1,
-      "repos": [
-        "siros-sdk-kotlin"
-      ],
-      "policy_category": "weak-copyleft"
-    },
-    {
-      "license": "Apache-2.0 AND LicenseRef-scancode-dco-1.1 AND MIT",
+      "license": "Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause",
       "total_usages": 1,
       "unique_packages": 1,
       "repos": [
@@ -627,7 +627,7 @@
       "policy_category": "allowed"
     },
     {
-      "license": "Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause",
+      "license": "Apache-2.0 AND LicenseRef-scancode-dco-1.1 AND MIT",
       "total_usages": 1,
       "unique_packages": 1,
       "repos": [
@@ -654,15 +654,6 @@
       "policy_category": "documentation"
     },
     {
-      "license": "BSD-3-Clause AND ISC AND MIT",
-      "total_usages": 1,
-      "unique_packages": 1,
-      "repos": [
-        "wallet-common"
-      ],
-      "policy_category": "allowed"
-    },
-    {
       "license": "BSD-2-Clause AND CC0-1.0 AND ISC AND MIT",
       "total_usages": 1,
       "unique_packages": 1,
@@ -672,13 +663,13 @@
       "policy_category": "allowed"
     },
     {
-      "license": "Apache-2.0 AND LGPL-3.0-or-later AND MIT",
+      "license": "BSD-3-Clause AND ISC AND MIT",
       "total_usages": 1,
       "unique_packages": 1,
       "repos": [
-        "wallet-companion"
+        "wallet-common"
       ],
-      "policy_category": "weak-copyleft"
+      "policy_category": "allowed"
     },
     {
       "license": "LicenseRef-scancode-unicode AND MIT",
@@ -690,13 +681,13 @@
       "policy_category": "allowed"
     },
     {
-      "license": "CC-BY-4.0",
+      "license": "Apache-2.0 AND LGPL-3.0-or-later AND MIT",
       "total_usages": 1,
       "unique_packages": 1,
       "repos": [
-        "wallet-frontend"
+        "wallet-companion"
       ],
-      "policy_category": "documentation"
+      "policy_category": "weak-copyleft"
     },
     {
       "license": "BSD-3-Clause AND MIT",
@@ -726,6 +717,15 @@
       "policy_category": "allowed"
     },
     {
+      "license": "Apache-2.0 AND BSD-3-Clause AND ISC AND MIT",
+      "total_usages": 1,
+      "unique_packages": 1,
+      "repos": [
+        "wallet-frontend"
+      ],
+      "policy_category": "allowed"
+    },
+    {
       "license": "AFL-2.1 AND AFL-3.0 AND BSD-3-Clause",
       "total_usages": 1,
       "unique_packages": 1,
@@ -735,13 +735,13 @@
       "policy_category": "allowed"
     },
     {
-      "license": "Apache-2.0 AND BSD-3-Clause AND ISC AND MIT",
+      "license": "CC-BY-4.0",
       "total_usages": 1,
       "unique_packages": 1,
       "repos": [
         "wallet-frontend"
       ],
-      "policy_category": "allowed"
+      "policy_category": "documentation"
     }
   ],
   "license_summary_raw": [
