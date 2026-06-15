@@ -17,78 +17,66 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Fetch license policy from compliance repo
+      - name: Prepare license policy
         run: |
           set -euo pipefail
           mkdir -p .license-policy
-          pip install -q pyyaml 2>/dev/null || true
 
-          # Fetch from public compliance repo using raw.githubusercontent.com (no auth needed)
-          curl -fsSL "https://raw.githubusercontent.com/sirosfoundation/compliance/main/catalog/technical/license-policy.yaml" \
-            -o .license-policy/license-policy.yaml
-          curl -fsSL "https://raw.githubusercontent.com/sirosfoundation/compliance/main/catalog/technical/license-compliance.yaml" \
-            -o .license-policy/license-compliance.yaml
+          # Write policy data as JSON directly (source of truth: sirosfoundation/compliance)
+          # Keep in sync with compliance/catalog/technical/license-policy.yaml
+          cat > .license-policy/overrides.json << 'EOF'
+          [
+            {"pattern": "github.com/gematik/zero-lab/*", "license": "EUPL-1.2", "scope": "production", "reason": "Repository root LICENSE is EUPL-1.2"},
+            {"pattern": "github.com/multiformats/go-base36", "license": "Apache-2.0", "scope": "production", "reason": "Dual-licensed Apache-2.0 OR MIT; select Apache-2.0"},
+            {"pattern": "github.com/moov-io/signedxml", "license": "MIT", "scope": "production", "reason": "go-licenses correctly resolves to MIT"},
+            {"pattern": "github.com/sirosfoundation/go-cryptoutil/brainpool", "license": "BSD-2-Clause", "scope": "production", "reason": "Internal package; parent module is BSD-2-Clause"},
+            {"pattern": "actions/*", "license": "MIT", "scope": "ci-only", "reason": "GitHub Actions — not in deliverable artifacts"},
+            {"pattern": "SonarSource/*", "license": "LGPL-3.0", "scope": "ci-only", "reason": "SonarQube action — CI-only"},
+            {"pattern": "docker/*", "license": "Apache-2.0", "scope": "ci-only", "reason": "Docker actions — CI-only"},
+            {"pattern": "anchore/*", "license": "Apache-2.0", "scope": "ci-only", "reason": "Anchore actions — CI-only"},
+            {"pattern": "step-security/*", "license": "Apache-2.0", "scope": "ci-only", "reason": "StepSecurity actions — CI-only"},
+            {"pattern": "softprops/*", "license": "MIT", "scope": "ci-only", "reason": "Release actions — CI-only"},
+            {"pattern": "github/*", "license": "MIT", "scope": "ci-only", "reason": "GitHub official actions — CI-only"}
+          ]
+          EOF
 
-          echo "Fetched license policy and compliance controls"
-
-          # Build override map and dual-license selections as JSON for jq consumption
-          # Parse YAML overrides into a JSON lookup (pattern -> resolved license + reason)
-          python3 << 'PYEOF'
-          import yaml, json
-
-          with open(".license-policy/license-policy.yaml") as f:
-              policy = yaml.safe_load(f)
-
-          p = policy["policy"]
-
-          # Build overrides list
-          overrides = []
-          for o in p.get("overrides", []):
-              overrides.append({
-                  "pattern": o["pattern"],
-                  "license": o["license"],
-                  "scope": o.get("scope", "production"),
-                  "reason": o["reason"]
-              })
-
-          # Build license classification sets
-          classification = {}
-          for lic in p.get("allowed", []):
-              classification[lic] = "allowed"
-          for lic in p.get("allowed_weak_copyleft", []):
-              if isinstance(lic, str):
-                  classification[lic] = "weak-copyleft"
-          for lic in p.get("test_only", []):
-              if isinstance(lic, str):
-                  classification[lic] = "test-only"
-          for lic in p.get("build_only", []):
-              if isinstance(lic, str):
-                  classification[lic] = "build-only"
-          for lic in p.get("blocked", []):
-              if isinstance(lic, str):
-                  classification[lic] = "blocked"
-          for lic in p.get("documentation", []):
-              if isinstance(lic, str):
-                  classification[lic] = "documentation"
-
-          # Dual-license selections: OR expressions where we pick the permissive side
-          dual_license_map = {
-              "CDDL-1.0 OR GPL-2.0-only WITH Classpath-exception-2.0": "CDDL-1.0",
-              "CDDL-1.1 OR GPL-2.0-only WITH Classpath-exception-2.0": "CDDL-1.1",
-              "GPL-3.0-only OR MIT": "MIT",
-              "BSD-3-Clause OR GPL-2.0-only": "BSD-3-Clause",
-              "Apache-2.0 OR LGPL-2.1-or-later": "Apache-2.0",
+          cat > .license-policy/classification.json << 'EOF'
+          {
+            "MIT": "allowed", "Apache-2.0": "allowed", "BSD-2-Clause": "allowed",
+            "BSD-3-Clause": "allowed", "ISC": "allowed", "CC0-1.0": "allowed",
+            "Unlicense": "allowed", "0BSD": "allowed", "BlueOak-1.0.0": "allowed",
+            "BSL-1.0": "allowed", "Zlib": "allowed", "X11": "allowed",
+            "curl": "allowed", "bzip2-1.0.6": "allowed", "PostgreSQL": "allowed",
+            "MPL-2.0": "weak-copyleft",
+            "LGPL-2.1-only": "weak-copyleft", "LGPL-2.1-or-later": "weak-copyleft",
+            "LGPL-3.0-only": "weak-copyleft", "LGPL-3.0-or-later": "weak-copyleft",
+            "EUPL-1.2": "weak-copyleft",
+            "CDDL-1.0": "weak-copyleft", "CDDL-1.1": "weak-copyleft",
+            "CPL-1.0": "weak-copyleft",
+            "EPL-1.0": "test-only", "EPL-2.0": "test-only",
+            "Elastic-2.0": "build-only",
+            "AGPL-3.0-only": "blocked", "AGPL-3.0-or-later": "blocked",
+            "SSPL-1.0": "blocked",
+            "GPL-2.0-only": "blocked", "GPL-3.0-only": "blocked",
+            "GPL-3.0-or-later": "blocked",
+            "CC-BY-NC-4.0": "blocked", "CC-BY-NC-SA-4.0": "blocked",
+            "CC-BY-NC-ND-4.0": "blocked",
+            "CC-BY-4.0": "documentation", "CC-BY-SA-4.0": "documentation",
+            "GFDL-1.3-only": "documentation"
           }
+          EOF
 
-          with open(".license-policy/overrides.json", "w") as f:
-              json.dump(overrides, f)
-          with open(".license-policy/classification.json", "w") as f:
-              json.dump(classification, f)
-          with open(".license-policy/dual-license-map.json", "w") as f:
-              json.dump(dual_license_map, f)
+          cat > .license-policy/dual-license-map.json << 'EOF'
+          {
+            "CDDL-1.0 OR GPL-2.0-only WITH Classpath-exception-2.0": "CDDL-1.0",
+            "CDDL-1.1 OR GPL-2.0-only WITH Classpath-exception-2.0": "CDDL-1.1",
+            "GPL-3.0-only OR MIT": "MIT",
+            "BSD-3-Clause OR GPL-2.0-only": "BSD-3-Clause",
+            "Apache-2.0 OR LGPL-2.1-or-later": "Apache-2.0"
+          }
+          EOF
 
-          print(f"Parsed {len(overrides)} overrides, {len(classification)} license classifications, {len(dual_license_map)} dual-license selections")
-          PYEOF
+          echo "License policy prepared (overrides, classification, dual-license map)"
 
       - name: Generate license inventory from SBOMs
         env:
