@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-15T14:18:23Z",
+  "generated": "2026-06-15T14:25:42Z",
   "organization": "sirosfoundation",
   "license_summary": [
     {
@@ -914,40 +914,6 @@
       ]
     },
     {
-      "repo": "goFF",
-      "package_count": 32,
-      "licenses": [
-        {
-          "license": "NOASSERTION",
-          "count": 19
-        },
-        {
-          "license": "Apache-2.0",
-          "count": 4
-        },
-        {
-          "license": "BSD-2-Clause",
-          "count": 2
-        },
-        {
-          "license": "BSD-3-Clause",
-          "count": 2
-        },
-        {
-          "license": "BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang",
-          "count": 2
-        },
-        {
-          "license": "MIT",
-          "count": 2
-        },
-        {
-          "license": "ISC",
-          "count": 1
-        }
-      ]
-    },
-    {
       "repo": "go-invite-op",
       "package_count": 132,
       "licenses": [
@@ -1134,6 +1100,40 @@
         {
           "license": "Apache-2.0 AND MIT",
           "count": 1
+        },
+        {
+          "license": "ISC",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "repo": "goFF",
+      "package_count": 32,
+      "licenses": [
+        {
+          "license": "NOASSERTION",
+          "count": 19
+        },
+        {
+          "license": "Apache-2.0",
+          "count": 4
+        },
+        {
+          "license": "BSD-2-Clause",
+          "count": 2
+        },
+        {
+          "license": "BSD-3-Clause",
+          "count": 2
+        },
+        {
+          "license": "BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang",
+          "count": 2
+        },
+        {
+          "license": "MIT",
+          "count": 2
         },
         {
           "license": "ISC",
