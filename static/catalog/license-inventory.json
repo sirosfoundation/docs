@@ -1,12 +1,12 @@
 {
-  "generated": "2026-06-17T09:12:05Z",
+  "generated": "2026-06-17T10:04:16Z",
   "organization": "sirosfoundation",
   "policy": {
     "overrides_applied": 611,
     "dual_license_selections": 156,
     "noassertion_remaining": 1,
     "categories": {
-      "allowed": 2607,
+      "allowed": 2617,
       "build-only": 85,
       "ci-only": 69,
       "weak-copyleft": 3,
@@ -74,7 +74,7 @@
   "license_summary": [
     {
       "license": "MIT",
-      "total_usages": 2375,
+      "total_usages": 2373,
       "unique_packages": 1262,
       "repos": [
         "browser-log",
@@ -180,7 +180,7 @@
     },
     {
       "license": "ISC",
-      "total_usages": 101,
+      "total_usages": 100,
       "unique_packages": 45,
       "repos": [
         "browser-log",
@@ -481,7 +481,7 @@
       "policy_category": "allowed"
     },
     {
-      "license": "LicenseRef-scancode-generic-cla AND MIT",
+      "license": "0BSD AND ISC AND MIT",
       "total_usages": 2,
       "unique_packages": 1,
       "repos": [
@@ -491,7 +491,7 @@
       "policy_category": "allowed"
     },
     {
-      "license": "0BSD AND ISC AND MIT",
+      "license": "LicenseRef-scancode-generic-cla AND MIT",
       "total_usages": 2,
       "unique_packages": 1,
       "repos": [
@@ -539,22 +539,13 @@
       "policy_category": "allowed"
     },
     {
-      "license": "EPL-1.0",
+      "license": "Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND Elastic-2.0 AND LicenseRef-scancode-public-domain AND MIT AND bzip2-1.0.6",
       "total_usages": 1,
       "unique_packages": 1,
       "repos": [
         "siros-sdk-kotlin"
       ],
-      "policy_category": "test-only"
-    },
-    {
-      "license": "Apache-2.0 AND LicenseRef-scancode-public-domain AND bzip2-1.0.6",
-      "total_usages": 1,
-      "unique_packages": 1,
-      "repos": [
-        "siros-sdk-kotlin"
-      ],
-      "policy_category": "allowed"
+      "policy_category": "build-only"
     },
     {
       "license": "LicenseRef-scancode-jdom",
@@ -564,24 +555,6 @@
         "siros-sdk-kotlin"
       ],
       "policy_category": "allowed"
-    },
-    {
-      "license": "MPL-1.1",
-      "total_usages": 1,
-      "unique_packages": 1,
-      "repos": [
-        "siros-sdk-kotlin"
-      ],
-      "policy_category": "weak-copyleft"
-    },
-    {
-      "license": "Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND Elastic-2.0 AND LicenseRef-scancode-public-domain AND MIT AND bzip2-1.0.6",
-      "total_usages": 1,
-      "unique_packages": 1,
-      "repos": [
-        "siros-sdk-kotlin"
-      ],
-      "policy_category": "build-only"
     },
     {
       "license": "CDDL-1.1",
@@ -602,6 +575,15 @@
       "policy_category": "weak-copyleft"
     },
     {
+      "license": "Apache-2.0 AND LicenseRef-scancode-public-domain AND bzip2-1.0.6",
+      "total_usages": 1,
+      "unique_packages": 1,
+      "repos": [
+        "siros-sdk-kotlin"
+      ],
+      "policy_category": "allowed"
+    },
+    {
       "license": "CDDL-1.0",
       "total_usages": 1,
       "unique_packages": 1,
@@ -611,13 +593,22 @@
       "policy_category": "weak-copyleft"
     },
     {
-      "license": "Apache-2.0 AND CC-BY-SA-4.0",
+      "license": "MPL-1.1",
       "total_usages": 1,
       "unique_packages": 1,
       "repos": [
-        "vc"
+        "siros-sdk-kotlin"
       ],
-      "policy_category": "documentation"
+      "policy_category": "weak-copyleft"
+    },
+    {
+      "license": "EPL-1.0",
+      "total_usages": 1,
+      "unique_packages": 1,
+      "repos": [
+        "siros-sdk-kotlin"
+      ],
+      "policy_category": "test-only"
     },
     {
       "license": "Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause",
@@ -636,6 +627,15 @@
         "vc"
       ],
       "policy_category": "allowed"
+    },
+    {
+      "license": "Apache-2.0 AND CC-BY-SA-4.0",
+      "total_usages": 1,
+      "unique_packages": 1,
+      "repos": [
+        "vc"
+      ],
+      "policy_category": "documentation"
     },
     {
       "license": "BSD-2-Clause-Views",
@@ -674,6 +674,15 @@
       "policy_category": "unclassified"
     },
     {
+      "license": "LicenseRef-scancode-unicode AND MIT",
+      "total_usages": 1,
+      "unique_packages": 1,
+      "repos": [
+        "wallet-companion"
+      ],
+      "policy_category": "allowed"
+    },
+    {
       "license": "Apache-2.0 AND LGPL-3.0-or-later AND MIT",
       "total_usages": 1,
       "unique_packages": 1,
@@ -683,13 +692,13 @@
       "policy_category": "weak-copyleft"
     },
     {
-      "license": "LicenseRef-scancode-unicode AND MIT",
+      "license": "CC-BY-4.0",
       "total_usages": 1,
       "unique_packages": 1,
       "repos": [
-        "wallet-companion"
+        "wallet-frontend"
       ],
-      "policy_category": "allowed"
+      "policy_category": "documentation"
     },
     {
       "license": "Apache-2.0 AND BSD-3-Clause AND ISC AND MIT",
@@ -701,7 +710,7 @@
       "policy_category": "allowed"
     },
     {
-      "license": "LicenseRef-scancode-public-domain",
+      "license": "AFL-2.1 AND AFL-3.0 AND BSD-3-Clause",
       "total_usages": 1,
       "unique_packages": 1,
       "repos": [
@@ -719,16 +728,7 @@
       "policy_category": "allowed"
     },
     {
-      "license": "CC-BY-4.0",
-      "total_usages": 1,
-      "unique_packages": 1,
-      "repos": [
-        "wallet-frontend"
-      ],
-      "policy_category": "documentation"
-    },
-    {
-      "license": "AFL-2.1 AND AFL-3.0 AND BSD-3-Clause",
+      "license": "Apache-2.0 AND BSD-2-Clause AND BlueOak-1.0.0 AND CC0-1.0 AND ISC AND MIT",
       "total_usages": 1,
       "unique_packages": 1,
       "repos": [
@@ -737,7 +737,7 @@
       "policy_category": "allowed"
     },
     {
-      "license": "Apache-2.0 AND BSD-2-Clause AND BlueOak-1.0.0 AND CC0-1.0 AND ISC AND MIT",
+      "license": "LicenseRef-scancode-public-domain",
       "total_usages": 1,
       "unique_packages": 1,
       "repos": [
@@ -749,7 +749,7 @@
   "license_summary_raw": [
     {
       "license": "MIT",
-      "total_usages": 2046,
+      "total_usages": 2044,
       "unique_packages": 1111,
       "repos": [
         "browser-log",
@@ -855,7 +855,7 @@
     },
     {
       "license": "ISC",
-      "total_usages": 101,
+      "total_usages": 100,
       "unique_packages": 45,
       "repos": [
         "browser-log",
@@ -1518,7 +1518,7 @@
       "licenses": [
         {
           "license": "MIT",
-          "count": 254
+          "count": 270
         },
         {
           "license": "ISC",
@@ -1529,23 +1529,15 @@
           "count": 12
         },
         {
-          "license": "MIT OR Apache-2.0",
+          "license": "BSD-2-Clause",
           "count": 9
         },
         {
-          "license": "BSD-2-Clause",
-          "count": 8
-        },
-        {
-          "license": "NOASSERTION",
-          "count": 8
-        },
-        {
-          "license": "Apache-2.0",
+          "license": "BSD-3-Clause",
           "count": 4
         },
         {
-          "license": "BSD-3-Clause",
+          "license": "Apache-2.0",
           "count": 4
         },
         {
@@ -1553,7 +1545,15 @@
           "count": 2
         },
         {
+          "license": "BSD-2-Clause AND BSD-3-Clause",
+          "count": 1
+        },
+        {
           "license": "0BSD",
+          "count": 1
+        },
+        {
+          "license": "CC0-1.0",
           "count": 1
         },
         {
@@ -1561,15 +1561,7 @@
           "count": 1
         },
         {
-          "license": "BSD-2-Clause AND BSD-3-Clause",
-          "count": 1
-        },
-        {
           "license": "BlueOak-1.0.0",
-          "count": 1
-        },
-        {
-          "license": "CC0-1.0",
           "count": 1
         },
         {
@@ -1584,19 +1576,19 @@
       "licenses": [
         {
           "license": "MIT",
-          "count": 21
-        },
-        {
-          "license": "NOASSERTION",
-          "count": 16
+          "count": 32
         },
         {
           "license": "Apache-2.0",
-          "count": 12
+          "count": 13
         },
         {
           "license": "BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang",
           "count": 6
+        },
+        {
+          "license": "BSD-2-Clause",
+          "count": 4
         },
         {
           "license": "BSD-3-Clause",
@@ -1607,7 +1599,7 @@
           "count": 1
         },
         {
-          "license": "BSD-2-Clause",
+          "license": "LGPL-3.0",
           "count": 1
         }
       ]
@@ -1617,23 +1609,23 @@
       "package_count": 38,
       "licenses": [
         {
-          "license": "NOASSERTION",
-          "count": 21
-        },
-        {
           "license": "MIT",
-          "count": 6
-        },
-        {
-          "license": "Apache-2.0",
-          "count": 4
+          "count": 17
         },
         {
           "license": "BSD-2-Clause",
-          "count": 4
+          "count": 7
+        },
+        {
+          "license": "Apache-2.0",
+          "count": 5
         },
         {
           "license": "BSD-3-Clause",
+          "count": 5
+        },
+        {
+          "license": "ISC",
           "count": 1
         },
         {
@@ -1641,7 +1633,11 @@
           "count": 1
         },
         {
-          "license": "ISC",
+          "license": "EUPL-1.2",
+          "count": 1
+        },
+        {
+          "license": "LGPL-3.0",
           "count": 1
         }
       ]
@@ -1651,15 +1647,27 @@
       "package_count": 17,
       "licenses": [
         {
-          "license": "NOASSERTION",
-          "count": 15
+          "license": "MIT",
+          "count": 10
         },
         {
           "license": "BSD-2-Clause",
-          "count": 1
+          "count": 3
         },
         {
           "license": "BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang",
+          "count": 1
+        },
+        {
+          "license": "EUPL-1.2",
+          "count": 1
+        },
+        {
+          "license": "Apache-2.0",
+          "count": 1
+        },
+        {
+          "license": "LGPL-3.0",
           "count": 1
         }
       ]
@@ -1670,15 +1678,11 @@
       "licenses": [
         {
           "license": "MIT",
-          "count": 68
+          "count": 78
         },
         {
           "license": "Apache-2.0",
-          "count": 18
-        },
-        {
-          "license": "NOASSERTION",
-          "count": 14
+          "count": 21
         },
         {
           "license": "MPL-2.0",
@@ -1697,15 +1701,15 @@
           "count": 3
         },
         {
+          "license": "BSD-2-Clause",
+          "count": 2
+        },
+        {
           "license": "Apache-2.0 AND BSD-3-Clause AND MIT",
           "count": 1
         },
         {
           "license": "Apache-2.0 AND MIT",
-          "count": 1
-        },
-        {
-          "license": "BSD-2-Clause",
           "count": 1
         }
       ]
@@ -1715,35 +1719,35 @@
       "package_count": 48,
       "licenses": [
         {
-          "license": "NOASSERTION",
-          "count": 18
+          "license": "MIT",
+          "count": 21
         },
         {
           "license": "Apache-2.0",
-          "count": 9
-        },
-        {
-          "license": "MIT",
-          "count": 8
+          "count": 10
         },
         {
           "license": "BSD-3-Clause",
-          "count": 5
+          "count": 6
         },
         {
           "license": "BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang",
           "count": 5
         },
         {
-          "license": "Apache-2.0 AND BSD-3-Clause AND MIT",
-          "count": 1
+          "license": "BSD-2-Clause",
+          "count": 3
         },
         {
           "license": "Apache-2.0 AND MIT",
           "count": 1
         },
         {
-          "license": "BSD-2-Clause",
+          "license": "Apache-2.0 AND BSD-3-Clause AND MIT",
+          "count": 1
+        },
+        {
+          "license": "LGPL-3.0",
           "count": 1
         }
       ]
@@ -1753,15 +1757,23 @@
       "package_count": 19,
       "licenses": [
         {
-          "license": "NOASSERTION",
-          "count": 16
-        },
-        {
           "license": "MIT",
-          "count": 2
+          "count": 13
         },
         {
           "license": "BSD-2-Clause",
+          "count": 3
+        },
+        {
+          "license": "LGPL-3.0",
+          "count": 1
+        },
+        {
+          "license": "Apache-2.0",
+          "count": 1
+        },
+        {
+          "license": "BSD-3-Clause",
           "count": 1
         }
       ]
@@ -1771,28 +1783,24 @@
       "package_count": 129,
       "licenses": [
         {
-          "license": "NOASSERTION",
-          "count": 49
-        },
-        {
           "license": "MIT",
-          "count": 38
+          "count": 60
         },
         {
           "license": "Apache-2.0",
+          "count": 28
+        },
+        {
+          "license": "BSD-2-Clause",
           "count": 12
+        },
+        {
+          "license": "BSD-3-Clause",
+          "count": 11
         },
         {
           "license": "BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang",
           "count": 9
-        },
-        {
-          "license": "BSD-3-Clause",
-          "count": 7
-        },
-        {
-          "license": "BSD-2-Clause",
-          "count": 6
         },
         {
           "license": "Apache-2.0 AND MIT",
@@ -1813,6 +1821,10 @@
         {
           "license": "MIT-0",
           "count": 1
+        },
+        {
+          "license": "LGPL-3.0",
+          "count": 1
         }
       ]
     },
@@ -1821,31 +1833,27 @@
       "package_count": 102,
       "licenses": [
         {
-          "license": "NOASSERTION",
-          "count": 43
-        },
-        {
           "license": "MIT",
-          "count": 25
+          "count": 44
         },
         {
           "license": "Apache-2.0",
-          "count": 17
+          "count": 26
         },
         {
           "license": "BSD-3-Clause",
-          "count": 7
+          "count": 13
+        },
+        {
+          "license": "BSD-2-Clause",
+          "count": 10
         },
         {
           "license": "BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang",
           "count": 5
         },
         {
-          "license": "BSD-2-Clause",
-          "count": 2
-        },
-        {
-          "license": "Apache-2.0 AND BSD-3-Clause AND MIT",
+          "license": "ISC",
           "count": 1
         },
         {
@@ -1853,7 +1861,11 @@
           "count": 1
         },
         {
-          "license": "ISC",
+          "license": "Apache-2.0 AND BSD-3-Clause AND MIT",
+          "count": 1
+        },
+        {
+          "license": "LGPL-3.0",
           "count": 1
         }
       ]
@@ -1863,31 +1875,31 @@
       "package_count": 32,
       "licenses": [
         {
-          "license": "NOASSERTION",
-          "count": 19
-        },
-        {
-          "license": "Apache-2.0",
-          "count": 4
+          "license": "MIT",
+          "count": 14
         },
         {
           "license": "BSD-2-Clause",
-          "count": 2
+          "count": 5
+        },
+        {
+          "license": "Apache-2.0",
+          "count": 5
         },
         {
           "license": "BSD-3-Clause",
-          "count": 2
+          "count": 4
         },
         {
           "license": "BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang",
           "count": 2
         },
         {
-          "license": "MIT",
-          "count": 2
+          "license": "ISC",
+          "count": 1
         },
         {
-          "license": "ISC",
+          "license": "LGPL-3.0",
           "count": 1
         }
       ]
@@ -1897,23 +1909,19 @@
       "package_count": 17,
       "licenses": [
         {
-          "license": "NOASSERTION",
+          "license": "MIT",
           "count": 7
         },
         {
           "license": "Apache-2.0",
-          "count": 3
+          "count": 4
         },
         {
           "license": "BSD-2-Clause",
-          "count": 2
+          "count": 3
         },
         {
           "license": "BSD-3-Clause",
-          "count": 2
-        },
-        {
-          "license": "MIT",
           "count": 2
         },
         {
@@ -1927,32 +1935,16 @@
       "package_count": 161,
       "licenses": [
         {
-          "license": "MIT OR Apache-2.0",
-          "count": 91
+          "license": "MIT",
+          "count": 107
         },
         {
-          "license": "Apache-2.0 OR MIT",
-          "count": 22
+          "license": "Apache-2.0",
+          "count": 29
         },
         {
           "license": "Unicode-3.0",
           "count": 18
-        },
-        {
-          "license": "MIT",
-          "count": 6
-        },
-        {
-          "license": "NOASSERTION",
-          "count": 5
-        },
-        {
-          "license": "Apache-2.0",
-          "count": 3
-        },
-        {
-          "license": "BSD-2-Clause OR Apache-2.0 OR MIT",
-          "count": 2
         },
         {
           "license": "CDLA-Permissive-2.0",
@@ -1963,31 +1955,7 @@
           "count": 2
         },
         {
-          "license": "Unlicense OR MIT",
-          "count": 2
-        },
-        {
-          "license": "(MIT OR Apache-2.0) AND Unicode-3.0",
-          "count": 1
-        },
-        {
-          "license": "0BSD OR MIT OR Apache-2.0",
-          "count": 1
-        },
-        {
           "license": "Apache-2.0 AND ISC",
-          "count": 1
-        },
-        {
-          "license": "Apache-2.0 OR ISC OR MIT",
-          "count": 1
-        },
-        {
-          "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
-          "count": 1
-        },
-        {
-          "license": "BSD-2-Clause",
           "count": 1
         },
         {
@@ -1995,7 +1963,7 @@
           "count": 1
         },
         {
-          "license": "MIT OR Zlib OR Apache-2.0",
+          "license": "BSD-2-Clause",
           "count": 1
         }
       ]
@@ -2005,31 +1973,31 @@
       "package_count": 38,
       "licenses": [
         {
-          "license": "NOASSERTION",
-          "count": 16
+          "license": "MIT",
+          "count": 14
         },
         {
           "license": "BSD-3-Clause",
-          "count": 9
+          "count": 10
         },
         {
           "license": "Apache-2.0",
-          "count": 6
-        },
-        {
-          "license": "MIT",
-          "count": 3
+          "count": 7
         },
         {
           "license": "BSD-2-Clause",
-          "count": 2
+          "count": 4
+        },
+        {
+          "license": "ISC",
+          "count": 1
         },
         {
           "license": "BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang",
           "count": 1
         },
         {
-          "license": "ISC",
+          "license": "LGPL-3.0",
           "count": 1
         }
       ]
@@ -2039,12 +2007,8 @@
       "package_count": 466,
       "licenses": [
         {
-          "license": "NOASSERTION",
-          "count": 249
-        },
-        {
           "license": "Apache-2.0",
-          "count": 173
+          "count": 416
         },
         {
           "license": "BSD-3-Clause",
@@ -2052,15 +2016,19 @@
         },
         {
           "license": "MIT",
-          "count": 9
+          "count": 15
         },
         {
           "license": "EPL-2.0",
-          "count": 6
+          "count": 7
         },
         {
           "license": "BSD-2-Clause",
-          "count": 2
+          "count": 3
+        },
+        {
+          "license": "Apache-2.0 AND MIT",
+          "count": 1
         },
         {
           "license": "Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND Elastic-2.0 AND LicenseRef-scancode-public-domain AND MIT AND bzip2-1.0.6",
@@ -2071,31 +2039,11 @@
           "count": 1
         },
         {
-          "license": "Apache-2.0 AND LGPL-2.1-only",
+          "license": "LicenseRef-scancode-jdom",
           "count": 1
         },
         {
-          "license": "Apache-2.0 AND LicenseRef-scancode-public-domain AND bzip2-1.0.6",
-          "count": 1
-        },
-        {
-          "license": "Apache-2.0 AND MIT",
-          "count": 1
-        },
-        {
-          "license": "Apache-2.0 OR LGPL-2.1-or-later",
-          "count": 1
-        },
-        {
-          "license": "CDDL-1.0 OR GPL-2.0-only WITH Classpath-exception-2.0",
-          "count": 1
-        },
-        {
-          "license": "CDDL-1.1 OR GPL-2.0-only WITH Classpath-exception-2.0",
-          "count": 1
-        },
-        {
-          "license": "EPL-1.0",
+          "license": "CDDL-1.1",
           "count": 1
         },
         {
@@ -2103,11 +2051,19 @@
           "count": 1
         },
         {
-          "license": "LicenseRef-scancode-jdom",
+          "license": "Apache-2.0 AND LicenseRef-scancode-public-domain AND bzip2-1.0.6",
+          "count": 1
+        },
+        {
+          "license": "CDDL-1.0",
           "count": 1
         },
         {
           "license": "MPL-1.1",
+          "count": 1
+        },
+        {
+          "license": "EPL-1.0",
           "count": 1
         }
       ]
@@ -2117,11 +2073,15 @@
       "package_count": 10,
       "licenses": [
         {
-          "license": "NOASSERTION",
-          "count": 9
+          "license": "MIT",
+          "count": 7
         },
         {
           "license": "BSD-2-Clause",
+          "count": 2
+        },
+        {
+          "license": "Apache-2.0",
           "count": 1
         }
       ]
@@ -2131,24 +2091,20 @@
       "package_count": 211,
       "licenses": [
         {
-          "license": "NOASSERTION",
-          "count": 71
-        },
-        {
           "license": "MIT",
-          "count": 57
+          "count": 81
         },
         {
           "license": "Apache-2.0",
-          "count": 44
+          "count": 74
         },
         {
           "license": "BSD-3-Clause",
-          "count": 17
+          "count": 29
         },
         {
           "license": "BSD-2-Clause",
-          "count": 5
+          "count": 10
         },
         {
           "license": "Apache-2.0 AND MIT",
@@ -2163,23 +2119,15 @@
           "count": 2
         },
         {
-          "license": "Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause",
-          "count": 1
-        },
-        {
           "license": "Apache-2.0 AND BSD-3-Clause",
           "count": 1
         },
         {
-          "license": "Apache-2.0 AND BSD-3-Clause AND MIT",
+          "license": "MPL-2.0",
           "count": 1
         },
         {
-          "license": "Apache-2.0 AND CC-BY-3.0 AND MIT",
-          "count": 1
-        },
-        {
-          "license": "Apache-2.0 AND CC-BY-SA-4.0",
+          "license": "Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause",
           "count": 1
         },
         {
@@ -2187,7 +2135,11 @@
           "count": 1
         },
         {
-          "license": "BSD-2-Clause-Views",
+          "license": "Apache-2.0 AND CC-BY-SA-4.0",
+          "count": 1
+        },
+        {
+          "license": "Apache-2.0 AND CC-BY-3.0 AND MIT",
           "count": 1
         },
         {
@@ -2195,7 +2147,11 @@
           "count": 1
         },
         {
-          "license": "MPL-2.0",
+          "license": "Apache-2.0 AND BSD-3-Clause AND MIT",
+          "count": 1
+        },
+        {
+          "license": "BSD-2-Clause-Views",
           "count": 1
         }
       ]
@@ -2206,15 +2162,11 @@
       "licenses": [
         {
           "license": "MIT",
-          "count": 165
+          "count": 174
         },
         {
           "license": "Apache-2.0",
           "count": 18
-        },
-        {
-          "license": "NOASSERTION",
-          "count": 11
         },
         {
           "license": "BSD-3-Clause",
@@ -2229,15 +2181,15 @@
           "count": 2
         },
         {
+          "license": "BSD-2-Clause",
+          "count": 2
+        },
+        {
+          "license": "MIT AND Zlib",
+          "count": 1
+        },
+        {
           "license": "0BSD AND ISC AND MIT",
-          "count": 1
-        },
-        {
-          "license": "BSD-2-Clause AND CC0-1.0 AND ISC AND MIT",
-          "count": 1
-        },
-        {
-          "license": "BSD-3-Clause AND ISC AND MIT",
           "count": 1
         },
         {
@@ -2245,30 +2197,34 @@
           "count": 1
         },
         {
-          "license": "MIT AND Zlib",
+          "license": "BSD-3-Clause AND ISC AND MIT",
+          "count": 1
+        },
+        {
+          "license": "BSD-2-Clause AND CC0-1.0 AND ISC AND MIT",
           "count": 1
         }
       ]
     },
     {
       "repo": "wallet-companion",
-      "package_count": 682,
+      "package_count": 679,
       "licenses": [
         {
           "license": "MIT",
-          "count": 485
+          "count": 501
         },
         {
           "license": "Apache-2.0",
-          "count": 46
+          "count": 47
         },
         {
           "license": "ISC",
-          "count": 33
+          "count": 32
         },
         {
           "license": "BSD-2-Clause",
-          "count": 29
+          "count": 30
         },
         {
           "license": "MPL-2.0",
@@ -2276,19 +2232,11 @@
         },
         {
           "license": "BSD-3-Clause",
-          "count": 13
+          "count": 14
         },
         {
           "license": "LGPL-3.0-or-later",
           "count": 10
-        },
-        {
-          "license": "NOASSERTION",
-          "count": 10
-        },
-        {
-          "license": "MIT OR Apache-2.0",
-          "count": 9
         },
         {
           "license": "CC0-1.0 AND MIT",
@@ -2303,11 +2251,11 @@
           "count": 3
         },
         {
-          "license": "Apache-2.0 AND MIT",
+          "license": "CC0-1.0",
           "count": 2
         },
         {
-          "license": "CC0-1.0",
+          "license": "Apache-2.0 AND MIT",
           "count": 2
         },
         {
@@ -2315,39 +2263,15 @@
           "count": 2
         },
         {
+          "license": "NOASSERTION",
+          "count": 1
+        },
+        {
+          "license": "MIT AND Zlib",
+          "count": 1
+        },
+        {
           "license": "0BSD",
-          "count": 1
-        },
-        {
-          "license": "Apache-2.0 AND LGPL-3.0-or-later AND MIT",
-          "count": 1
-        },
-        {
-          "license": "Apache-2.0 AND OFL-1.1 AND Ubuntu-font-1.0",
-          "count": 1
-        },
-        {
-          "license": "Apache-2.0 OR BSD-2-Clause OR MIT OR (Apache-2.0 AND BSD-2-Clause) OR (Apache-2.0 AND MIT) OR (BSD-2-Clause AND MIT)",
-          "count": 1
-        },
-        {
-          "license": "BSD-2-Clause AND BSD-2-Clause-Views",
-          "count": 1
-        },
-        {
-          "license": "BSD-2-Clause AND BSD-3-Clause",
-          "count": 1
-        },
-        {
-          "license": "BSD-3-Clause OR GPL-2.0-only",
-          "count": 1
-        },
-        {
-          "license": "GPL-3.0-only OR MIT",
-          "count": 1
-        },
-        {
-          "license": "ISC AND MIT",
           "count": 1
         },
         {
@@ -2355,7 +2279,23 @@
           "count": 1
         },
         {
-          "license": "MIT AND Zlib",
+          "license": "Apache-2.0 AND LGPL-3.0-or-later AND MIT",
+          "count": 1
+        },
+        {
+          "license": "BSD-2-Clause AND BSD-3-Clause",
+          "count": 1
+        },
+        {
+          "license": "ISC AND MIT",
+          "count": 1
+        },
+        {
+          "license": "Apache-2.0 AND OFL-1.1 AND Ubuntu-font-1.0",
+          "count": 1
+        },
+        {
+          "license": "BSD-2-Clause AND BSD-2-Clause-Views",
           "count": 1
         },
         {
@@ -2370,11 +2310,11 @@
       "licenses": [
         {
           "license": "MIT",
-          "count": 895
+          "count": 908
         },
         {
           "license": "Apache-2.0",
-          "count": 50
+          "count": 60
         },
         {
           "license": "ISC",
@@ -2382,15 +2322,11 @@
         },
         {
           "license": "BSD-2-Clause",
-          "count": 20
+          "count": 21
         },
         {
           "license": "BSD-3-Clause",
           "count": 19
-        },
-        {
-          "license": "NOASSERTION",
-          "count": 15
         },
         {
           "license": "MPL-2.0",
@@ -2401,20 +2337,16 @@
           "count": 10
         },
         {
-          "license": "Apache-2.0 AND BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND LicenseRef-scancode-other-permissive AND MIT AND MPL-2.0",
+          "license": "CC0-1.0 AND MIT",
           "count": 3
         },
         {
-          "license": "CC0-1.0 AND MIT",
+          "license": "Apache-2.0 AND BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND LicenseRef-scancode-other-permissive AND MIT AND MPL-2.0",
           "count": 3
         },
         {
           "license": "ISC AND MIT",
           "count": 3
-        },
-        {
-          "license": "(Apache-2.0 OR MIT)",
-          "count": 2
         },
         {
           "license": "0BSD",
@@ -2425,15 +2357,11 @@
           "count": 2
         },
         {
-          "license": "BlueOak-1.0.0",
-          "count": 2
-        },
-        {
           "license": "CC0-1.0",
           "count": 2
         },
         {
-          "license": "MIT OR (Apache-2.0 AND MIT)",
+          "license": "BlueOak-1.0.0",
           "count": 2
         },
         {
@@ -2441,11 +2369,7 @@
           "count": 2
         },
         {
-          "license": "(EUPL-1.2 OR Apache-2.0)",
-          "count": 1
-        },
-        {
-          "license": "(MPL-2.0 OR Apache-2.0)",
+          "license": "LicenseRef-scancode-generic-cla AND MIT",
           "count": 1
         },
         {
@@ -2453,7 +2377,31 @@
           "count": 1
         },
         {
+          "license": "BSD-2-Clause AND BSD-3-Clause",
+          "count": 1
+        },
+        {
+          "license": "CC-BY-4.0",
+          "count": 1
+        },
+        {
+          "license": "Apache-2.0 AND BSD-3-Clause AND ISC AND MIT",
+          "count": 1
+        },
+        {
           "license": "AFL-2.1 AND AFL-3.0 AND BSD-3-Clause",
+          "count": 1
+        },
+        {
+          "license": "Apache-2.0 AND OFL-1.1 AND Ubuntu-font-1.0",
+          "count": 1
+        },
+        {
+          "license": "BSD-3-Clause AND MIT",
+          "count": 1
+        },
+        {
+          "license": "Python-2.0",
           "count": 1
         },
         {
@@ -2465,23 +2413,7 @@
           "count": 1
         },
         {
-          "license": "Apache-2.0 AND BSD-3-Clause AND ISC AND MIT",
-          "count": 1
-        },
-        {
           "license": "Apache-2.0 AND MIT",
-          "count": 1
-        },
-        {
-          "license": "Apache-2.0 AND OFL-1.1 AND Ubuntu-font-1.0",
-          "count": 1
-        },
-        {
-          "license": "Apache-2.0 OR MIT",
-          "count": 1
-        },
-        {
-          "license": "Apache-2.0 OR Unlicense OR (Apache-2.0 AND Unlicense)",
           "count": 1
         },
         {
@@ -2489,35 +2421,11 @@
           "count": 1
         },
         {
-          "license": "BSD-2-Clause AND BSD-3-Clause",
-          "count": 1
-        },
-        {
-          "license": "BSD-3-Clause AND MIT",
-          "count": 1
-        },
-        {
-          "license": "CC-BY-4.0",
-          "count": 1
-        },
-        {
-          "license": "LicenseRef-scancode-generic-cla AND MIT",
-          "count": 1
-        },
-        {
-          "license": "LicenseRef-scancode-public-domain",
-          "count": 1
-        },
-        {
           "license": "MIT AND Zlib",
           "count": 1
         },
         {
-          "license": "MIT OR (CC0-1.0 AND MIT)",
-          "count": 1
-        },
-        {
-          "license": "Python-2.0",
+          "license": "LicenseRef-scancode-public-domain",
           "count": 1
         }
       ]
@@ -4746,7 +4654,17 @@
       "version": "4.1.1",
       "license": "MIT",
       "repos": [
-        "browser-log",
+        "browser-log"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
+      "name": "@csstools/css-color-parser",
+      "version": "4.1.7",
+      "license": "MIT",
+      "repos": [
         "wallet-companion"
       ],
       "license_resolved": "MIT",
@@ -4782,7 +4700,17 @@
       "version": "1.1.4",
       "license": "MIT-0",
       "repos": [
-        "browser-log",
+        "browser-log"
+      ],
+      "license_resolved": "MIT-0",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
+      "name": "@csstools/css-syntax-patches-for-csstree",
+      "version": "1.1.5",
+      "license": "MIT-0",
+      "repos": [
         "wallet-companion"
       ],
       "license_resolved": "MIT-0",
@@ -5020,7 +4948,7 @@
     },
     {
       "name": "@esbuild/aix-ppc64",
-      "version": "0.28.0",
+      "version": "0.28.1",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -5065,7 +4993,7 @@
     },
     {
       "name": "@esbuild/android-arm",
-      "version": "0.28.0",
+      "version": "0.28.1",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -5110,7 +5038,7 @@
     },
     {
       "name": "@esbuild/android-arm64",
-      "version": "0.28.0",
+      "version": "0.28.1",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -5155,7 +5083,7 @@
     },
     {
       "name": "@esbuild/android-x64",
-      "version": "0.28.0",
+      "version": "0.28.1",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -5200,7 +5128,7 @@
     },
     {
       "name": "@esbuild/darwin-arm64",
-      "version": "0.28.0",
+      "version": "0.28.1",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -5245,7 +5173,7 @@
     },
     {
       "name": "@esbuild/darwin-x64",
-      "version": "0.28.0",
+      "version": "0.28.1",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -5290,7 +5218,7 @@
     },
     {
       "name": "@esbuild/freebsd-arm64",
-      "version": "0.28.0",
+      "version": "0.28.1",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -5335,7 +5263,7 @@
     },
     {
       "name": "@esbuild/freebsd-x64",
-      "version": "0.28.0",
+      "version": "0.28.1",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -5380,7 +5308,7 @@
     },
     {
       "name": "@esbuild/linux-arm",
-      "version": "0.28.0",
+      "version": "0.28.1",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -5425,7 +5353,7 @@
     },
     {
       "name": "@esbuild/linux-arm64",
-      "version": "0.28.0",
+      "version": "0.28.1",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -5470,7 +5398,7 @@
     },
     {
       "name": "@esbuild/linux-ia32",
-      "version": "0.28.0",
+      "version": "0.28.1",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -5515,7 +5443,7 @@
     },
     {
       "name": "@esbuild/linux-loong64",
-      "version": "0.28.0",
+      "version": "0.28.1",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -5560,7 +5488,7 @@
     },
     {
       "name": "@esbuild/linux-mips64el",
-      "version": "0.28.0",
+      "version": "0.28.1",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -5605,7 +5533,7 @@
     },
     {
       "name": "@esbuild/linux-ppc64",
-      "version": "0.28.0",
+      "version": "0.28.1",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -5650,7 +5578,7 @@
     },
     {
       "name": "@esbuild/linux-riscv64",
-      "version": "0.28.0",
+      "version": "0.28.1",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -5695,7 +5623,7 @@
     },
     {
       "name": "@esbuild/linux-s390x",
-      "version": "0.28.0",
+      "version": "0.28.1",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -5740,7 +5668,7 @@
     },
     {
       "name": "@esbuild/linux-x64",
-      "version": "0.28.0",
+      "version": "0.28.1",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -5774,7 +5702,7 @@
     },
     {
       "name": "@esbuild/netbsd-arm64",
-      "version": "0.28.0",
+      "version": "0.28.1",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -5819,7 +5747,7 @@
     },
     {
       "name": "@esbuild/netbsd-x64",
-      "version": "0.28.0",
+      "version": "0.28.1",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -5853,7 +5781,7 @@
     },
     {
       "name": "@esbuild/openbsd-arm64",
-      "version": "0.28.0",
+      "version": "0.28.1",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -5898,7 +5826,7 @@
     },
     {
       "name": "@esbuild/openbsd-x64",
-      "version": "0.28.0",
+      "version": "0.28.1",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -5921,7 +5849,7 @@
     },
     {
       "name": "@esbuild/openharmony-arm64",
-      "version": "0.28.0",
+      "version": "0.28.1",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -5966,7 +5894,7 @@
     },
     {
       "name": "@esbuild/sunos-x64",
-      "version": "0.28.0",
+      "version": "0.28.1",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -6011,7 +5939,7 @@
     },
     {
       "name": "@esbuild/win32-arm64",
-      "version": "0.28.0",
+      "version": "0.28.1",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -6056,7 +5984,7 @@
     },
     {
       "name": "@esbuild/win32-ia32",
-      "version": "0.28.0",
+      "version": "0.28.1",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -6101,7 +6029,7 @@
     },
     {
       "name": "@esbuild/win32-x64",
-      "version": "0.28.0",
+      "version": "0.28.1",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -7238,17 +7166,6 @@
     },
     {
       "name": "@napi-rs/wasm-runtime",
-      "version": "1.1.4",
-      "license": "MIT",
-      "repos": [
-        "wallet-companion"
-      ],
-      "license_resolved": "MIT",
-      "license_source": "sbom",
-      "policy_category": "allowed"
-    },
-    {
-      "name": "@napi-rs/wasm-runtime",
       "version": "1.1.5",
       "license": "MIT",
       "repos": [
@@ -7735,7 +7652,7 @@
     },
     {
       "name": "@playwright/test",
-      "version": "1.60.0",
+      "version": "1.61.0",
       "license": "Apache-2.0",
       "repos": [
         "wallet-companion"
@@ -10272,7 +10189,7 @@
     },
     {
       "name": "@vitest/coverage-v8",
-      "version": "4.1.8",
+      "version": "4.1.9",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -10308,7 +10225,17 @@
       "version": "4.1.8",
       "license": "MIT",
       "repos": [
-        "browser-log",
+        "browser-log"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
+      "name": "@vitest/expect",
+      "version": "4.1.9",
+      "license": "MIT",
+      "repos": [
         "wallet-companion"
       ],
       "license_resolved": "MIT",
@@ -10331,7 +10258,17 @@
       "version": "4.1.8",
       "license": "MIT",
       "repos": [
-        "browser-log",
+        "browser-log"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
+      "name": "@vitest/mocker",
+      "version": "4.1.9",
+      "license": "MIT",
+      "repos": [
         "wallet-companion"
       ],
       "license_resolved": "MIT",
@@ -10354,7 +10291,17 @@
       "version": "4.1.8",
       "license": "MIT",
       "repos": [
-        "browser-log",
+        "browser-log"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
+      "name": "@vitest/pretty-format",
+      "version": "4.1.9",
+      "license": "MIT",
+      "repos": [
         "wallet-companion"
       ],
       "license_resolved": "MIT",
@@ -10388,7 +10335,17 @@
       "version": "4.1.8",
       "license": "MIT",
       "repos": [
-        "browser-log",
+        "browser-log"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
+      "name": "@vitest/runner",
+      "version": "4.1.9",
+      "license": "MIT",
+      "repos": [
         "wallet-companion"
       ],
       "license_resolved": "MIT",
@@ -10422,7 +10379,17 @@
       "version": "4.1.8",
       "license": "MIT",
       "repos": [
-        "browser-log",
+        "browser-log"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
+      "name": "@vitest/snapshot",
+      "version": "4.1.9",
+      "license": "MIT",
+      "repos": [
         "wallet-companion"
       ],
       "license_resolved": "MIT",
@@ -10456,7 +10423,17 @@
       "version": "4.1.8",
       "license": "MIT",
       "repos": [
-        "browser-log",
+        "browser-log"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
+      "name": "@vitest/spy",
+      "version": "4.1.9",
+      "license": "MIT",
+      "repos": [
         "wallet-companion"
       ],
       "license_resolved": "MIT",
@@ -10490,7 +10467,17 @@
       "version": "4.1.8",
       "license": "MIT",
       "repos": [
-        "browser-log",
+        "browser-log"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
+      "name": "@vitest/utils",
+      "version": "4.1.9",
+      "license": "MIT",
+      "repos": [
         "wallet-companion"
       ],
       "license_resolved": "MIT",
@@ -13248,7 +13235,7 @@
     },
     {
       "name": "ast-v8-to-istanbul",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -17785,7 +17772,7 @@
     },
     {
       "name": "esbuild",
-      "version": "0.28.0",
+      "version": "0.28.1",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -23836,7 +23823,17 @@
       "version": "4.1.3",
       "license": "MIT",
       "repos": [
-        "browser-log",
+        "browser-log"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
+      "name": "human-id",
+      "version": "4.2.0",
+      "license": "MIT",
+      "repos": [
         "wallet-companion"
       ],
       "license_resolved": "MIT",
@@ -25412,8 +25409,7 @@
       "version": "4.1.1",
       "license": "MIT",
       "repos": [
-        "browser-log",
-        "wallet-companion"
+        "browser-log"
       ],
       "license_resolved": "MIT",
       "license_source": "sbom",
@@ -26465,21 +26461,11 @@
     },
     {
       "name": "lru-cache",
-      "version": "11.5.0",
-      "license": "BlueOak-1.0.0",
-      "repos": [
-        "wallet-companion"
-      ],
-      "license_resolved": "BlueOak-1.0.0",
-      "license_source": "sbom",
-      "policy_category": "allowed"
-    },
-    {
-      "name": "lru-cache",
       "version": "11.5.1",
       "license": "BlueOak-1.0.0",
       "repos": [
-        "browser-log"
+        "browser-log",
+        "wallet-companion"
       ],
       "license_resolved": "BlueOak-1.0.0",
       "license_source": "sbom",
@@ -26498,7 +26484,7 @@
     },
     {
       "name": "lucide",
-      "version": "1.18.0",
+      "version": "1.20.0",
       "license": "ISC",
       "repos": [
         "wallet-companion"
@@ -27263,7 +27249,8 @@
       "version": "2.1.3",
       "license": "MIT",
       "repos": [
-        "browser-log"
+        "browser-log",
+        "wallet-companion"
       ],
       "license_resolved": "MIT",
       "license_source": "sbom",
@@ -29661,7 +29648,7 @@
     },
     {
       "name": "playwright",
-      "version": "1.60.0",
+      "version": "1.61.0",
       "license": "Apache-2.0",
       "repos": [
         "wallet-companion"
@@ -29672,7 +29659,7 @@
     },
     {
       "name": "playwright-core",
-      "version": "1.60.0",
+      "version": "1.61.0",
       "license": "Apache-2.0",
       "repos": [
         "wallet-companion"
@@ -31182,8 +31169,7 @@
       "version": "7.8.1",
       "license": "ISC",
       "repos": [
-        "browser-log",
-        "wallet-companion"
+        "browser-log"
       ],
       "license_resolved": "ISC",
       "license_source": "sbom",
@@ -32660,7 +32646,17 @@
       "version": "7.4.0",
       "license": "MIT",
       "repos": [
-        "browser-log",
+        "browser-log"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
+      "name": "tldts",
+      "version": "7.4.3",
+      "license": "MIT",
+      "repos": [
         "wallet-companion"
       ],
       "license_resolved": "MIT",
@@ -32680,10 +32676,10 @@
     },
     {
       "name": "tldts-core",
-      "version": "7.4.0",
+      "version": "7.4.1",
       "license": "MIT",
       "repos": [
-        "wallet-companion"
+        "browser-log"
       ],
       "license_resolved": "MIT",
       "license_source": "sbom",
@@ -32691,10 +32687,10 @@
     },
     {
       "name": "tldts-core",
-      "version": "7.4.1",
+      "version": "7.4.3",
       "license": "MIT",
       "repos": [
-        "browser-log"
+        "wallet-companion"
       ],
       "license_resolved": "MIT",
       "license_source": "sbom",
@@ -33153,8 +33149,7 @@
       "version": "7.26.0",
       "license": "MIT",
       "repos": [
-        "browser-log",
-        "wallet-companion"
+        "browser-log"
       ],
       "license_resolved": "MIT",
       "license_source": "sbom",
@@ -33162,7 +33157,7 @@
     },
     {
       "name": "undici",
-      "version": "7.27.2",
+      "version": "7.28.0",
       "license": "MIT",
       "repos": [
         "wallet-companion"
@@ -33687,7 +33682,17 @@
       "version": "4.1.8",
       "license": "MIT",
       "repos": [
-        "browser-log",
+        "browser-log"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
+      "name": "vitest",
+      "version": "4.1.9",
+      "license": "MIT",
+      "repos": [
         "wallet-companion"
       ],
       "license_resolved": "MIT",
