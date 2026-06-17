@@ -74,6 +74,41 @@ Key elements:
 | `[mandatory]` | Marks a claim as required in every issued credential. |
 | `[sd=always]` | Enables selective disclosure — the holder can choose whether to share this claim. |
 
+#### Nested claims
+
+Claims that contain sub-fields can be expressed using Markdown sub-lists. Use `(object)` for structured data and `(array)` for repeating items:
+
+```markdown
+## Claims
+
+- `employee_id` (string): Employee identifier [mandatory] [sd=always]
+- `department` (object): Department details
+    - `name` (string): Department name [mandatory]
+    - `code` (string): Department code
+    - `location` (string): Office location
+- `certifications` (array): Professional certifications
+    - `name` (string): Certification name [mandatory]
+    - `issuer` (string): Certifying body
+    - `date` (date): Date obtained
+```
+
+See the [registry-cli nested claims reference](../sirosid/registry/registry-cli#nested-claims) for how each output format represents nested structures.
+
+#### Per-credential format selection
+
+By default, registry-cli generates metadata in all supported formats (SD-JWT VCTM, mDOC MDDL, W3C VCDM 2.0). To restrict which formats are generated for a specific credential, add a `formats` field to the front matter:
+
+```markdown
+---
+vct: https://example.com/credentials/employee-badge
+formats: sd-jwt, w3c
+background_color: "#1a365d"
+text_color: "#ffffff"
+---
+```
+
+See the [registry-cli format override reference](../sirosid/registry/registry-cli#per-credential-formats) for supported format names and aliases.
+
 :::tip Choosing a VCT Identifier
 The `vct` value is a URI that uniquely identifies your credential type. Use a domain you control. For EU-regulated credentials, URN-based identifiers following the `urn:eudi:` scheme are conventional (e.g., `urn:eudi:pid:arf-1.8:1`).
 :::

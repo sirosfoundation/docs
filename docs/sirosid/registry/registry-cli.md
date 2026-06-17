@@ -108,6 +108,22 @@ sources:
     organization: "My Org" # override organization display name
 ```
 
+### Subfolder path targeting {#path-targeting}
+
+*Added in v0.12.0*
+
+If a repository contains credentials in a subdirectory (rather than at the root), use the `path` field to restrict discovery to that subtree:
+
+```yaml
+sources:
+  - url: "git:https://github.com/org/monorepo.git"
+    path: "credentials/production"   # only scan this subfolder
+```
+
+This is useful for monorepos where credential definitions live alongside other project files. Only credential files within the specified path (and its subdirectories) are processed; everything else in the repository is ignored.
+
+Path traversal (e.g. `../`) is rejected for security.
+
 ### Default settings
 
 ```yaml
@@ -116,6 +132,60 @@ defaults:
 sources:
   - "git:https://github.com/org/repo.git"
 ```
+
+## Markdown Credential Authoring
+
+registry-cli converts Markdown files with `vct:` YAML front matter into credential metadata in multiple output formats. See the [Custom SD-JWT Credential guide](../../howto/custom-sd-jwt-credential) for a full end-to-end walkthrough.
+
+### Per-credential format override {#per-credential-formats}
+
+*Added in v0.12.0*
+
+By default, registry-cli generates all registered output formats (SD-JWT VCTM, mDOC MDDL, and W3C VCDM 2.0) for every markdown credential. To generate only specific formats, add a `formats` field to the front matter:
+
+```markdown
+---
+vct: https://example.com/credentials/my-credential
+formats: sd-jwt, w3c
+---
+```
+
+Supported format names and aliases:
+
+| Name | Aliases | Output file |
+|------|---------|-------------|
+| `vctm` | `sd-jwt`, `sdjwt` | `.vctm.json` |
+| `mddl` | `mdoc`, `mso_mdoc` | `.mdoc.json` |
+| `w3c` | `jwt_vc_json` | `.vc.json` |
+
+When `formats` is omitted or empty, all registered formats are generated.
+
+### Nested object and array claims {#nested-claims}
+
+*Added in v0.12.0*
+
+Claims that contain sub-fields (objects) or repeated items (arrays) can be expressed using Markdown sub-lists:
+
+```markdown
+## Claims
+
+- `name` (string): Full name [mandatory] [sd=always]
+- `address` (object): Postal address [mandatory]
+    - `street` (string): Street address [mandatory]
+    - `city` (string): City [mandatory]
+    - `postal_code` (string): Postal code
+    - `country` (string): Country code
+- `previous_addresses` (array): Previous addresses
+    - `street` (string): Street address
+    - `city` (string): City
+```
+
+The container type determines how children are represented in each output format:
+
+| Container type | VCTM (SD-JWT) | mDOC (MDDL) | W3C (JSON Schema) |
+|---------------|--------------|-------------|-------------------|
+| `object` | Nested claim paths (e.g. `["address", "street"]`) | Dot-notation keys (e.g. `address.street`) | Nested `properties` in JSON Schema |
+| `array` | Array paths with `null` index (e.g. `["previous_addresses", null, "city"]`) | Dot-notation keys (e.g. `previous_addresses.city`) | `items` schema with `properties` |
 
 ## CLI Reference
 
