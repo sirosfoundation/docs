@@ -1,16 +1,17 @@
 {
-  "generated": "2026-06-16T08:30:37Z",
+  "generated": "2026-06-17T08:02:46Z",
   "organization": "sirosfoundation",
   "policy": {
     "overrides_applied": 611,
     "dual_license_selections": 156,
-    "noassertion_remaining": 0,
+    "noassertion_remaining": 1,
     "categories": {
-      "allowed": 2708,
+      "allowed": 2709,
       "weak-copyleft": 65,
       "documentation": 2,
       "test-only": 8,
-      "build-only": 1
+      "build-only": 1,
+      "unclassified": 1
     },
     "classification": {
       "MIT": "allowed",
@@ -72,7 +73,7 @@
   "license_summary": [
     {
       "license": "MIT",
-      "total_usages": 2312,
+      "total_usages": 2375,
       "unique_packages": 1262,
       "repos": [
         "browser-log",
@@ -178,7 +179,7 @@
     },
     {
       "license": "ISC",
-      "total_usages": 99,
+      "total_usages": 101,
       "unique_packages": 45,
       "repos": [
         "browser-log",
@@ -322,23 +323,23 @@
       "policy_category": "test-only"
     },
     {
-      "license": "0BSD",
+      "license": "BlueOak-1.0.0",
       "total_usages": 6,
-      "unique_packages": 1,
+      "unique_packages": 4,
       "repos": [
         "browser-log",
-        "wallet-common",
         "wallet-companion",
         "wallet-frontend"
       ],
       "policy_category": "allowed"
     },
     {
-      "license": "BlueOak-1.0.0",
+      "license": "0BSD",
       "total_usages": 6,
-      "unique_packages": 4,
+      "unique_packages": 1,
       "repos": [
         "browser-log",
+        "wallet-common",
         "wallet-companion",
         "wallet-frontend"
       ],
@@ -379,7 +380,7 @@
       "policy_category": "allowed"
     },
     {
-      "license": "Python-2.0",
+      "license": "BSD-2-Clause AND BSD-3-Clause",
       "total_usages": 3,
       "unique_packages": 1,
       "repos": [
@@ -390,7 +391,7 @@
       "policy_category": "allowed"
     },
     {
-      "license": "BSD-2-Clause AND BSD-3-Clause",
+      "license": "Python-2.0",
       "total_usages": 3,
       "unique_packages": 1,
       "repos": [
@@ -479,16 +480,6 @@
       "policy_category": "allowed"
     },
     {
-      "license": "0BSD AND ISC AND MIT",
-      "total_usages": 2,
-      "unique_packages": 1,
-      "repos": [
-        "wallet-common",
-        "wallet-frontend"
-      ],
-      "policy_category": "allowed"
-    },
-    {
       "license": "LicenseRef-scancode-generic-cla AND MIT",
       "total_usages": 2,
       "unique_packages": 1,
@@ -499,7 +490,17 @@
       "policy_category": "allowed"
     },
     {
-      "license": "BSD-2-Clause AND BSD-2-Clause-Views",
+      "license": "0BSD AND ISC AND MIT",
+      "total_usages": 2,
+      "unique_packages": 1,
+      "repos": [
+        "wallet-common",
+        "wallet-frontend"
+      ],
+      "policy_category": "allowed"
+    },
+    {
+      "license": "Apache-2.0 AND OFL-1.1 AND Ubuntu-font-1.0",
       "total_usages": 2,
       "unique_packages": 1,
       "repos": [
@@ -509,7 +510,7 @@
       "policy_category": "allowed"
     },
     {
-      "license": "Apache-2.0 AND OFL-1.1 AND Ubuntu-font-1.0",
+      "license": "BSD-2-Clause AND BSD-2-Clause-Views",
       "total_usages": 2,
       "unique_packages": 1,
       "repos": [
@@ -537,42 +538,6 @@
       "policy_category": "allowed"
     },
     {
-      "license": "Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND Elastic-2.0 AND LicenseRef-scancode-public-domain AND MIT AND bzip2-1.0.6",
-      "total_usages": 1,
-      "unique_packages": 1,
-      "repos": [
-        "siros-sdk-kotlin"
-      ],
-      "policy_category": "build-only"
-    },
-    {
-      "license": "LGPL-2.1",
-      "total_usages": 1,
-      "unique_packages": 1,
-      "repos": [
-        "siros-sdk-kotlin"
-      ],
-      "policy_category": "weak-copyleft"
-    },
-    {
-      "license": "CDDL-1.0",
-      "total_usages": 1,
-      "unique_packages": 1,
-      "repos": [
-        "siros-sdk-kotlin"
-      ],
-      "policy_category": "weak-copyleft"
-    },
-    {
-      "license": "Apache-2.0 AND LicenseRef-scancode-public-domain AND bzip2-1.0.6",
-      "total_usages": 1,
-      "unique_packages": 1,
-      "repos": [
-        "siros-sdk-kotlin"
-      ],
-      "policy_category": "allowed"
-    },
-    {
       "license": "CDDL-1.1",
       "total_usages": 1,
       "unique_packages": 1,
@@ -582,7 +547,25 @@
       "policy_category": "weak-copyleft"
     },
     {
+      "license": "Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND Elastic-2.0 AND LicenseRef-scancode-public-domain AND MIT AND bzip2-1.0.6",
+      "total_usages": 1,
+      "unique_packages": 1,
+      "repos": [
+        "siros-sdk-kotlin"
+      ],
+      "policy_category": "build-only"
+    },
+    {
       "license": "MPL-1.1",
+      "total_usages": 1,
+      "unique_packages": 1,
+      "repos": [
+        "siros-sdk-kotlin"
+      ],
+      "policy_category": "weak-copyleft"
+    },
+    {
+      "license": "LGPL-2.1",
       "total_usages": 1,
       "unique_packages": 1,
       "repos": [
@@ -609,7 +592,43 @@
       "policy_category": "allowed"
     },
     {
+      "license": "CDDL-1.0",
+      "total_usages": 1,
+      "unique_packages": 1,
+      "repos": [
+        "siros-sdk-kotlin"
+      ],
+      "policy_category": "weak-copyleft"
+    },
+    {
+      "license": "Apache-2.0 AND LicenseRef-scancode-public-domain AND bzip2-1.0.6",
+      "total_usages": 1,
+      "unique_packages": 1,
+      "repos": [
+        "siros-sdk-kotlin"
+      ],
+      "policy_category": "allowed"
+    },
+    {
+      "license": "Apache-2.0 AND LicenseRef-scancode-dco-1.1 AND MIT",
+      "total_usages": 1,
+      "unique_packages": 1,
+      "repos": [
+        "vc"
+      ],
+      "policy_category": "allowed"
+    },
+    {
       "license": "Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause",
+      "total_usages": 1,
+      "unique_packages": 1,
+      "repos": [
+        "vc"
+      ],
+      "policy_category": "allowed"
+    },
+    {
+      "license": "BSD-2-Clause-Views",
       "total_usages": 1,
       "unique_packages": 1,
       "repos": [
@@ -625,24 +644,6 @@
         "vc"
       ],
       "policy_category": "documentation"
-    },
-    {
-      "license": "BSD-2-Clause-Views",
-      "total_usages": 1,
-      "unique_packages": 1,
-      "repos": [
-        "vc"
-      ],
-      "policy_category": "allowed"
-    },
-    {
-      "license": "Apache-2.0 AND LicenseRef-scancode-dco-1.1 AND MIT",
-      "total_usages": 1,
-      "unique_packages": 1,
-      "repos": [
-        "vc"
-      ],
-      "policy_category": "allowed"
     },
     {
       "license": "BSD-2-Clause AND CC0-1.0 AND ISC AND MIT",
@@ -663,6 +664,15 @@
       "policy_category": "allowed"
     },
     {
+      "license": "NOASSERTION",
+      "total_usages": 1,
+      "unique_packages": 1,
+      "repos": [
+        "wallet-companion"
+      ],
+      "policy_category": "unclassified"
+    },
+    {
       "license": "Apache-2.0 AND LGPL-3.0-or-later AND MIT",
       "total_usages": 1,
       "unique_packages": 1,
@@ -681,25 +691,7 @@
       "policy_category": "allowed"
     },
     {
-      "license": "LicenseRef-scancode-public-domain",
-      "total_usages": 1,
-      "unique_packages": 1,
-      "repos": [
-        "wallet-frontend"
-      ],
-      "policy_category": "allowed"
-    },
-    {
       "license": "AFL-2.1 AND AFL-3.0 AND BSD-3-Clause",
-      "total_usages": 1,
-      "unique_packages": 1,
-      "repos": [
-        "wallet-frontend"
-      ],
-      "policy_category": "allowed"
-    },
-    {
-      "license": "Apache-2.0 AND BSD-3-Clause AND ISC AND MIT",
       "total_usages": 1,
       "unique_packages": 1,
       "repos": [
@@ -717,6 +709,15 @@
       "policy_category": "documentation"
     },
     {
+      "license": "BSD-3-Clause AND MIT",
+      "total_usages": 1,
+      "unique_packages": 1,
+      "repos": [
+        "wallet-frontend"
+      ],
+      "policy_category": "allowed"
+    },
+    {
       "license": "Apache-2.0 AND BSD-2-Clause AND BlueOak-1.0.0 AND CC0-1.0 AND ISC AND MIT",
       "total_usages": 1,
       "unique_packages": 1,
@@ -726,7 +727,16 @@
       "policy_category": "allowed"
     },
     {
-      "license": "BSD-3-Clause AND MIT",
+      "license": "LicenseRef-scancode-public-domain",
+      "total_usages": 1,
+      "unique_packages": 1,
+      "repos": [
+        "wallet-frontend"
+      ],
+      "policy_category": "allowed"
+    },
+    {
+      "license": "Apache-2.0 AND BSD-3-Clause AND ISC AND MIT",
       "total_usages": 1,
       "unique_packages": 1,
       "repos": [
@@ -738,7 +748,7 @@
   "license_summary_raw": [
     {
       "license": "MIT",
-      "total_usages": 1983,
+      "total_usages": 2046,
       "unique_packages": 1111,
       "repos": [
         "browser-log",
@@ -762,8 +772,8 @@
     },
     {
       "license": "NOASSERTION",
-      "total_usages": 611,
-      "unique_packages": 325,
+      "total_usages": 612,
+      "unique_packages": 326,
       "repos": [
         "browser-log",
         "facetec-api",
@@ -844,7 +854,7 @@
     },
     {
       "license": "ISC",
-      "total_usages": 99,
+      "total_usages": 101,
       "unique_packages": 45,
       "repos": [
         "browser-log",
@@ -1503,19 +1513,19 @@
   "repositories": [
     {
       "repo": "browser-log",
-      "package_count": 300,
+      "package_count": 319,
       "licenses": [
         {
           "license": "MIT",
-          "count": 236
+          "count": 254
+        },
+        {
+          "license": "ISC",
+          "count": 12
         },
         {
           "license": "MPL-2.0",
           "count": 12
-        },
-        {
-          "license": "ISC",
-          "count": 11
         },
         {
           "license": "MIT OR Apache-2.0",
@@ -2241,11 +2251,11 @@
     },
     {
       "repo": "wallet-companion",
-      "package_count": 635,
+      "package_count": 682,
       "licenses": [
         {
           "license": "MIT",
-          "count": 440
+          "count": 485
         },
         {
           "license": "Apache-2.0",
@@ -2253,7 +2263,7 @@
         },
         {
           "license": "ISC",
-          "count": 32
+          "count": 33
         },
         {
           "license": "BSD-2-Clause",
@@ -2272,11 +2282,11 @@
           "count": 10
         },
         {
-          "license": "MIT OR Apache-2.0",
-          "count": 9
+          "license": "NOASSERTION",
+          "count": 10
         },
         {
-          "license": "NOASSERTION",
+          "license": "MIT OR Apache-2.0",
           "count": 9
         },
         {
@@ -2741,10 +2751,11 @@
     },
     {
       "name": "@babel/generator",
-      "version": "8.0.0-rc.5",
+      "version": "8.0.0-rc.6",
       "license": "MIT",
       "repos": [
-        "browser-log"
+        "browser-log",
+        "wallet-companion"
       ],
       "license_resolved": "MIT",
       "license_source": "sbom",
@@ -2942,7 +2953,8 @@
       "version": "8.0.0-rc.6",
       "license": "MIT",
       "repos": [
-        "browser-log"
+        "browser-log",
+        "wallet-companion"
       ],
       "license_resolved": "MIT",
       "license_source": "sbom",
@@ -2994,21 +3006,11 @@
     },
     {
       "name": "@babel/helper-validator-identifier",
-      "version": "8.0.0-rc.5",
-      "license": "MIT",
-      "repos": [
-        "browser-log"
-      ],
-      "license_resolved": "MIT",
-      "license_source": "sbom",
-      "policy_category": "allowed"
-    },
-    {
-      "name": "@babel/helper-validator-identifier",
       "version": "8.0.0-rc.6",
       "license": "MIT",
       "repos": [
-        "browser-log"
+        "browser-log",
+        "wallet-companion"
       ],
       "license_resolved": "MIT",
       "license_source": "sbom",
@@ -3082,21 +3084,11 @@
     },
     {
       "name": "@babel/parser",
-      "version": "8.0.0-rc.4",
-      "license": "MIT",
-      "repos": [
-        "browser-log"
-      ],
-      "license_resolved": "MIT",
-      "license_source": "sbom",
-      "policy_category": "allowed"
-    },
-    {
-      "name": "@babel/parser",
       "version": "8.0.0-rc.6",
       "license": "MIT",
       "repos": [
-        "browser-log"
+        "browser-log",
+        "wallet-companion"
       ],
       "license_resolved": "MIT",
       "license_source": "sbom",
@@ -4164,7 +4156,8 @@
       "version": "8.0.0-rc.6",
       "license": "MIT",
       "repos": [
-        "browser-log"
+        "browser-log",
+        "wallet-companion"
       ],
       "license_resolved": "MIT",
       "license_source": "sbom",
@@ -4183,32 +4176,11 @@
     },
     {
       "name": "@biomejs/biome",
-      "version": "2.4.16",
-      "license": "MIT OR Apache-2.0",
-      "repos": [
-        "browser-log"
-      ],
-      "license_resolved": "MIT",
-      "license_source": "dual-license-selection",
-      "policy_category": "allowed"
-    },
-    {
-      "name": "@biomejs/biome",
       "version": "2.5.0",
       "license": "MIT OR Apache-2.0",
       "repos": [
+        "browser-log",
         "wallet-companion"
-      ],
-      "license_resolved": "MIT",
-      "license_source": "dual-license-selection",
-      "policy_category": "allowed"
-    },
-    {
-      "name": "@biomejs/cli-darwin-arm64",
-      "version": "2.4.16",
-      "license": "MIT OR Apache-2.0",
-      "repos": [
-        "browser-log"
       ],
       "license_resolved": "MIT",
       "license_source": "dual-license-selection",
@@ -4219,18 +4191,8 @@
       "version": "2.5.0",
       "license": "MIT OR Apache-2.0",
       "repos": [
+        "browser-log",
         "wallet-companion"
-      ],
-      "license_resolved": "MIT",
-      "license_source": "dual-license-selection",
-      "policy_category": "allowed"
-    },
-    {
-      "name": "@biomejs/cli-darwin-x64",
-      "version": "2.4.16",
-      "license": "MIT OR Apache-2.0",
-      "repos": [
-        "browser-log"
       ],
       "license_resolved": "MIT",
       "license_source": "dual-license-selection",
@@ -4241,18 +4203,8 @@
       "version": "2.5.0",
       "license": "MIT OR Apache-2.0",
       "repos": [
+        "browser-log",
         "wallet-companion"
-      ],
-      "license_resolved": "MIT",
-      "license_source": "dual-license-selection",
-      "policy_category": "allowed"
-    },
-    {
-      "name": "@biomejs/cli-linux-arm64",
-      "version": "2.4.16",
-      "license": "MIT OR Apache-2.0",
-      "repos": [
-        "browser-log"
       ],
       "license_resolved": "MIT",
       "license_source": "dual-license-selection",
@@ -4263,18 +4215,8 @@
       "version": "2.5.0",
       "license": "MIT OR Apache-2.0",
       "repos": [
+        "browser-log",
         "wallet-companion"
-      ],
-      "license_resolved": "MIT",
-      "license_source": "dual-license-selection",
-      "policy_category": "allowed"
-    },
-    {
-      "name": "@biomejs/cli-linux-arm64-musl",
-      "version": "2.4.16",
-      "license": "MIT OR Apache-2.0",
-      "repos": [
-        "browser-log"
       ],
       "license_resolved": "MIT",
       "license_source": "dual-license-selection",
@@ -4285,18 +4227,8 @@
       "version": "2.5.0",
       "license": "MIT OR Apache-2.0",
       "repos": [
+        "browser-log",
         "wallet-companion"
-      ],
-      "license_resolved": "MIT",
-      "license_source": "dual-license-selection",
-      "policy_category": "allowed"
-    },
-    {
-      "name": "@biomejs/cli-linux-x64",
-      "version": "2.4.16",
-      "license": "MIT OR Apache-2.0",
-      "repos": [
-        "browser-log"
       ],
       "license_resolved": "MIT",
       "license_source": "dual-license-selection",
@@ -4307,18 +4239,8 @@
       "version": "2.5.0",
       "license": "MIT OR Apache-2.0",
       "repos": [
+        "browser-log",
         "wallet-companion"
-      ],
-      "license_resolved": "MIT",
-      "license_source": "dual-license-selection",
-      "policy_category": "allowed"
-    },
-    {
-      "name": "@biomejs/cli-linux-x64-musl",
-      "version": "2.4.16",
-      "license": "MIT OR Apache-2.0",
-      "repos": [
-        "browser-log"
       ],
       "license_resolved": "MIT",
       "license_source": "dual-license-selection",
@@ -4329,18 +4251,8 @@
       "version": "2.5.0",
       "license": "MIT OR Apache-2.0",
       "repos": [
+        "browser-log",
         "wallet-companion"
-      ],
-      "license_resolved": "MIT",
-      "license_source": "dual-license-selection",
-      "policy_category": "allowed"
-    },
-    {
-      "name": "@biomejs/cli-win32-arm64",
-      "version": "2.4.16",
-      "license": "MIT OR Apache-2.0",
-      "repos": [
-        "browser-log"
       ],
       "license_resolved": "MIT",
       "license_source": "dual-license-selection",
@@ -4351,18 +4263,8 @@
       "version": "2.5.0",
       "license": "MIT OR Apache-2.0",
       "repos": [
+        "browser-log",
         "wallet-companion"
-      ],
-      "license_resolved": "MIT",
-      "license_source": "dual-license-selection",
-      "policy_category": "allowed"
-    },
-    {
-      "name": "@biomejs/cli-win32-x64",
-      "version": "2.4.16",
-      "license": "MIT OR Apache-2.0",
-      "repos": [
-        "browser-log"
       ],
       "license_resolved": "MIT",
       "license_source": "dual-license-selection",
@@ -4373,6 +4275,7 @@
       "version": "2.5.0",
       "license": "MIT OR Apache-2.0",
       "repos": [
+        "browser-log",
         "wallet-companion"
       ],
       "license_resolved": "MIT",
@@ -4945,6 +4848,18 @@
     },
     {
       "name": "@emnapi/core",
+      "version": "1.11.0",
+      "license": "MIT",
+      "repos": [
+        "browser-log",
+        "wallet-companion"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
+      "name": "@emnapi/core",
       "version": "1.7.1",
       "license": "MIT",
       "repos": [
@@ -4957,6 +4872,18 @@
     {
       "name": "@emnapi/runtime",
       "version": "1.10.0",
+      "license": "MIT",
+      "repos": [
+        "browser-log",
+        "wallet-companion"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
+      "name": "@emnapi/runtime",
+      "version": "1.11.0",
       "license": "MIT",
       "repos": [
         "browser-log",
@@ -5013,6 +4940,18 @@
     {
       "name": "@emnapi/wasi-threads",
       "version": "1.2.1",
+      "license": "MIT",
+      "repos": [
+        "browser-log",
+        "wallet-companion"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
+      "name": "@emnapi/wasi-threads",
+      "version": "1.2.2",
       "license": "MIT",
       "repos": [
         "browser-log",
@@ -7083,6 +7022,7 @@
       "repos": [
         "browser-log",
         "go-invite-op",
+        "wallet-companion",
         "wallet-frontend"
       ],
       "license_resolved": "MIT",
@@ -7250,6 +7190,17 @@
       "version": "1.1.4",
       "license": "MIT",
       "repos": [
+        "wallet-companion"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
+      "name": "@napi-rs/wasm-runtime",
+      "version": "1.1.5",
+      "license": "MIT",
+      "repos": [
         "browser-log",
         "wallet-companion"
       ],
@@ -7369,6 +7320,18 @@
       "version": "0.133.0",
       "license": "MIT",
       "repos": [
+        "wallet-companion"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
+      "name": "@oxc-project/types",
+      "version": "0.135.0",
+      "license": "MIT",
+      "repos": [
+        "browser-log",
         "wallet-companion"
       ],
       "license_resolved": "MIT",
@@ -7779,7 +7742,8 @@
       "version": "1.0.0",
       "license": "MIT",
       "repos": [
-        "browser-log"
+        "browser-log",
+        "wallet-companion"
       ],
       "license_resolved": "MIT",
       "license_source": "sbom",
@@ -7819,6 +7783,18 @@
       "policy_category": "allowed"
     },
     {
+      "name": "@rolldown/binding-android-arm64",
+      "version": "1.1.1",
+      "license": "MIT",
+      "repos": [
+        "browser-log",
+        "wallet-companion"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
       "name": "@rolldown/binding-darwin-arm64",
       "version": "1.0.2",
       "license": "MIT",
@@ -7834,6 +7810,18 @@
       "version": "1.0.3",
       "license": "MIT",
       "repos": [
+        "wallet-companion"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
+      "name": "@rolldown/binding-darwin-arm64",
+      "version": "1.1.1",
+      "license": "MIT",
+      "repos": [
+        "browser-log",
         "wallet-companion"
       ],
       "license_resolved": "MIT",
@@ -7863,6 +7851,18 @@
       "policy_category": "allowed"
     },
     {
+      "name": "@rolldown/binding-darwin-x64",
+      "version": "1.1.1",
+      "license": "MIT",
+      "repos": [
+        "browser-log",
+        "wallet-companion"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
       "name": "@rolldown/binding-freebsd-x64",
       "version": "1.0.2",
       "license": "MIT",
@@ -7878,6 +7878,18 @@
       "version": "1.0.3",
       "license": "MIT",
       "repos": [
+        "wallet-companion"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
+      "name": "@rolldown/binding-freebsd-x64",
+      "version": "1.1.1",
+      "license": "MIT",
+      "repos": [
+        "browser-log",
         "wallet-companion"
       ],
       "license_resolved": "MIT",
@@ -7907,6 +7919,18 @@
       "policy_category": "allowed"
     },
     {
+      "name": "@rolldown/binding-linux-arm-gnueabihf",
+      "version": "1.1.1",
+      "license": "MIT",
+      "repos": [
+        "browser-log",
+        "wallet-companion"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
       "name": "@rolldown/binding-linux-arm64-gnu",
       "version": "1.0.2",
       "license": "MIT",
@@ -7922,6 +7946,18 @@
       "version": "1.0.3",
       "license": "MIT",
       "repos": [
+        "wallet-companion"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
+      "name": "@rolldown/binding-linux-arm64-gnu",
+      "version": "1.1.1",
+      "license": "MIT",
+      "repos": [
+        "browser-log",
         "wallet-companion"
       ],
       "license_resolved": "MIT",
@@ -7951,6 +7987,18 @@
       "policy_category": "allowed"
     },
     {
+      "name": "@rolldown/binding-linux-arm64-musl",
+      "version": "1.1.1",
+      "license": "MIT",
+      "repos": [
+        "browser-log",
+        "wallet-companion"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
       "name": "@rolldown/binding-linux-ppc64-gnu",
       "version": "1.0.2",
       "license": "MIT",
@@ -7966,6 +8014,18 @@
       "version": "1.0.3",
       "license": "MIT",
       "repos": [
+        "wallet-companion"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
+      "name": "@rolldown/binding-linux-ppc64-gnu",
+      "version": "1.1.1",
+      "license": "MIT",
+      "repos": [
+        "browser-log",
         "wallet-companion"
       ],
       "license_resolved": "MIT",
@@ -7995,6 +8055,18 @@
       "policy_category": "allowed"
     },
     {
+      "name": "@rolldown/binding-linux-s390x-gnu",
+      "version": "1.1.1",
+      "license": "MIT",
+      "repos": [
+        "browser-log",
+        "wallet-companion"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
       "name": "@rolldown/binding-linux-x64-gnu",
       "version": "1.0.2",
       "license": "MIT",
@@ -8010,6 +8082,18 @@
       "version": "1.0.3",
       "license": "MIT",
       "repos": [
+        "wallet-companion"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
+      "name": "@rolldown/binding-linux-x64-gnu",
+      "version": "1.1.1",
+      "license": "MIT",
+      "repos": [
+        "browser-log",
         "wallet-companion"
       ],
       "license_resolved": "MIT",
@@ -8039,6 +8123,18 @@
       "policy_category": "allowed"
     },
     {
+      "name": "@rolldown/binding-linux-x64-musl",
+      "version": "1.1.1",
+      "license": "MIT",
+      "repos": [
+        "browser-log",
+        "wallet-companion"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
       "name": "@rolldown/binding-openharmony-arm64",
       "version": "1.0.2",
       "license": "MIT",
@@ -8054,6 +8150,18 @@
       "version": "1.0.3",
       "license": "MIT",
       "repos": [
+        "wallet-companion"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
+      "name": "@rolldown/binding-openharmony-arm64",
+      "version": "1.1.1",
+      "license": "MIT",
+      "repos": [
+        "browser-log",
         "wallet-companion"
       ],
       "license_resolved": "MIT",
@@ -8083,6 +8191,18 @@
       "policy_category": "allowed"
     },
     {
+      "name": "@rolldown/binding-wasm32-wasi",
+      "version": "1.1.1",
+      "license": "MIT",
+      "repos": [
+        "browser-log",
+        "wallet-companion"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
       "name": "@rolldown/binding-win32-arm64-msvc",
       "version": "1.0.2",
       "license": "MIT",
@@ -8105,6 +8225,18 @@
       "policy_category": "allowed"
     },
     {
+      "name": "@rolldown/binding-win32-arm64-msvc",
+      "version": "1.1.1",
+      "license": "MIT",
+      "repos": [
+        "browser-log",
+        "wallet-companion"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
       "name": "@rolldown/binding-win32-x64-msvc",
       "version": "1.0.2",
       "license": "MIT",
@@ -8120,6 +8252,18 @@
       "version": "1.0.3",
       "license": "MIT",
       "repos": [
+        "wallet-companion"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
+      "name": "@rolldown/binding-win32-x64-msvc",
+      "version": "1.1.1",
+      "license": "MIT",
+      "repos": [
+        "browser-log",
         "wallet-companion"
       ],
       "license_resolved": "MIT",
@@ -9724,7 +9868,8 @@
       "version": "2.5.1",
       "license": "MIT",
       "repos": [
-        "browser-log"
+        "browser-log",
+        "wallet-companion"
       ],
       "license_resolved": "MIT",
       "license_source": "sbom",
@@ -10109,20 +10254,10 @@
     },
     {
       "name": "@vitest/expect",
-      "version": "4.1.7",
-      "license": "MIT",
-      "repos": [
-        "browser-log"
-      ],
-      "license_resolved": "MIT",
-      "license_source": "sbom",
-      "policy_category": "allowed"
-    },
-    {
-      "name": "@vitest/expect",
       "version": "4.1.8",
       "license": "MIT",
       "repos": [
+        "browser-log",
         "wallet-companion"
       ],
       "license_resolved": "MIT",
@@ -10142,20 +10277,10 @@
     },
     {
       "name": "@vitest/mocker",
-      "version": "4.1.7",
-      "license": "MIT",
-      "repos": [
-        "browser-log"
-      ],
-      "license_resolved": "MIT",
-      "license_source": "sbom",
-      "policy_category": "allowed"
-    },
-    {
-      "name": "@vitest/mocker",
       "version": "4.1.8",
       "license": "MIT",
       "repos": [
+        "browser-log",
         "wallet-companion"
       ],
       "license_resolved": "MIT",
@@ -10175,20 +10300,10 @@
     },
     {
       "name": "@vitest/pretty-format",
-      "version": "4.1.7",
-      "license": "MIT",
-      "repos": [
-        "browser-log"
-      ],
-      "license_resolved": "MIT",
-      "license_source": "sbom",
-      "policy_category": "allowed"
-    },
-    {
-      "name": "@vitest/pretty-format",
       "version": "4.1.8",
       "license": "MIT",
       "repos": [
+        "browser-log",
         "wallet-companion"
       ],
       "license_resolved": "MIT",
@@ -10219,20 +10334,10 @@
     },
     {
       "name": "@vitest/runner",
-      "version": "4.1.7",
-      "license": "MIT",
-      "repos": [
-        "browser-log"
-      ],
-      "license_resolved": "MIT",
-      "license_source": "sbom",
-      "policy_category": "allowed"
-    },
-    {
-      "name": "@vitest/runner",
       "version": "4.1.8",
       "license": "MIT",
       "repos": [
+        "browser-log",
         "wallet-companion"
       ],
       "license_resolved": "MIT",
@@ -10263,20 +10368,10 @@
     },
     {
       "name": "@vitest/snapshot",
-      "version": "4.1.7",
-      "license": "MIT",
-      "repos": [
-        "browser-log"
-      ],
-      "license_resolved": "MIT",
-      "license_source": "sbom",
-      "policy_category": "allowed"
-    },
-    {
-      "name": "@vitest/snapshot",
       "version": "4.1.8",
       "license": "MIT",
       "repos": [
+        "browser-log",
         "wallet-companion"
       ],
       "license_resolved": "MIT",
@@ -10307,20 +10402,10 @@
     },
     {
       "name": "@vitest/spy",
-      "version": "4.1.7",
-      "license": "MIT",
-      "repos": [
-        "browser-log"
-      ],
-      "license_resolved": "MIT",
-      "license_source": "sbom",
-      "policy_category": "allowed"
-    },
-    {
-      "name": "@vitest/spy",
       "version": "4.1.8",
       "license": "MIT",
       "repos": [
+        "browser-log",
         "wallet-companion"
       ],
       "license_resolved": "MIT",
@@ -10351,20 +10436,10 @@
     },
     {
       "name": "@vitest/utils",
-      "version": "4.1.7",
-      "license": "MIT",
-      "repos": [
-        "browser-log"
-      ],
-      "license_resolved": "MIT",
-      "license_source": "sbom",
-      "policy_category": "allowed"
-    },
-    {
-      "name": "@vitest/utils",
       "version": "4.1.8",
       "license": "MIT",
       "repos": [
+        "browser-log",
         "wallet-companion"
       ],
       "license_resolved": "MIT",
@@ -10651,7 +10726,6 @@
       "version": "4.*.*",
       "license": "NOASSERTION",
       "repos": [
-        "browser-log",
         "facetec-api",
         "go-cryptoutil",
         "go-spocp",
@@ -10669,6 +10743,7 @@
       "version": "5.*.*",
       "license": "NOASSERTION",
       "repos": [
+        "browser-log",
         "g119612",
         "go-r2ps-service",
         "go-trust",
@@ -12746,10 +12821,11 @@
     },
     {
       "name": "ansis",
-      "version": "4.3.0",
+      "version": "4.3.1",
       "license": "ISC",
       "repos": [
-        "browser-log"
+        "browser-log",
+        "wallet-companion"
       ],
       "license_resolved": "ISC",
       "license_source": "sbom",
@@ -13098,7 +13174,8 @@
       "version": "3.0.0-beta.1",
       "license": "MIT",
       "repos": [
-        "browser-log"
+        "browser-log",
+        "wallet-companion"
       ],
       "license_resolved": "MIT",
       "license_source": "sbom",
@@ -13446,7 +13523,8 @@
       "version": "4.0.0",
       "license": "MIT",
       "repos": [
-        "browser-log"
+        "browser-log",
+        "wallet-companion"
       ],
       "license_resolved": "MIT",
       "license_source": "sbom",
@@ -13639,7 +13717,8 @@
       "version": "7.0.0",
       "license": "MIT",
       "repos": [
-        "browser-log"
+        "browser-log",
+        "wallet-companion"
       ],
       "license_resolved": "MIT",
       "license_source": "sbom",
@@ -16692,7 +16771,8 @@
       "version": "6.1.7",
       "license": "MIT",
       "repos": [
-        "browser-log"
+        "browser-log",
+        "wallet-companion"
       ],
       "license_resolved": "MIT",
       "license_source": "sbom",
@@ -17186,7 +17266,8 @@
       "version": "3.0.0",
       "license": "MIT",
       "repos": [
-        "browser-log"
+        "browser-log",
+        "wallet-companion"
       ],
       "license_resolved": "MIT",
       "license_source": "sbom",
@@ -17311,7 +17392,8 @@
       "version": "2.0.1",
       "license": "MIT",
       "repos": [
-        "browser-log"
+        "browser-log",
+        "wallet-companion"
       ],
       "license_resolved": "MIT",
       "license_source": "sbom",
@@ -18781,7 +18863,8 @@
       "version": "5.0.0-beta.5",
       "license": "MIT",
       "repos": [
-        "browser-log"
+        "browser-log",
+        "wallet-companion"
       ],
       "license_resolved": "MIT",
       "license_source": "sbom",
@@ -23499,7 +23582,8 @@
       "version": "6.1.1",
       "license": "MIT",
       "repos": [
-        "browser-log"
+        "browser-log",
+        "wallet-companion"
       ],
       "license_resolved": "MIT",
       "license_source": "sbom",
@@ -23806,7 +23890,8 @@
       "version": "0.4.0",
       "license": "MIT",
       "repos": [
-        "browser-log"
+        "browser-log",
+        "wallet-companion"
       ],
       "license_resolved": "MIT",
       "license_source": "sbom",
@@ -25201,6 +25286,7 @@
       "license": "MIT",
       "repos": [
         "browser-log",
+        "wallet-companion",
         "wallet-frontend"
       ],
       "license_resolved": "MIT",
@@ -26953,10 +27039,10 @@
     },
     {
       "name": "obug",
-      "version": "2.1.1",
+      "version": "2.1.2",
       "license": "MIT",
       "repos": [
-        "browser-log"
+        "wallet-companion"
       ],
       "license_resolved": "MIT",
       "license_source": "sbom",
@@ -26964,10 +27050,10 @@
     },
     {
       "name": "obug",
-      "version": "2.1.2",
+      "version": "2.1.3",
       "license": "MIT",
       "repos": [
-        "wallet-companion"
+        "browser-log"
       ],
       "license_resolved": "MIT",
       "license_source": "sbom",
@@ -29700,7 +29786,8 @@
       "version": "1.0.0",
       "license": "MIT",
       "repos": [
-        "browser-log"
+        "browser-log",
+        "wallet-companion"
       ],
       "license_resolved": "MIT",
       "license_source": "sbom",
@@ -30360,7 +30447,8 @@
       "version": "1.0.0",
       "license": "MIT",
       "repos": [
-        "browser-log"
+        "browser-log",
+        "wallet-companion"
       ],
       "license_resolved": "MIT",
       "license_source": "sbom",
@@ -30445,11 +30533,24 @@
       "policy_category": "allowed"
     },
     {
-      "name": "rolldown-plugin-dts",
-      "version": "0.25.1",
+      "name": "rolldown",
+      "version": "1.1.1",
       "license": "MIT",
       "repos": [
-        "browser-log"
+        "browser-log",
+        "wallet-companion"
+      ],
+      "license_resolved": "MIT",
+      "license_source": "sbom",
+      "policy_category": "allowed"
+    },
+    {
+      "name": "rolldown-plugin-dts",
+      "version": "0.25.2",
+      "license": "MIT",
+      "repos": [
+        "browser-log",
+        "wallet-companion"
       ],
       "license_resolved": "MIT",
       "license_source": "sbom",
@@ -30797,6 +30898,7 @@
       "version": "7.8.4",
       "license": "ISC",
       "repos": [
+        "browser-log",
         "wallet-companion"
       ],
       "license_resolved": "ISC",
@@ -32102,20 +32204,10 @@
     },
     {
       "name": "tinyexec",
-      "version": "1.2.3",
-      "license": "MIT",
-      "repos": [
-        "browser-log"
-      ],
-      "license_resolved": "MIT",
-      "license_source": "sbom",
-      "policy_category": "allowed"
-    },
-    {
-      "name": "tinyexec",
       "version": "1.2.4",
       "license": "MIT",
       "repos": [
+        "browser-log",
         "wallet-companion"
       ],
       "license_resolved": "MIT",
@@ -32149,7 +32241,6 @@
       "version": "0.2.16",
       "license": "MIT",
       "repos": [
-        "browser-log",
         "wallet-common"
       ],
       "license_resolved": "MIT",
@@ -32161,6 +32252,7 @@
       "version": "0.2.17",
       "license": "MIT",
       "repos": [
+        "browser-log",
         "wallet-companion"
       ],
       "license_resolved": "MIT",
@@ -32401,6 +32493,7 @@
       "license": "MIT",
       "repos": [
         "browser-log",
+        "wallet-companion",
         "wallet-frontend"
       ],
       "license_resolved": "MIT",
@@ -32431,14 +32524,26 @@
     },
     {
       "name": "tsdown",
-      "version": "0.22.1",
+      "version": "0.22.2",
       "license": "MIT",
       "repos": [
-        "browser-log"
+        "browser-log",
+        "wallet-companion"
       ],
       "license_resolved": "MIT",
       "license_source": "sbom",
       "policy_category": "allowed"
+    },
+    {
+      "name": "tsdown",
+      "version": "^0.22.2",
+      "license": "NOASSERTION",
+      "repos": [
+        "wallet-companion"
+      ],
+      "license_resolved": "NOASSERTION",
+      "license_source": "sbom",
+      "policy_category": "unclassified"
     },
     {
       "name": "tslib",
@@ -32706,7 +32811,8 @@
       "version": "7.5.0",
       "license": "MIT",
       "repos": [
-        "browser-log"
+        "browser-log",
+        "wallet-companion"
       ],
       "license_resolved": "MIT",
       "license_source": "sbom",
@@ -33271,20 +33377,10 @@
     },
     {
       "name": "vitest",
-      "version": "4.1.7",
-      "license": "MIT",
-      "repos": [
-        "browser-log"
-      ],
-      "license_resolved": "MIT",
-      "license_source": "sbom",
-      "policy_category": "allowed"
-    },
-    {
-      "name": "vitest",
       "version": "4.1.8",
       "license": "MIT",
       "repos": [
+        "browser-log",
         "wallet-companion"
       ],
       "license_resolved": "MIT",
