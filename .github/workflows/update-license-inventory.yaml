@@ -39,6 +39,7 @@ jobs:
             {"pattern": "github/*", "license": "MIT", "scope": "ci-only", "reason": "GitHub official actions — CI-only"},
             {"pattern": "androidx.*", "license": "Apache-2.0", "scope": "production", "reason": "Android Jetpack libraries — Apache-2.0"},
             {"pattern": "com.google.*", "license": "Apache-2.0", "scope": "production", "reason": "Google libraries — Apache-2.0"},
+            {"pattern": "org.jetbrains.intellij.deps:trove4j", "license": "LGPL-2.1", "scope": "build", "reason": "trove4j — Kotlin compiler internal dependency, build-only"},
             {"pattern": "org.jetbrains.*", "license": "Apache-2.0", "scope": "production", "reason": "JetBrains libraries — Apache-2.0"},
             {"pattern": "org.jetbrains.kotlin*", "license": "Apache-2.0", "scope": "production", "reason": "Kotlin stdlib — Apache-2.0"},
             {"pattern": "org.jetbrains.kotlinx*", "license": "Apache-2.0", "scope": "production", "reason": "KotlinX libraries — Apache-2.0"},
@@ -126,7 +127,17 @@ jobs:
             {"pattern": "vladopajic/*", "license": "MIT", "scope": "ci-only", "reason": "go-test-coverage action — CI-only"},
 
             {"pattern": "org.junit*", "license": "EPL-2.0", "scope": "test", "reason": "JUnit — EPL-2.0, test-only"},
-            {"pattern": "tsx", "license": "MIT", "scope": "production", "reason": "tsx — MIT"}
+            {"pattern": "tsx", "license": "MIT", "scope": "production", "reason": "tsx — MIT"},
+
+            {"pattern": "@img/sharp-*", "license": "LGPL-3.0-or-later", "scope": "build", "reason": "Native image binaries — build-time optional platform deps, dynamic linking"},
+            {"pattern": "lightningcss*", "license": "MPL-2.0", "scope": "build", "reason": "LightningCSS — build-time CSS compiler"},
+            {"pattern": "addons-*", "license": "MPL-2.0", "scope": "build", "reason": "Firefox addons dev tooling — build-time only"},
+            {"pattern": "web-ext", "license": "MPL-2.0", "scope": "build", "reason": "web-ext CLI — browser extension build tool"},
+            {"pattern": "fx-runner", "license": "MPL-2.0", "scope": "build", "reason": "fx-runner — browser extension dev tool"},
+            {"pattern": "eslint-plugin-no-unsanitized", "license": "MPL-2.0", "scope": "build", "reason": "ESLint plugin — dev-time linter"},
+            {"pattern": "com.sun.activation:javax.activation", "license": "CDDL-1.1", "scope": "build", "reason": "javax.activation — Gradle build dependency, CDDL+GPL with Classpath exception"},
+            {"pattern": "javax.annotation:javax.annotation-api", "license": "CDDL-1.0", "scope": "build", "reason": "javax.annotation-api — Gradle build dependency, CDDL+GPL with Classpath exception"},
+            {"pattern": "com.googlecode.juniversalchardet:juniversalchardet", "license": "MPL-1.1", "scope": "build", "reason": "juniversalchardet — build tooling dependency"}
           ]
           EOF
 
@@ -328,53 +339,76 @@ jobs:
           override_count = 0
           dual_count = 0
 
+          # Scope-to-category mapping for non-production overrides
+          SCOPE_CATEGORIES = {"ci-only": "ci-only", "build": "build-only", "test": "test-only"}
+
           # Apply overrides and dual-license selections to all_packages
           for pkg in all_packages:
               orig_license = pkg["license"]
+              override = apply_override(pkg["name"])
 
-              # 1. Check overrides (for NOASSERTION resolution)
-              if orig_license == "NOASSERTION":
-                  override = apply_override(pkg["name"])
-                  if override:
+              # 1. Check overrides
+              if override:
+                  scope = override.get("scope", "production")
+                  pkg["override_scope"] = scope
+                  pkg["override_reason"] = override["reason"]
+                  if orig_license == "NOASSERTION":
                       pkg["license_resolved"] = override["license"]
                       pkg["license_source"] = "policy-override"
-                      pkg["override_scope"] = override.get("scope", "production")
-                      pkg["override_reason"] = override["reason"]
                       override_count += 1
+                  elif orig_license in dual_license_map:
+                      pkg["license_resolved"] = dual_license_map[orig_license]
+                      pkg["license_source"] = "dual-license-selection"
+                      dual_count += 1
                   else:
-                      pkg["license_resolved"] = "NOASSERTION"
+                      pkg["license_resolved"] = orig_license
                       pkg["license_source"] = "sbom"
+                  # Non-production scope overrides the license-based category
+                  if scope in SCOPE_CATEGORIES:
+                      pkg["policy_category"] = SCOPE_CATEGORIES[scope]
+                  else:
+                      pkg["policy_category"] = classify_license(pkg.get("license_resolved", orig_license))
               # 2. Check dual-license selections (OR expressions)
               elif orig_license in dual_license_map:
                   pkg["license_resolved"] = dual_license_map[orig_license]
                   pkg["license_source"] = "dual-license-selection"
+                  pkg["policy_category"] = classify_license(pkg["license_resolved"])
                   dual_count += 1
+              # 3. No override, no dual-license
               else:
                   pkg["license_resolved"] = orig_license
                   pkg["license_source"] = "sbom"
-
-              # 3. Classify the resolved license
-              pkg["policy_category"] = classify_license(pkg.get("license_resolved", orig_license))
+                  pkg["policy_category"] = classify_license(pkg.get("license_resolved", orig_license))
 
           # Apply the same to unique_packages
           for pkg in unique_packages:
               orig_license = pkg["license"]
-              if orig_license == "NOASSERTION":
-                  override = apply_override(pkg["name"])
-                  if override:
+              override = apply_override(pkg["name"])
+
+              if override:
+                  scope = override.get("scope", "production")
+                  pkg["override_scope"] = scope
+                  if orig_license == "NOASSERTION":
                       pkg["license_resolved"] = override["license"]
                       pkg["license_source"] = "policy-override"
-                      pkg["override_scope"] = override.get("scope", "production")
+                  elif orig_license in dual_license_map:
+                      pkg["license_resolved"] = dual_license_map[orig_license]
+                      pkg["license_source"] = "dual-license-selection"
                   else:
-                      pkg["license_resolved"] = "NOASSERTION"
+                      pkg["license_resolved"] = orig_license
                       pkg["license_source"] = "sbom"
+                  if scope in SCOPE_CATEGORIES:
+                      pkg["policy_category"] = SCOPE_CATEGORIES[scope]
+                  else:
+                      pkg["policy_category"] = classify_license(pkg.get("license_resolved", orig_license))
               elif orig_license in dual_license_map:
                   pkg["license_resolved"] = dual_license_map[orig_license]
                   pkg["license_source"] = "dual-license-selection"
+                  pkg["policy_category"] = classify_license(pkg["license_resolved"])
               else:
                   pkg["license_resolved"] = orig_license
                   pkg["license_source"] = "sbom"
-              pkg["policy_category"] = classify_license(pkg.get("license_resolved", orig_license))
+                  pkg["policy_category"] = classify_license(pkg.get("license_resolved", orig_license))
 
           with open(f"{WORK}/all_packages.json", "w") as f:
               json.dump(all_packages, f)
