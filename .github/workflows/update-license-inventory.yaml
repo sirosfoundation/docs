@@ -415,6 +415,27 @@ jobs:
           with open(f"{WORK}/unique_packages.json", "w") as f:
               json.dump(unique_packages, f)
 
+          # Rebuild repo_summary using resolved licenses
+          from collections import defaultdict as ddict
+          repo_pkgs = ddict(list)
+          for p in all_packages:
+              repo_pkgs[p["repo"]].append(p)
+          repo_summary = []
+          for repo in sorted(repo_pkgs.keys()):
+              pkgs = repo_pkgs[repo]
+              lic_counts = {}
+              for p in pkgs:
+                  rl = p.get("license_resolved", p["license"])
+                  lic_counts[rl] = lic_counts.get(rl, 0) + 1
+              licenses = sorted(lic_counts.items(), key=lambda x: -x[1])
+              repo_summary.append({
+                  "repo": repo,
+                  "package_count": len(pkgs),
+                  "licenses": [{"license": l, "count": c} for l, c in licenses]
+              })
+          with open(f"{WORK}/repo_summary.json", "w") as f:
+              json.dump(repo_summary, f)
+
           # Build policy summary: count by category
           from collections import Counter
           cat_counts = Counter(p["policy_category"] for p in unique_packages)
@@ -454,6 +475,22 @@ jobs:
 
           with open(f"{WORK}/license_summary_resolved.json", "w") as f:
               json.dump(resolved_summary, f)
+
+          # Build audit drilldown: non-allowed packages grouped by category
+          audit_packages = [p for p in unique_packages if p.get("policy_category") != "allowed"]
+          audit_by_category = ddict(list)
+          for p in audit_packages:
+              audit_by_category[p["policy_category"]].append({
+                  "name": p["name"],
+                  "version": p.get("version", ""),
+                  "license": p.get("license_resolved", p["license"]),
+                  "license_source": p.get("license_source", "sbom"),
+                  "repos": p.get("repos", []),
+                  "override_scope": p.get("override_scope", ""),
+                  "override_reason": p.get("override_reason", ""),
+              })
+          with open(f"{WORK}/audit_drilldown.json", "w") as f:
+              json.dump(dict(audit_by_category), f)
 
           print(f"Policy applied: {override_count} overrides, {dual_count} dual-license selections")
           print(f"Categories: {dict(cat_counts)}")
@@ -556,6 +593,30 @@ jobs:
             jq -r '.[] |
               "| [\(.repo)](https://github.com/sirosfoundation/\(.repo)) | \(.package_count) | \(.licenses | map("\(.license) (\(.count))") | join(", ")) |"' \
               "$WORK/repo_summary.json"
+
+            echo ''
+            echo '## Packages Requiring Review'
+            echo ''
+            echo 'The following packages do not fall into the **allowed** category and may require'
+            echo 'additional review. Each entry shows which repositories pull in the dependency,'
+            echo 'enabling audit of the dependency graph.'
+            echo ''
+
+            # Generate a section per non-allowed category (ordered by severity)
+            for CATEGORY in weak-copyleft unclassified build-only test-only ci-only documentation; do
+              COUNT=$(jq --arg cat "$CATEGORY" '.[$cat] // [] | length' "$WORK/audit_drilldown.json")
+              if [[ "$COUNT" -gt 0 ]]; then
+                echo "### ${CATEGORY} (${COUNT} packages)"
+                echo ''
+                echo '| Package | Version | License | Source | Repositories | Reason |'
+                echo '|---------|---------|---------|--------|--------------|--------|'
+                jq -r --arg cat "$CATEGORY" '
+                  .[$cat] // [] | sort_by(.name) | .[] |
+                  "| \(.name) | \(.version) | \(.license) | \(.license_source) | \(.repos | map("[\(.)](https://github.com/sirosfoundation/\(.)/network/dependencies)") | join(", ")) | \(.override_reason) |"
+                ' "$WORK/audit_drilldown.json"
+                echo ''
+              fi
+            done
 
             echo ''
             echo "_Last updated: ${TIMESTAMP}_"
