@@ -36,6 +36,6 @@ https://developers.siros.org/catalog/container-images.json
 | `ghcr.io/sirosfoundation/go-ztts` | [sirosfoundation/go-ztts](https://github.com/sirosfoundation/go-ztts) | - | `e9949dd` |  |
 | `ghcr.io/sirosfoundation/go-grc` | [sirosfoundation/go-grc](https://github.com/sirosfoundation/go-grc) | `0.11.1` | `sha-f397a37` | 0.11.1, 0.11.0-arm64, 0.11.0-amd64, 0.11.0, 0.11 |
 | `ghcr.io/sirosfoundation/registry-cli` | [sirosfoundation/registry-cli](https://github.com/sirosfoundation/registry-cli) | `0.9.9` | `fe16a2b` | 0.9.9, 0.9.8, 0.9.7, 0.9.6, 0.9.5, 0.9.4, 0.9.3, 0.9.2, 0.9.10, 0.9.1, 0.9.0, 0.9, 0.8.0, 0.8, 0.7.0, 0.7, 0.12.0, 0.12, 0.11.0, 0.11, 0.10.0, 0.10 |
-| `ghcr.io/sirosfoundation/go-r2ps-service` | [sirosfoundation/go-r2ps-service](https://github.com/sirosfoundation/go-r2ps-service) | `0.0.1` | `f33f746` | 0.0.1, 0.0 |
+| `ghcr.io/sirosfoundation/go-r2ps-service` | [sirosfoundation/go-r2ps-service](https://github.com/sirosfoundation/go-r2ps-service) | `0.0.1` | `f92ce41` | 0.0.1, 0.0 |
 
-_Last updated: 2026-06-18T15:12:00Z_
+_Last updated: 2026-06-18T22:45:00Z_
