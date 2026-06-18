@@ -141,7 +141,7 @@ registry-cli converts Markdown files with `vct:` YAML front matter into credenti
 
 *Added in v0.12.0*
 
-By default, registry-cli generates all registered output formats (SD-JWT VCTM, mDOC MDDL, and W3C VCDM 2.0) for every markdown credential. To generate only specific formats, add a `formats` field to the front matter:
+By default, registry-cli generates all registered output formats (SD-JWT VCTM, mDOC MDDL, W3C VCDM 2.0, and standalone JSON Schema) for every markdown credential. To generate only specific formats, add a `formats` field to the front matter:
 
 ```markdown
 ---
@@ -157,6 +157,7 @@ Supported format names and aliases:
 | `vctm` | `sd-jwt`, `sdjwt` | `.vctm.json` |
 | `mddl` | `mdoc`, `mso_mdoc` | `.mdoc.json` |
 | `w3c` | `jwt_vc_json` | `.vc.json` |
+| `jsonschema` | `json-schema`, `schema` | `.schema.json` |
 
 When `formats` is omitted or empty, all registered formats are generated.
 

@@ -96,7 +96,7 @@ See the [registry-cli nested claims reference](../sirosid/registry/registry-cli#
 
 #### Per-credential format selection
 
-By default, registry-cli generates metadata in all supported formats (SD-JWT VCTM, mDOC MDDL, W3C VCDM 2.0). To restrict which formats are generated for a specific credential, add a `formats` field to the front matter:
+By default, registry-cli generates metadata in all supported formats (SD-JWT VCTM, mDOC MDDL, W3C VCDM 2.0, JSON Schema). To restrict which formats are generated for a specific credential, add a `formats` field to the front matter:
 
 ```markdown
 ---
