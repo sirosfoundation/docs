@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-18T07:55:24Z",
+  "generated": "2026-06-18T15:12:00Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -777,6 +777,7 @@
         "6a7d97c",
         "676c0d6",
         "523e841",
+        "3ff421c",
         "2f4d4f8",
         "26d4164",
         "2273447",
