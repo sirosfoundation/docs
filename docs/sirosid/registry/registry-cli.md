@@ -188,6 +188,94 @@ The container type determines how children are represented in each output format
 | `object` | Nested claim paths (e.g. `["address", "street"]`) | Dot-notation keys (e.g. `address.street`) | Nested `properties` in JSON Schema |
 | `array` | Array paths with `null` index (e.g. `["previous_addresses", null, "city"]`) | Dot-notation keys (e.g. `previous_addresses.city`) | `items` schema with `properties` |
 
+## Schema-meta: TS11 Governance Metadata
+
+Each credential must have a co-located `.schema-meta.yaml` (or `.schema-meta.json`) file providing **TS11 Catalogue of Attestations** compliance metadata. Only two fields are required; all others are inferred automatically by registry-cli at build time.
+
+### Required Fields
+
+Every credential must declare its governance properties:
+
+| Field | Values | Description |
+|-------|--------|-------------|
+| `attestation_los` | `iso_18045_high`, `iso_18045_moderate`, `iso_18045_enhanced-basic`, `iso_18045_basic` | Attestation Level of Surety per ISO 18045. Friendly aliases (`high`, `moderate`, `enhanced-basic`, `basic`, `substantial`, `low`) are normalized automatically. |
+| `binding_type` | `key`, `biometric`, `claim`, `none` | How the credential is bound to the holder. Aliases: `cnf` → `key`, `holder` → `key`. |
+
+### Optional Fields
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `version` | string | `"0.1.0"` | Credential schema version (semver). Can also be derived from git tags. |
+| `rulebook_uri` | string | *(auto-detected)* | URL to attestation rulebook. Registry-cli auto-generates this from co-located `rulebook.md` if present. |
+| `trusted_authorities` | array | *(empty)* | Trust framework references per TS11 §4.3.3. See [Trusted Authorities](#trusted-authorities) below. |
+
+### Auto-Generated Fields
+
+The following fields are inferred automatically during build and should **not** be set in the YAML:
+
+| Field | Source |
+|-------|--------|
+| `id` | UUID v5 deterministically derived from organization + slug |
+| `supportedFormats` | Auto-detected from co-located files: `.vctm.json` → `dc+sd-jwt`, `.mdoc.json` → `mso_mdoc`, `.vc.json` → `jwt_vc_json` |
+| `schemaURIs` | Generated from `supportedFormats`, using the registry base URL |
+
+### Minimal Example
+
+```yaml
+attestation_los: iso_18045_high
+binding_type: key
+```
+
+### Full Example with Trusted Authorities
+
+```yaml
+attestation_los: iso_18045_high
+binding_type: key
+version: "1.0.0"
+rulebook_uri: https://example.com/credentials/my-credential/rulebook.html
+trusted_authorities:
+  - framework_type: etsi_tl
+    value: "https://tl.etsi.org/export/trustlist.xml"
+    is_lote: false
+  - framework_type: eidas
+    value: "https://eidas.ec.europa.eu"
+    is_lote: false
+    trust_mark_id: "https://eidas.ec.europa.eu/markers/high"
+    trust_mark_issuers:
+      - "https://issuer.example.com"
+```
+
+#### Trusted Authorities Reference
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `framework_type` | string | Yes | Identifier for the trust framework (e.g., `etsi_tl`, `eidas`, `custom-scheme`) |
+| `value` | string | Yes | Trust list URL or authority endpoint |
+| `is_lote` | boolean | No | Whether this is a List of Trusted Entities (LOTE) |
+| `trust_mark_id` | string | No | URI identifying the trust mark |
+| `trust_mark_issuers` | array of strings | No | URLs of entities authorized to issue this trust mark |
+
+### File Placement
+
+Place the `.schema-meta.yaml` file alongside your credential files with a matching base name:
+
+```
+credentials/
+├── my-credential.md                (markdown source or pre-built)
+├── my-credential.schema-meta.yaml  (TS11 metadata — required)
+├── my-credential.vctm.json         (auto-generated or pre-built)
+├── my-credential.mdoc.json         (auto-generated or pre-built)
+└── my-credential.vc.json           (auto-generated or pre-built)
+```
+
+### Publishing Without Schema-Meta
+
+Credentials discovered without a `.schema-meta.yaml` file:
+- ✅ Appear in the **human-readable site** (HTML pages, credential listings)
+- ❌ Are **excluded** from TS11 API responses (`/api/v1/schemas.json`)
+
+This allows incremental migration to TS11 compliance. To make a credential TS11-compliant, add a `.schema-meta.yaml` file and rebuild the registry.
+
 ## CLI Reference
 
 ### `registry-cli build`
