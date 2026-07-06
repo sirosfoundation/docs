@@ -58,9 +58,9 @@ License policy overrides applied: **658** · Dual-license selections: **157**
 | MIT-0 | allowed | 3 | 8 |
 | CC0-1.0 AND MIT | allowed | 6 | 8 |
 | EPL-2.0 | test-only | 7 | 7 |
+| BlueOak-1.0.0 | allowed | 4 | 6 |
 | CC0-1.0 | allowed | 4 | 6 |
 | 0BSD | allowed | 1 | 6 |
-| BlueOak-1.0.0 | allowed | 4 | 6 |
 | Apache-2.0 AND BSD-3-Clause AND MIT | allowed | 1 | 5 |
 | ISC AND MIT | allowed | 4 | 4 |
 | BSD-2-Clause AND BSD-3-Clause | allowed | 1 | 3 |
@@ -80,53 +80,53 @@ License policy overrides applied: **658** · Dual-license selections: **157**
 | Apache-2.0 AND BSD-2-Clause | allowed | 1 | 2 |
 | Apache-2.0 AND ISC | allowed | 1 | 1 |
 | Apache-2.0 AND CC0-1.0 | allowed | 1 | 1 |
-| Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND Elastic-2.0 AND LicenseRef-scancode-public-domain AND MIT AND bzip2-1.0.6 | build-only | 1 | 1 |
-| LGPL-2.1 | build-only | 1 | 1 |
-| LicenseRef-scancode-jdom | allowed | 1 | 1 |
-| EPL-1.0 | test-only | 1 | 1 |
-| Apache-2.0 AND LicenseRef-scancode-public-domain AND bzip2-1.0.6 | allowed | 1 | 1 |
-| CDDL-1.0 | build-only | 1 | 1 |
 | CDDL-1.1 | build-only | 1 | 1 |
+| Apache-2.0 AND LicenseRef-scancode-public-domain AND bzip2-1.0.6 | allowed | 1 | 1 |
+| EPL-1.0 | test-only | 1 | 1 |
+| LicenseRef-scancode-jdom | allowed | 1 | 1 |
+| LGPL-2.1 | build-only | 1 | 1 |
+| Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND Elastic-2.0 AND LicenseRef-scancode-public-domain AND MIT AND bzip2-1.0.6 | build-only | 1 | 1 |
 | MPL-1.1 | build-only | 1 | 1 |
+| CDDL-1.0 | build-only | 1 | 1 |
 | BSD-2-Clause-Views | allowed | 1 | 1 |
 | Apache-2.0 AND CC-BY-SA-4.0 | documentation | 1 | 1 |
-| Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause | allowed | 1 | 1 |
 | Apache-2.0 AND LicenseRef-scancode-dco-1.1 AND MIT | allowed | 1 | 1 |
-| BSD-3-Clause AND ISC AND MIT | allowed | 1 | 1 |
+| Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause | allowed | 1 | 1 |
 | BSD-2-Clause AND CC0-1.0 AND ISC AND MIT | allowed | 1 | 1 |
+| BSD-3-Clause AND ISC AND MIT | allowed | 1 | 1 |
 | LicenseRef-scancode-unicode AND MIT | allowed | 1 | 1 |
 | Apache-2.0 AND LGPL-3.0-or-later AND MIT | build-only | 1 | 1 |
-| AFL-2.1 AND AFL-3.0 AND BSD-3-Clause | allowed | 1 | 1 |
-| Apache-2.0 AND BSD-2-Clause AND BlueOak-1.0.0 AND CC0-1.0 AND ISC AND MIT | allowed | 1 | 1 |
+| Apache-2.0 AND BSD-3-Clause AND ISC AND MIT | allowed | 1 | 1 |
 | LicenseRef-scancode-public-domain | allowed | 1 | 1 |
 | BSD-3-Clause AND MIT | allowed | 1 | 1 |
-| Apache-2.0 AND BSD-3-Clause AND ISC AND MIT | allowed | 1 | 1 |
+| AFL-2.1 AND AFL-3.0 AND BSD-3-Clause | allowed | 1 | 1 |
+| Apache-2.0 AND BSD-2-Clause AND BlueOak-1.0.0 AND CC0-1.0 AND ISC AND MIT | allowed | 1 | 1 |
 | CC-BY-4.0 | documentation | 1 | 1 |
 
 ## Per-Repository Breakdown
 
 | Repository | Dependencies | Licenses |
 |------------|------------:|----------|
-| [browser-log](https://github.com/sirosfoundation/browser-log) | 319 | MIT (270), MPL-2.0 (12), ISC (12), BSD-2-Clause (9), Apache-2.0 (4), BSD-3-Clause (4), MIT-0 (2), CC0-1.0 (1), BSD-2-Clause AND BSD-3-Clause (1), Python-2.0 (1), 0BSD (1), Apache-2.0 AND BSD-2-Clause AND CC0-1.0 AND ISC AND MIT (1), BlueOak-1.0.0 (1) |
+| [browser-log](https://github.com/sirosfoundation/browser-log) | 319 | MIT (270), ISC (12), MPL-2.0 (12), BSD-2-Clause (9), Apache-2.0 (4), BSD-3-Clause (4), MIT-0 (2), BSD-2-Clause AND BSD-3-Clause (1), BlueOak-1.0.0 (1), Python-2.0 (1), CC0-1.0 (1), 0BSD (1), Apache-2.0 AND BSD-2-Clause AND CC0-1.0 AND ISC AND MIT (1) |
 | [facetec-api](https://github.com/sirosfoundation/facetec-api) | 61 | MIT (32), Apache-2.0 (13), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (6), BSD-2-Clause (4), BSD-3-Clause (3), Apache-2.0 AND MIT (1), ISC (1), LGPL-3.0 (1) |
-| [g119612](https://github.com/sirosfoundation/g119612) | 38 | MIT (17), BSD-2-Clause (7), BSD-3-Clause (5), Apache-2.0 (5), ISC (1), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (1), EUPL-1.2 (1), LGPL-3.0 (1) |
-| [go-cryptoutil](https://github.com/sirosfoundation/go-cryptoutil) | 18 | MIT (10), BSD-2-Clause (3), BSD-3-Clause (1), EUPL-1.2 (1), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (1), LGPL-3.0 (1), Apache-2.0 (1) |
-| [go-invite-op](https://github.com/sirosfoundation/go-invite-op) | 132 | MIT (78), Apache-2.0 (21), MPL-2.0 (12), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (8), BSD-3-Clause (6), ISC (3), BSD-2-Clause (2), Apache-2.0 AND BSD-3-Clause AND MIT (1), Apache-2.0 AND MIT (1) |
-| [go-r2ps-service](https://github.com/sirosfoundation/go-r2ps-service) | 47 | MIT (20), BSD-3-Clause (10), Apache-2.0 (10), BSD-2-Clause (3), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (1), Apache-2.0 AND BSD-3-Clause AND MIT (1), Apache-2.0 AND MIT (1), LGPL-3.0 (1) |
-| [go-spocp](https://github.com/sirosfoundation/go-spocp) | 19 | MIT (13), BSD-2-Clause (3), BSD-3-Clause (1), LGPL-3.0 (1), Apache-2.0 (1) |
-| [go-trust](https://github.com/sirosfoundation/go-trust) | 128 | MIT (59), Apache-2.0 (28), BSD-3-Clause (17), BSD-2-Clause (12), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (3), Apache-2.0 AND MIT (3), ISC (2), Apache-2.0 AND CC-BY-3.0 AND MIT (1), Apache-2.0 AND BSD-3-Clause AND MIT (1), MIT-0 (1), LGPL-3.0 (1) |
+| [g119612](https://github.com/sirosfoundation/g119612) | 38 | MIT (17), BSD-2-Clause (7), Apache-2.0 (5), BSD-3-Clause (5), EUPL-1.2 (1), ISC (1), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (1), LGPL-3.0 (1) |
+| [go-cryptoutil](https://github.com/sirosfoundation/go-cryptoutil) | 18 | MIT (10), BSD-2-Clause (3), EUPL-1.2 (1), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (1), BSD-3-Clause (1), Apache-2.0 (1), LGPL-3.0 (1) |
+| [go-invite-op](https://github.com/sirosfoundation/go-invite-op) | 132 | MIT (78), Apache-2.0 (21), MPL-2.0 (12), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (8), BSD-3-Clause (6), ISC (3), BSD-2-Clause (2), Apache-2.0 AND MIT (1), Apache-2.0 AND BSD-3-Clause AND MIT (1) |
+| [go-r2ps-service](https://github.com/sirosfoundation/go-r2ps-service) | 47 | MIT (20), Apache-2.0 (10), BSD-3-Clause (10), BSD-2-Clause (3), Apache-2.0 AND MIT (1), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (1), Apache-2.0 AND BSD-3-Clause AND MIT (1), LGPL-3.0 (1) |
+| [go-spocp](https://github.com/sirosfoundation/go-spocp) | 19 | MIT (13), BSD-2-Clause (3), LGPL-3.0 (1), Apache-2.0 (1), BSD-3-Clause (1) |
+| [go-trust](https://github.com/sirosfoundation/go-trust) | 128 | MIT (59), Apache-2.0 (28), BSD-3-Clause (17), BSD-2-Clause (12), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (3), Apache-2.0 AND MIT (3), ISC (2), Apache-2.0 AND CC-BY-3.0 AND MIT (1), MIT-0 (1), Apache-2.0 AND BSD-3-Clause AND MIT (1), LGPL-3.0 (1) |
 | [go-wallet-backend](https://github.com/sirosfoundation/go-wallet-backend) | 103 | MIT (44), Apache-2.0 (26), BSD-3-Clause (16), BSD-2-Clause (11), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (2), Apache-2.0 AND MIT (1), ISC (1), Apache-2.0 AND BSD-3-Clause AND MIT (1), LGPL-3.0 (1) |
-| [goFF](https://github.com/sirosfoundation/goFF) | 32 | MIT (14), BSD-2-Clause (5), Apache-2.0 (5), BSD-3-Clause (4), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (2), ISC (1), LGPL-3.0 (1) |
+| [goFF](https://github.com/sirosfoundation/goFF) | 32 | MIT (14), Apache-2.0 (5), BSD-2-Clause (5), BSD-3-Clause (4), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (2), ISC (1), LGPL-3.0 (1) |
 | [goxmldsig](https://github.com/sirosfoundation/goxmldsig) | 17 | MIT (7), Apache-2.0 (4), BSD-2-Clause (3), BSD-3-Clause (2), ISC (1) |
-| [r2ps-client](https://github.com/sirosfoundation/r2ps-client) | 163 | MIT (108), Apache-2.0 (29), Unicode-3.0 (18), CDLA-Permissive-2.0 (2), ISC (2), LGPL-3.0 (1), Apache-2.0 AND ISC (1), BSD-3-Clause (1), BSD-2-Clause (1) |
-| [registry-cli](https://github.com/sirosfoundation/registry-cli) | 43 | MIT (15), BSD-3-Clause (13), Apache-2.0 (7), BSD-2-Clause (5), NOASSERTION (1), ISC (1), LGPL-3.0 (1) |
-| [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin) | 480 | Apache-2.0 (423), MIT (18), BSD-3-Clause (15), EPL-2.0 (7), BSD-2-Clause (3), Apache-2.0 AND CC0-1.0 (1), NOASSERTION (1), Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND Elastic-2.0 AND LicenseRef-scancode-public-domain AND MIT AND bzip2-1.0.6 (1), LGPL-2.1 (1), Apache-2.0 AND MIT (1), LicenseRef-scancode-jdom (1), Apache-2.0 AND BSD-3-Clause (1), EPL-1.0 (1), Apache-2.0 AND LicenseRef-scancode-public-domain AND bzip2-1.0.6 (1), CDDL-1.0 (1), CC0-1.0 (1), CDDL-1.1 (1), MPL-1.1 (1), LGPL-3.0 (1) |
+| [r2ps-client](https://github.com/sirosfoundation/r2ps-client) | 163 | MIT (108), Apache-2.0 (29), Unicode-3.0 (18), ISC (2), CDLA-Permissive-2.0 (2), Apache-2.0 AND ISC (1), BSD-3-Clause (1), LGPL-3.0 (1), BSD-2-Clause (1) |
+| [registry-cli](https://github.com/sirosfoundation/registry-cli) | 43 | MIT (15), BSD-3-Clause (13), Apache-2.0 (7), BSD-2-Clause (5), ISC (1), NOASSERTION (1), LGPL-3.0 (1) |
+| [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin) | 480 | Apache-2.0 (423), MIT (18), BSD-3-Clause (15), EPL-2.0 (7), BSD-2-Clause (3), Apache-2.0 AND CC0-1.0 (1), CDDL-1.1 (1), CC0-1.0 (1), Apache-2.0 AND MIT (1), Apache-2.0 AND LicenseRef-scancode-public-domain AND bzip2-1.0.6 (1), EPL-1.0 (1), NOASSERTION (1), LicenseRef-scancode-jdom (1), LGPL-2.1 (1), Apache-2.0 AND BSD-3-Clause (1), Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND Elastic-2.0 AND LicenseRef-scancode-public-domain AND MIT AND bzip2-1.0.6 (1), MPL-1.1 (1), CDDL-1.0 (1), LGPL-3.0 (1) |
 | [siros-sdk-swift](https://github.com/sirosfoundation/siros-sdk-swift) | 12 | MIT (8), BSD-2-Clause (2), LGPL-3.0 (1), Apache-2.0 (1) |
 | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app) | 70 | NOASSERTION (58), MIT (8), BSD-2-Clause (2), Apache-2.0 (1), LGPL-3.0 (1) |
-| [vc](https://github.com/sirosfoundation/vc) | 211 | MIT (81), Apache-2.0 (74), BSD-3-Clause (29), BSD-2-Clause (10), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (3), Apache-2.0 AND MIT (3), ISC (2), Apache-2.0 AND BSD-3-Clause AND MIT (1), BSD-2-Clause-Views (1), MPL-2.0 (1), Apache-2.0 AND BSD-3-Clause (1), Apache-2.0 AND CC-BY-SA-4.0 (1), Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause (1), MIT-0 (1), Apache-2.0 AND CC-BY-3.0 AND MIT (1), Apache-2.0 AND LicenseRef-scancode-dco-1.1 AND MIT (1) |
-| [wallet-common](https://github.com/sirosfoundation/wallet-common) | 210 | MIT (174), Apache-2.0 (18), BSD-3-Clause (7), ISC (2), 0BSD (2), BSD-2-Clause (2), LicenseRef-scancode-generic-cla AND MIT (1), 0BSD AND ISC AND MIT (1), MIT AND Zlib (1), BSD-3-Clause AND ISC AND MIT (1), BSD-2-Clause AND CC0-1.0 AND ISC AND MIT (1) |
-| [wallet-companion](https://github.com/sirosfoundation/wallet-companion) | 681 | MIT (499), Apache-2.0 (47), ISC (35), BSD-2-Clause (30), MPL-2.0 (18), BSD-3-Clause (14), LGPL-3.0-or-later (10), CC0-1.0 AND MIT (5), BlueOak-1.0.0 (3), Apache-2.0 AND LGPL-3.0-or-later (3), CC0-1.0 (2), Apache-2.0 AND MIT (2), MIT-0 (2), NOASSERTION (1), LicenseRef-scancode-unicode AND MIT (1), ISC AND MIT (1), 0BSD (1), BSD-2-Clause AND BSD-2-Clause-Views (1), Python-2.0 (1), MIT AND Zlib (1), BSD-2-Clause AND BSD-3-Clause (1), Apache-2.0 AND OFL-1.1 AND Ubuntu-font-1.0 (1), Apache-2.0 AND LGPL-3.0-or-later AND MIT (1), LGPL-3.0 (1) |
-| [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend) | 1107 | MIT (908), Apache-2.0 (60), ISC (40), BSD-2-Clause (21), BSD-3-Clause (19), MPL-2.0 (13), BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND LicenseRef-scancode-other-permissive AND MIT AND MPL-2.0 (10), Apache-2.0 AND BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND LicenseRef-scancode-other-permissive AND MIT AND MPL-2.0 (3), CC0-1.0 AND MIT (3), ISC AND MIT (3), CC0-1.0 (2), MIT-0 (2), Apache-2.0 AND BSD-2-Clause (2), 0BSD (2), BlueOak-1.0.0 (2), AFL-2.1 AND AFL-3.0 AND BSD-3-Clause (1), Python-2.0 (1), BSD-2-Clause AND BSD-3-Clause (1), Apache-2.0 AND BSD-2-Clause AND BlueOak-1.0.0 AND CC0-1.0 AND ISC AND MIT (1), Apache-2.0 AND BSD-2-Clause AND CC0-1.0 AND ISC AND MIT (1), Apache-2.0 AND MIT (1), Apache-2.0 AND OFL-1.1 AND Ubuntu-font-1.0 (1), 0BSD AND ISC AND MIT (1), LicenseRef-scancode-public-domain (1), NOASSERTION (1), BSD-3-Clause AND MIT (1), LicenseRef-scancode-generic-cla AND MIT (1), Apache-2.0 AND BSD-3-Clause AND ISC AND MIT (1), BSD-2-Clause AND BSD-2-Clause-Views (1), CC-BY-4.0 (1), MIT AND Zlib (1), LGPL-3.0 (1) |
+| [vc](https://github.com/sirosfoundation/vc) | 211 | MIT (81), Apache-2.0 (74), BSD-3-Clause (29), BSD-2-Clause (10), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (3), Apache-2.0 AND MIT (3), ISC (2), MIT-0 (1), BSD-2-Clause-Views (1), Apache-2.0 AND BSD-3-Clause AND MIT (1), Apache-2.0 AND CC-BY-SA-4.0 (1), Apache-2.0 AND LicenseRef-scancode-dco-1.1 AND MIT (1), Apache-2.0 AND CC-BY-3.0 AND MIT (1), Apache-2.0 AND BSD-3-Clause (1), MPL-2.0 (1), Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause (1) |
+| [wallet-common](https://github.com/sirosfoundation/wallet-common) | 210 | MIT (174), Apache-2.0 (18), BSD-3-Clause (7), ISC (2), 0BSD (2), BSD-2-Clause (2), LicenseRef-scancode-generic-cla AND MIT (1), 0BSD AND ISC AND MIT (1), BSD-2-Clause AND CC0-1.0 AND ISC AND MIT (1), MIT AND Zlib (1), BSD-3-Clause AND ISC AND MIT (1) |
+| [wallet-companion](https://github.com/sirosfoundation/wallet-companion) | 681 | MIT (499), Apache-2.0 (47), ISC (35), BSD-2-Clause (30), MPL-2.0 (18), BSD-3-Clause (14), LGPL-3.0-or-later (10), CC0-1.0 AND MIT (5), BlueOak-1.0.0 (3), Apache-2.0 AND LGPL-3.0-or-later (3), Apache-2.0 AND MIT (2), MIT-0 (2), CC0-1.0 (2), LicenseRef-scancode-unicode AND MIT (1), BSD-2-Clause AND BSD-3-Clause (1), ISC AND MIT (1), BSD-2-Clause AND BSD-2-Clause-Views (1), MIT AND Zlib (1), Apache-2.0 AND OFL-1.1 AND Ubuntu-font-1.0 (1), Python-2.0 (1), 0BSD (1), Apache-2.0 AND LGPL-3.0-or-later AND MIT (1), NOASSERTION (1), LGPL-3.0 (1) |
+| [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend) | 1107 | MIT (908), Apache-2.0 (60), ISC (40), BSD-2-Clause (21), BSD-3-Clause (19), MPL-2.0 (13), BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND LicenseRef-scancode-other-permissive AND MIT AND MPL-2.0 (10), Apache-2.0 AND BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND LicenseRef-scancode-other-permissive AND MIT AND MPL-2.0 (3), ISC AND MIT (3), CC0-1.0 AND MIT (3), Apache-2.0 AND BSD-2-Clause (2), BlueOak-1.0.0 (2), 0BSD (2), MIT-0 (2), CC0-1.0 (2), Apache-2.0 AND BSD-3-Clause AND ISC AND MIT (1), NOASSERTION (1), Apache-2.0 AND OFL-1.1 AND Ubuntu-font-1.0 (1), LicenseRef-scancode-public-domain (1), BSD-3-Clause AND MIT (1), Python-2.0 (1), AFL-2.1 AND AFL-3.0 AND BSD-3-Clause (1), 0BSD AND ISC AND MIT (1), Apache-2.0 AND MIT (1), BSD-2-Clause AND BSD-2-Clause-Views (1), Apache-2.0 AND BSD-2-Clause AND BlueOak-1.0.0 AND CC0-1.0 AND ISC AND MIT (1), CC-BY-4.0 (1), BSD-2-Clause AND BSD-3-Clause (1), Apache-2.0 AND BSD-2-Clause AND CC0-1.0 AND ISC AND MIT (1), LicenseRef-scancode-generic-cla AND MIT (1), MIT AND Zlib (1), LGPL-3.0 (1) |
 
 ## Packages Requiring Review
 
@@ -413,6 +413,6 @@ enabling audit of the dependency graph.
 | github.com/opencontainers/go-digest | v1.0.0 | Apache-2.0 AND CC-BY-SA-4.0 | sbom | [vc](https://github.com/sirosfoundation/vc/network/dependencies) |  |
 
 
-_Last updated: 2026-07-05T07:37:25Z_
+_Last updated: 2026-07-06T08:01:06Z_
 
 _License policy: [sirosfoundation/compliance](https://github.com/sirosfoundation/compliance/blob/main/catalog/technical/license-policy.yaml)_
