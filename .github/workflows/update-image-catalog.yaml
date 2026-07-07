@@ -72,7 +72,7 @@ jobs:
             for IMAGE in "${IMAGES[@]}"; do
               TAGS_JSON=$(fetch_tags "$IMAGE" || true)
               if [[ -n "$TAGS_JSON" ]]; then
-                TAGS=$(echo "$TAGS_JSON" | jq -r '.tags // [] | sort | reverse')
+                TAGS=$(echo "$TAGS_JSON" | jq -r '.tags // [] | reverse')
                 echo "  ${ORG}/${IMAGE}: $(echo "$TAGS" | jq 'length') tags"
                 CATALOG_JSON=$(echo "$CATALOG_JSON" | jq \
                   --arg name "ghcr.io/${ORG}/${IMAGE}" \
