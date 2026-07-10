@@ -32,10 +32,10 @@ https://developers.siros.org/catalog/container-images.json
 | `ghcr.io/sirosfoundation/go-wallet-backend` | [sirosfoundation/go-wallet-backend](https://github.com/sirosfoundation/go-wallet-backend) | `0.7.1` | `2597300` | 0.7.1, 0.7, 0.7.0, 0.6.1, 0.6, 0.6.0, 0.5.2, 0.5.1, 0.5, 0.5.0 |
 | `ghcr.io/sirosfoundation/goff` | [sirosfoundation/goFF](https://github.com/sirosfoundation/goFF) | `0.1` | `067efda` | 0.1, 0.1.0 |
 | `ghcr.io/sirosfoundation/facetec-api` | [sirosfoundation/facetec-api](https://github.com/sirosfoundation/facetec-api) | `0.12` | `9a878e3` | 0.12, 0.12.0, 0.11, 0.11.0, 0.10, 0.10.0, 0.9, 0.9.0, 0.8, 0.8.0 |
-| `ghcr.io/sirosfoundation/go-invite-op` | [sirosfoundation/go-invite-op](https://github.com/sirosfoundation/go-invite-op) | - | `sha-336f021` |  |
+| `ghcr.io/sirosfoundation/go-invite-op` | [sirosfoundation/go-invite-op](https://github.com/sirosfoundation/go-invite-op) | - | `9965482` |  |
 | `ghcr.io/sirosfoundation/go-ztts` | [sirosfoundation/go-ztts](https://github.com/sirosfoundation/go-ztts) | - | `0f06e7d` |  |
 | `ghcr.io/sirosfoundation/go-grc` | [sirosfoundation/go-grc](https://github.com/sirosfoundation/go-grc) | `0.12` | `0165685` | 0.12, 0.12.0, 0.11.2, 0.11.1, 0.11.0-arm64, 0.11.0-amd64, 0.11, 0.11.0 |
 | `ghcr.io/sirosfoundation/registry-cli` | [sirosfoundation/registry-cli](https://github.com/sirosfoundation/registry-cli) | `0.12` | `b8a5190` | 0.12, 0.12.0, 0.11, 0.11.0, 0.10, 0.10.0, 0.9.10, 0.9.9, 0.9.8, 0.9.7 |
 | `ghcr.io/sirosfoundation/go-r2ps-service` | [sirosfoundation/go-r2ps-service](https://github.com/sirosfoundation/go-r2ps-service) | `0.1` | `d82314c` | 0.1, 0.1.0, 0.0, 0.0.1 |
 
-_Last updated: 2026-07-10T14:59:10Z_
+_Last updated: 2026-07-10T22:25:36Z_

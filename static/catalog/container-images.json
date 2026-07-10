@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-10T14:59:10Z",
+  "generated": "2026-07-10T22:25:36Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -794,6 +794,8 @@
       "image": "ghcr.io/sirosfoundation/go-invite-op",
       "repo": "sirosfoundation/go-invite-op",
       "tags": [
+        "9965482",
+        "latest-build",
         "sha-336f021",
         "sha-210cedd",
         "sha-bf0a3aa",
