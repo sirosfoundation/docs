@@ -72,7 +72,7 @@ jobs:
             for IMAGE in "${IMAGES[@]}"; do
               TAGS_JSON=$(fetch_tags "$IMAGE" || true)
               if [[ -n "$TAGS_JSON" ]]; then
-                TAGS=$(echo "$TAGS_JSON" | jq -r '.tags // [] | sort | reverse')
+                TAGS=$(echo "$TAGS_JSON" | jq -r '.tags // [] | reverse')
                 echo "  ${ORG}/${IMAGE}: $(echo "$TAGS" | jq 'length') tags"
                 CATALOG_JSON=$(echo "$CATALOG_JSON" | jq \
                   --arg name "ghcr.io/${ORG}/${IMAGE}" \
@@ -121,7 +121,7 @@ jobs:
             .tags as $all |
             .repo as $repo |
             ($all | map(select(test("^v?[0-9]+[.][0-9]")))) as $versions |
-            ($versions | join(", ")) as $release |
+            ($versions[:10] | join(", ")) as $release |
             ($versions[0] // "-") as $latest |
             ($all | map(select(test("^([0-9a-f]{7,9}|sha-[0-9a-f]+|unstable-[0-9a-f]+|dev-[0-9a-f]+)$")))[0] // "-") as $build |
             "| `\(.image)` | [\($repo)](https://github.com/\($repo)) | \(if $latest == "-" then "-" else "`\($latest)`" end) | \(if $build == "-" then "-" else "`\($build)`" end) | \($release) |"' >> "$MD"
