@@ -1,10 +1,11 @@
 {
-  "generated": "2026-07-13T15:05:00Z",
+  "generated": "2026-07-13T22:22:52Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
       "repo": "sirosfoundation/go-trust",
       "tags": [
+        "c21d9b8",
         "332b58f",
         "0.9",
         "0.9.0",
@@ -223,6 +224,7 @@
       "image": "ghcr.io/sirosfoundation/vc/apigw",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "v0.6.5-sirosid.7",
         "dev-83fe1f7",
         "v0.6.5-sirosid.6",
         "dev-6de33dc",
@@ -279,6 +281,7 @@
       "image": "ghcr.io/sirosfoundation/vc/issuer",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "v0.6.5-sirosid.7",
         "dev-83fe1f7",
         "v0.6.5-sirosid.6",
         "dev-6de33dc",
@@ -355,6 +358,7 @@
       "image": "ghcr.io/sirosfoundation/vc/registry",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "v0.6.5-sirosid.7",
         "dev-83fe1f7",
         "v0.6.5-sirosid.6",
         "dev-6de33dc",
@@ -431,6 +435,7 @@
       "image": "ghcr.io/sirosfoundation/vc/verifier",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "v0.6.5-sirosid.7",
         "dev-83fe1f7",
         "v0.6.5-sirosid.6",
         "dev-6de33dc",
@@ -487,6 +492,7 @@
       "image": "ghcr.io/sirosfoundation/go-spocp",
       "repo": "sirosfoundation/go-spocp",
       "tags": [
+        "4e024ec",
         "0371182",
         "latest-build",
         "de62ba0",
@@ -513,6 +519,8 @@
       "image": "ghcr.io/sirosfoundation/go-wallet-backend",
       "repo": "sirosfoundation/go-wallet-backend",
       "tags": [
+        "48f5189",
+        "test-yubikit-extension-data-signature-1",
         "22f87e2",
         "30c2815",
         "89d1571",
@@ -712,6 +720,7 @@
       "image": "ghcr.io/sirosfoundation/goff",
       "repo": "sirosfoundation/goFF",
       "tags": [
+        "9b4170f",
         "067efda",
         "10c12de",
         "d6c6394",
@@ -738,6 +747,7 @@
       "image": "ghcr.io/sirosfoundation/facetec-api",
       "repo": "sirosfoundation/facetec-api",
       "tags": [
+        "7a7eaf3",
         "9a878e3",
         "0.12",
         "0.12.0",
@@ -829,6 +839,7 @@
       "image": "ghcr.io/sirosfoundation/go-ztts",
       "repo": "sirosfoundation/go-ztts",
       "tags": [
+        "179b6b5",
         "0f06e7d",
         "latest-build",
         "05e0b87",
@@ -876,6 +887,16 @@
       "image": "ghcr.io/sirosfoundation/registry-cli",
       "repo": "sirosfoundation/registry-cli",
       "tags": [
+        "0.14",
+        "0.14.0",
+        "dabec09",
+        "6c633e8",
+        "4fdcfcf",
+        "c31b4a3",
+        "0.13.1",
+        "0.13",
+        "0.13.0",
+        "91a356c",
         "b8a5190",
         "3ff421c",
         "0.12",
@@ -934,6 +955,7 @@
       "image": "ghcr.io/sirosfoundation/go-r2ps-service",
       "repo": "sirosfoundation/go-r2ps-service",
       "tags": [
+        "5da1dcb",
         "0.1",
         "0.1.0",
         "d82314c",
