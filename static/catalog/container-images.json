@@ -1,10 +1,11 @@
 {
-  "generated": "2026-07-14T14:39:06Z",
+  "generated": "2026-07-14T22:24:47Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
       "repo": "sirosfoundation/go-trust",
       "tags": [
+        "14fc3fa",
         "49d503e",
         "a0a6386",
         "a42967e",
@@ -130,6 +131,7 @@
       "image": "ghcr.io/sirosfoundation/wallet-frontend",
       "repo": "sirosfoundation/wallet-frontend",
       "tags": [
+        "test-v0.5.0-1-sirosid.8-gid0.2",
         "test-v0.5.0-1-sirosid.8-gid0.1",
         "test-v0.5.0-1-sirosid.8-gid0",
         "test-v0.5.0-1-sirosid.8-unpriv",
@@ -499,6 +501,8 @@
       "image": "ghcr.io/sirosfoundation/go-spocp",
       "repo": "sirosfoundation/go-spocp",
       "tags": [
+        "2bb6bf4",
+        "aa6c18c",
         "347dfdf",
         "4e024ec",
         "0371182",
@@ -527,6 +531,8 @@
       "image": "ghcr.io/sirosfoundation/go-wallet-backend",
       "repo": "sirosfoundation/go-wallet-backend",
       "tags": [
+        "8d68963",
+        "bec402b",
         "9ab0b85",
         "test-yubikit-extension-data-signature-2",
         "48f5189",
@@ -730,6 +736,7 @@
       "image": "ghcr.io/sirosfoundation/goff",
       "repo": "sirosfoundation/goFF",
       "tags": [
+        "4a93d26",
         "c00caa5",
         "9b4170f",
         "067efda",
@@ -758,6 +765,8 @@
       "image": "ghcr.io/sirosfoundation/facetec-api",
       "repo": "sirosfoundation/facetec-api",
       "tags": [
+        "9b07e76",
+        "2f36f73",
         "aa073bd",
         "34b2010",
         "7a7eaf3",
@@ -954,6 +963,9 @@
       "image": "ghcr.io/sirosfoundation/go-r2ps-service",
       "repo": "sirosfoundation/go-r2ps-service",
       "tags": [
+        "45a5174",
+        "0fecb17",
+        "e06d943",
         "6366f52",
         "4ce5447",
         "5da1dcb",
