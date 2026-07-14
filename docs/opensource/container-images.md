@@ -38,4 +38,4 @@ https://developers.siros.org/catalog/container-images.json
 | `ghcr.io/sirosfoundation/registry-cli` | [sirosfoundation/registry-cli](https://github.com/sirosfoundation/registry-cli) | `0.14` | `dabec09` | 0.14, 0.14.0, 0.13.1, 0.13, 0.13.0, 0.12, 0.12.0, 0.11, 0.11.0, 0.10 |
 | `ghcr.io/sirosfoundation/go-r2ps-service` | [sirosfoundation/go-r2ps-service](https://github.com/sirosfoundation/go-r2ps-service) | `0.1` | `5da1dcb` | 0.1, 0.1.0, 0.0, 0.0.1 |
 
-_Last updated: 2026-07-13T22:22:52Z_
+_Last updated: 2026-07-14T06:52:32Z_
