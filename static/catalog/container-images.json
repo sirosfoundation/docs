@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-15T06:53:37Z",
+  "generated": "2026-07-15T14:38:43Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -501,6 +501,7 @@
       "image": "ghcr.io/sirosfoundation/go-spocp",
       "repo": "sirosfoundation/go-spocp",
       "tags": [
+        "8c2bfd3",
         "2bb6bf4",
         "aa6c18c",
         "347dfdf",
@@ -736,6 +737,7 @@
       "image": "ghcr.io/sirosfoundation/goff",
       "repo": "sirosfoundation/goFF",
       "tags": [
+        "3eba04a",
         "4a93d26",
         "c00caa5",
         "9b4170f",
@@ -765,6 +767,7 @@
       "image": "ghcr.io/sirosfoundation/facetec-api",
       "repo": "sirosfoundation/facetec-api",
       "tags": [
+        "47ac180",
         "9b07e76",
         "2f36f73",
         "aa073bd",
