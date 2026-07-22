@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-22T14:44:38Z",
+  "generated": "2026-07-22T22:25:57Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -133,6 +133,7 @@
       "image": "ghcr.io/sirosfoundation/wallet-frontend",
       "repo": "sirosfoundation/wallet-frontend",
       "tags": [
+        "test-v0.5.0-1-sirosid.8-gid0.3",
         "test-dcapi-mdoc-1",
         "test-mdoc-verification-1",
         "test-v0.5.0-1-sirosid.8-gid0.2",
