@@ -20,7 +20,7 @@ https://developers.siros.org/catalog/container-images.json
 
 | Image | Repository | Latest | Latest Build | Release Tags |
 |---|---|---|---|---|
-| `ghcr.io/sirosfoundation/go-trust` | [sirosfoundation/go-trust](https://github.com/sirosfoundation/go-trust) | `0.9.1` | `ead4a6e` | 0.9.1, 0.9, 0.9.0, 0.8, 0.8.0, 0.7, 0.7.0, 0.6.1, 0.6, 0.6.0 |
+| `ghcr.io/sirosfoundation/go-trust` | [sirosfoundation/go-trust](https://github.com/sirosfoundation/go-trust) | `0.9.1` | `79f43af` | 0.9.1, 0.9, 0.9.0, 0.8, 0.8.0, 0.7, 0.7.0, 0.6.1, 0.6, 0.6.0 |
 | `ghcr.io/sirosfoundation/wallet-frontend` | [sirosfoundation/wallet-frontend](https://github.com/sirosfoundation/wallet-frontend) | `0.5.0-1-sirosid.8` | `unstable-b1d949f` | 0.5.0-1-sirosid.8, 0.5.0-1-sirosid.7, 0.5.0-1-sirosid.6, 0.5.0-1-sirosid.5, 0.5.0-1-sirosid.4, 0.5.0-1-sirosid.3, 0.5.0-1-sirosid.2, 0.5.0-1-sirosid.1 |
 | `ghcr.io/sirosfoundation/vc/apigw` | [sirosfoundation/vc](https://github.com/sirosfoundation/vc) | `v0.6.5-sirosid.7` | `dev-b6e5a02` | v0.6.5-sirosid.7, v0.6.5-sirosid.6, v0.6.5-sirosid.5, v0.6.5-sirosid.4, v0.6.5-sirosid.3, v0.6.5-sirosid.2, v0.6.5-sirosid.1, v0.6.5-sirosid.0, v0.6.2-sirosid.2, v0.6.2-sirosid.1 |
 | `ghcr.io/sirosfoundation/vc/issuer` | [sirosfoundation/vc](https://github.com/sirosfoundation/vc) | `v0.6.5-sirosid.7` | `dev-b6e5a02` | v0.6.5-sirosid.7, v0.6.5-sirosid.6, v0.6.5-sirosid.5, v0.6.5-sirosid.4, v0.6.5-sirosid.3, v0.6.5-sirosid.2, v0.6.5-sirosid.1, v0.6.5-sirosid.0, v0.6.2-sirosid.2, v0.6.2-sirosid.1 |
@@ -37,4 +37,4 @@ https://developers.siros.org/catalog/container-images.json
 | `ghcr.io/sirosfoundation/registry-cli` | [sirosfoundation/registry-cli](https://github.com/sirosfoundation/registry-cli) | `0.14` | `b93e430` | 0.14, 0.14.0, 0.13.1, 0.13, 0.13.0, 0.12, 0.12.0, 0.11, 0.11.0, 0.10 |
 | `ghcr.io/sirosfoundation/go-r2ps-service` | [sirosfoundation/go-r2ps-service](https://github.com/sirosfoundation/go-r2ps-service) | `0.1` | `45a5174` | 0.1, 0.1.0, 0.0, 0.0.1 |
 
-_Last updated: 2026-07-25T06:54:29Z_
+_Last updated: 2026-07-25T14:34:54Z_
