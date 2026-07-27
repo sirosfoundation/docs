@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-27T07:20:01Z",
+  "generated": "2026-07-27T15:04:36Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -240,6 +240,8 @@
       "image": "ghcr.io/sirosfoundation/vc/apigw",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "dev-98ad2ff",
+        "v0.6.5-sirosid.8",
         "dev-b6e5a02",
         "dev-6ac0f58",
         "dev-3572371",
@@ -302,6 +304,8 @@
       "image": "ghcr.io/sirosfoundation/vc/issuer",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "dev-98ad2ff",
+        "v0.6.5-sirosid.8",
         "dev-b6e5a02",
         "dev-6ac0f58",
         "dev-3572371",
@@ -384,6 +388,8 @@
       "image": "ghcr.io/sirosfoundation/vc/registry",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "dev-98ad2ff",
+        "v0.6.5-sirosid.8",
         "dev-b6e5a02",
         "dev-6ac0f58",
         "dev-3572371",
@@ -466,6 +472,8 @@
       "image": "ghcr.io/sirosfoundation/vc/verifier",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "dev-98ad2ff",
+        "v0.6.5-sirosid.8",
         "dev-b6e5a02",
         "dev-6ac0f58",
         "dev-3572371",
