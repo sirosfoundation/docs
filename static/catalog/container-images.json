@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-28T07:01:15Z",
+  "generated": "2026-07-28T11:43:10Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -931,6 +931,8 @@
       "image": "ghcr.io/sirosfoundation/registry-cli",
       "repo": "sirosfoundation/registry-cli",
       "tags": [
+        "0.14.1",
+        "b1d9e99",
         "b93e430",
         "72fd693",
         "0.14",
@@ -1036,6 +1038,33 @@
         "61c99a2",
         "947570d",
         "latest",
+        "main"
+      ]
+    },
+    {
+      "image": "ghcr.io/sirosfoundation/mini-oidc",
+      "repo": "sirosfoundation/mini-oidc",
+      "tags": [
+        "0.0.2",
+        "sha-b54dabf",
+        "sha-abd5d7e",
+        "sha-350fbf0",
+        "sha-28c8251",
+        "sha-fc8f967",
+        "sha-d1bf67f",
+        "latest",
+        "0.0",
+        "0.0.1",
+        "sha-81faf84",
+        "sha-40da595",
+        "sha-e7fd5b1",
+        "sha-49785b9",
+        "sha-73cc838",
+        "sha-57598d0",
+        "sha-6b06bc4",
+        "sha-a7ef04f",
+        "sha-0d3340f",
+        "sha-e936836",
         "main"
       ]
     }
