@@ -78,6 +78,44 @@ Backend service for the SIROS ID wallet application.
 docker pull ghcr.io/sirosfoundation/go-wallet-backend:latest
 ```
 
+## Testing & Development Images
+
+### mini-oidc
+
+Minimal OIDC Provider (OP) and Relying Party (RP) for testing OpenID Connect
+flows. Used by `sirosid-dev` and other e2e test suites to exercise OIDC
+integrations without standing up a full identity provider.
+
+| Image | Description |
+|-------|-------------|
+| `ghcr.io/sirosfoundation/mini-oidc` | Bundles the `op` and `rp` binaries; select which to run via the container `command` |
+
+**Tags:** Same tagging scheme as VC images (`latest`, `{major}.{minor}.{patch}`)
+
+```bash
+docker pull ghcr.io/sirosfoundation/mini-oidc:latest
+```
+
+```yaml
+services:
+  mini-oidc-op:
+    image: ghcr.io/sirosfoundation/mini-oidc:latest
+    command: ["/usr/local/bin/op"]
+    ports:
+      - "9005:9005"
+
+  mini-oidc-rp:
+    image: ghcr.io/sirosfoundation/mini-oidc:latest
+    command: ["/usr/local/bin/rp"]
+    ports:
+      - "9006:9006"
+```
+
+:::info Not a production identity provider
+mini-oidc exists for local development and automated testing only. It is not
+intended for production credential issuance or verification.
+:::
+
 ## Pulling Images
 
 ### Authentication
@@ -103,6 +141,9 @@ docker pull ghcr.io/sirosfoundation/go-trust:latest
 
 # Wallet backend
 docker pull ghcr.io/sirosfoundation/go-wallet-backend:latest
+
+# mini-oidc test OP/RP
+docker pull ghcr.io/sirosfoundation/mini-oidc:latest
 ```
 
 ## Platforms
@@ -225,6 +266,7 @@ volumes:
 | VC Services | [sirosfoundation/vc](https://github.com/sirosfoundation/vc) | `docker-publish.yaml` |
 | go-trust | [sirosfoundation/go-trust](https://github.com/sirosfoundation/go-trust) | `docker-publish.yml` |
 | go-wallet-backend | [sirosfoundation/go-wallet-backend](https://github.com/sirosfoundation/go-wallet-backend) | `docker-publish.yml` |
+| mini-oidc | [sirosfoundation/mini-oidc](https://github.com/sirosfoundation/mini-oidc) | `docker-publish.yml` |
 
 ## Next Steps
 
