@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-04T07:00:26Z",
+  "generated": "2026-08-04T14:53:39Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -578,6 +578,10 @@
       "image": "ghcr.io/sirosfoundation/go-wallet-backend",
       "repo": "sirosfoundation/go-wallet-backend",
       "tags": [
+        "0.9",
+        "0.9.0",
+        "19581e3",
+        "0411b67",
         "045eca5",
         "8e2850b",
         "6fa088c",
