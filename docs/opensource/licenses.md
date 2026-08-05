@@ -22,39 +22,39 @@ https://developers.siros.org/catalog/license-inventory.json
 ```
 :::
 
-**24** repositories scanned · **2977** unique packages · **61** license types · **69** unresolved
+**24** repositories scanned · **2982** unique packages · **61** license types · **70** unresolved
 
 ## Policy Compliance
 
 | Category | Packages | Description |
 |----------|--------:|-------------|
-| allowed | 2708 | |
+| allowed | 2710 | |
 | ci-only | 91 | |
 | build-only | 85 | |
-| unclassified | 69 | |
+| unclassified | 72 | |
 | test-only | 19 | |
 | weak-copyleft | 3 | |
 | documentation | 2 | |
 
-License policy overrides applied: **764** · Dual-license selections: **158**
+License policy overrides applied: **767** · Dual-license selections: **158**
 
 ## License Summary
 
 | License | Category | Unique Packages | Total Usages |
 |---------|----------|---------------:|-------------:|
-| MIT | allowed | 1261 | 2605 |
-| Apache-2.0 | allowed | 581 | 865 |
-| BSD-3-Clause | allowed | 85 | 193 |
-| BSD-2-Clause | allowed | 76 | 153 |
+| MIT | allowed | 1262 | 2607 |
+| Apache-2.0 | allowed | 582 | 866 |
+| BSD-3-Clause | allowed | 85 | 194 |
+| BSD-2-Clause | allowed | 77 | 155 |
 | ISC | allowed | 46 | 111 |
 | MPL-2.0 | build-only | 20 | 80 |
-| NOASSERTION | unclassified | 68 | 69 |
+| NOASSERTION | unclassified | 69 | 70 |
 | LGPL-3.0 | ci-only | 1 | 19 |
 | Unicode-3.0 | allowed | 18 | 18 |
-| BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang | allowed | 4 | 13 |
 | Apache-2.0 AND MIT | allowed | 7 | 13 |
+| BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang | allowed | 4 | 13 |
 | LGPL-3.0-or-later | build-only | 10 | 10 |
-| BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND LicenseRef-scancode-other-permissive AND MIT AND MPL-2.0 | build-only | 10 | 10 |
+| BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND MIT AND MPL-2.0 | build-only | 10 | 10 |
 | MIT-0 | allowed | 3 | 8 |
 | 0BSD | allowed | 1 | 8 |
 | CC0-1.0 AND MIT | allowed | 6 | 8 |
@@ -68,39 +68,39 @@ License policy overrides applied: **764** · Dual-license selections: **158**
 | Apache-2.0 AND BSD-3-Clause | allowed | 3 | 3 |
 | MIT AND Zlib | allowed | 1 | 3 |
 | Apache-2.0 AND LGPL-3.0-or-later | build-only | 3 | 3 |
-| Apache-2.0 AND BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND LicenseRef-scancode-other-permissive AND MIT AND MPL-2.0 | build-only | 3 | 3 |
+| Apache-2.0 AND BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND MIT AND MPL-2.0 | build-only | 3 | 3 |
 | Apache-2.0 AND BSD-2-Clause AND CC0-1.0 AND ISC AND MIT | allowed | 1 | 2 |
 | EUPL-1.2 | weak-copyleft | 1 | 2 |
 | Apache-2.0 AND CC-BY-3.0 AND MIT | allowed | 1 | 2 |
+| LicenseRef-bad-mitapache-2.0 | unclassified | 2 | 2 |
 | 0BSD AND ISC AND MIT | allowed | 1 | 2 |
-| LicenseRef-scancode-generic-cla AND MIT | allowed | 1 | 2 |
 | BSD-2-Clause AND BSD-2-Clause-Views | allowed | 1 | 2 |
 | Apache-2.0 AND OFL-1.1 AND Ubuntu-font-1.0 | allowed | 1 | 2 |
 | Apache-2.0 AND BSD-2-Clause | allowed | 1 | 2 |
 | MIT OR Apache-2.0 OR LGPL-2.1-or-later | allowed | 1 | 1 |
-| Apache-2.0 AND ISC | allowed | 1 | 1 |
 | CDLA-Permissive-2.0 | allowed | 1 | 1 |
+| Apache-2.0 AND ISC | allowed | 1 | 1 |
+| Apache-2.0 AND LicenseRef-scancode-public-domain AND bzip2-1.0.6 | allowed | 1 | 1 |
 | Apache-2.0 AND CC0-1.0 | allowed | 1 | 1 |
-| CDDL-1.1 | build-only | 1 | 1 |
-| LicenseRef-scancode-jdom | allowed | 1 | 1 |
 | Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND Elastic-2.0 AND LicenseRef-scancode-public-domain AND MIT AND bzip2-1.0.6 | build-only | 1 | 1 |
+| MPL-1.1 | build-only | 1 | 1 |
+| LicenseRef-scancode-jdom | allowed | 1 | 1 |
+| LGPL-2.1 | build-only | 1 | 1 |
+| CDDL-1.1 | build-only | 1 | 1 |
 | CDDL-1.0 | build-only | 1 | 1 |
 | EPL-1.0 | test-only | 1 | 1 |
-| MPL-1.1 | build-only | 1 | 1 |
-| Apache-2.0 AND LicenseRef-scancode-public-domain AND bzip2-1.0.6 | allowed | 1 | 1 |
-| LGPL-2.1 | build-only | 1 | 1 |
 | BSD-2-Clause-Views | allowed | 1 | 1 |
-| Apache-2.0 AND CC-BY-SA-4.0 | documentation | 1 | 1 |
 | Apache-2.0 AND LicenseRef-scancode-dco-1.1 AND MIT | allowed | 1 | 1 |
+| Apache-2.0 AND CC-BY-SA-4.0 | documentation | 1 | 1 |
 | Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause | allowed | 1 | 1 |
 | BSD-3-Clause AND ISC AND MIT | allowed | 1 | 1 |
 | BSD-2-Clause AND CC0-1.0 AND ISC AND MIT | allowed | 1 | 1 |
 | Apache-2.0 AND LGPL-3.0-or-later AND MIT | build-only | 1 | 1 |
 | LicenseRef-scancode-unicode AND MIT | allowed | 1 | 1 |
-| BSD-3-Clause AND MIT | allowed | 1 | 1 |
-| AFL-2.1 AND AFL-3.0 AND BSD-3-Clause | allowed | 1 | 1 |
 | CC-BY-4.0 | documentation | 1 | 1 |
+| AFL-2.1 AND AFL-3.0 AND BSD-3-Clause | allowed | 1 | 1 |
 | LicenseRef-scancode-public-domain | allowed | 1 | 1 |
+| BSD-3-Clause AND MIT | allowed | 1 | 1 |
 | Apache-2.0 AND BSD-3-Clause AND ISC AND MIT | allowed | 1 | 1 |
 | Apache-2.0 AND BSD-2-Clause AND BlueOak-1.0.0 AND CC0-1.0 AND ISC AND MIT | allowed | 1 | 1 |
 
@@ -108,30 +108,30 @@ License policy overrides applied: **764** · Dual-license selections: **158**
 
 | Repository | Dependencies | Licenses |
 |------------|------------:|----------|
-| [browser-log](https://github.com/sirosfoundation/browser-log) | 319 | MIT (270), MPL-2.0 (12), ISC (12), BSD-2-Clause (9), BSD-3-Clause (4), Apache-2.0 (4), MIT-0 (2), BSD-2-Clause AND BSD-3-Clause (1), Apache-2.0 AND BSD-2-Clause AND CC0-1.0 AND ISC AND MIT (1), BlueOak-1.0.0 (1), Python-2.0 (1), CC0-1.0 (1), 0BSD (1) |
-| [dc-api](https://github.com/sirosfoundation/dc-api) | 143 | MIT (101), Apache-2.0 (24), MPL-2.0 (12), ISC (2), BSD-2-Clause (2), 0BSD (1), BSD-3-Clause (1) |
-| [facetec-api](https://github.com/sirosfoundation/facetec-api) | 61 | MIT (32), Apache-2.0 (13), BSD-3-Clause (7), BSD-2-Clause (4), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (2), ISC (1), Apache-2.0 AND MIT (1), LGPL-3.0 (1) |
-| [g119612](https://github.com/sirosfoundation/g119612) | 37 | MIT (15), BSD-2-Clause (7), BSD-3-Clause (6), Apache-2.0 (5), EUPL-1.2 (1), ISC (1), NOASSERTION (1), LGPL-3.0 (1) |
+| [browser-log](https://github.com/sirosfoundation/browser-log) | 319 | MIT (270), MPL-2.0 (12), ISC (12), BSD-2-Clause (9), Apache-2.0 (4), BSD-3-Clause (4), MIT-0 (2), CC0-1.0 (1), Apache-2.0 AND BSD-2-Clause AND CC0-1.0 AND ISC AND MIT (1), BSD-2-Clause AND BSD-3-Clause (1), Python-2.0 (1), 0BSD (1), BlueOak-1.0.0 (1) |
+| [dc-api](https://github.com/sirosfoundation/dc-api) | 143 | MIT (101), Apache-2.0 (24), MPL-2.0 (12), ISC (2), BSD-2-Clause (2), BSD-3-Clause (1), 0BSD (1) |
+| [facetec-api](https://github.com/sirosfoundation/facetec-api) | 61 | MIT (32), Apache-2.0 (13), BSD-3-Clause (7), BSD-2-Clause (4), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (2), Apache-2.0 AND MIT (1), ISC (1), LGPL-3.0 (1) |
+| [g119612](https://github.com/sirosfoundation/g119612) | 37 | MIT (15), BSD-2-Clause (7), BSD-3-Clause (6), Apache-2.0 (5), NOASSERTION (1), EUPL-1.2 (1), ISC (1), LGPL-3.0 (1) |
 | [go-cryptoutil](https://github.com/sirosfoundation/go-cryptoutil) | 18 | MIT (10), BSD-2-Clause (3), BSD-3-Clause (2), EUPL-1.2 (1), Apache-2.0 (1), LGPL-3.0 (1) |
-| [go-invite-op](https://github.com/sirosfoundation/go-invite-op) | 135 | MIT (80), Apache-2.0 (19), BSD-3-Clause (13), MPL-2.0 (12), ISC (3), BSD-2-Clause (3), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (2), Apache-2.0 AND BSD-3-Clause AND MIT (1), Apache-2.0 AND MIT (1), LGPL-3.0 (1) |
-| [go-r2ps-service](https://github.com/sirosfoundation/go-r2ps-service) | 49 | MIT (21), BSD-3-Clause (10), Apache-2.0 (10), BSD-2-Clause (4), Apache-2.0 AND BSD-3-Clause AND MIT (1), Apache-2.0 AND MIT (1), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (1), LGPL-3.0 (1) |
+| [go-invite-op](https://github.com/sirosfoundation/go-invite-op) | 135 | MIT (80), Apache-2.0 (19), BSD-3-Clause (13), MPL-2.0 (12), ISC (3), BSD-2-Clause (3), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (2), Apache-2.0 AND MIT (1), Apache-2.0 AND BSD-3-Clause AND MIT (1), LGPL-3.0 (1) |
+| [go-r2ps-service](https://github.com/sirosfoundation/go-r2ps-service) | 49 | MIT (21), Apache-2.0 (10), BSD-3-Clause (10), BSD-2-Clause (4), Apache-2.0 AND MIT (1), Apache-2.0 AND BSD-3-Clause AND MIT (1), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (1), LGPL-3.0 (1) |
 | [go-spocp](https://github.com/sirosfoundation/go-spocp) | 19 | MIT (13), BSD-2-Clause (3), Apache-2.0 (1), BSD-3-Clause (1), LGPL-3.0 (1) |
-| [go-trust](https://github.com/sirosfoundation/go-trust) | 128 | MIT (59), Apache-2.0 (28), BSD-3-Clause (17), BSD-2-Clause (12), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (3), Apache-2.0 AND MIT (3), ISC (2), Apache-2.0 AND CC-BY-3.0 AND MIT (1), Apache-2.0 AND BSD-3-Clause AND MIT (1), MIT-0 (1), LGPL-3.0 (1) |
-| [go-wallet-backend](https://github.com/sirosfoundation/go-wallet-backend) | 101 | MIT (43), Apache-2.0 (25), BSD-3-Clause (16), BSD-2-Clause (11), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (2), ISC (1), NOASSERTION (1), Apache-2.0 AND BSD-3-Clause AND MIT (1), LGPL-3.0 (1) |
+| [go-trust](https://github.com/sirosfoundation/go-trust) | 128 | MIT (59), Apache-2.0 (28), BSD-3-Clause (17), BSD-2-Clause (12), Apache-2.0 AND MIT (3), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (3), ISC (2), MIT-0 (1), Apache-2.0 AND CC-BY-3.0 AND MIT (1), Apache-2.0 AND BSD-3-Clause AND MIT (1), LGPL-3.0 (1) |
+| [go-wallet-backend](https://github.com/sirosfoundation/go-wallet-backend) | 104 | MIT (43), Apache-2.0 (25), BSD-3-Clause (17), BSD-2-Clause (13), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (2), NOASSERTION (1), ISC (1), Apache-2.0 AND BSD-3-Clause AND MIT (1), LGPL-3.0 (1) |
 | [go-wmp](https://github.com/sirosfoundation/go-wmp) | 15 | MIT (8), BSD-2-Clause (3), Apache-2.0 (2), BSD-3-Clause (1), LGPL-3.0 (1) |
 | [goFF](https://github.com/sirosfoundation/goFF) | 32 | MIT (14), BSD-3-Clause (6), BSD-2-Clause (6), Apache-2.0 (4), ISC (1), LGPL-3.0 (1) |
 | [goxmldsig](https://github.com/sirosfoundation/goxmldsig) | 17 | MIT (7), Apache-2.0 (4), BSD-2-Clause (3), BSD-3-Clause (2), ISC (1) |
 | [mini-oidc](https://github.com/sirosfoundation/mini-oidc) | 18 | MIT (9), Apache-2.0 (7), LGPL-3.0 (1), BSD-2-Clause (1) |
-| [r2ps-client](https://github.com/sirosfoundation/r2ps-client) | 167 | MIT (103), Apache-2.0 (34), Unicode-3.0 (18), NOASSERTION (4), ISC (2), LGPL-3.0 (1), MIT OR Apache-2.0 OR LGPL-2.1-or-later (1), Apache-2.0 AND ISC (1), CDLA-Permissive-2.0 (1), BSD-3-Clause (1), BSD-2-Clause (1) |
+| [r2ps-client](https://github.com/sirosfoundation/r2ps-client) | 167 | MIT (103), Apache-2.0 (34), Unicode-3.0 (18), LicenseRef-bad-mitapache-2.0 (2), NOASSERTION (2), ISC (2), MIT OR Apache-2.0 OR LGPL-2.1-or-later (1), CDLA-Permissive-2.0 (1), Apache-2.0 AND ISC (1), BSD-3-Clause (1), LGPL-3.0 (1), BSD-2-Clause (1) |
 | [registry-cli](https://github.com/sirosfoundation/registry-cli) | 43 | MIT (15), BSD-3-Clause (13), Apache-2.0 (7), BSD-2-Clause (5), ISC (1), NOASSERTION (1), LGPL-3.0 (1) |
-| [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin) | 514 | Apache-2.0 (452), MIT (20), BSD-3-Clause (15), EPL-2.0 (7), BSD-2-Clause (5), NOASSERTION (2), CC0-1.0 (1), Apache-2.0 AND CC0-1.0 (1), Apache-2.0 AND BSD-3-Clause (1), CDDL-1.1 (1), LicenseRef-scancode-jdom (1), Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND Elastic-2.0 AND LicenseRef-scancode-public-domain AND MIT AND bzip2-1.0.6 (1), CDDL-1.0 (1), Apache-2.0 AND MIT (1), EPL-1.0 (1), MPL-1.1 (1), Apache-2.0 AND LicenseRef-scancode-public-domain AND bzip2-1.0.6 (1), LGPL-2.1 (1), LGPL-3.0 (1) |
+| [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin) | 518 | Apache-2.0 (453), MIT (20), BSD-3-Clause (15), EPL-2.0 (7), NOASSERTION (5), BSD-2-Clause (5), Apache-2.0 AND LicenseRef-scancode-public-domain AND bzip2-1.0.6 (1), CC0-1.0 (1), Apache-2.0 AND CC0-1.0 (1), Apache-2.0 AND MIT (1), Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND Elastic-2.0 AND LicenseRef-scancode-public-domain AND MIT AND bzip2-1.0.6 (1), MPL-1.1 (1), LicenseRef-scancode-jdom (1), LGPL-2.1 (1), CDDL-1.1 (1), CDDL-1.0 (1), EPL-1.0 (1), Apache-2.0 AND BSD-3-Clause (1), LGPL-3.0 (1) |
 | [siros-sdk-swift](https://github.com/sirosfoundation/siros-sdk-swift) | 17 | MIT (11), BSD-2-Clause (4), Apache-2.0 (1), LGPL-3.0 (1) |
-| [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app) | 70 | NOASSERTION (58), MIT (8), BSD-2-Clause (2), LGPL-3.0 (1), Apache-2.0 (1) |
-| [vc](https://github.com/sirosfoundation/vc) | 211 | MIT (81), Apache-2.0 (73), BSD-3-Clause (29), BSD-2-Clause (10), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (3), Apache-2.0 AND MIT (3), ISC (2), Apache-2.0 AND BSD-3-Clause (2), BSD-2-Clause-Views (1), Apache-2.0 AND BSD-3-Clause AND MIT (1), Apache-2.0 AND CC-BY-3.0 AND MIT (1), MIT-0 (1), Apache-2.0 AND CC-BY-SA-4.0 (1), MPL-2.0 (1), Apache-2.0 AND LicenseRef-scancode-dco-1.1 AND MIT (1), Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause (1) |
-| [wallet-common](https://github.com/sirosfoundation/wallet-common) | 210 | MIT (174), Apache-2.0 (18), BSD-3-Clause (7), ISC (2), 0BSD (2), BSD-2-Clause (2), MIT AND Zlib (1), BSD-3-Clause AND ISC AND MIT (1), BSD-2-Clause AND CC0-1.0 AND ISC AND MIT (1), 0BSD AND ISC AND MIT (1), LicenseRef-scancode-generic-cla AND MIT (1) |
-| [wallet-companion](https://github.com/sirosfoundation/wallet-companion) | 684 | MIT (501), Apache-2.0 (48), ISC (35), BSD-2-Clause (30), MPL-2.0 (18), BSD-3-Clause (14), LGPL-3.0-or-later (10), CC0-1.0 AND MIT (5), Apache-2.0 AND LGPL-3.0-or-later (3), BlueOak-1.0.0 (3), CC0-1.0 (2), Apache-2.0 AND MIT (2), MIT-0 (2), NOASSERTION (1), Python-2.0 (1), MIT AND Zlib (1), BSD-2-Clause AND BSD-2-Clause-Views (1), 0BSD (1), Apache-2.0 AND OFL-1.1 AND Ubuntu-font-1.0 (1), Apache-2.0 AND LGPL-3.0-or-later AND MIT (1), LicenseRef-scancode-unicode AND MIT (1), ISC AND MIT (1), BSD-2-Clause AND BSD-3-Clause (1), LGPL-3.0 (1) |
-| [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend) | 1122 | MIT (917), Apache-2.0 (60), ISC (42), BSD-3-Clause (23), BSD-2-Clause (21), MPL-2.0 (13), BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND LicenseRef-scancode-other-permissive AND MIT AND MPL-2.0 (10), ISC AND MIT (4), Apache-2.0 AND BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND LicenseRef-scancode-other-permissive AND MIT AND MPL-2.0 (3), CC0-1.0 AND MIT (3), MIT-0 (2), 0BSD (2), CC0-1.0 (2), Apache-2.0 AND BSD-2-Clause (2), Apache-2.0 AND BSD-2-Clause AND CC0-1.0 AND ISC AND MIT (1), BSD-2-Clause AND BSD-2-Clause-Views (1), BSD-3-Clause AND MIT (1), Apache-2.0 AND OFL-1.1 AND Ubuntu-font-1.0 (1), Python-2.0 (1), AFL-2.1 AND AFL-3.0 AND BSD-3-Clause (1), LicenseRef-scancode-generic-cla AND MIT (1), MIT AND Zlib (1), NOASSERTION (1), CC-BY-4.0 (1), LicenseRef-scancode-public-domain (1), Apache-2.0 AND MIT (1), Apache-2.0 AND BSD-3-Clause AND ISC AND MIT (1), BlueOak-1.0.0 (1), BSD-2-Clause AND BSD-3-Clause (1), 0BSD AND ISC AND MIT (1), Apache-2.0 AND BSD-2-Clause AND BlueOak-1.0.0 AND CC0-1.0 AND ISC AND MIT (1), LGPL-3.0 (1) |
-| [wmp-js](https://github.com/sirosfoundation/wmp-js) | 142 | MIT (93), Apache-2.0 (24), MPL-2.0 (12), BSD-3-Clause (5), ISC (3), BSD-2-Clause (2), 0BSD (1), ISC AND MIT (1), LGPL-3.0 (1) |
+| [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app) | 70 | NOASSERTION (58), MIT (8), BSD-2-Clause (2), Apache-2.0 (1), LGPL-3.0 (1) |
+| [vc](https://github.com/sirosfoundation/vc) | 211 | MIT (81), Apache-2.0 (73), BSD-3-Clause (29), BSD-2-Clause (10), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (3), Apache-2.0 AND MIT (3), Apache-2.0 AND BSD-3-Clause (2), ISC (2), BSD-2-Clause-Views (1), MPL-2.0 (1), Apache-2.0 AND LicenseRef-scancode-dco-1.1 AND MIT (1), Apache-2.0 AND CC-BY-SA-4.0 (1), Apache-2.0 AND BSD-3-Clause AND MIT (1), Apache-2.0 AND CC-BY-3.0 AND MIT (1), Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause (1), MIT-0 (1) |
+| [wallet-common](https://github.com/sirosfoundation/wallet-common) | 210 | MIT (175), Apache-2.0 (18), BSD-3-Clause (7), 0BSD (2), ISC (2), BSD-2-Clause (2), MIT AND Zlib (1), BSD-3-Clause AND ISC AND MIT (1), BSD-2-Clause AND CC0-1.0 AND ISC AND MIT (1), 0BSD AND ISC AND MIT (1) |
+| [wallet-companion](https://github.com/sirosfoundation/wallet-companion) | 684 | MIT (501), Apache-2.0 (48), ISC (35), BSD-2-Clause (30), MPL-2.0 (18), BSD-3-Clause (14), LGPL-3.0-or-later (10), CC0-1.0 AND MIT (5), Apache-2.0 AND LGPL-3.0-or-later (3), BlueOak-1.0.0 (3), CC0-1.0 (2), MIT-0 (2), Apache-2.0 AND MIT (2), NOASSERTION (1), BSD-2-Clause AND BSD-3-Clause (1), MIT AND Zlib (1), BSD-2-Clause AND BSD-2-Clause-Views (1), 0BSD (1), Apache-2.0 AND LGPL-3.0-or-later AND MIT (1), LicenseRef-scancode-unicode AND MIT (1), Python-2.0 (1), Apache-2.0 AND OFL-1.1 AND Ubuntu-font-1.0 (1), ISC AND MIT (1), LGPL-3.0 (1) |
+| [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend) | 1122 | MIT (918), Apache-2.0 (60), ISC (42), BSD-3-Clause (23), BSD-2-Clause (21), MPL-2.0 (13), BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND MIT AND MPL-2.0 (10), ISC AND MIT (4), CC0-1.0 AND MIT (3), Apache-2.0 AND BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND MIT AND MPL-2.0 (3), 0BSD (2), MIT-0 (2), CC0-1.0 (2), Apache-2.0 AND BSD-2-Clause (2), Apache-2.0 AND BSD-2-Clause AND CC0-1.0 AND ISC AND MIT (1), BlueOak-1.0.0 (1), CC-BY-4.0 (1), Python-2.0 (1), Apache-2.0 AND MIT (1), AFL-2.1 AND AFL-3.0 AND BSD-3-Clause (1), NOASSERTION (1), LicenseRef-scancode-public-domain (1), Apache-2.0 AND OFL-1.1 AND Ubuntu-font-1.0 (1), BSD-3-Clause AND MIT (1), 0BSD AND ISC AND MIT (1), BSD-2-Clause AND BSD-2-Clause-Views (1), Apache-2.0 AND BSD-3-Clause AND ISC AND MIT (1), BSD-2-Clause AND BSD-3-Clause (1), MIT AND Zlib (1), Apache-2.0 AND BSD-2-Clause AND BlueOak-1.0.0 AND CC0-1.0 AND ISC AND MIT (1), LGPL-3.0 (1) |
+| [wmp-js](https://github.com/sirosfoundation/wmp-js) | 142 | MIT (93), Apache-2.0 (24), MPL-2.0 (12), BSD-3-Clause (5), ISC (3), BSD-2-Clause (2), ISC AND MIT (1), 0BSD (1), LGPL-3.0 (1) |
 
 ## Packages Requiring Review
 
@@ -147,24 +147,27 @@ enabling audit of the dependency graph.
 | github.com/gematik/zero-lab/go/brainpool | v0.0.0-20260309133150-5b2b80ad6517 | EUPL-1.2 | policy-override | [g119612](https://github.com/sirosfoundation/g119612/network/dependencies), [go-cryptoutil](https://github.com/sirosfoundation/go-cryptoutil/network/dependencies) | Repository root LICENSE is EUPL-1.2 |
 | github.com/hashicorp/go-uuid | v1.0.3 | MPL-2.0 | sbom | [vc](https://github.com/sirosfoundation/vc/network/dependencies) |  |
 
-### unclassified (69 packages)
+### unclassified (72 packages)
 
 | Package | Version | License | Source | Repositories | Reason |
 |---------|---------|---------|--------|--------------|--------|
 | @sirosfoundation/wcc-types | 0.1.0-beta.1 | NOASSERTION | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) |  |
 | args | 2.7.0 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | async | 2.13.1 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
+| bleak |  | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
 | bluez | 0.8.3 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | boolean_selector | 2.1.2 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | cbor | 6.5.1 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
+| cbor2 |  | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
 | characters | 1.4.1 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | clock | 1.1.2 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | collection | 1.19.1 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | com.github.peteroupc:datautilities | 1.1.0 | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
 | convert | 3.1.2 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
+| cryptography |  | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
 | dbus | 0.7.14 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | fake_async | 1.3.3 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
-| ff | 0.14.0 | NOASSERTION | sbom | [r2ps-client](https://github.com/sirosfoundation/r2ps-client/network/dependencies) |  |
+| ff | 0.14.0 | LicenseRef-bad-mitapache-2.0 | sbom | [r2ps-client](https://github.com/sirosfoundation/r2ps-client/network/dependencies) |  |
 | ffi | 2.2.0 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | fixnum | 1.1.1 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | flutter_blue_plus | 1.36.8 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
@@ -179,7 +182,7 @@ enabling audit of the dependency graph.
 | github.com/prometheus/procfs | v0.21.1 | NOASSERTION | sbom | [go-wallet-backend](https://github.com/sirosfoundation/go-wallet-backend/network/dependencies) |  |
 | github.com/thalesgroup/crypto11 | v1.6.1 | NOASSERTION | sbom | [g119612](https://github.com/sirosfoundation/g119612/network/dependencies) |  |
 | github.com/thalesgroup/crypto11 | v1.2.6 | NOASSERTION | sbom | [registry-cli](https://github.com/sirosfoundation/registry-cli/network/dependencies) |  |
-| group | 0.14.0 | NOASSERTION | sbom | [r2ps-client](https://github.com/sirosfoundation/r2ps-client/network/dependencies) |  |
+| group | 0.14.0 | LicenseRef-bad-mitapache-2.0 | sbom | [r2ps-client](https://github.com/sirosfoundation/r2ps-client/network/dependencies) |  |
 | hex | 0.2.0 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | js | 0.7.2 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | leak_tracker | 11.0.2 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
@@ -231,25 +234,25 @@ enabling audit of the dependency graph.
 | @img/sharp-darwin-x64 | 0.34.5 | Apache-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
 | @img/sharp-freebsd-wasm32 | 0.35.2 | Apache-2.0 | sbom | [wallet-companion](https://github.com/sirosfoundation/wallet-companion/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
 | @img/sharp-libvips-darwin-arm64 | 1.3.1 | LGPL-3.0-or-later | sbom | [wallet-companion](https://github.com/sirosfoundation/wallet-companion/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
-| @img/sharp-libvips-darwin-arm64 | 1.2.4 | BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND LicenseRef-scancode-other-permissive AND MIT AND MPL-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
+| @img/sharp-libvips-darwin-arm64 | 1.2.4 | BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND MIT AND MPL-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
 | @img/sharp-libvips-darwin-x64 | 1.3.1 | LGPL-3.0-or-later | sbom | [wallet-companion](https://github.com/sirosfoundation/wallet-companion/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
-| @img/sharp-libvips-darwin-x64 | 1.2.4 | BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND LicenseRef-scancode-other-permissive AND MIT AND MPL-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
+| @img/sharp-libvips-darwin-x64 | 1.2.4 | BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND MIT AND MPL-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
 | @img/sharp-libvips-linux-arm | 1.3.1 | LGPL-3.0-or-later | sbom | [wallet-companion](https://github.com/sirosfoundation/wallet-companion/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
-| @img/sharp-libvips-linux-arm | 1.2.4 | BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND LicenseRef-scancode-other-permissive AND MIT AND MPL-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
+| @img/sharp-libvips-linux-arm | 1.2.4 | BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND MIT AND MPL-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
 | @img/sharp-libvips-linux-arm64 | 1.3.1 | LGPL-3.0-or-later | sbom | [wallet-companion](https://github.com/sirosfoundation/wallet-companion/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
-| @img/sharp-libvips-linux-arm64 | 1.2.4 | BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND LicenseRef-scancode-other-permissive AND MIT AND MPL-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
+| @img/sharp-libvips-linux-arm64 | 1.2.4 | BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND MIT AND MPL-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
 | @img/sharp-libvips-linux-ppc64 | 1.3.1 | LGPL-3.0-or-later | sbom | [wallet-companion](https://github.com/sirosfoundation/wallet-companion/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
-| @img/sharp-libvips-linux-ppc64 | 1.2.4 | BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND LicenseRef-scancode-other-permissive AND MIT AND MPL-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
+| @img/sharp-libvips-linux-ppc64 | 1.2.4 | BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND MIT AND MPL-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
 | @img/sharp-libvips-linux-riscv64 | 1.3.1 | LGPL-3.0-or-later | sbom | [wallet-companion](https://github.com/sirosfoundation/wallet-companion/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
-| @img/sharp-libvips-linux-riscv64 | 1.2.4 | BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND LicenseRef-scancode-other-permissive AND MIT AND MPL-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
+| @img/sharp-libvips-linux-riscv64 | 1.2.4 | BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND MIT AND MPL-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
 | @img/sharp-libvips-linux-s390x | 1.3.1 | LGPL-3.0-or-later | sbom | [wallet-companion](https://github.com/sirosfoundation/wallet-companion/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
-| @img/sharp-libvips-linux-s390x | 1.2.4 | BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND LicenseRef-scancode-other-permissive AND MIT AND MPL-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
+| @img/sharp-libvips-linux-s390x | 1.2.4 | BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND MIT AND MPL-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
 | @img/sharp-libvips-linux-x64 | 1.3.1 | LGPL-3.0-or-later | sbom | [wallet-companion](https://github.com/sirosfoundation/wallet-companion/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
-| @img/sharp-libvips-linux-x64 | 1.2.4 | BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND LicenseRef-scancode-other-permissive AND MIT AND MPL-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
+| @img/sharp-libvips-linux-x64 | 1.2.4 | BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND MIT AND MPL-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
 | @img/sharp-libvips-linuxmusl-arm64 | 1.3.1 | LGPL-3.0-or-later | sbom | [wallet-companion](https://github.com/sirosfoundation/wallet-companion/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
-| @img/sharp-libvips-linuxmusl-arm64 | 1.2.4 | BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND LicenseRef-scancode-other-permissive AND MIT AND MPL-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
+| @img/sharp-libvips-linuxmusl-arm64 | 1.2.4 | BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND MIT AND MPL-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
 | @img/sharp-libvips-linuxmusl-x64 | 1.3.1 | LGPL-3.0-or-later | sbom | [wallet-companion](https://github.com/sirosfoundation/wallet-companion/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
-| @img/sharp-libvips-linuxmusl-x64 | 1.2.4 | BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND LicenseRef-scancode-other-permissive AND MIT AND MPL-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
+| @img/sharp-libvips-linuxmusl-x64 | 1.2.4 | BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND MIT AND MPL-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
 | @img/sharp-linux-arm | 0.35.2 | Apache-2.0 | sbom | [wallet-companion](https://github.com/sirosfoundation/wallet-companion/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
 | @img/sharp-linux-arm | 0.34.5 | Apache-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
 | @img/sharp-linux-arm64 | 0.35.2 | Apache-2.0 | sbom | [wallet-companion](https://github.com/sirosfoundation/wallet-companion/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
@@ -270,11 +273,11 @@ enabling audit of the dependency graph.
 | @img/sharp-wasm32 | 0.34.5 | Apache-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
 | @img/sharp-webcontainers-wasm32 | 0.35.2 | Apache-2.0 | sbom | [wallet-companion](https://github.com/sirosfoundation/wallet-companion/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
 | @img/sharp-win32-arm64 | 0.35.2 | Apache-2.0 AND LGPL-3.0-or-later | sbom | [wallet-companion](https://github.com/sirosfoundation/wallet-companion/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
-| @img/sharp-win32-arm64 | 0.34.5 | Apache-2.0 AND BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND LicenseRef-scancode-other-permissive AND MIT AND MPL-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
+| @img/sharp-win32-arm64 | 0.34.5 | Apache-2.0 AND BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND MIT AND MPL-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
 | @img/sharp-win32-ia32 | 0.35.2 | Apache-2.0 AND LGPL-3.0-or-later | sbom | [wallet-companion](https://github.com/sirosfoundation/wallet-companion/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
-| @img/sharp-win32-ia32 | 0.34.5 | Apache-2.0 AND BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND LicenseRef-scancode-other-permissive AND MIT AND MPL-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
+| @img/sharp-win32-ia32 | 0.34.5 | Apache-2.0 AND BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND MIT AND MPL-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
 | @img/sharp-win32-x64 | 0.35.2 | Apache-2.0 AND LGPL-3.0-or-later | sbom | [wallet-companion](https://github.com/sirosfoundation/wallet-companion/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
-| @img/sharp-win32-x64 | 0.34.5 | Apache-2.0 AND BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND LicenseRef-scancode-other-permissive AND MIT AND MPL-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
+| @img/sharp-win32-x64 | 0.34.5 | Apache-2.0 AND BSD-2-Clause AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND LGPL-3.0-or-later AND MIT AND MPL-2.0 | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Native image binaries — build-time optional platform deps, dynamic linking |
 | addons-linter | 10.7.0 | MPL-2.0 | sbom | [wallet-companion](https://github.com/sirosfoundation/wallet-companion/network/dependencies) | Firefox addons dev tooling — build-time only |
 | addons-moz-compare | 1.3.0 | MPL-2.0 | sbom | [wallet-companion](https://github.com/sirosfoundation/wallet-companion/network/dependencies) | Firefox addons dev tooling — build-time only |
 | addons-scanner-utils | 15.2.0 | MPL-2.0 | sbom | [wallet-companion](https://github.com/sirosfoundation/wallet-companion/network/dependencies) | Firefox addons dev tooling — build-time only |
@@ -439,6 +442,6 @@ enabling audit of the dependency graph.
 | github.com/opencontainers/go-digest | v1.0.0 | Apache-2.0 AND CC-BY-SA-4.0 | sbom | [vc](https://github.com/sirosfoundation/vc/network/dependencies) |  |
 
 
-_Last updated: 2026-08-04T07:23:28Z_
+_Last updated: 2026-08-05T07:23:41Z_
 
 _License policy: [sirosfoundation/compliance](https://github.com/sirosfoundation/compliance/blob/main/catalog/technical/license-policy.yaml)_
