@@ -296,6 +296,10 @@ Establish trust with the SIROS ID ecosystem. See [Trust Services](../trust/) for
 - OpenID Federation
 - X.509 certificate chains
 
+:::tip Accepting wallets without pre-registering each one
+The steps above cover how the issuer establishes *its own* trust with the ecosystem. Separately, you can let the issuer accept **any wallet whose provider is trusted** — instead of maintaining a static client map — via [Wallet Attestation](../trust/wallet-attestation.md). See the [Attestation-Based Authentication how-to](../../howto/attestation-based-authentication.md) for a full worked setup.
+:::
+
 ### Step 4: Test the Integration
 
 1. **Obtain a test wallet**: Use the SIROS ID web app at [id.siros.org](https://id.siros.org)
