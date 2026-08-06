@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-06T07:02:10Z",
+  "generated": "2026-08-06T14:50:28Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -243,6 +243,12 @@
       "image": "ghcr.io/sirosfoundation/vc/apigw",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "0.7.0-sirosid.0",
+        "f00ec0a",
+        "latest",
+        "0",
+        "0.7",
+        "0.7.0",
         "v0.6.5-sirosid.9",
         "dev-d932ddd",
         "dev-98ad2ff",
@@ -309,6 +315,12 @@
       "image": "ghcr.io/sirosfoundation/vc/issuer",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "0",
+        "0.7",
+        "0.7.0",
+        "f00ec0a",
+        "latest",
+        "0.7.0-sirosid.0",
         "v0.6.5-sirosid.9",
         "dev-d932ddd",
         "dev-98ad2ff",
@@ -395,6 +407,12 @@
       "image": "ghcr.io/sirosfoundation/vc/registry",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "0",
+        "0.7",
+        "f00ec0a",
+        "latest",
+        "0.7.0-sirosid.0",
+        "0.7.0",
         "v0.6.5-sirosid.9",
         "dev-d932ddd",
         "dev-98ad2ff",
@@ -481,6 +499,12 @@
       "image": "ghcr.io/sirosfoundation/vc/verifier",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "0",
+        "0.7",
+        "0.7.0",
+        "f00ec0a",
+        "latest",
+        "0.7.0-sirosid.0",
         "v0.6.5-sirosid.9",
         "dev-d932ddd",
         "dev-98ad2ff",
@@ -578,6 +602,13 @@
       "image": "ghcr.io/sirosfoundation/go-wallet-backend",
       "repo": "sirosfoundation/go-wallet-backend",
       "tags": [
+        "c1c757d",
+        "0.10",
+        "0.10.0",
+        "04dbcc0",
+        "c144413",
+        "4f99ed9",
+        "d324e1f",
         "f5f7a2d",
         "0.9.1",
         "b18a9ba",
