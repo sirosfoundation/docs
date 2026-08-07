@@ -27,7 +27,7 @@ There are two ways to get credential type metadata into your wallet deployment:
 
 - **Run your own registry with [registry-cli](./registry-cli).** Running registry-cli locally lets you choose exactly which sources to include, mix public and private repositories, and serve credential metadata to a private wallet deployment that is not connected to the public internet. This is useful for testing, for organisations that need to keep their credential types confidential, or for air-gapped environments.
 
-Both options produce the same TS11-compliant JSON API, so wallets and backends can switch between them by changing a single URL.
+Both options produce the same TS11-compliant JSON API, so wallets and backends can switch between them by changing a single URL. Clients that only need credentials from a specific organization can query `/api/v1/orgs/<org>/schemas.json` instead of filtering the full catalogue — see [Organization-scoped filtering](./registry-cli#organization-filtering) for details.
 
 ## How registry.siros.org is Built
 

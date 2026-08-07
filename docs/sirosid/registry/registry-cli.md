@@ -328,12 +328,24 @@ The generated registry includes a TS11-compliant JSON API:
 |----------|-------------|
 | `/api/v1/schemas.json` | All credential schemas |
 | `/api/v1/schemas/<id>.json` | Individual credential schema |
+| `/api/v1/orgs.json` | Index of contributing organizations *(SIROS extension, not part of TS11 — see below)* |
+| `/api/v1/orgs/<org>/schemas.json` | TS11-compliant schemas for one organization *(SIROS extension, not part of TS11 — see below)* |
 | `/api/v1/attributes.json` | Catalogue of attributes |
 | `/api/v1/openapi.yaml` | OpenAPI 3.1 specification |
 | `/.well-known/vctm-registry.json` | VCTM registry discovery |
 | `/api/v1/.well-known/jwks.json` | Public signing keys (when signing is enabled) |
 
 When JWS signing is enabled, all JSON responses are also available as `.jwt` files (JWS compact serialization).
+
+### Organization-scoped filtering {#organization-filtering}
+
+*Added in v0.17.0*
+
+`/api/v1/orgs/<org>/schemas.json` returns the same shape as `/api/v1/schemas.json`, filtered to one organization's TS11-compliant schemas. `/api/v1/orgs.json` lists every organization known to the registry instance, with a `schemaCount` and a link to its `schemasURL`.
+
+This is a **SIROS-specific extension**, not part of the normative ETSI TS11 API: TS11 has no "organization" concept, and its `SchemaMeta` JSON Schema sets `additionalProperties: false` at the top level, so adding an org/repo field directly to the object would break TS11 compliance validation for every credential. Filtering is expressed as a separate resource collection instead — every schema object returned from an org-scoped list is byte-for-byte identical to the one served from the global list, so this has no effect on TS11 conformance. It works identically on static hosting (GitHub Pages) and `registry-cli serve`.
+
+There is no static resource for an arbitrary *set* of organizations — fetch each organization's list separately and merge client-side.
 
 ## Environment Variables
 
