@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-07T14:25:12Z",
+  "generated": "2026-08-07T22:14:31Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -997,6 +997,14 @@
       "image": "ghcr.io/sirosfoundation/registry-cli",
       "repo": "sirosfoundation/registry-cli",
       "tags": [
+        "40589b4",
+        "0.17",
+        "0.17.0",
+        "d5f6108",
+        "7ef007a",
+        "0.16",
+        "0.16.0",
+        "77dec9f",
         "0.15",
         "0.15.0",
         "753587d",
