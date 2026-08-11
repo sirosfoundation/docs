@@ -330,6 +330,41 @@ When no explicit `jwks_endpoint_pattern` is set, the registry discovers keys via
 The whitelist registry performs full cryptographic key validation by default. Each entity's JWKS is fetched at startup and periodically refreshed. The registry reports healthy only when keys for all configured entities have been successfully loaded.
 :::
 
+##### Trusting X.509 Cert-Based Verifiers (No JWKS)
+
+The whitelist registry's key validation described above assumes every entity has a fetchable JWKS. That assumption doesn't hold for OpenID4VP verifiers using the [`x509_san_dns` or `x509_hash` client_id_scheme](#subject-id-normalization) — these authenticate via an X.509 certificate chain (`x5c`) embedded in the signed request's JWS header, not a JWKS endpoint. Since there's nothing to fetch, such a verifier's whitelist entry never gets keys loaded, and by default is denied with "no keys cached for entity", no matter how it's configured.
+
+Set `trust_x509_via_system_ca: true` to close this gap:
+
+```yaml
+registries:
+  whitelist:
+    enabled: true
+    lists:
+      verifiers:
+        - "https://vc-verifier.example.com"
+        - "x509_san_dns:verifier.example.com"
+    actions:
+      credential-verifier: "verifiers"
+      verifier: "verifiers"
+    trust_x509_via_system_ca: true
+```
+
+When enabled, for an entity that:
+1. is a member of the matched action's list (the ordinary whitelist membership check above still applies — this is **not** a blanket "trust any certificate" fallback),
+2. has no fetchable JWKS **and** whose identifier uses a non-HTTP(S) scheme (i.e. it was never JWKS-fetchable to begin with), and
+3. is being evaluated against an `x5c` resource,
+
+the registry falls back to validating the presented certificate chain against the **operating system's root CA pool**, instead of denying for "no keys cached". Both `x509_san_dns` and `x509_hash` are covered identically — the fallback is scheme-agnostic beyond special-casing `http(s)` as "must use JWKS". Note that non-http(s) list entries like `x509_san_dns:verifier.example.com` are matched literally against the request's subject id — no scheme-stripping normalization is applied to them the way it is for `https://` entries.
+
+:::caution
+This does **not** relax trust for ordinary `https://` entities. A real whitelisted verifier whose JWKS fetch failed for an unrelated reason (network error, misconfiguration) is still denied as before — the system-CA fallback only ever applies to entities that were never JWKS-fetchable in the first place.
+:::
+
+| Field | YAML key | Default | Description |
+|---|---|---|---|
+| Trust X.509 via system CA | `whitelist.trust_x509_via_system_ca` | `false` | When `true`, whitelisted entities with a non-HTTP(S) identifier and no fetchable JWKS fall back to validating their presented `x5c` chain against the system root CA pool. |
+
 #### Always-Trusted Registry
 
 Returns `decision: true` for any request. Useful for testing or when trust is handled by other means.

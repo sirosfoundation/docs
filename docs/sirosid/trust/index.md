@@ -297,7 +297,7 @@ actions:
 ```
 
 :::tip
-The whitelist registry performs full key validation by fetching each entity's JWKS and computing key fingerprints. See [Go-Trust Whitelist Registry](./go-trust#whitelist-registry) for details on JWKS discovery and configuration options.
+The whitelist registry performs full key validation by fetching each entity's JWKS and computing key fingerprints. See [Go-Trust Whitelist Registry](./go-trust#whitelist-registry) for details on JWKS discovery and configuration options, including `trust_x509_via_system_ca` for whitelisting X.509 cert-authenticated verifiers (`x509_san_dns`/`x509_hash` client_id_schemes) that have no JWKS to fetch.
 :::
 
 ## Trust Configuration
