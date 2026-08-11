@@ -1,10 +1,13 @@
 {
-  "generated": "2026-08-11T06:24:31Z",
+  "generated": "2026-08-11T14:29:05Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
       "repo": "sirosfoundation/go-trust",
       "tags": [
+        "0.12",
+        "0.12.0",
+        "c95dbb3",
         "0.11",
         "0.11.0",
         "fbae886",
@@ -146,6 +149,7 @@
       "image": "ghcr.io/sirosfoundation/wallet-frontend",
       "repo": "sirosfoundation/wallet-frontend",
       "tags": [
+        "unstable-99cdfeb",
         "unstable-c6294ac",
         "unstable-e8645f0",
         "unstable-0fcc6a8",
@@ -254,6 +258,8 @@
       "image": "ghcr.io/sirosfoundation/vc/apigw",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "a5ba027",
+        "0.7.0-sirosid.1",
         "0.7.0-sirosid.0",
         "f00ec0a",
         "latest",
@@ -326,6 +332,8 @@
       "image": "ghcr.io/sirosfoundation/vc/issuer",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "a5ba027",
+        "0.7.0-sirosid.1",
         "0",
         "0.7",
         "0.7.0",
@@ -418,6 +426,8 @@
       "image": "ghcr.io/sirosfoundation/vc/registry",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "a5ba027",
+        "0.7.0-sirosid.1",
         "0",
         "0.7",
         "f00ec0a",
@@ -510,6 +520,8 @@
       "image": "ghcr.io/sirosfoundation/vc/verifier",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "a5ba027",
+        "0.7.0-sirosid.1",
         "0",
         "0.7",
         "0.7.0",
@@ -613,6 +625,13 @@
       "image": "ghcr.io/sirosfoundation/go-wallet-backend",
       "repo": "sirosfoundation/go-wallet-backend",
       "tags": [
+        "0.11",
+        "0.11.0",
+        "6168750",
+        "e7c71ca",
+        "d56fa3b",
+        "2047f9e",
+        "d624046",
         "c9c283c",
         "c1c757d",
         "0.10",
@@ -966,6 +985,9 @@
       "image": "ghcr.io/sirosfoundation/go-grc",
       "repo": "sirosfoundation/go-grc",
       "tags": [
+        "ca516b8",
+        "0.13",
+        "0.13.0",
         "eec5ec1",
         "0165685",
         "0.12",
