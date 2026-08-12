@@ -138,6 +138,7 @@ The wallet's backend (go-wallet-backend) sends a trust evaluation request to its
 - **ETSI Trust Status Lists** (for X.509 certificate chains)
 - **OpenID Federation trust chains** (for federation participants)
 - **LoTE registries** (for DID-based verifiers)
+- **Whitelist registries** (for known verifier URLs — and, with `trust_x509_via_system_ca` enabled, `x509_san_dns`/`x509_hash` verifiers that have no JWKS to fetch at all; see [Trusting X.509 Cert-Based Verifiers](./go-trust#trusting-x509-cert-based-verifiers-no-jwks))
 
 ## Related
 
