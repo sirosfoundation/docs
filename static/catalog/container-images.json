@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-17T06:17:39Z",
+  "generated": "2026-08-17T14:10:22Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -275,6 +275,8 @@
       "image": "ghcr.io/sirosfoundation/vc/apigw",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "zklong-seed-revert",
+        "zklong-ppid-shrink",
         "zk-longfellow-test",
         "a5ba027",
         "0.7.0-sirosid.1",
@@ -350,6 +352,8 @@
       "image": "ghcr.io/sirosfoundation/vc/issuer",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "zklong-seed-revert",
+        "zklong-ppid-shrink",
         "zk-longfellow-test",
         "a5ba027",
         "0.7.0-sirosid.1",
@@ -445,6 +449,8 @@
       "image": "ghcr.io/sirosfoundation/vc/registry",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "zklong-seed-revert",
+        "zklong-ppid-shrink",
         "zk-longfellow-test",
         "a5ba027",
         "0.7.0-sirosid.1",
@@ -540,6 +546,8 @@
       "image": "ghcr.io/sirosfoundation/vc/verifier",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "zklong-seed-revert",
+        "zklong-ppid-shrink",
         "zk-longfellow-test",
         "a5ba027",
         "0.7.0-sirosid.1",
@@ -646,6 +654,8 @@
       "image": "ghcr.io/sirosfoundation/go-wallet-backend",
       "repo": "sirosfoundation/go-wallet-backend",
       "tags": [
+        "zklong-session-verifier-context",
+        "zklong-ws-readlimit",
         "0.12",
         "0.12.0",
         "dd7db84",
