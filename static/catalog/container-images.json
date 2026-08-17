@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-17T14:10:22Z",
+  "generated": "2026-08-17T22:07:38Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -654,6 +654,8 @@
       "image": "ghcr.io/sirosfoundation/go-wallet-backend",
       "repo": "sirosfoundation/go-wallet-backend",
       "tags": [
+        "aa8afdd",
+        "840fb0b",
         "zklong-session-verifier-context",
         "zklong-ws-readlimit",
         "0.12",
