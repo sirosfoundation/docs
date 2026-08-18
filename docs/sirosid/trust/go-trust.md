@@ -365,6 +365,40 @@ This does **not** relax trust for ordinary `https://` entities. A real whitelist
 |---|---|---|---|
 | Trust X.509 via system CA | `whitelist.trust_x509_via_system_ca` | `false` | When `true`, whitelisted entities with a non-HTTP(S) identifier and no fetchable JWKS fall back to validating their presented `x5c` chain against the system root CA pool. |
 
+##### Adding Custom Roots to the X.509 Trust Pool
+
+Some verifiers sign requests with a certificate chaining to a long-lived, self-signed "reader CA" root that is meant to be trusted out-of-band per ISO 18013-5 convention, rather than to a public CA in the system pool — for example, `verifier.multipaz.org`'s request-signing certificate is issued by exactly such a root (published at its own `/verifier/readerRootCert` endpoint), distinct from the publicly-CA-issued HTTPS/TLS certificate the same host also serves. `trust_x509_via_system_ca`'s OS pool alone won't validate a chain against such a root.
+
+Set `additional_trusted_roots` to merge one or more PEM-encoded CA certificates into that same chain-validation pool:
+
+```yaml
+registries:
+  whitelist:
+    enabled: true
+    lists:
+      verifiers:
+        - "x509_san_dns:verifier.example.com"
+    actions:
+      credential-verifier: "verifiers"
+      verifier: "verifiers"
+    trust_x509_via_system_ca: true
+    additional_trusted_roots:
+      - |
+        -----BEGIN CERTIFICATE-----
+        MIIBXXXX...one PEM cert per list entry...XXXX
+        -----END CERTIFICATE-----
+```
+
+This only affects the `x509_san_dns`/`x509_san_uri` chain-validation path — `x509_hash` pins a specific leaf certificate and skips chain validation entirely, so `additional_trusted_roots` has no effect on it. Trusting the root here (rather than pinning the leaf via `x509_hash`) is preferable when the root is long-lived: it survives the verifier rotating its signing certificate, whereas a pinned leaf hash breaks the moment that happens.
+
+:::caution
+Some real-world reader-CA roots are issued with a negative serial number (RFC 5280 recommends non-negative but doesn't forbid it, and common CA tooling still produces them). Go's x509 parser rejects these by default since Go 1.23, in which case `additional_trusted_roots` silently becomes a no-op for that specific root. Go-Trust's own shipped binary sets `GODEBUG=x509negativeserial=1` to accommodate this — anything embedding this package directly must set the same environment variable, or affected roots won't actually be trusted despite being configured.
+:::
+
+| Field | YAML key | Default | Description |
+|---|---|---|---|
+| Additional trusted roots | `whitelist.additional_trusted_roots` | *(none)* | List of PEM-encoded CA certificates merged into `trust_x509_via_system_ca`'s chain-validation pool, for verifiers whose signing certificate chains to a custom root rather than a publicly-trusted one. |
+
 #### Always-Trusted Registry
 
 Returns `decision: true` for any request. Useful for testing or when trust is handled by other means.
