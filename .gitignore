@@ -13,8 +13,10 @@
 
 # Configuration reference docs (fetched at build time via `make fetch-config-docs`)
 /docs/sirosid/reference/vc-configuration.md
+/docs/sirosid/reference/vc-configuration-history.md
 /docs/sirosid/reference/vc-configuration-versions/*.md
 /docs/wallet/wallet-backend-configuration.md
+/docs/wallet/wallet-backend-configuration-history.md
 /docs/wallet/wallet-backend-configuration-versions/*.md
 
 # Misc

@@ -94,14 +94,14 @@ fetch-config-docs-latest:
 		TITLE="VC Configuration Reference" \
 		SOURCE_LABEL="SUNET/vc@$(VC_DOCS_BRANCH)" \
 		SOURCE_URL="https://github.com/SUNET/vc/blob/$(VC_DOCS_BRANCH)/docs/CONFIGURATION.md" \
-		VERSIONS_NOTE="Looking for a specific release instead of $(VC_DOCS_BRANCH)? See **Older Releases** in the sidebar below."
+		VERSIONS_NOTE="Looking for a specific release instead of $(VC_DOCS_BRANCH)? See [Older Releases](/sirosid/reference/vc-configuration-history)."
 	@$(MAKE) --no-print-directory _fetch-config-doc \
 		SRC_URL="$(GITHUB_RAW)/sirosfoundation/go-wallet-backend/$(WALLET_BACKEND_DOCS_BRANCH)/docs/CONFIGURATION.md" \
 		DEST="docs/wallet/wallet-backend-configuration.md" \
 		TITLE="Wallet Backend Configuration Reference" \
 		SOURCE_LABEL="go-wallet-backend@$(WALLET_BACKEND_DOCS_BRANCH)" \
 		SOURCE_URL="https://github.com/sirosfoundation/go-wallet-backend/blob/$(WALLET_BACKEND_DOCS_BRANCH)/docs/CONFIGURATION.md" \
-		VERSIONS_NOTE="Looking for a specific release instead of $(WALLET_BACKEND_DOCS_BRANCH)? See **Older Releases** in the sidebar below."
+		VERSIONS_NOTE="Looking for a specific release instead of $(WALLET_BACKEND_DOCS_BRANCH)? See [Older Releases](/wallet/wallet-backend-configuration-history)."
 	@echo "Done."
 
 # Helper: fetch one CONFIGURATION.md and prepend frontmatter. Not called directly.
@@ -124,7 +124,11 @@ _fetch-config-doc:
 # Fetch a pinned config-doc snapshot for each of the most recent tagged
 # releases of each repo (skipping tags that predate the generator, i.e.
 # have no docs/CONFIGURATION.md — this is expected for older releases,
-# not an error).
+# not an error). Each snapshot is marked `unlisted` (built and directly
+# linkable, but excluded from the sidebar and search) so that adding more
+# components never produces multiple identically-labeled "Older Releases"
+# sidebar categories. A single small sidecar index page per component
+# lists the available releases instead; the default/latest page links to it.
 fetch-config-docs-versions:
 	@echo "Fetching per-release configuration reference docs (up to $(CONFIG_DOC_MAX_VERSIONS) most recent tags each)..."
 	@mkdir -p docs/sirosid/reference/vc-configuration-versions docs/wallet/wallet-backend-configuration-versions
@@ -132,28 +136,33 @@ fetch-config-docs-versions:
 		GH_REPO="SUNET/vc" \
 		DEST_DIR="docs/sirosid/reference/vc-configuration-versions" \
 		TITLE_PREFIX="VC Configuration Reference" \
-		LATEST_PATH="/sirosid/reference/vc-configuration"
+		LATEST_PATH="/sirosid/reference/vc-configuration" \
+		INDEX_DEST="docs/sirosid/reference/vc-configuration-history.md" \
+		INDEX_SIDEBAR_POSITION=11
 	@$(MAKE) --no-print-directory _fetch-config-doc-versions \
 		GH_REPO="sirosfoundation/go-wallet-backend" \
 		DEST_DIR="docs/wallet/wallet-backend-configuration-versions" \
 		TITLE_PREFIX="Wallet Backend Configuration Reference" \
-		LATEST_PATH="/wallet/wallet-backend-configuration"
+		LATEST_PATH="/wallet/wallet-backend-configuration" \
+		INDEX_DEST="docs/wallet/wallet-backend-configuration-history.md" \
+		INDEX_SIDEBAR_POSITION=11
 	@echo "Done."
 
-# Helper: fetch CONFIGURATION.md at each of a repo's N most recent tags. Not called directly.
+# Helper: fetch CONFIGURATION.md at each of a repo's N most recent tags,
+# plus the sidecar index page linking to them. Not called directly.
 _fetch-config-doc-versions:
 	@tags="$$(git ls-remote --tags --refs https://github.com/$(GH_REPO).git | awk -F'refs/tags/' '{print $$2}' | sort -rV | head -n $(CONFIG_DOC_MAX_VERSIONS))"; \
-	fetched=0; skipped=0; pos=1; \
+	fetched=0; skipped=0; index_items=""; \
 	for tag in $$tags; do \
 		url="$(GITHUB_RAW)/$(GH_REPO)/$$tag/docs/CONFIGURATION.md"; \
 		dest="$(DEST_DIR)/$$tag.md"; \
+		tag_path="/$$(echo $(DEST_DIR) | sed 's|^docs/||')/$$tag"; \
 		body="$$(curl -sfL "$$url" 2>/dev/null | python3 scripts/escape-placeholder-tags.py)"; \
 		if [ -n "$$body" ]; then \
 			{ \
 				echo "---"; \
 				echo "title: $$tag"; \
-				echo "sidebar_label: $$tag"; \
-				echo "sidebar_position: $$pos"; \
+				echo "unlisted: true"; \
 				echo "mdx:"; \
 				echo "  format: md"; \
 				echo "---"; \
@@ -163,12 +172,27 @@ _fetch-config-doc-versions:
 				echo "$$body"; \
 			} > "$$dest"; \
 			fetched=$$((fetched + 1)); \
-			pos=$$((pos + 1)); \
+			index_items="$$index_items- [$$tag]($$tag_path)\n"; \
 		else \
 			skipped=$$((skipped + 1)); \
 		fi; \
 	done; \
-	echo "  $(GH_REPO): $$fetched version page(s) written to $(DEST_DIR)/, $$skipped tag(s) skipped (no docs/CONFIGURATION.md at that ref)"
+	{ \
+		echo "---"; \
+		echo "title: $(TITLE_PREFIX) — Older Releases"; \
+		echo "sidebar_label: Older Releases"; \
+		echo "sidebar_position: $(INDEX_SIDEBAR_POSITION)"; \
+		echo "---"; \
+		echo ""; \
+		echo "Pinned snapshots of the [$(TITLE_PREFIX)]($(LATEST_PATH)) for previous releases of [$(GH_REPO)](https://github.com/$(GH_REPO)). These are not listed in the sidebar or indexed by search — reach them from here."; \
+		echo ""; \
+		printf "%b" "$$index_items"; \
+		echo ""; \
+		if [ "$$skipped" -gt 0 ]; then \
+			echo "$$skipped older release(s) predate the generated configuration reference and aren't available here."; \
+		fi; \
+	} > "$(INDEX_DEST)"; \
+	echo "  $(GH_REPO): $$fetched version page(s) written to $(DEST_DIR)/, $$skipped tag(s) skipped (no docs/CONFIGURATION.md at that ref), index at $(INDEX_DEST)"
 
 # Install dependencies
 install:
