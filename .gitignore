@@ -11,6 +11,12 @@
 # API specs (fetched at build time via `make fetch-api-specs`)
 /static/api/
 
+# Configuration reference docs (fetched at build time via `make fetch-config-docs`)
+/docs/sirosid/reference/vc-configuration.md
+/docs/sirosid/reference/vc-configuration-versions/*.md
+/docs/wallet/wallet-backend-configuration.md
+/docs/wallet/wallet-backend-configuration-versions/*.md
+
 # Misc
 .DS_Store
 .env.local
