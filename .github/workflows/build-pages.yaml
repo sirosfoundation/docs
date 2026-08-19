@@ -5,6 +5,10 @@ on:
     branches:
       - main
   workflow_dispatch:
+  schedule:
+    # Daily rebuild so fetched content (config docs, API specs) picks up
+    # changes from source repos even without a commit to this repo.
+    - cron: '0 6 * * *'
 
 permissions:
   contents: read
@@ -31,6 +35,9 @@ jobs:
 
       - name: Fetch API specs
         run: make fetch-api-specs
+
+      - name: Fetch config docs
+        run: make fetch-config-docs
 
       - name: Build Docusaurus
         run: pnpm build

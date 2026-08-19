@@ -182,7 +182,17 @@ external_urls:
 | `WALLET_LOGGING_LEVEL` | `logging.level` | `info` | Log level: `debug`, `info`, `warn`, `error` |
 
 :::tip Complete Configuration Reference
-The wallet backend includes a [generated configuration reference](https://github.com/sirosfoundation/go-wallet-backend/blob/main/docs/CONFIGURATION.md) covering all YAML keys, environment variables, and their descriptions. Regenerate it with `go run developer_tools/scripts/gen_config_docs/main.go`.
+The wallet backend includes a [generated configuration reference](/wallet/wallet-backend-configuration) covering all YAML keys, environment variables, and their descriptions, generated directly from the Go config structs.
+:::
+
+---
+
+## VC (Credential Manager)
+
+The apigw, issuer, registry, and verifier services share a single YAML config file (`VC_CONFIG_YAML`), plus a small set of bootstrap environment variables.
+
+:::tip Complete Configuration Reference
+See the [generated configuration reference](/sirosid/reference/vc-configuration) for all YAML keys, defaults, and validation constraints across `common`, `apigw`, `issuer`, `verifier`, and `registry`, generated directly from the Go config structs.
 :::
 
 ---
