@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-19T06:14:01Z",
+  "generated": "2026-08-19T14:14:33Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -164,6 +164,9 @@
       "image": "ghcr.io/sirosfoundation/wallet-frontend",
       "repo": "sirosfoundation/wallet-frontend",
       "tags": [
+        "0.5.0-1-sirosid.9",
+        "unstable-e66bb7a",
+        "unstable-d885a5e",
         "unstable-36f803e",
         "unstable-831c46c",
         "testing-922394ab",
@@ -547,6 +550,8 @@
       "image": "ghcr.io/sirosfoundation/vc/verifier",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "oidc-op-send-redirect-uri-1",
+        "oidc-op-send-redirect-uri",
         "zklong-seed-revert",
         "zklong-ppid-shrink",
         "zk-longfellow-test",
