@@ -11,13 +11,11 @@
 # API specs (fetched at build time via `make fetch-api-specs`)
 /static/api/
 
-# Configuration reference docs (fetched at build time via `make fetch-config-docs`)
-/docs/sirosid/reference/vc-configuration/index.md
-/docs/sirosid/reference/vc-configuration/history.md
-/docs/sirosid/reference/vc-configuration-versions/*.md
-/docs/wallet/wallet-backend-configuration/index.md
-/docs/wallet/wallet-backend-configuration/history.md
-/docs/wallet/wallet-backend-configuration-versions/*.md
+# Configuration reference docs (fetched at build time via `make fetch-config-docs`):
+# the default/latest doc plus one page per tagged release, all as siblings.
+# _category_.json is checked in and must not match this glob.
+/docs/sirosid/reference/vc-configuration/*.md
+/docs/wallet/wallet-backend-configuration/*.md
 
 # Misc
 .DS_Store
