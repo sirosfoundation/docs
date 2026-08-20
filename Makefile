@@ -32,7 +32,7 @@ help:
 	@echo ""
 	@echo "API Specs:"
 	@echo "  fetch-api-specs          Fetch latest OpenAPI/Swagger specs from source repos"
-	@echo "  fetch-config-docs        Fetch config reference docs: default branch + per-release"
+	@echo "  fetch-config-docs        Fetch config reference docs (vc, go-wallet-backend, go-trust): default branch + per-release"
 	@echo "  fetch-config-docs-latest   ...just the default-branch snapshot"
 	@echo "  fetch-config-docs-versions ...just the per-tagged-release snapshots"
 	@echo ""
@@ -69,6 +69,7 @@ fetch-api-specs:
 # e.g. `make fetch-config-docs VC_DOCS_BRANCH=my-feature-branch`
 VC_DOCS_BRANCH ?= main
 WALLET_BACKEND_DOCS_BRANCH ?= main
+GO_TRUST_DOCS_BRANCH ?= main
 
 # How many of the most recent tagged releases (per repo) get their own
 # published config-doc snapshot, newest first. Bounds build time/requests
@@ -106,6 +107,15 @@ fetch-config-docs-latest:
 		SOURCE_LABEL="go-wallet-backend@$(WALLET_BACKEND_DOCS_BRANCH)" \
 		SOURCE_URL="https://github.com/sirosfoundation/go-wallet-backend/blob/$(WALLET_BACKEND_DOCS_BRANCH)/docs/CONFIGURATION.md" \
 		VERSIONS_NOTE="Looking for a specific release instead of $(WALLET_BACKEND_DOCS_BRANCH)? Expand **Wallet Backend Configuration Reference** in the sidebar — every published release has its own page."
+	@$(MAKE) --no-print-directory _fetch-config-doc \
+		SRC_URL="$(GITHUB_RAW)/sirosfoundation/go-trust/$(GO_TRUST_DOCS_BRANCH)/docs/CONFIGURATION.md" \
+		DEST="docs/sirosid/trust/go-trust-configuration/index.md" \
+		ID="go-trust-configuration" \
+		SLUG="/sirosid/trust/go-trust-configuration" \
+		TITLE="Go-Trust Configuration Reference" \
+		SOURCE_LABEL="go-trust@$(GO_TRUST_DOCS_BRANCH)" \
+		SOURCE_URL="https://github.com/sirosfoundation/go-trust/blob/$(GO_TRUST_DOCS_BRANCH)/docs/CONFIGURATION.md" \
+		VERSIONS_NOTE="Looking for a specific release instead of $(GO_TRUST_DOCS_BRANCH)? Expand **Go-Trust Configuration Reference** in the sidebar — every published release has its own page."
 	@echo "Done."
 
 # Helper: fetch one CONFIGURATION.md and prepend frontmatter. Not called directly.
@@ -144,7 +154,7 @@ _fetch-config-doc:
 # that component's own category as soon as it's fetched.
 fetch-config-docs-versions:
 	@echo "Fetching per-release configuration reference docs (up to $(CONFIG_DOC_MAX_VERSIONS) most recent tags each)..."
-	@mkdir -p docs/sirosid/reference/vc-configuration docs/wallet/wallet-backend-configuration
+	@mkdir -p docs/sirosid/reference/vc-configuration docs/wallet/wallet-backend-configuration docs/sirosid/trust/go-trust-configuration
 	@$(MAKE) --no-print-directory _fetch-config-doc-versions \
 		GH_REPO="SUNET/vc" \
 		DEST_DIR="docs/sirosid/reference/vc-configuration" \
@@ -155,6 +165,11 @@ fetch-config-docs-versions:
 		DEST_DIR="docs/wallet/wallet-backend-configuration" \
 		TITLE_PREFIX="Wallet Backend Configuration Reference" \
 		LATEST_PATH="/wallet/wallet-backend-configuration"
+	@$(MAKE) --no-print-directory _fetch-config-doc-versions \
+		GH_REPO="sirosfoundation/go-trust" \
+		DEST_DIR="docs/sirosid/trust/go-trust-configuration" \
+		TITLE_PREFIX="Go-Trust Configuration Reference" \
+		LATEST_PATH="/sirosid/trust/go-trust-configuration"
 	@echo "Done."
 
 # Helper: fetch CONFIGURATION.md at each of a repo's N most recent tags.
