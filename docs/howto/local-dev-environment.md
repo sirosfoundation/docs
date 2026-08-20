@@ -5,7 +5,7 @@ sidebar_label: Local Development Environment
 
 # Setting Up a Local Development Environment
 
-This guide walks you through setting up a complete SIROS ID development environment on your local machine. By the end, you'll have the full wallet stack running locally with hot-reload for frontend and backend development.
+This guide walks you through setting up a complete SIROS ID development environment on your local machine. By the end, you'll have the full wallet stack running locally, built from source in the sibling repos — rebuild with `make up REBUILD=yes` after changing frontend or backend code.
 
 ## Prerequisites
 
