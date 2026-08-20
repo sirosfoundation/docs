@@ -90,14 +90,18 @@ fetch-config-docs-latest:
 	@echo "Fetching configuration reference docs ($(VC_DOCS_BRANCH) / $(WALLET_BACKEND_DOCS_BRANCH))..."
 	@$(MAKE) --no-print-directory _fetch-config-doc \
 		SRC_URL="$(GITHUB_RAW)/SUNET/vc/$(VC_DOCS_BRANCH)/docs/CONFIGURATION.md" \
-		DEST="docs/sirosid/reference/vc-configuration.md" \
+		DEST="docs/sirosid/reference/vc-configuration/index.md" \
+		ID="vc-configuration" \
+		SLUG="/sirosid/reference/vc-configuration" \
 		TITLE="VC Configuration Reference" \
 		SOURCE_LABEL="SUNET/vc@$(VC_DOCS_BRANCH)" \
 		SOURCE_URL="https://github.com/SUNET/vc/blob/$(VC_DOCS_BRANCH)/docs/CONFIGURATION.md" \
 		VERSIONS_NOTE="Looking for a specific release instead of $(VC_DOCS_BRANCH)? See [Older Releases](/sirosid/reference/vc-configuration-history)."
 	@$(MAKE) --no-print-directory _fetch-config-doc \
 		SRC_URL="$(GITHUB_RAW)/sirosfoundation/go-wallet-backend/$(WALLET_BACKEND_DOCS_BRANCH)/docs/CONFIGURATION.md" \
-		DEST="docs/wallet/wallet-backend-configuration.md" \
+		DEST="docs/wallet/wallet-backend-configuration/index.md" \
+		ID="wallet-backend-configuration" \
+		SLUG="/wallet/wallet-backend-configuration" \
 		TITLE="Wallet Backend Configuration Reference" \
 		SOURCE_LABEL="go-wallet-backend@$(WALLET_BACKEND_DOCS_BRANCH)" \
 		SOURCE_URL="https://github.com/sirosfoundation/go-wallet-backend/blob/$(WALLET_BACKEND_DOCS_BRANCH)/docs/CONFIGURATION.md" \
@@ -105,13 +109,22 @@ fetch-config-docs-latest:
 	@echo "Done."
 
 # Helper: fetch one CONFIGURATION.md and prepend frontmatter. Not called directly.
+# ID/SLUG give the doc a stable id and URL independent of where it physically
+# lives (docs/.../<component>-configuration/index.md) — see the _category_.json
+# next to it, which links the category itself to this doc so "Older Releases"
+# (docs/.../<component>-configuration/history.md, in the same folder) renders
+# nested underneath it instead of as a sibling sidebar entry. That nesting is
+# what prevents two components' "Older Releases" pages from ever looking like
+# the same, ambiguous sidebar row: each is scoped under its own
+# component-named category instead of sharing a flat label.
 _fetch-config-doc:
 	@mkdir -p $(dir $(DEST))
 	@echo "  $(DEST) <- $(SRC_URL)"
 	@body="$$(curl -sfL "$(SRC_URL)" | python3 scripts/escape-placeholder-tags.py)" && { \
 		echo "---"; \
+		echo "id: $(ID)"; \
+		echo "slug: $(SLUG)"; \
 		echo "title: $(TITLE)"; \
-		echo "sidebar_position: 10"; \
 		echo "mdx:"; \
 		echo "  format: md"; \
 		echo "---"; \
@@ -137,20 +150,28 @@ fetch-config-docs-versions:
 		DEST_DIR="docs/sirosid/reference/vc-configuration-versions" \
 		TITLE_PREFIX="VC Configuration Reference" \
 		LATEST_PATH="/sirosid/reference/vc-configuration" \
-		INDEX_DEST="docs/sirosid/reference/vc-configuration-history.md" \
-		INDEX_SIDEBAR_POSITION=11
+		INDEX_DEST="docs/sirosid/reference/vc-configuration/history.md" \
+		INDEX_ID="vc-configuration-history" \
+		INDEX_SLUG="/sirosid/reference/vc-configuration-history"
 	@$(MAKE) --no-print-directory _fetch-config-doc-versions \
 		GH_REPO="sirosfoundation/go-wallet-backend" \
 		DEST_DIR="docs/wallet/wallet-backend-configuration-versions" \
 		TITLE_PREFIX="Wallet Backend Configuration Reference" \
 		LATEST_PATH="/wallet/wallet-backend-configuration" \
-		INDEX_DEST="docs/wallet/wallet-backend-configuration-history.md" \
-		INDEX_SIDEBAR_POSITION=11
+		INDEX_DEST="docs/wallet/wallet-backend-configuration/history.md" \
+		INDEX_ID="wallet-backend-configuration-history" \
+		INDEX_SLUG="/wallet/wallet-backend-configuration-history"
 	@echo "Done."
 
 # Helper: fetch CONFIGURATION.md at each of a repo's N most recent tags,
 # plus the sidecar index page linking to them. Not called directly.
+# The index page (INDEX_DEST) lives inside the same category folder as
+# the default/latest page (see _fetch-config-doc above) so it renders as
+# a nested "Older Releases" item under that component's own category,
+# rather than a flat sidebar entry that could collide with another
+# component's identically-labeled "Older Releases" page.
 _fetch-config-doc-versions:
+	@mkdir -p $(dir $(INDEX_DEST))
 	@tags="$$(git ls-remote --tags --refs https://github.com/$(GH_REPO).git | awk -F'refs/tags/' '{print $$2}' | sort -rV | head -n $(CONFIG_DOC_MAX_VERSIONS))"; \
 	fetched=0; skipped=0; index_items=""; \
 	for tag in $$tags; do \
@@ -179,9 +200,10 @@ _fetch-config-doc-versions:
 	done; \
 	{ \
 		echo "---"; \
+		echo "id: $(INDEX_ID)"; \
+		echo "slug: $(INDEX_SLUG)"; \
 		echo "title: $(TITLE_PREFIX) — Older Releases"; \
 		echo "sidebar_label: Older Releases"; \
-		echo "sidebar_position: $(INDEX_SIDEBAR_POSITION)"; \
 		echo "---"; \
 		echo ""; \
 		echo "Pinned snapshots of the [$(TITLE_PREFIX)]($(LATEST_PATH)) for previous releases of [$(GH_REPO)](https://github.com/$(GH_REPO)). These are not listed in the sidebar or indexed by search — reach them from here."; \
