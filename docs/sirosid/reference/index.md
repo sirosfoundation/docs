@@ -11,11 +11,11 @@ Technical reference documentation including standards, credential types, and con
 - [Token Status Lists](/sirosid/reference/token-status-lists)
 - [Credential Manager](/sirosid/reference/cm)
 - [API Reference](/sirosid/reference/api)
+
+## Configuration Reference
+
+Generated, always-current configuration reference for each SIROS ID component:
+
 - [VC Configuration Reference](/sirosid/reference/vc-configuration)
-
-## Other Components
-
-The VC services' configuration reference lives here since that's the platform's core credential issuance/verification service, but the same generated, always-current configuration reference is also published for the other SIROS ID components:
-
 - [Wallet Backend Configuration Reference](/wallet/wallet-backend-configuration)
 - [Go-Trust Configuration Reference](/sirosid/trust/go-trust-configuration)
