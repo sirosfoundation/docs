@@ -92,6 +92,10 @@ services:
 
 ## Configuration
 
+:::tip Complete Configuration Reference
+See the [generated configuration reference](/sirosid/trust/go-trust-configuration) for every YAML key, its type, description, and (where one exists) `GT_*` environment variable override — generated directly from the Go config structs, so it can't drift from what the code actually accepts.
+:::
+
 ### Basic Configuration
 
 Create `trust-config.yaml`:

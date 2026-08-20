@@ -16,6 +16,7 @@
 # _category_.json is checked in and must not match this glob.
 /docs/sirosid/reference/vc-configuration/*.md
 /docs/wallet/wallet-backend-configuration/*.md
+/docs/sirosid/trust/go-trust-configuration/*.md
 
 # Misc
 .DS_Store
