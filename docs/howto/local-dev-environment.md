@@ -77,6 +77,7 @@ make up GOLDEN=yes
 | Option | Values | Default | Description |
 |--------|--------|---------|--------------|
 | `PDP=` | `allow`, `whitelist`, `deny`, `mock`, `helm` | `allow` | Trust PDP mode — see [PDP Modes](#pdp-modes) below |
+| `AS_RULES=` | `allow-all`, `baseline` | `allow-all` | Built-in Authorization Server SPOCP ruleset — see [AS Rules](#as-rules) below |
 | `VC=` | `yes` / `1` | off | Enable VC services |
 | `TRANSPORT=` | `wmp`, `http` | websocket | Transport protocol (`http` is deprecated) |
 | `CONFORMANCE=` | `yes` / `1` | off | Enable OpenID Conformance Suite (implies `VC=yes PDP=allow`) |
@@ -129,6 +130,24 @@ The `PDP=` option selects how trust decisions are made:
 | `deny` | go-trust deny-all — rejects everything (negative testing) |
 | `mock` | Legacy mock-trust-pdp (no go-trust) |
 | `helm` | go-trust whitelist + wallet-backend, both configured from files rendered off the [siros-id-stack](https://github.com/sirosfoundation/siros-id-stack) chart instead of hand-maintained env vars. Requires a sibling `../siros-id-stack` checkout. This is the transitional path towards aligning sirosid-dev's config with the production Helm chart. |
+
+## AS Rules
+
+Separate from the `PDP=` trust policy above, the `AS_RULES=` option selects
+the SPOCP policy evaluated by wallet-backend's *built-in* Authorization
+Server — the passkey login + token endpoint used for session auth by both
+the web frontend and the native (Kotlin/Swift) SDKs, not issuer/verifier
+trust decisions.
+
+| Mode | Description |
+|------|--------------|
+| `allow-all` (default) | Unconditional allow (`fixtures/as-rules/allow-all.rules`). `make up`'s job is to give every other feature a working AS out of the box, not to exercise the AS ruleset itself. |
+| `baseline` | go-wallet-backend's own real baseline policy (`rules/default.rules` + `rules/delegation.rules`) — the same rules baked into every wallet-backend image and used whenever `WALLET_AS_RULES_DIR` is left unset, which is exactly what `make fly-up` does. Use this only when directly testing AS rule behavior, e.g. reproducing a Fly-only 403 locally, or checking a new client request shape against the real policy. |
+
+```bash
+# Test against the real AS policy instead of the default allow-all
+make up AS_RULES=baseline
+```
 
 ## Mobile Device Testing
 
