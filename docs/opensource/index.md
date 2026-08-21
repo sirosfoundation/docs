@@ -129,6 +129,12 @@ SIROS Foundation also contributes to and maintains forks of related open source 
 
 ---
 
+## Release Notes
+
+[Per-release notes](/opensource/release-notes/) are published for components that opt in, generated from each repository's own `RELEASE_NOTES.md`.
+
+---
+
 ## Documentation
 
 | Repository | Description |
