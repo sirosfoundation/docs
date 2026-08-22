@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-21T22:07:28Z",
+  "generated": "2026-08-22T06:11:24Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -684,6 +684,7 @@
       "image": "ghcr.io/sirosfoundation/go-wallet-backend",
       "repo": "sirosfoundation/go-wallet-backend",
       "tags": [
+        "pr-284-test",
         "2caa82f",
         "0.14.1",
         "cc72483",
