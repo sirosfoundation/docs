@@ -18,6 +18,10 @@
 /docs/wallet/wallet-backend-configuration/*.md
 /docs/sirosid/trust/go-trust-configuration/*.md
 
+# Release notes (fetched at build time via `make fetch-release-notes`).
+# _category_.json is checked in and must not match this glob.
+/docs/opensource/release-notes/*.md
+
 # Misc
 .DS_Store
 .env.local
