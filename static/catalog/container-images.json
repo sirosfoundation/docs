@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-22T06:11:24Z",
+  "generated": "2026-08-22T14:06:45Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -303,6 +303,7 @@
       "image": "ghcr.io/sirosfoundation/vc/apigw",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "pr-596-597-test",
         "zklong-seed-revert",
         "zklong-ppid-shrink",
         "zk-longfellow-test",
@@ -380,6 +381,7 @@
       "image": "ghcr.io/sirosfoundation/vc/issuer",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "pr-596-597-test",
         "zklong-seed-revert",
         "zklong-ppid-shrink",
         "zk-longfellow-test",
@@ -477,6 +479,7 @@
       "image": "ghcr.io/sirosfoundation/vc/registry",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "pr-596-597-test",
         "zklong-seed-revert",
         "zklong-ppid-shrink",
         "zk-longfellow-test",
@@ -574,6 +577,7 @@
       "image": "ghcr.io/sirosfoundation/vc/verifier",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "pr-596-597-test",
         "oidc-op-send-redirect-uri-1",
         "oidc-op-send-redirect-uri",
         "zklong-seed-revert",
