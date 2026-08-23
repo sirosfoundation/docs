@@ -38,4 +38,4 @@ https://developers.siros.org/catalog/container-images.json
 | `ghcr.io/sirosfoundation/go-r2ps-service` | [sirosfoundation/go-r2ps-service](https://github.com/sirosfoundation/go-r2ps-service) | `0.1` | `45a5174` | 0.1, 0.1.0, 0.0, 0.0.1 |
 | `ghcr.io/sirosfoundation/mini-oidc` | [sirosfoundation/mini-oidc](https://github.com/sirosfoundation/mini-oidc) | `0.0.3` | `sha-56cf336` | 0.0.3, 0.0.2, 0.0, 0.0.1 |
 
-_Last updated: 2026-08-23T06:12:53Z_
+_Last updated: 2026-08-23T14:07:54Z_
