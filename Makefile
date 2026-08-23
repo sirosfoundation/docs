@@ -309,7 +309,15 @@ watch: stop
 	@$(MAKE) start-bg
 	@tail -f .docusaurus.log
 
-# Build production site
+# Build production site.
+#
+# NOTE: .github/workflows/build-pages.yaml does NOT call this target — it runs
+# each fetch-* target as its own step and then `pnpm build` directly, so it can
+# show which fetch failed in the Actions UI. That means adding a prerequisite
+# here is not enough: add a matching step to that workflow too, or the content
+# simply won't exist in CI. (Learned the hard way — a missing fetch step there
+# broke the Pages deploy with a "broken link" error that reproduced only under
+# CI's command sequence, never under `make build`.)
 build: fetch-api-specs fetch-config-docs fetch-release-notes
 	@echo "Building production site..."
 	pnpm run build

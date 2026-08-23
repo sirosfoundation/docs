@@ -39,6 +39,9 @@ jobs:
       - name: Fetch config docs
         run: make fetch-config-docs
 
+      - name: Fetch release notes
+        run: make fetch-release-notes
+
       - name: Build Docusaurus
         run: pnpm build
 
