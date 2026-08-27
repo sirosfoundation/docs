@@ -21,7 +21,7 @@ https://developers.siros.org/catalog/container-images.json
 | Image | Repository | Latest | Latest Build | Release Tags |
 |---|---|---|---|---|
 | `ghcr.io/sirosfoundation/go-trust` | [sirosfoundation/go-trust](https://github.com/sirosfoundation/go-trust) | `0.20.1` | `541f9ea` | 0.20.1, 0.20, 0.20.0, 0.19, 0.19.0, 0.18, 0.18.0, 0.17, 0.17.0, 0.16 |
-| `ghcr.io/sirosfoundation/wallet-frontend` | [sirosfoundation/wallet-frontend](https://github.com/sirosfoundation/wallet-frontend) | `0.5.0-1-sirosid.10` | `unstable-c8f132d` | 0.5.0-1-sirosid.10, 0.5.0-1-sirosid.9, 0.5.0-1-sirosid.8, 0.5.0-1-sirosid.7, 0.5.0-1-sirosid.6, 0.5.0-1-sirosid.5, 0.5.0-1-sirosid.4, 0.5.0-1-sirosid.3, 0.5.0-1-sirosid.2, 0.5.0-1-sirosid.1 |
+| `ghcr.io/sirosfoundation/wallet-frontend` | [sirosfoundation/wallet-frontend](https://github.com/sirosfoundation/wallet-frontend) | `0.5.0-1-sirosid.10` | `unstable-7a17f64` | 0.5.0-1-sirosid.10, 0.5.0-1-sirosid.9, 0.5.0-1-sirosid.8, 0.5.0-1-sirosid.7, 0.5.0-1-sirosid.6, 0.5.0-1-sirosid.5, 0.5.0-1-sirosid.4, 0.5.0-1-sirosid.3, 0.5.0-1-sirosid.2, 0.5.0-1-sirosid.1 |
 | `ghcr.io/sirosfoundation/vc/apigw` | [sirosfoundation/vc](https://github.com/sirosfoundation/vc) | `0.7.0-sirosid.1` | `a5ba027` | 0.7.0-sirosid.1, 0.7.0-sirosid.0, 0.7, 0.7.0, v0.6.5-sirosid.9, v0.6.5-sirosid.8, v0.6.5-sirosid.7, v0.6.5-sirosid.6, v0.6.5-sirosid.5, v0.6.5-sirosid.4 |
 | `ghcr.io/sirosfoundation/vc/issuer` | [sirosfoundation/vc](https://github.com/sirosfoundation/vc) | `0.7.0-sirosid.1` | `a5ba027` | 0.7.0-sirosid.1, 0.7, 0.7.0, 0.7.0-sirosid.0, v0.6.5-sirosid.9, v0.6.5-sirosid.8, v0.6.5-sirosid.7, v0.6.5-sirosid.6, v0.6.5-sirosid.5, v0.6.5-sirosid.4 |
 | `ghcr.io/sirosfoundation/vc/mockas` | [sirosfoundation/vc](https://github.com/sirosfoundation/vc) | `v0.5.0-sirosid.4` | `dev-056efd6` | v0.5.0-sirosid.4, v0.5.0-sirosid.3, v0.5.0-sirosid.2, v0.5.0-sirosid.1 |
@@ -38,4 +38,4 @@ https://developers.siros.org/catalog/container-images.json
 | `ghcr.io/sirosfoundation/go-r2ps-service` | [sirosfoundation/go-r2ps-service](https://github.com/sirosfoundation/go-r2ps-service) | `0.1` | `45a5174` | 0.1, 0.1.0, 0.0, 0.0.1 |
 | `ghcr.io/sirosfoundation/mini-oidc` | [sirosfoundation/mini-oidc](https://github.com/sirosfoundation/mini-oidc) | `0.0.4` | `sha-742950e` | 0.0.4, 0.0.3, 0.0.2, 0.0, 0.0.1 |
 
-_Last updated: 2026-08-27T09:14:46Z_
+_Last updated: 2026-08-27T17:48:46Z_
