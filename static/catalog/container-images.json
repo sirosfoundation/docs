@@ -1,10 +1,12 @@
 {
-  "generated": "2026-08-28T09:18:52Z",
+  "generated": "2026-08-28T18:04:06Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
       "repo": "sirosfoundation/go-trust",
       "tags": [
+        "1a75b62",
+        "0.20.2",
         "0.20.1",
         "541f9ea",
         "0.20",
@@ -186,6 +188,11 @@
       "image": "ghcr.io/sirosfoundation/wallet-frontend",
       "repo": "sirosfoundation/wallet-frontend",
       "tags": [
+        "demo-zkp-1",
+        "unstable-963fee6",
+        "0.5.0-1-sirosid.11",
+        "unstable-6d1c718",
+        "unstable-25e590f",
         "unstable-7a17f64",
         "unstable-da937d7",
         "unstable-4b49fe8",
@@ -329,6 +336,8 @@
       "image": "ghcr.io/sirosfoundation/vc/apigw",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "28383da",
+        "0.7.3-sirosid.0",
         "pr-596-597-test",
         "zklong-seed-revert",
         "zklong-ppid-shrink",
@@ -407,6 +416,8 @@
       "image": "ghcr.io/sirosfoundation/vc/issuer",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "28383da",
+        "0.7.3-sirosid.0",
         "pr-596-597-test",
         "zklong-seed-revert",
         "zklong-ppid-shrink",
@@ -505,6 +516,8 @@
       "image": "ghcr.io/sirosfoundation/vc/registry",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "28383da",
+        "0.7.3-sirosid.0",
         "pr-596-597-test",
         "zklong-seed-revert",
         "zklong-ppid-shrink",
@@ -603,6 +616,8 @@
       "image": "ghcr.io/sirosfoundation/vc/verifier",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "28383da",
+        "0.7.3-sirosid.0",
         "pr-596-597-test",
         "oidc-op-send-redirect-uri-1",
         "oidc-op-send-redirect-uri",
