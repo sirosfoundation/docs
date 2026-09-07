@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-07T14:17:53Z",
+  "generated": "2026-09-07T22:14:48Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -203,6 +203,7 @@
       "image": "ghcr.io/sirosfoundation/wallet-frontend",
       "repo": "sirosfoundation/wallet-frontend",
       "tags": [
+        "unstable-7444011",
         "unstable-f445f24",
         "unstable-7cf7768",
         "unstable-465923e",
@@ -370,6 +371,7 @@
       "image": "ghcr.io/sirosfoundation/vc/apigw",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "0.7.5-sirosid.0",
         "28383da",
         "0.7.3-sirosid.0",
         "pr-596-597-test",
@@ -450,6 +452,7 @@
       "image": "ghcr.io/sirosfoundation/vc/issuer",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "0.7.5-sirosid.0",
         "28383da",
         "0.7.3-sirosid.0",
         "pr-596-597-test",
@@ -550,6 +553,7 @@
       "image": "ghcr.io/sirosfoundation/vc/registry",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "0.7.5-sirosid.0",
         "28383da",
         "0.7.3-sirosid.0",
         "pr-596-597-test",
@@ -650,6 +654,7 @@
       "image": "ghcr.io/sirosfoundation/vc/verifier",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "0.7.5-sirosid.0",
         "28383da",
         "0.7.3-sirosid.0",
         "pr-596-597-test",
