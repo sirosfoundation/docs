@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-08T06:28:30Z",
+  "generated": "2026-09-08T14:18:36Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -203,6 +203,8 @@
       "image": "ghcr.io/sirosfoundation/wallet-frontend",
       "repo": "sirosfoundation/wallet-frontend",
       "tags": [
+        "zkp-demo-9",
+        "zkp-demo-8",
         "unstable-7444011",
         "unstable-f445f24",
         "unstable-7cf7768",
@@ -371,6 +373,9 @@
       "image": "ghcr.io/sirosfoundation/vc/apigw",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "dev-de-edu-wallet-2",
+        "dev-de-edu-wallet-1",
+        "dev-256a9858",
         "0.7.5-sirosid.0",
         "28383da",
         "0.7.3-sirosid.0",
@@ -452,6 +457,9 @@
       "image": "ghcr.io/sirosfoundation/vc/issuer",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "dev-de-edu-wallet-2",
+        "dev-de-edu-wallet-1",
+        "dev-256a9858",
         "0.7.5-sirosid.0",
         "28383da",
         "0.7.3-sirosid.0",
@@ -654,6 +662,7 @@
       "image": "ghcr.io/sirosfoundation/vc/verifier",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "dev-de-edu-wallet-2",
         "0.7.5-sirosid.0",
         "28383da",
         "0.7.3-sirosid.0",
@@ -768,6 +777,7 @@
       "image": "ghcr.io/sirosfoundation/go-wallet-backend",
       "repo": "sirosfoundation/go-wallet-backend",
       "tags": [
+        "e27a1a1",
         "0.19",
         "0.19.0",
         "e3bcf46",
