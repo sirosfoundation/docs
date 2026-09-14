@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-14T06:37:52Z",
+  "generated": "2026-09-14T14:18:50Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -203,6 +203,13 @@
       "image": "ghcr.io/sirosfoundation/wallet-frontend",
       "repo": "sirosfoundation/wallet-frontend",
       "tags": [
+        "unstable-c816667",
+        "0.6.0-beta.0",
+        "unstable-9f61d70",
+        "unstable-5ae48d0",
+        "unstable-e2469da",
+        "unstable-2d7c48e",
+        "fix-mdoc-credential-matching-1",
         "zkp-demo-9",
         "zkp-demo-8",
         "unstable-7444011",
@@ -664,6 +671,10 @@
       "image": "ghcr.io/sirosfoundation/vc/verifier",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "dev-56c4e10083dcd8aafcc76d91a8dbf3fbd459071a",
+        "dev-de-edu-wallet-qr-click-1",
+        "dev-de-edu-wallet-5",
+        "dev-de-edu-wallet-4",
         "dev-de-edu-wallet-3",
         "dev-de-edu-wallet-2",
         "0.7.5-sirosid.0",
@@ -780,6 +791,9 @@
       "image": "ghcr.io/sirosfoundation/go-wallet-backend",
       "repo": "sirosfoundation/go-wallet-backend",
       "tags": [
+        "test-mixed_mode_wia-1",
+        "ba04319",
+        "test-ka-untrusted-user-authentication-3",
         "0.20",
         "0.20.0",
         "3df4808",
