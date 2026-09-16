@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-16T14:17:56Z",
+  "generated": "2026-09-16T22:14:38Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -385,6 +385,7 @@
       "image": "ghcr.io/sirosfoundation/vc/apigw",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "dev-d43a58475e376b102c84528c5d3366a97b91a51e",
         "dev-de-edu-wallet-3",
         "dev-de-edu-wallet-2",
         "dev-de-edu-wallet-1",
@@ -470,6 +471,7 @@
       "image": "ghcr.io/sirosfoundation/vc/issuer",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "dev-d43a58475e376b102c84528c5d3366a97b91a51e",
         "dev-de-edu-wallet-3",
         "dev-de-edu-wallet-2",
         "dev-de-edu-wallet-1",
@@ -575,6 +577,7 @@
       "image": "ghcr.io/sirosfoundation/vc/registry",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "dev-d43a58475e376b102c84528c5d3366a97b91a51e",
         "0.7.5-sirosid.0",
         "28383da",
         "0.7.3-sirosid.0",
@@ -796,6 +799,7 @@
       "image": "ghcr.io/sirosfoundation/go-wallet-backend",
       "repo": "sirosfoundation/go-wallet-backend",
       "tags": [
+        "6a7d2a3",
         "aa9e1ca",
         "9095745",
         "4cde546",
