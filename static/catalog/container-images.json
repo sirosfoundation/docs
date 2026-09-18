@@ -1,10 +1,14 @@
 {
-  "generated": "2026-09-18T14:16:35Z",
+  "generated": "2026-09-18T22:14:31Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
       "repo": "sirosfoundation/go-trust",
       "tags": [
+        "e4eae95",
+        "0807fdb",
+        "0.20.7",
+        "e6665fe",
         "c066251",
         "0.20.6",
         "a88760b",
@@ -203,6 +207,8 @@
       "image": "ghcr.io/sirosfoundation/wallet-frontend",
       "repo": "sirosfoundation/wallet-frontend",
       "tags": [
+        "unstable-af48649",
+        "unstable-675a58b",
         "unstable-d3bb2ba",
         "unstable-7e2d45b",
         "unstable-9dbef14",
@@ -393,6 +399,9 @@
       "image": "ghcr.io/sirosfoundation/vc/apigw",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "68ca7eb-amd64",
+        "latest-amd64",
+        "0.7.20-sirosid.0-amd64",
         "dev-d43a58475e376b102c84528c5d3366a97b91a51e",
         "dev-de-edu-wallet-3",
         "dev-de-edu-wallet-2",
@@ -479,6 +488,9 @@
       "image": "ghcr.io/sirosfoundation/vc/issuer",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "68ca7eb-amd64",
+        "latest-amd64",
+        "0.7.20-sirosid.0-amd64",
         "dev-d43a58475e376b102c84528c5d3366a97b91a51e",
         "dev-de-edu-wallet-3",
         "dev-de-edu-wallet-2",
@@ -585,6 +597,9 @@
       "image": "ghcr.io/sirosfoundation/vc/registry",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "68ca7eb-amd64",
+        "latest-amd64",
+        "0.7.20-sirosid.0-amd64",
         "dev-d43a58475e376b102c84528c5d3366a97b91a51e",
         "0.7.5-sirosid.0",
         "28383da",
@@ -687,6 +702,9 @@
       "image": "ghcr.io/sirosfoundation/vc/verifier",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "68ca7eb-amd64",
+        "latest-amd64",
+        "0.7.20-sirosid.0-amd64",
         "dev-56c4e10083dcd8aafcc76d91a8dbf3fbd459071a",
         "dev-de-edu-wallet-qr-click-1",
         "dev-de-edu-wallet-5",
@@ -807,6 +825,10 @@
       "image": "ghcr.io/sirosfoundation/go-wallet-backend",
       "repo": "sirosfoundation/go-wallet-backend",
       "tags": [
+        "0.22",
+        "0.22.0",
+        "257199d",
+        "22a0479",
         "0208541",
         "d3130e6",
         "76dc5ce",
