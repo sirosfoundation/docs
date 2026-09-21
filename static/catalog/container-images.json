@@ -1,10 +1,13 @@
 {
-  "generated": "2026-09-21T06:38:22Z",
+  "generated": "2026-09-21T14:18:53Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
       "repo": "sirosfoundation/go-trust",
       "tags": [
+        "0.21",
+        "0.21.0",
+        "805451a",
         "f2c54e6",
         "e4eae95",
         "0807fdb",
@@ -400,6 +403,10 @@
       "image": "ghcr.io/sirosfoundation/vc/apigw",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "33f8983-amd64",
+        "0.7.20-sirosid.2-amd64",
+        "ffc3593-amd64",
+        "0.7.20-sirosid.1-amd64",
         "68ca7eb-amd64",
         "latest-amd64",
         "0.7.20-sirosid.0-amd64",
@@ -489,6 +496,10 @@
       "image": "ghcr.io/sirosfoundation/vc/issuer",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "33f8983-amd64",
+        "0.7.20-sirosid.2-amd64",
+        "ffc3593-amd64",
+        "0.7.20-sirosid.1-amd64",
         "68ca7eb-amd64",
         "latest-amd64",
         "0.7.20-sirosid.0-amd64",
@@ -598,6 +609,10 @@
       "image": "ghcr.io/sirosfoundation/vc/registry",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "ffc3593-amd64",
+        "0.7.20-sirosid.1-amd64",
+        "33f8983-amd64",
+        "0.7.20-sirosid.2-amd64",
         "68ca7eb-amd64",
         "latest-amd64",
         "0.7.20-sirosid.0-amd64",
@@ -703,6 +718,10 @@
       "image": "ghcr.io/sirosfoundation/vc/verifier",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "ffc3593-amd64",
+        "0.7.20-sirosid.1-amd64",
+        "33f8983-amd64",
+        "0.7.20-sirosid.2-amd64",
         "68ca7eb-amd64",
         "latest-amd64",
         "0.7.20-sirosid.0-amd64",
@@ -826,6 +845,8 @@
       "image": "ghcr.io/sirosfoundation/go-wallet-backend",
       "repo": "sirosfoundation/go-wallet-backend",
       "tags": [
+        "1a0ff0c",
+        "abea625",
         "0.22",
         "0.22.0",
         "257199d",
