@@ -1,10 +1,16 @@
 {
-  "generated": "2026-09-23T14:18:00Z",
+  "generated": "2026-09-23T22:15:16Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
       "repo": "sirosfoundation/go-trust",
       "tags": [
+        "0.21.1",
+        "563cceb",
+        "e93cc22",
+        "cfad503",
+        "11a3808",
+        "bda7459",
         "0.21",
         "0.21.0",
         "805451a",
@@ -403,6 +409,7 @@
       "image": "ghcr.io/sirosfoundation/vc/apigw",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "pr699-f8d627e8a-amd64",
         "dev-71fa1a782bba99e0a656a181f251fdbc53ead9af",
         "33f8983-amd64",
         "0.7.20-sirosid.2-amd64",
@@ -497,6 +504,7 @@
       "image": "ghcr.io/sirosfoundation/vc/issuer",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "pr699-f8d627e8a-amd64",
         "33f8983-amd64",
         "0.7.20-sirosid.2-amd64",
         "ffc3593-amd64",
@@ -610,6 +618,7 @@
       "image": "ghcr.io/sirosfoundation/vc/registry",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "pr699-f8d627e8a-amd64",
         "ffc3593-amd64",
         "0.7.20-sirosid.1-amd64",
         "33f8983-amd64",
@@ -719,6 +728,7 @@
       "image": "ghcr.io/sirosfoundation/vc/verifier",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "pr699-f8d627e8a-amd64",
         "ffc3593-amd64",
         "0.7.20-sirosid.1-amd64",
         "33f8983-amd64",
@@ -846,6 +856,9 @@
       "image": "ghcr.io/sirosfoundation/go-wallet-backend",
       "repo": "sirosfoundation/go-wallet-backend",
       "tags": [
+        "0.22.2",
+        "468aadb",
+        "4e2e1bb",
         "8cdea17",
         "2fab397",
         "e1d3bf3",
