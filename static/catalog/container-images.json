@@ -1,10 +1,16 @@
 {
-  "generated": "2026-09-28T14:19:52Z",
+  "generated": "2026-09-28T22:16:37Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
       "repo": "sirosfoundation/go-trust",
       "tags": [
+        "0.22",
+        "0.22.0",
+        "d8d1161",
+        "4ded242",
+        "92bf7b4",
+        "e127458",
         "098a717",
         "f046426",
         "0.21.1",
@@ -219,6 +225,10 @@
       "image": "ghcr.io/sirosfoundation/wallet-frontend",
       "repo": "sirosfoundation/wallet-frontend",
       "tags": [
+        "unstable-4df31d1",
+        "0.6.0-beta.3",
+        "unstable-b02a32a",
+        "unstable-b4d92af",
         "unstable-31838ee",
         "0.6.0-beta.2",
         "unstable-81a329d",
@@ -833,6 +843,7 @@
       "image": "ghcr.io/sirosfoundation/go-spocp",
       "repo": "sirosfoundation/go-spocp",
       "tags": [
+        "e4d1845",
         "8c2bfd3",
         "2bb6bf4",
         "aa6c18c",
@@ -1212,6 +1223,7 @@
       "image": "ghcr.io/sirosfoundation/goff",
       "repo": "sirosfoundation/goFF",
       "tags": [
+        "d290f66",
         "3eba04a",
         "4a93d26",
         "c00caa5",
@@ -1339,6 +1351,11 @@
       "image": "ghcr.io/sirosfoundation/go-grc",
       "repo": "sirosfoundation/go-grc",
       "tags": [
+        "2232768",
+        "52e25bc",
+        "722104c",
+        "09f94f3",
+        "533442f",
         "6860f7d",
         "0.13.2",
         "dbb7953",
@@ -1378,6 +1395,7 @@
       "image": "ghcr.io/sirosfoundation/registry-cli",
       "repo": "sirosfoundation/registry-cli",
       "tags": [
+        "b3037df",
         "2327040",
         "40589b4",
         "0.17",
