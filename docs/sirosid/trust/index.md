@@ -12,9 +12,10 @@ For production deployments, we recommend using **[Go-Trust](./go-trust)** as a t
 
 All configuration snippets on this page are Go-Trust `config.yaml` fragments.
 Registries live under a single top-level `registries:` map; per-role
-constraints live under `policies:`. See the
-[generated configuration reference](/sirosid/trust/go-trust-configuration) for
-the authoritative key list.
+constraints live under `policies:`. The
+[generated configuration reference](/sirosid/trust/go-trust-configuration) is
+authoritative for registry keys; it does not expand `policies`, so for those see
+[Policy-Based Trust Decisions](./go-trust#policy-based-trust-decisions).
 :::
 
 ## Why Trust Matters
