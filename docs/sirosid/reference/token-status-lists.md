@@ -129,8 +129,15 @@ registry:
 
 | Endpoint | Description |
 |----------|-------------|
-| `GET /status/{list-id}` | Fetch a specific status list |
-| `GET /.well-known/jwt-vc-issuer` | Status list issuer metadata |
+| `GET /statuslists/{list-id}` | Fetch a specific status list token (draft-ietf-oauth-status-list §8.1) |
+| `GET /statuslists` | Status List Aggregation — the list of all Status List Token URIs this registry hosts (draft-ietf-oauth-status-list §9.3) |
+
+The registry has no `.well-known` metadata endpoint of its own; a verifier
+resolves its signing key the same way it resolves any other trust decision —
+via go-trust — rather than through SD-JWT VC issuer-metadata discovery. That
+discovery mechanism (`/.well-known/jwt-vc-issuer`) belongs to the credential
+issuer (APIGW), for resolving the credential's own signing key, and is
+unrelated to status list verification.
 
 ## Revocation Flow
 
@@ -154,7 +161,7 @@ sequenceDiagram
     participant Registry
     
     Verifier->>Verifier: Extract status claim from credential
-    Verifier->>Registry: GET /status/{list-id}
+    Verifier->>Registry: GET /statuslists/{list-id}
     Registry->>Verifier: Signed status list JWT
     Verifier->>Verifier: Verify signature
     Verifier->>Verifier: Decompress bitmap

@@ -227,7 +227,7 @@ GET /api/v1/identity/mapping/search?authentic_source=hr.example.org&search=Smith
 Upload the credential data before the user requests it. Documents reference identity mappings by their `authentic_source_person_id`:
 
 ```bash
-POST /api/v1/datastore/
+POST /api/v1/datastore
 Content-Type: application/json
 Authorization: Bearer <your-jwt-token>
 
@@ -264,10 +264,12 @@ If `document_id` is omitted from `meta`, a UUIDv7 is generated automatically.
 Navigate to the credential offer UI or use the API to create an offer for the user:
 
 ```
-GET /offers/<scope>/<wallet_id>
+GET /offers/<scope>
 ```
 
-The user scans the QR code or clicks the deep link to initiate credential collection in their wallet.
+The route is wallet-independent — the offer is generated once and the response (or the rendered page, for a browser) carries all three renderings: the QR code, the deep link, and a per-wallet redirect URI for each wallet configured in `apigw.delivery.credential_offers.wallets`. There is no `/offers/<scope>/<wallet_id>` form; a wallet is not selected before the offer is created.
+
+The user scans the QR code or clicks the deep link (or a wallet-specific redirect) to initiate credential collection in their wallet.
 
 ### Step 3: Notify the User
 
@@ -284,7 +286,7 @@ Send the credential offer link to the user via:
 ### Get a Document by Key
 
 ```bash
-GET /api/v1/datastore/?authentic_source=hr.example.org&scope=diploma&document_id=diploma-2025-001234
+GET /api/v1/datastore?authentic_source=hr.example.org&scope=diploma&document_id=diploma-2025-001234
 Authorization: Bearer <your-jwt-token>
 ```
 
@@ -321,7 +323,7 @@ Content-Type: application/json
 ### Replace a Document
 
 ```bash
-PUT /api/v1/datastore/
+PUT /api/v1/datastore
 Content-Type: application/json
 
 {
@@ -399,8 +401,8 @@ sequenceDiagram
 
     AS->>AS: User completes process<br/>(e.g., graduation, employment)
     AS->>Issuer: POST /api/v1/identity/mapping (create mapping)
-    AS->>Issuer: POST /api/v1/datastore/ (upload document)
-    AS->>Issuer: GET /offers/scope/wallet_id (get offer link)
+    AS->>Issuer: POST /api/v1/datastore (upload document)
+    AS->>Issuer: GET /offers/scope (get offer link)
     Issuer->>AS: Credential offer URL
     AS->>User: Email with credential offer
     User->>Wallet: Open link / scan QR
@@ -462,7 +464,6 @@ Authorization: Bearer <your-jwt-token>
 ```
 
 Verifiers checking the Token Status List will see the credential as revoked.
-```
 
 ---
 
@@ -563,7 +564,7 @@ curl -X POST https://issuer.example.org/api/v1/datastore/bulk \
 Navigate users to the credential offer UI:
 
 ```
-https://issuer.example.org/offers/diploma/<wallet_id>
+https://issuer.example.org/offers/diploma
 ```
 
 ---

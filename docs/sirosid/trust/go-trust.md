@@ -915,8 +915,11 @@ flowchart TD
 
 When more than one registry is applicable, the registry manager aggregates
 their answers using a **resolution strategy**. The `gt` server runs with
-`first_match`: registries are evaluated in registration order and the first
-positive decision wins; if none is positive, the request is denied.
+`first_match`: all applicable registries are queried **in parallel**, and
+whichever one returns a positive decision first wins — this is a race, not a
+scan in registration order. If none returns a positive decision (once every
+registry has responded or the manager's timeout elapses), the request is
+denied.
 
 :::info Not configurable from YAML
 `first_match` is the only strategy the `gt` binary uses — there is no
@@ -1485,8 +1488,9 @@ flowchart LR
 
 ### Enabling Enrichment
 
-Enrichment is driven by five keys that the evaluation pipeline reads from the
-**request context**:
+Enrichment is driven by five keys, configured per policy and injected by the
+policy mapper into the request context the evaluation pipeline reads from —
+they are never set by the caller:
 
 | Context key | Type | Effect |
 |---|---|---|

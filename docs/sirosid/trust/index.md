@@ -442,9 +442,10 @@ sequenceDiagram
 ## Multi-Framework Support
 
 Go-Trust can use several trust frameworks at once. Enable each registry you
-need; the registry manager evaluates them in registration order and the first
-positive decision wins (`first_match`). To restrict a particular role to a
-subset of registries, name them in that role's policy:
+need; the registry manager queries all applicable registries in parallel and
+whichever one returns a positive decision first wins (`first_match` — a race,
+not a scan in registration order). To restrict a particular role to a subset
+of registries, name them in that role's policy:
 
 ```yaml
 registries:
