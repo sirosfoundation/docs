@@ -46,36 +46,69 @@ issuer/
 
 The main configuration file that controls all issuer behavior.
 
+Issuance is split across two services: **apigw** terminates OpenID4VCI and
+authenticates the user, **issuer** signs the credential.
+
 | Section | Purpose |
 |---------|---------|
-| `issuer.api_server` | HTTP server settings (port, TLS) |
-| `issuer.external_url` | Public URL of the issuer |
-| `issuer.signing` | Credential signing key configuration |
-| `issuer.authentication` | User authentication backend (OIDC or SAML) |
-| `issuer.trust` | Trust evaluation endpoint (go-trust) |
-| `credential_constructor` | Credential type definitions and claim mappings |
+| `issuer.api_server` / `issuer.grpc_server` | Issuer service listeners |
+| `issuer.issuer_url` | Issuer identifier URL |
+| `issuer.key_config` | Credential signing key (file or PKCS#11) |
+| `apigw.api_server` | APIGW HTTP server settings (port, TLS) |
+| `apigw.public_url` | Public URL of the issuance front end |
+| `apigw.auth_providers` | User authentication backend (`oidc`, `saml`, `preauth`) |
+| `apigw.data_sources` | Binds credential scopes to auth providers and data sources |
+| `apigw.delivery.openid4vci` | OpenID4VCI clients and token endpoint |
+| `apigw.trust` | Trust evaluation endpoint (go-trust) |
+| `common.credential_metadata` | Credential type definitions (VCTM path + format) |
 | `common.mongo` | MongoDB connection settings |
 
 ```yaml
 # Minimal config.yaml structure
-issuer:
-  api_server:
-    addr: :8080
-  external_url: "https://issuer.example.org"
-  signing:
-    key_path: "/pki/issuer_key.pem"
-    algorithm: "ES256"
-  authentication:
-    type: oidc  # or "saml"
-    # ... authentication settings
-
-credential_constructor:
-  # ... credential type definitions
-
 common:
   mongo:
     uri: mongodb://mongo:27017
+  credential_metadata:
+    pid:
+      vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
+      format: "dc+sd-jwt"
+
+issuer:
+  issuer_url: "https://issuer.example.org"
+  api_server:
+    addr: :8080
+  grpc_server:
+    addr: :8090
+  key_config:
+    private_key_path: "/pki/issuer_key.pem"
+    chain_path: "/pki/issuer_chain.pem"
+
+apigw:
+  api_server:
+    addr: :8080
+  public_url: "https://issuer.example.org"
+  issuer_client:
+    addr: issuer:8090
+  auth_providers:
+    oidc:
+      enable: true
+      # ... see the OIDC Provider integration guide
+  data_sources:
+    assertion:
+      scopes:
+        pid:
+          auth_provider: oidc
 ```
+
+:::note No `credential_constructor`
+The old `credential_constructor` section was removed from vc. Credential types
+are now declared in `common.credential_metadata`, and how a scope is
+authenticated and sourced is declared in `apigw.data_sources`. Attribute-to-claim
+mapping lives under `apigw.auth_providers.<provider>.attribute_mapping`.
+:::
+
+The full key list is in the
+[VC Configuration Reference](/sirosid/reference/vc-configuration).
 
 ### VCTM Files (metadata/*.json)
 
@@ -199,11 +232,18 @@ services:
 | Variable | Purpose | Default |
 |----------|---------|---------|
 | `VC_CONFIG_YAML` | Path to configuration file | `config.yaml` |
-| `OIDC_CLIENT_SECRET` | OIDC client secret (use secrets) | — |
-| `MONGO_URI` | MongoDB connection string | — |
+| `SSL_CERT_FILE` | CA bundle Go's `crypto/x509` should trust, for inter-service HTTPS with private CAs | — |
+
+These are the only two environment variables the vc services read. The config
+file is not environment-interpolated, so there is no `MONGO_URI` or
+`OIDC_CLIENT_SECRET` variable — use `common.mongo.uri` and the OIDC provider's
+own config keys.
 
 :::warning Secrets Management
-Never commit secrets to version control. Use environment variables, Docker secrets, or a secrets manager for sensitive values like `OIDC_CLIENT_SECRET`.
+Never commit secrets to version control. Put them in the file named by
+`common.secret_file_path` and mount that with Docker secrets or a secrets
+manager. The file's permissions are checked at startup unless
+`common.skip_secrets_perm_check` is set.
 :::
 
 ## Deployment Checklist

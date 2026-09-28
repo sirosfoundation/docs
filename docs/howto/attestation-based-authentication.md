@@ -24,22 +24,26 @@ Enable WIA issuance and pick an identity format:
 ```yaml
 wallet_provider:
   private_key_path: /path/to/wallet-provider-key.pem
-  certificate_path: /path/to/wallet-provider-cert.pem   # only needed for the x5c format below
+  certificate_path: /path/to/wallet-provider-cert.pem   # required for mode: etsi
   wia:
     enabled: true
-    issuer: "https://wallet-provider.example.com"
-    omit_x5c: true    # see the two formats below
+    mode: "ietf"                                        # see the two formats below
+    issuer: "https://wallet-provider.example.com"       # required for mode: ietf
+    wallet_name: "Example Wallet"
+    wallet_version: "1.4.0"
 ```
 
-There are two identity formats, and they're **mutually exclusive in practice** even though `omit_x5c` looks like a toggle:
+`mode` picks the identity format, and the two are mutually exclusive:
 
-| | `omit_x5c: false` (default) | `omit_x5c: true` |
+| | `mode: "etsi"` (default) | `mode: "ietf"` |
 |---|---|---|
-| WIA header carries | An `x5c` certificate chain | Nothing — no embedded key material |
-| Relying party resolves the key from | The embedded certificate (authoritative) | The provider's own JWKS, discovered from `iss` |
-| Use when | You already run a PKI for the wallet provider | You want to avoid managing a cert chain, or need to interop with relying parties that only implement `iss`/JWKS-based resolution |
+| WIA header carries | An `x5c` certificate chain, no `iss` | A `kid`, plus the `iss` claim — no `x5c` |
+| Relying party resolves the key from | The embedded certificate, verified against the Trusted List for Wallet Providers | The provider's own JWKS, discovered from `iss` |
+| Specified by | EUDI ARF v3.0 / EC TS03 v1.5.2 / ETSI TS 119 472-3 | draft-ietf-oauth-attestation-based-client-auth (no ARF counterpart) |
+| Use when | Interoperating with ARF-conformant PID/EAA providers — the only mode with a defined trust path under the EUDI specs | A generic, non-EUDI OAuth ecosystem, or you want to avoid managing a cert chain |
+| Also requires | `wallet_name`, `wallet_version` (TS03 §2.3.1) | `issuer` |
 
-If you pick `omit_x5c: true`, the wallet provider must publish its signing key somewhere the issuer's discovery can find it. go-wallet-backend does this automatically at two paths once `issuer` is set:
+If you pick `mode: "ietf"`, the wallet provider must publish its signing key somewhere the issuer's discovery can find it. go-wallet-backend does this automatically at two paths once `issuer` is set:
 
 ```
 GET https://wallet-provider.example.com/.well-known/jwks.json
@@ -78,12 +82,17 @@ The issuer's own config only says "check attestations." The PDP decides whether 
 registries:
   whitelist:
     enabled: true
-lists:
-  wallet-providers:
-    - "https://wallet-provider.example.com"
-actions:
-  wallet_provider: "wallet-providers"
+    lists:
+      wallet-providers:
+        - "https://wallet-provider.example.com"
+    actions:
+      wallet_provider: "wallet-providers"
 ```
+
+(`lists` and `actions` can equally live in a separate file referenced by
+`config_file:`; the keys are the same either way. The action name must be
+`wallet_provider` with an underscore — that is the role string the issuer
+sends.)
 
 For production, prefer [OpenID Federation](../sirosid/trust/openid-federation.md) so wallet providers can be added/removed without touching the PDP's static config.
 

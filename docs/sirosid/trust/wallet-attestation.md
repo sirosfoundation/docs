@@ -29,7 +29,7 @@ sequenceDiagram
     I->>I: Client not in static map
     I->>I: Resolve provider's signing key (x5c header, or JWKS discovered from iss)
     I->>I: Verify WIA signature locally
-    I->>PDP: Evaluate(role=wallet-provider, key=resolved JWK)
+    I->>PDP: Evaluate(role=wallet_provider, key=resolved JWK)
     PDP->>TL: Check key/provider against trust anchors
     TL-->>PDP: Provider trusted (e.g., whitelist or OIDF chain)
     PDP-->>I: decision=true, framework="whitelist" | "openid-federation"
@@ -64,6 +64,7 @@ apigw:
     pdp_url: "https://trust.siros.se/pdp"    # Required - also gates whether attestation is checked at all
     wallet_attestation:
       enabled: true                           # Enable attestation-based client auth
+      mode: "etsi"                            # Optional: pin one WIA trust model ("etsi" | "ietf" | unset = accept either)
       policy:                                 # Optional: SPOCP-based per-scope tiering
         rules:
           - "(wallet (attestation_source ios_app_attest)(scope pid)(issuer *))"
@@ -77,6 +78,13 @@ apigw:
 
 `wallet_attestation.enabled` only takes effect when `trust.pdp_url` is also set — the PDP performs the trust/registry decision, never the signature check. Leaving `policy` unset means "default open": any wallet provider the PDP trusts is authorized for **any** scope, with no additional per-scope gating.
 
+`mode` pins which WIA trust model this deployment accepts, using the same
+`etsi`/`ietf` terminology as go-wallet-backend's `wallet_provider.wia.mode`.
+Leaving it unset accepts either format, decided per-WIA by whether it carries
+`x5c` or `iss` — which means an operator expecting only ARF-conformant wallets
+would still silently accept an `iss`/JWKS-based WIA. Pin it to `etsi` if that
+matters. An unrecognised value is logged as a warning and treated as unset.
+
 ### Wallet Provider (e.g. go-wallet-backend)
 
 The wallet provider issues WIAs and must publish its signing key somewhere the issuer's JWKS discovery can find it:
@@ -85,12 +93,16 @@ The wallet provider issues WIAs and must publish its signing key somewhere the i
 wallet_provider:
   wia:
     enabled: true
-    issuer: "https://wallet-provider.siros.se"
-    omit_x5c: true    # false (default): x5c chain embedded in the WIA header instead
+    mode: "ietf"                               # "etsi" is the default
+    issuer: "https://wallet-provider.siros.se" # required for "ietf"
+    wallet_name: "SIROS ID"                    # required for "etsi"
+    wallet_version: "1.4.0"                    # required for "etsi"
 ```
 
-- **`omit_x5c: false` (default)** — the WIA carries an `x5c` certificate chain in its JOSE header; relying parties treat the embedded cert as authoritative, and `iss` (if present) is only a secondary consistency check.
-- **`omit_x5c: true`** — no certificate chain. This is the *only* way to actually exercise `iss`/JWKS-based trust (the IETF draft's second identity format) — with a cert configured but `omit_x5c: false`, consumers use the cert regardless of `iss`. Requires `issuer` to be set; the provider publishes its key at `<issuer>/.well-known/jwks.json`, keyed by a JOSE `kid` header the WIA itself also carries (`"wallet-provider"`).
+- **`mode: "etsi"` (default)** — the EUDI ARF v3.0 / EC TS03 v1.5.2 / ETSI TS 119 472-3 model. The WIA always carries an `x5c` certificate chain in its JOSE header and sets no `iss` or `kid`; relying parties verify the chain against the Trusted List for Wallet Providers. This is the only mode with a defined trust path under the current EUDI specs.
+- **`mode: "ietf"`** — the generic IETF draft-ietf-oauth-attestation-based-client-auth model, with no ARF/ETSI counterpart. No certificate chain; the WIA carries a `kid` header and a required `iss` claim, and the provider publishes its key at `<issuer>/.well-known/jwks.json`.
+
+SUNET/vc treats `x5c` as authoritative and `iss` as a secondary consistency check when both are present, so each mode is unambiguous to it.
 
 ### Go-Trust PDP
 
@@ -204,7 +216,7 @@ The SIROS ID Issuer verifies the WIA's signature **itself**, locally, before eve
 
 1. Extract `iss` from the WIA (identifies the wallet provider) and resolve its signing key — from the WIA's own `x5c` header, or, for `iss`-based (no `x5c`) attestations, by discovering the provider's JWKS from `iss` (tries, in order: `.well-known/jwt-vc-issuer`, `.well-known/openid-credential-issuer`, `.well-known/openid-configuration`, `.well-known/oauth-authorization-server` — the first that resolves wins)
 2. Verify the WIA's signature against that key
-3. Send the **resolved key**, not the raw token, to the PDP with `role=wallet-provider`
+3. Send the **resolved key**, not the raw token, to the PDP with `role=wallet_provider` (underscore — this is the string matched against whitelist `actions` and policy names)
 4. The PDP checks that key/provider against its configured trust registries (OIDF federation, trust lists, whitelists) — a pure membership/trust decision, no cryptographic verification
 5. If the PDP returns `trusted: true`, the wallet is accepted
 

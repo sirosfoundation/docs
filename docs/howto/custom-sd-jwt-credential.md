@@ -311,37 +311,59 @@ Make the VCTM file available to the issuer. For Docker deployments, mount it int
 
 ```yaml title="docker-compose.yml (snippet)"
 services:
-  issuer:
+  apigw:
     volumes:
       - ./metadata/employee-badge.vctm.json:/metadata/vctm_employee_badge.json:ro
 ```
 
-### 2.2 Add the Credential Constructor
+### 2.2 Declare the Credential Type and Its Data Source
 
-Add an entry to the `credential_constructor` section of your issuer configuration. The `auth_method` determines how users authenticate before receiving the credential.
+This takes two config sections:
+
+- `common.credential_metadata.<scope>` declares the type — which VCTM describes
+  it and which format to issue.
+- `apigw.data_sources.<category>.scopes.<scope>` says where the data comes from
+  (`assertion`, `datastore` or `external_api`) and which `auth_provider`
+  authenticates the user.
+
+:::note
+Earlier releases used a single top-level `credential_constructor` section with
+an `auth_method` field. It was removed; the two sections above replace it.
+:::
 
 #### Using OIDC Authentication
 
 If your organization has an OIDC identity provider (Keycloak, Azure AD, Okta, etc.):
 
 ```yaml title="config.yaml (snippet)"
-credential_constructor:
-  employee_badge:
-    vctm_file_path: "/metadata/vctm_employee_badge.json"
-    auth_method: oidc
-    format: "dc+sd-jwt"
+common:
+  credential_metadata:
+    employee_badge:
+      vctm_file_path: "/metadata/vctm_employee_badge.json"
+      format: "dc+sd-jwt"
 
 apigw:
-  oidcrp:
-    enabled: true
-    client_id: "issuer-client"
-    client_secret: "${OIDC_CLIENT_SECRET}"
-    provider_metadata_url: "https://keycloak.example.com/realms/corp/.well-known/openid-configuration"
-    scopes:
-      - openid
-      - profile
-      - email
-    credential_config_id: "employee_badge"
+  auth_providers:
+    oidc:
+      enable: true
+      issuer_url: "https://keycloak.example.com/realms/corp"
+      redirect_uri: "https://issuer.example.com/oidcrp/callback"
+      registration:
+        preconfigured:
+          enable: true
+          client_id: "issuer-client"
+          client_secret: "the-client-secret"
+      scopes:
+        - openid
+        - profile
+        - email
+
+  # Bind the scope to OIDC: the ID token's claims are the credential data
+  data_sources:
+    assertion:
+      scopes:
+        employee_badge:
+          auth_provider: oidc
 ```
 
 The issuer maps OIDC claims from the ID token to credential claims automatically when claim names match (e.g., `given_name` → `given_name`). For non-matching names, configure explicit mappings.
@@ -351,52 +373,70 @@ The issuer maps OIDC claims from the ID token to credential claims automatically
 For organizations with SAML-based identity federations:
 
 ```yaml title="config.yaml (snippet)"
-credential_constructor:
-  employee_badge:
-    vctm_file_path: "/metadata/vctm_employee_badge.json"
-    auth_method: saml
-    format: "dc+sd-jwt"
+common:
+  credential_metadata:
+    employee_badge:
+      vctm_file_path: "/metadata/vctm_employee_badge.json"
+      format: "dc+sd-jwt"
 
 apigw:
-  saml:
-    enabled: true
-    entity_id: "https://issuer.example.com/sp"
-    acs_endpoint: "https://issuer.example.com/saml/acs"
-    certificate_path: "/pki/sp-cert.pem"
-    private_key_path: "/pki/sp-key.pem"
-    credential_mappings:
-      - credential_config_id: "employee_badge"
-        entity_ids:
-          - "https://idp.example.com/idp"
-        attributes:
-          "urn:oid:2.5.4.42":
-            claim: "given_name"
-            required: true
-          "urn:oid:2.5.4.4":
-            claim: "family_name"
-            required: true
-          "urn:oid:0.9.2342.19200300.100.1.3":
-            claim: "email"
-            required: true
+  auth_providers:
+    saml:
+      enable: true
+      entity_id: "https://issuer.example.com/sp"
+      acs_endpoint: "https://issuer.example.com/saml/acs"
+      certificate_path: "/pki/sp-cert.pem"
+      private_key_path: "/pki/sp-key.pem"
+      attribute_mapping:
+        "urn:oid:2.5.4.42":
+          claim: "given_name"
+          required: true
+        "urn:oid:2.5.4.4":
+          claim: "family_name"
+          required: true
+        "urn:oid:0.9.2342.19200300.100.1.3":
+          claim: "email"
+          required: true
+
+  data_sources:
+    assertion:
+      scopes:
+        employee_badge:
+          auth_provider: saml
 ```
+
+Attribute mapping is per auth provider, not per credential type — one SAML
+`attribute_mapping` normalises the assertion for every scope that uses it.
 
 #### Using Pre-Authorized Code (API Integration)
 
 For server-to-server issuance where your backend pushes credential data directly:
 
 ```yaml title="config.yaml (snippet)"
-credential_constructor:
-  employee_badge:
-    vctm_file_path: "/metadata/vctm_employee_badge.json"
-    auth_method: basic
-    format: "dc+sd-jwt"
+common:
+  credential_metadata:
+    employee_badge:
+      vctm_file_path: "/metadata/vctm_employee_badge.json"
+      format: "dc+sd-jwt"
 
-issuer:
-  pre_authorized_code:
-    enabled: true
-    pin_required: false
-    code_ttl: 300
+apigw:
+  auth_providers:
+    preauth:
+      # true adds a numeric transaction code the wallet must present
+      enable_pin: false
+
+  data_sources:
+    datastore:
+      scopes:
+        employee_badge:
+          # Required: /api/v1/datastore/preauth_offer refuses any scope whose
+          # datastore auth_provider is not "preauth", so that it cannot be
+          # used to bypass a SAML/OIDC/OpenID4VP flow declared elsewhere.
+          auth_provider: preauth
 ```
+
+Your backend uploads the document and then creates the offer with
+`POST /api/v1/datastore/preauth_offer` — see [API Integration](../sirosid/issuers/api-integration).
 
 Then issue credentials using the REST API:
 
@@ -455,13 +495,22 @@ See [API Integration](../sirosid/issuers/api-integration) for the full API refer
 For the `openid4vp` method, you also specify which credential types and claims the user must present:
 
 ```yaml
-credential_constructor:
-  employee_badge:
-    vctm_file_path: "/metadata/vctm_employee_badge.json"
-    auth_method: openid4vp
-    auth_scopes: ["pid_1_8"]
-    auth_claims: ["given_name", "family_name", "birthdate"]
-    format: "dc+sd-jwt"
+common:
+  credential_metadata:
+    employee_badge:
+      vctm_file_path: "/metadata/vctm_employee_badge.json"
+      format: "dc+sd-jwt"
+
+apigw:
+  data_sources:
+    datastore:
+      scopes:
+        employee_badge:
+          auth_provider: openid4vp
+          # Credential types the user may present to authenticate
+          auth_scopes: ["pid"]
+          # Claims taken from the presented credential for the identity lookup
+          auth_claims: ["given_name", "family_name", "birthdate"]
 ```
 
 ## Phase 3: Configure the Verifier
@@ -474,10 +523,12 @@ Map an OIDC scope to your credential type so applications can request it:
 
 ```yaml title="config.yaml (snippet)"
 verifier:
-  openid4vp:
-    supported_credentials:
-      - vct: "https://example.com/credentials/employee-badge"
-        scopes: ["employee"]
+  inbound:
+    openid4vp:
+      presentation_requests_dir: "/presentation_requests"
+      supported_credentials:
+        - vct: "https://example.com/credentials/employee-badge"
+          scopes: ["employee"]
 ```
 
 Applications then include `employee` in their OIDC `scope` parameter to trigger a presentation request for this credential.
@@ -486,32 +537,43 @@ Applications then include `employee` in their OIDC `scope` parameter to trigger 
 
 For more granular control over which claims are requested, define a [DCQL](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#name-digital-credentials-query-l) query:
 
-```yaml title="presentation_request.yaml"
-credentials:
-  - id: employee_badge
-    format: vc+sd-jwt
-    meta:
-      vct_values:
-        - "https://example.com/credentials/employee-badge"
-    claims:
-      - path: ["given_name"]
-      - path: ["family_name"]
-      - path: ["employee_id"]
-      - path: ["department"]
+```yaml title="presentation_requests/employee.yaml"
+templates:
+  - id: "employee_badge"
+    name: "Employee Badge"
+    version: "1.0"
+    oidc_scopes: ["employee"]
+    dcql:
+      credentials:
+        - id: employee_badge
+          format: dc+sd-jwt
+          meta:
+            vct_values:
+              - "https://example.com/credentials/employee-badge"
+          claims:
+            - path: ["given_name"]
+            - path: ["family_name"]
+            - path: ["employee_id"]
+            - path: ["department"]
+    claim_mappings:
+      "*": "*"
+    enabled: true
 ```
 
 ### 3.3 Map Claims to OIDC ID Token
 
-Configure how credential claims appear in the OIDC ID token returned to your application:
+How credential claims appear in the OIDC ID token is part of the same
+presentation-request template, under `claim_mappings` — it is not a separate
+config-file section. Replace the `"*": "*"` pass-through above when you want to
+rename or drop claims:
 
-```yaml title="config.yaml (snippet)"
-verifier:
-  claim_mapping:
-    given_name: "$.vc.credentialSubject.given_name"
-    family_name: "$.vc.credentialSubject.family_name"
-    email: "$.vc.credentialSubject.email"
-    employee_id: "$.vc.credentialSubject.employee_id"
-    department: "$.vc.credentialSubject.department"
+```yaml title="presentation_requests/employee.yaml (snippet)"
+    claim_mappings:
+      given_name: "given_name"
+      family_name: "family_name"
+      email: "email"
+      employee_id: "employee_id"
+      department: "department"
 ```
 
 Your application then receives these claims in a standard OIDC ID token:
@@ -593,7 +655,7 @@ Test that selective disclosure works correctly:
 | Credential not appearing in wallet | VCTM not found or invalid | Check that the VCTM file is mounted correctly and valid JSON |
 | Authentication fails during issuance | IdP misconfiguration | Verify redirect URIs, client credentials, and scopes |
 | Verifier rejects credential | Issuer not trusted | Add the issuer to the trust framework (see Phase 4) |
-| Claims missing in ID token | Claim mapping mismatch | Check `claim_mapping` paths against actual credential structure |
+| Claims missing in ID token | Claim mapping mismatch | Check the template's `claim_mappings` keys against the claim names the credential actually discloses |
 | Wallet shows raw claim names | Missing VCTM display metadata | Add `display` entries for each claim in the VCTM |
 
 ## Next Steps

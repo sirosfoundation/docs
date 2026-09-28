@@ -194,34 +194,65 @@ SIROS ID includes pre-configured types based on EU standards:
 | **OpenBadge** | `urn:eudi:openbadge_complete:1` | Open Badges 3.0 |
 
 :::note ARF Version Selection
-SIROS ID supports both ARF 1.5 and ARF 1.8 PID schemas. The configuration `credential_constructor` key determines which schema is used. The generic VCT `urn:eudi:pid:1` is accepted for compatibility but maps to a configured ARF version.
+SIROS ID supports both ARF 1.5 and ARF 1.8 PID schemas. Which one a scope uses is determined by the VCTM it points at in `common.credential_metadata`. The generic VCT `urn:eudi:pid:1` is accepted for compatibility but maps to a configured ARF version.
 :::
 
-### Credential Constructor
+### Building the Claim Set
 
-The **credential constructor** is the component that transforms user identity data into credential claims. It:
+Turning authenticated user data into credential claims takes three pieces of
+configuration:
 
-1. Receives authenticated user attributes (from SAML/OIDC)
-2. Maps external attributes to credential claims
-3. Applies transformations and defaults
-4. Validates against the VCTM schema
-5. Produces the claim set for signing
+1. `common.credential_metadata.<scope>` declares the credential type — which
+   VCTM (or MDDL, for mdoc) describes it, and which format to issue.
+2. `apigw.data_sources.<category>.scopes.<scope>` says where the data comes
+   from and which auth provider identifies the user.
+3. `apigw.auth_providers.<provider>.attribute_mapping` normalises the
+   provider's own attribute names to canonical claim names, with optional
+   transforms and defaults.
+
+APIGW then validates the resulting claim set against the VCTM schema before
+sending it to the issuer for signing.
 
 ```yaml
-# Example: Map SAML attributes to PID claims
-credential_constructor:
-  pid_1_8:
-    vct: "urn:eudi:pid:arf-1.8:1"
-    vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
-    attributes:
-      given_name:
-        source: ["$.claims.given_name", "$.saml.urn:oid:2.5.4.42"]
-      family_name:
-        source: ["$.claims.family_name", "$.saml.urn:oid:2.5.4.4"]
-      birthdate:
-        source: ["$.claims.birthdate"]
-        transform: "date_iso8601"
+common:
+  credential_metadata:
+    pid:
+      vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
+      format: "dc+sd-jwt"
+
+apigw:
+  auth_providers:
+    saml:
+      enable: true
+      # Map SAML attribute OIDs onto canonical claim names
+      attribute_mapping:
+        "urn:oid:2.5.4.42":
+          claim: "given_name"
+          required: true
+        "urn:oid:2.5.4.4":
+          claim: "family_name"
+          required: true
+        "urn:oid:0.9.2342.19200300.100.1.3":
+          claim: "email_address"
+          transform: "lowercase"
+
+  data_sources:
+    # The SAML assertion's claims ARE the credential data
+    assertion:
+      scopes:
+        pid:
+          auth_provider: saml
 ```
+
+Supported `transform` values are `lowercase`, `uppercase`, `trim`,
+`country_alpha2`, `country_alpha3` and `yyyymmdd_to_iso`. `default:` supplies a
+value when the attribute is absent, and `as_array: true` wraps a scalar in a
+single-element array.
+
+:::note Removed configuration
+Earlier releases had a top-level `credential_constructor` section. It no longer
+exists — use the three sections above instead.
+:::
 
 ## Issuer Components
 

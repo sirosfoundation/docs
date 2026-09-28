@@ -129,21 +129,26 @@ window.location = authUrl.toString();
 
 ### Option 3: Direct OpenID4VP
 
-For maximum control, use the OpenID4VP API directly:
+There is no separate "start a presentation" REST API — a presentation session
+is always created by an OIDC authorization request. Drive it the same way as
+Option 2, then use the session endpoints to render your own UI:
 
 ```javascript
-// Start a presentation request
-const response = await fetch('https://verifier.example.org/verification/start', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    credential_types: ['urn:eudi:pid:arf-1.8:1'],
-    claims: ['given_name', 'family_name', 'birth_date']
-  })
-});
+// 1. Send the user to /authorize with the scopes that select a
+//    presentation-request template.
+// 2. The verifier creates a session and renders the QR page itself, or you
+//    can fetch the pieces for your own page:
 
-const { session_id, qr_code, deep_link } = await response.json();
+// QR code image for a session
+//   GET /qr/{session_id}
+// Poll session state until the wallet has responded
+//   GET /poll/{session_id}
+// The signed request object the wallet fetches
+//   GET /verification/request-object/{session_id}
 ```
+
+For browser-native presentation without a QR code, use the
+[W3C Digital Credentials API](./digital-credentials-api) instead.
 
 ## Client Registration
 
@@ -195,27 +200,176 @@ Map OIDC scopes to credential types:
 
 For fine-grained control, use [Digital Credentials Query Language (DCQL)](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#name-digital-credentials-query-l):
 
+Presentation requests live in `presentation_requests/*.yaml`, each holding a
+`templates:` list. The DCQL query goes under a template's `dcql:` key:
+
 ```yaml
-# presentation_request.yaml
-credentials:
-  - id: pid_credential
-    format: vc+sd-jwt
-    meta:
-      vct_values:
-        - urn:eudi:pid:arf-1.8:1
-    claims:
-      - path: ["given_name"]
-      - path: ["family_name"]
-      - path: ["birth_date"]
-        
-  - id: ehic_credential
-    format: vc+sd-jwt
-    meta:
-      vct_values:
-        - urn:eudi:ehic:1
-    claims:
-      - path: ["card_number"]
-      - path: ["institution"]
+# presentation_requests/pid_and_ehic.yaml
+templates:
+  - id: "pid_and_ehic"
+    name: "PID + EHIC"
+    oidc_scopes: ["pid", "ehic"]
+    dcql:
+      credentials:
+        - id: pid_credential
+          format: dc+sd-jwt
+          meta:
+            vct_values:
+              - urn:eudi:pid:arf-1.8:1
+          claims:
+            - path: ["given_name"]
+            - path: ["family_name"]
+            - path: ["birthdate"]
+
+        - id: ehic_credential
+          format: dc+sd-jwt
+          meta:
+            vct_values:
+              - urn:eudi:ehic:1
+          claims:
+            - path: ["card_number"]
+            - path: ["institution"]
+    claim_mappings:
+      "*": "*"
+    enabled: true
+```
+
+## Verification Presets
+
+Presets are the ready-made requests the verifier's own UI offers — each one a
+labelled combination of credential scopes and claim selections, so an operator
+demonstrating or testing the verifier does not have to hand-build a DCQL query.
+The map key is the label shown to the user.
+
+```yaml
+verifier:
+  presets:
+    "PID":
+      featured: true
+      credentials:
+        pid:
+          exclude_claims:
+            - path: ["trust_anchor"]
+            - path: ["attestation_legal_category"]
+
+    "PID Age Over 18":
+      category: "Selective disclosure"
+      order: 1
+      credentials:
+        pid:
+          claims:
+            - path: ["birthdate"]
+          validations:
+            - rule: "age_over"
+              path: ["birthdate"]
+              value: 18
+
+    "PID + EHIC":
+      category: "Combined"
+      credentials:
+        pid:
+        ehic:
+```
+
+| Field | Purpose |
+|---|---|
+| `credentials` | Map of `common.credential_metadata` scope → optional overrides. At least one scope is required. An empty entry requests the scope's full VCTM claim set |
+| `credentials.<scope>.claims` | Specific claims to request. When empty, all VCTM claims are used |
+| `credentials.<scope>.exclude_claims` | Claims to drop from the generated DCQL query |
+| `credentials.<scope>.validations` | Server-side rules applied after claims are extracted, e.g. `age_over` |
+| `credentials.<scope>.format` | Overrides the scope's own format — e.g. requesting `mso_mdoc_zk` over a scope normally issued as `mso_mdoc` |
+| `credentials.<scope>.zk_system_type` | Required whenever `format` is `mso_mdoc_zk`; identifies the system + circuit combination |
+| `category` | Groups the preset under a shared UI heading |
+| `order` | Position within the category, ascending; ties break alphabetically |
+| `featured` | Featured presets are always shown; the rest are revealed progressively |
+
+Presets drive the verifier's own pages. Presentation requests reached through
+OIDC scopes come from `presentation_requests/*.yaml` instead — see
+[DCQL Queries](#dcql-queries-advanced).
+
+## Credential Revocation Checking
+
+When enabled, the verifier checks each presented credential's Token Status List
+entry at presentation time (ARF 3.0 §6.6.3.7):
+
+```yaml
+verifier:
+  revocation:
+    enabled: true
+    # Seconds to cache fetched status list tokens
+    cache_ttl: 300
+    # true (the default) logs a warning and allows the credential through
+    # when the status list is unreachable or unparseable; false rejects it
+    fail_open: false
+    # Scopes exempt from checking — e.g. credentials valid < 24h
+    skip_scopes:
+      - "short_lived_badge"
+```
+
+:::caution `fail_open` defaults to `true`
+An unreachable status list is not evidence that a credential is valid, but the
+default lets it through anyway. Turning revocation checking on without also
+setting `fail_open: false` therefore buys less than it looks like: any
+status-list outage silently disables the check. Set it to `false` unless
+availability genuinely outranks the check for your deployment.
+:::
+
+## Combined Presentation Binding
+
+When a wallet presents more than one credential in a single response, nothing
+in the protocol guarantees they describe the *same* person. Combined
+presentation verification (ARF 3.0 §6.6.3.10) checks that they do:
+
+```yaml
+verifier:
+  combined_presentation:
+    enabled: true
+    # enforce | warn | disabled (default: warn)
+    enforcement: "enforce"
+    # Every listed path must match across all presented credentials
+    binding_attributes:
+      - paths: ["family_name", "birth_date", "place_of_birth.locality"]
+    # Compare cnf.jwk / device key across credentials.
+    # Cross-format comparison is limited — see below.
+    key_binding_enabled: true
+```
+
+`enforcement: "enforce"` rejects a presentation whose credentials do not bind;
+`warn` records the mismatch and proceeds. Attribute binding uses AND semantics
+— every path in a `paths` list must match across all credentials.
+
+## Zero-Knowledge Circuit Resolution
+
+Verifying an `mso_mdoc_zk` (Longfellow ZK / PPID) presentation requires the
+circuit the proof was produced against. The verifier resolves a presented
+document's `zkSystemId` to a downloadable artifact through a catalog service:
+
+```yaml
+verifier:
+  zk_circuits:
+    # Mirrors of the same catalog, tried in order until one succeeds.
+    # Defaults to the live deployed service.
+    sources:
+      - "https://zk-circuits.fly.dev"
+```
+
+The default is the live deployed service (`https://zk-circuits.fly.dev`). The
+entries are mirrors of one catalog, not distinct registries — listing several
+buys availability, not additional trust roots.
+
+## OpenID4VP Compatibility
+
+Every field here defaults to the conformant behaviour, so a deployment that
+sets none of them is a plain OpenID4VP 1.0 deployment. Use it only to
+interoperate with a wallet that still expects draft-era wire details:
+
+```yaml
+common:
+  openid4vp_compat:
+    # Re-add the draft-era authorization_encrypted_response_alg and
+    # authorization_encrypted_response_enc members to client_metadata,
+    # alongside the 1.0 encrypted_response_enc_values_supported
+    send_legacy_jarm_encryption_params: true
 ```
 
 ## Claim Mapping
@@ -238,18 +392,36 @@ Verified credentials are mapped to standard OIDC claims in the ID token:
 
 ### Custom Claim Mapping
 
-Configure how credential claims map to OIDC claims:
+Claim mapping is per presentation-request template, in the
+`presentation_requests/*.yaml` files — not a config-file key. Each template's
+`claim_mappings` maps a credential claim name to the OIDC claim name it should
+appear as:
 
 ```yaml
-verifier:
-  claim_mapping:
-    # Standard mappings
-    given_name: "$.vc.credentialSubject.given_name"
-    family_name: "$.vc.credentialSubject.family_name"
-    birthdate: "$.vc.credentialSubject.birth_date"
-    # Custom mappings
-    employee_id: "$.vc.credentialSubject.employee_number"
+# presentation_requests/employee.yaml
+templates:
+  - id: "employee_badge"
+    name: "Employee Badge"
+    oidc_scopes: ["employee"]
+    dcql:
+      credentials:
+        - id: badge
+          format: dc+sd-jwt
+          meta:
+            vct_values: ["https://example.com/credentials/employee-badge"]
+          claims:
+            - path: ["given_name"]
+            - path: ["family_name"]
+            - path: ["employee_number"]
+    claim_mappings:
+      given_name: "given_name"
+      family_name: "family_name"
+      employee_number: "employee_id"   # rename on the way into the ID token
+    enabled: true
 ```
+
+Use `"*": "*"` to pass every disclosed claim through unchanged. Optional
+`claim_transforms` can post-process individual values.
 
 ## W3C Digital Credentials API
 
@@ -298,9 +470,10 @@ By default, users receive different `sub` claims for each relying party, prevent
 
 ```yaml
 verifier:
-  oidc:
-    subject_type: "pairwise"  # or "public"
-    subject_salt: "random-secret-value"
+  outbound:
+    oidc_provider:
+      subject_type: "pairwise"  # or "public"
+      subject_salt: "random-secret-value"
 ```
 
 ### Credential Verification
@@ -330,10 +503,18 @@ The verifier automatically:
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/verification/start` | POST | Create presentation request |
-| `/verification/request-object/{id}` | GET | Get signed request object |
-| `/verification/direct_post` | POST | Receive wallet response |
-| `/verification/status/{id}` | GET | Check verification status |
+| `/verification/request-object/{session_id}` | GET | Signed request object for an OIDC-initiated session |
+| `/verification/oidc-direct_post` | POST | Receive the wallet's VP token (OIDC flow) |
+| `/verification/oidc-callback` | GET | Wallet same-device return URL (OIDC flow) |
+| `/verification/direct_post` | POST | Receive the wallet's VP token (browser-session flow) |
+| `/verification/callback` | GET | Wallet same-device return URL (browser-session flow) |
+| `/verification/display/{session_id}` | GET | Credential preview page (when `credential_display` is on) |
+| `/verification/confirm/{session_id}` | POST | Confirm the previewed credential |
+| `/qr/{session_id}` | GET | QR code image for a session |
+| `/poll/{session_id}` | GET | Poll session state |
+
+Presentation sessions are created by the OIDC `/authorize` request; there is no
+endpoint that creates one directly.
 
 ## Testing
 
@@ -430,39 +611,45 @@ verifier:
   api_server:
     addr: :8080
     tls:
-      enabled: false  # Use reverse proxy for TLS in production
-  external_url: "https://verifier.example.com"
+      enable: false  # Use reverse proxy for TLS in production
+  public_url: "https://verifier.example.com"
 
-verifier_proxy:
-  api_server:
-    addr: :8080
-  external_url: "https://verifier.example.com"
-  
-  oidc:
-    issuer: "https://verifier.example.com"
-    signing_key_path: "/pki/oidc_signing_key.pem"
-    signing_alg: "RS256"
-    session_duration: 900
-    code_duration: 300
-    access_token_duration: 3600
-    id_token_duration: 3600
-    subject_type: "pairwise"
-    subject_salt: "${SUBJECT_SALT}"
-  
-  openid4vp:
-    presentation_timeout: 300
-    supported_credentials:
-      - vct: "urn:eudi:pid:arf-1.8:1"
-        scopes: ["openid", "profile"]
-      - vct: "urn:eudi:ehic:1"
-        scopes: ["ehic"]
+  # Signs JARs and OIDC tokens; published at /jwks
+  key_config:
+    private_key_path: "/pki/verifier_key.pem"
+    chain_path: "/pki/verifier_chain.pem"
+
+  # How the verifier identifies itself to wallets
+  client_id_scheme: "x509_san_dns"   # or "x509_hash", "did"
+
+  # Wallet-facing side: OpenID4VP
+  inbound:
+    openid4vp:
+      presentation_timeout: 300
+      presentation_requests_dir: "/presentation_requests"
+      supported_credentials:
+        - vct: "urn:eudi:pid:arf-1.8:1"
+          scopes: ["openid", "profile"]
+        - vct: "urn:eudi:ehic:1"
+          scopes: ["ehic"]
+
+  # RP-facing side: the verifier acting as an OIDC Provider
+  outbound:
+    oidc_provider:
+      issuer: "https://verifier.example.com"
+      session_duration: 900
+      code_duration: 300
+      access_token_duration: 3600
+      id_token_duration: 3600
+      subject_type: "pairwise"
+      subject_salt: "put-this-in-the-secrets-file"
 
   # Trust evaluation via go-trust (AuthZEN)
   trust:
     pdp_url: "http://go-trust:6001"
 
   digital_credentials:
-    enabled: true
+    enable: true
     use_jar: true
     allow_qr_fallback: true
 
@@ -470,13 +657,20 @@ common:
   mongo:
     uri: mongodb://mongo:27017
   production: true
+  secret_file_path: "/etc/vc/secrets.yaml"
 ```
+
+:::note
+The vc config file is not environment-interpolated. Secrets such as
+`subject_salt` go in the file referenced by `common.secret_file_path`, not in
+`${VAR}` placeholders.
+:::
 
 #### Start the Services
 
 ```bash
-# Generate signing keys
-openssl genrsa -out pki/oidc_signing_key.pem 2048
+# Generate the verifier signing key
+openssl ecparam -name prime256v1 -genkey -noout -out pki/verifier_key.pem
 
 # Start all services
 docker compose up -d
@@ -532,16 +726,15 @@ spec:
           env:
             - name: VC_CONFIG_YAML
               value: /config/config.yaml
-            - name: SUBJECT_SALT
-              valueFrom:
-                secretKeyRef:
-                  name: verifier-secrets
-                  key: subject-salt
           volumeMounts:
             - name: config
               mountPath: /config
             - name: pki
               mountPath: /pki
+            # subject_salt and other secrets come from the file named by
+            # common.secret_file_path, not from environment variables.
+            - name: secrets
+              mountPath: /etc/vc
           livenessProbe:
             httpGet:
               path: /health
@@ -558,6 +751,9 @@ spec:
         - name: pki
           secret:
             secretName: verifier-pki
+        - name: secrets
+          secret:
+            secretName: verifier-secrets
 ```
 
 ## Next Steps

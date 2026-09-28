@@ -116,18 +116,29 @@ A **presentation request** specifies what credentials and claims the verifier ne
 1. **OIDC Scopes** – Simple mapping (`openid profile pid`)
 2. **DCQL Queries** – Fine-grained control over credential types and claims
 
+Presentation requests are defined in `presentation_requests/*.yaml`. Each file
+holds a `templates:` list; a template binds OIDC scopes to a DCQL query and a
+claim mapping:
+
 ```yaml
-# DCQL Query Example
-credentials:
-  - id: identity_credential
-    format: vc+sd-jwt
-    meta:
-      vct_values:
-        - urn:eudi:pid:arf-1.8:1
-    claims:
-      - path: ["given_name"]
-      - path: ["family_name"]
-      - path: ["birth_date"]
+templates:
+  - id: "pid_basic"
+    name: "PID - Basic Profile"
+    oidc_scopes: ["pid", "profile"]
+    dcql:
+      credentials:
+        - id: identity_credential
+          format: dc+sd-jwt
+          meta:
+            vct_values:
+              - urn:eudi:pid:arf-1.8:1
+          claims:
+            - path: ["given_name"]
+            - path: ["family_name"]
+            - path: ["birthdate"]
+    claim_mappings:
+      "*": "*"
+    enabled: true
 ```
 
 ### Trust Verification
@@ -274,13 +285,18 @@ sequenceDiagram
     participant Verifier
     participant Wallet
 
-    App->>Verifier: POST /verification/start
-    Verifier->>App: session_id, qr_code, deep_link
-    App->>App: Display QR or invoke DC API
-    Wallet->>Verifier: POST /verification/direct_post
-    App->>Verifier: GET /verification/status/{id}
-    Verifier->>App: Verified claims
+    App->>Verifier: GET /authorize (scopes select the request template)
+    Verifier->>App: session created
+    App->>Verifier: GET /qr/{session_id} — or invoke the DC API
+    App->>App: Display QR or deep link
+    Wallet->>Verifier: GET /verification/request-object/{session_id}
+    Wallet->>Verifier: POST /verification/oidc-direct_post
+    App->>Verifier: GET /poll/{session_id}
+    Verifier->>App: Verified claims (via the OIDC code exchange)
 ```
+
+A presentation session is always created by the OIDC `/authorize` request —
+there is no separate endpoint that starts one.
 
 **Benefits:**
 - Full control over UX
