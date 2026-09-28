@@ -93,7 +93,12 @@ services:
 ## Configuration
 
 :::tip Complete Configuration Reference
-See the [generated configuration reference](/sirosid/trust/go-trust-configuration) for every YAML key, its type, description, and (where one exists) `GT_*` environment variable override — generated directly from the Go config structs, so it can't drift from what the code actually accepts.
+See the [generated configuration reference](/sirosid/trust/go-trust-configuration) for each `server`, `logging`, `security` and `registries` key, its type, description, and (where one exists) `GT_*` environment variable override — generated directly from the Go config structs, so it can't drift from what the code actually accepts.
+
+**It does not cover `policies`.** The generator does not descend into
+`PolicyConfig`, so the whole policy key space renders as a single opaque row,
+`policies.policies · map[string]*PolicyConfig (object)`. For those keys, this
+page and `example/config.yaml` in the go-trust repo are the references.
 :::
 
 ### Basic Configuration
