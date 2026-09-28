@@ -223,9 +223,14 @@ programs that embed `pkg/registry`. See
 Several capabilities exist in `pkg/registry` but are not reachable from
 `config.yaml`, because `cmd/gt/main.go` is what translates YAML into registry
 objects and it does not cover everything. The system cert pool registry,
-composite registries, non-default resolution strategies, the ETSI refresh loop
-and the x5c-enrichment policy fields are all in this category. When a feature
-seems to do nothing, check `cmd/gt/main.go` before assuming a YAML typo.
+composite registries, non-default resolution strategies and the ETSI refresh
+loop are all in this category. When a feature seems to do nothing, check
+`cmd/gt/main.go` before assuming a YAML typo.
+
+The x5c-enrichment policy fields used to belong on that list; v0.22.0 wired
+them through. Note what the symptom was: unknown keys are silently discarded
+(`pkg/config` decodes without `KnownFields`), so a dropped key and a typo look
+identical — neither produces an error.
 :::
 
 ### ETSI TSL Multi-Source Configuration
@@ -1000,6 +1005,57 @@ policies:
   default_policy: "credential-issuer"  # Policy to use when action.name doesn't match
 ```
 
+### Registry-Agnostic Constraints
+
+Two constraints apply whatever registry answers, and sit under a policy's
+`constraints:` block rather than a registry-specific one:
+
+```yaml
+policies:
+  policies:
+    credential-issuer:
+      constraints:
+        # Restrict which kinds of key material are accepted
+        allowed_key_types: ["x5c", "jwk"]
+        # Demand that key material actually be presented and validated
+        require_key_binding: true
+```
+
+`require_key_binding: true` makes a policy unsatisfiable by a
+[resolution-only request](#resolution-only-requests): those return resolved
+metadata without any key having been presented, so there is nothing to bind.
+Set it on roles where a bare identifier lookup must never count as a positive
+trust decision.
+
+:::info `require_key_binding` requires go-trust v0.22.0
+It parsed but had no effect before then.
+:::
+
+### Credential-Type Constraints
+
+Two policy fields narrow a decision by credential type — useful where one
+issuer is trusted for some attestation types but not others:
+
+```yaml
+policies:
+  policies:
+    credential-issuer:
+      etsi:
+        # Included in the response for audit, and available to registries
+        # that can filter on it
+        credential_types:
+          - "eu.europa.ec.eudi.pid.1"
+      oidfed:
+        # Require a specific trust mark per credential type: presenting
+        # eu.europa.ec.eudi.pid.1 additionally requires this mark
+        credential_type_trust_marks:
+          eu.europa.ec.eudi.pid.1:
+            - "https://trust.eu/wallet/pid-issuer"
+```
+
+Both require go-trust v0.22.0; before then neither reached the registry from a
+config file.
+
 ## AuthZEN API
 
 Go-Trust implements the AuthZEN protocol for trust evaluation.
@@ -1094,6 +1150,52 @@ Response includes the resolved DID document or entity configuration:
   }
 }
 ```
+
+### What a Client May Put in `context`
+
+An evaluation request carries a `context` object, and the server **strips it to
+an allowlist** before any registry or enrichment step reads it. The dividing
+line is data versus control: these keys describe *what the relying party is
+asking for*, which only the client knows.
+
+| Key | Purpose |
+|---|---|
+| `query` | DCQL query, parsed for over-request detection |
+| `requested_attributes` | Explicit attribute list, used in preference to `query` |
+| `credential_types` | Credential type identifiers |
+| `doc_type` | mdoc doctype; filters VICAL entries |
+| `intermediary_x5c` | The intermediary's own certificate chain |
+| `purpose` | Presentation purpose, informational |
+| `trust_chain` | Pre-supplied OpenID Federation chain (OpenID4VP §5.9.3.6) |
+| `include_trust_chain` | Include the resolved chain in the response |
+| `include_certificates` | Include X.509 certificates in the response |
+| `cache_control` | Freshness hint: `no-cache`, `no-store`, `max-age=N` |
+
+Everything else is a **server-side policy control** and is discarded, including
+`extract_rp_identity`, `required_cert_policy_oids`, `strict_entitlement_check`,
+`allow_intermediaries`, `allowed_attributes`, `service_types`,
+`required_trust_marks` and `allowed_domains`. A client that could set those
+would be writing its own policy. The same allowlist governs
+`action.parameters`.
+
+:::note Why `trust_chain` is safe to accept
+It is never taken on trust. The chain's depth is capped, its leaf must be the
+entity under evaluation, its anchor must be a **configured** trust anchor that
+self-signs, linkage and validity are checked, and the anchor is verified
+against the configured JWKS rather than the chain's own — falling back to full
+resolution when no configured JWKS exists. Supplying a genuine chain only saves
+the resolution round-trip; a forged one cannot pass.
+
+`cache_control` is likewise safe because it can only ever ask for *fresher*
+data: `max-age` is applied on top of normal expiry, so a client can force
+revalidation but never extend an entry's life.
+:::
+
+:::caution Changed in v0.22.0
+Before v0.22.0 the context was passed through verbatim, so a client could set
+any of the policy controls above. Anything relying on that will stop working —
+which is the intent. See [Enabling Enrichment](#enabling-enrichment).
+:::
 
 ### Subject ID Normalization
 
@@ -1416,21 +1518,19 @@ policies:
         allow_intermediaries: false
 ```
 
-:::caution The `gt` config file does not yet carry these through
-`configurePoliciesFromConfig` in `cmd/gt/main.go` copies only `service_types`,
-`service_statuses` and `countries` from a YAML `etsi:` policy block into the
-runtime policy. The five enrichment keys above are therefore **silently
-dropped** when set in `config.yaml` on a stock `gt` server.
+:::info Requires go-trust v0.22.0
+Before v0.22.0 these five keys were silently dropped from `config.yaml` —
+`configurePoliciesFromConfig` copied only `service_types`, `service_statuses`
+and `countries` — and the documented workaround was for the caller to set them
+in the AuthZEN request's `context` instead.
 
-Until that gap is closed, enrichment on a stock server is driven per request:
-the caller sets the keys directly in the AuthZEN request's `context` object.
-Note that `action.parameters` cannot be used for them — only `query`,
-`requested_attributes`, `credential_types` and `purpose` are accepted from
-there, precisely so a client cannot turn `strict_entitlement_check` off or
-inject its own `required_cert_policy_oids`.
-
-Programs embedding `pkg/registry` can set the fields on
-`registry.ETSIPolicyConstraints` directly, and they work as documented.
+**That workaround no longer works, and its removal is the point.** Since
+v0.22.0 the request context is sanitised before anything reads it, so a client
+that sends `strict_entitlement_check`, `allow_intermediaries`,
+`extract_rp_identity`, `required_cert_policy_oids` or `allowed_attributes` has
+them dropped: they are server policy, and a client that could set them would be
+writing its own. If you adopted the old workaround, move those values into a
+policy or they will stop taking effect.
 :::
 
 ### Enriched Response
@@ -1535,13 +1635,11 @@ policies:
           - "birth_date"
 ```
 
-When no entitlement data is available — no `allowed_attributes` in the
-request context — over-request detection is skipped and the decision is
-unaffected. There is no separate opt-out flag for that case.
-
-See the caution under [Enabling Enrichment](#enabling-enrichment): on a stock
-`gt` server these keys must currently be supplied in the request context
-rather than in `config.yaml`.
+When a policy sets no `allowed_attributes`, there is nothing to compare the
+request against, so over-request detection is skipped and the decision is
+unaffected. There is no separate opt-out flag for that case — and no way for a
+client to supply its own entitlements, since `allowed_attributes` is a policy
+control and is stripped from an inbound request context.
 
 ### Over-Request in Response
 
