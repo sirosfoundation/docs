@@ -8,7 +8,13 @@ sidebar_label: Overview
 A digital credential ecosystem requires mechanisms for issuers, wallets, and verifiers to recognize and trust each other. This is called **technical trust management**. SIROS ID supports multiple trust frameworks to meet different regulatory and deployment requirements.
 
 :::tip Go-Trust Abstraction Layer
-For production deployments, we recommend using **[Go-Trust](./go-trust)** as a trust abstraction layer. Go-Trust provides a unified AuthZEN API that handles the complexity of ETSI TSL, ETSI LoTE, OpenID Federation, and DID resolution, so your services don't need to implement trust logic directly. Each registry supports **multiple input sources** that are merged into a single trust pool — for example, combining trust lists from different countries or scheme operators — and registries can be composed using **boolean logic** (AND, OR, MAJORITY, QUORUM) for advanced trust policies.
+For production deployments, we recommend using **[Go-Trust](./go-trust)** as a trust abstraction layer. Go-Trust provides a unified AuthZEN API that handles the complexity of ETSI TSL, ETSI LoTE, OpenID Federation, and DID resolution, so your services don't need to implement trust logic directly. Each registry supports **multiple input sources** that are merged into a single trust pool — for example, combining trust lists from different countries or scheme operators.
+
+All configuration snippets on this page are Go-Trust `config.yaml` fragments.
+Registries live under a single top-level `registries:` map; per-role
+constraints live under `policies:`. See the
+[generated configuration reference](/sirosid/trust/go-trust-configuration) for
+the authoritative key list.
 :::
 
 ## Why Trust Matters
@@ -89,19 +95,19 @@ graph TD
 
 **Configuration:**
 ```yaml
-trust:
-  etsi_tsl:
+registries:
+  etsi:
     enabled: true
     # Multiple sources can be combined — cert bundles, local files, and URLs
     cert_bundle: "/var/lib/go-trust/eu-certs.pem"
     tsl_files:
       - "/var/lib/go-trust/se-tsl.xml"
+    # http(s) URLs require allow_network_access
+    allow_network_access: true
     tsl_urls:
       - "https://ec.europa.eu/tools/lotl/eu-lotl.xml"
     follow_refs: true
     max_ref_depth: 3
-    accepted_schemes:
-      - "http://uri.etsi.org/TrstSvc/TrustedList/schemerules/EUcommon"
 ```
 
 ### ETSI Lists of Trusted Entities (LoTE — TS 119 602)
@@ -125,7 +131,7 @@ graph TD
 
 **Configuration:**
 ```yaml
-trust:
+registries:
   lote:
     enabled: true
     # Multiple sources are merged into a single entity index
@@ -134,6 +140,7 @@ trust:
       - "https://lote.example.org/lote-DE.json"
       - "/etc/go-trust/local-lote.json"
     verify_jws: false
+    fetch_timeout: "30s"
     refresh_interval: "1h"
 ```
 
@@ -164,12 +171,15 @@ For detailed setup instructions including Trust Anchor deployment with [Inmor](h
 
 **Configuration:**
 ```yaml
-trust:
-  openid_federation:
+registries:
+  oidfed:
     enabled: true
     trust_anchors:
-      - "https://federation.example.com"
-    entity_configuration_path: "/.well-known/openid-federation"
+      - entity_id: "https://federation.example.com"
+    entity_types:
+      - "openid_credential_issuer"
+    cache_ttl: "5m"
+    max_chain_depth: 5
 ```
 
 ### DID:web
@@ -183,12 +193,19 @@ Decentralized identifiers resolved via web infrastructure.
 
 **Configuration:**
 ```yaml
-trust:
-  did_web:
+registries:
+  didweb:
     enabled: true
-    allowed_domains:
-      - "*.example.com"
-      - "issuer.trusted.org"
+    timeout: "30s"
+
+policies:
+  policies:
+    credential-issuer:
+      did:
+        # Domain restrictions are a policy constraint, not a registry setting
+        allowed_domains:
+          - "*.example.com"
+          - "issuer.trusted.org"
 ```
 
 ### DID:webvh (Verifiable History)
@@ -218,8 +235,8 @@ graph TD
 
 **Configuration:**
 ```yaml
-trust:
-  did_webvh:
+registries:
+  didwebvh:
     enabled: true
     timeout: "30s"
     # Allow HTTP only for testing (HTTPS required in production)
@@ -244,15 +261,43 @@ Traditional PKI-based trust using certificate chains.
 - Requiring offline verification
 - Connecting to legacy systems
 
+Go-Trust has a **System Certificate Pool registry** that validates a presented
+chain against the operating system's root CA store. It is fully implemented in
+`pkg/registry/static`, but it has no `registries.*` key and `gt` never
+instantiates it — it is reachable only by embedding the library:
+
+```go
+reg, _ := static.NewSystemCertPoolRegistry(static.SystemCertPoolConfig{
+    Name: "system-ca",
+})
+```
+
+For a server deployment, choose the configurable route that matches where your
+trust anchors actually live:
+
+- **A PEM bundle of roots** — load it through the ETSI registry's
+  `cert_bundle`, which is just a trust pool of PEM certificates and needs no
+  TSL XML at all. Unlike the OS pool, it can be narrowed per role by policy.
+- **The OS root pool, for a whitelisted RP with no JWKS** — use
+  `registries.whitelist` with `trust_x509_via_system_ca: true` (plus
+  `additional_trusted_roots` for a private reader-CA root); see
+  [Trusting X.509 Cert-Based Verifiers](./go-trust#trusting-x509-cert-based-verifiers-no-jwks).
+  This reaches the same OS pool, but only for entities already on the
+  whitelist — a narrower door than trusting everything the OS trusts.
+- **ISO 18013-5 IACA / VICAL / RICAL roots** — use `registries.mdociaca`,
+  `registries.vical` or `registries.mdocrical`.
+
 **Configuration:**
 ```yaml
-trust:
-  x509:
+registries:
+  etsi:
     enabled: true
-    root_certificates:
-      - "/certs/root-ca.pem"
-    allow_self_signed: false
+    name: "private-pki"
+    cert_bundle: "/certs/root-ca.pem"
 ```
+
+See the [registry inventory](./go-trust#registry-inventory) for the full list,
+including which registries are configurable and which are library-only.
 
 ### URL Whitelist
 
@@ -276,14 +321,16 @@ graph TD
 
 **Configuration:**
 ```yaml
-trust:
+registries:
   whitelist:
     enabled: true
     config_file: "/config/trusted-entities.yaml"
     watch_file: true  # Auto-reload on changes
 ```
 
-**Whitelist file format:**
+**Whitelist file format** (`/config/trusted-entities.yaml`; the same `lists:`
+and `actions:` keys may also be written inline under `registries.whitelist`
+instead of in a separate file):
 ```yaml
 lists:
   issuers:
@@ -310,34 +357,42 @@ Configure trust anchors that recognize your issuer:
 2. **Configure your signing certificate** chain
 3. **Publish discovery metadata** at well-known endpoints
 
+The signing chain the issuer presents lives in its ordinary key configuration
+— there is no separate `issuer.trust` section, and no config key that
+"registers" the issuer with a trust list (that is an out-of-band process with
+the scheme operator):
+
 ```yaml
 issuer:
-  trust:
-    # Certificate chain for credential signing
-    signing_chain_path: "/pki/issuer-chain.pem"
-    
-    # Your trust list registrations
-    trust_list_entries:
-      - scheme: "etsi"
-        status_list_url: "https://tsl.example.eu/tsl.xml"
+  issuer_url: "https://issuer.example.org"
+  key_config:
+    private_key_path: "/pki/issuer-key.pem"
+    chain_path: "/pki/issuer-chain.pem"
 ```
+
+The issuer's *wallet-facing* access certificate (WRPAC), when the deployment
+needs one, is configured separately under `issuer.access_certificate`.
 
 ### For Verifiers
 
 Configure which issuers to trust:
 
 ```yaml
-verifier_proxy:
+verifier:
   trust:
     # AuthZEN PDP URL — when set, operates in "default deny" mode
     pdp_url: "http://go-trust:6001"
-    
-    # Optional: restrict accepted signature algorithms
+
+    # Optional: restrict accepted signature algorithms.
+    # Defaults to ES256/384/512, RS256/384/512, PS256/384/512, EdDSA.
+    # "none" is never accepted.
     allowed_signature_algorithms:
       - "ES256"
       - "ES384"
       - "EdDSA"
 ```
+
+The same `trust` block exists under `apigw` for the issuance side.
 
 When `pdp_url` is configured, the verifier delegates all trust decisions to Go-Trust. When omitted, the verifier operates in "allow all" mode. Trust policies (which registries, ETSI service types, etc.) are configured in Go-Trust, not in the verifier itself.
 
@@ -350,12 +405,20 @@ Register your wallet with trust frameworks:
 3. **Configure attestation in wallet backend**
 
 ```yaml
-wallet:
-  attestation:
+wallet_provider:
+  wia:
     enabled: true
-    key_path: "/keys/wallet-attestation.pem"
-    attestation_endpoint: "https://attestation.siros.org"
+    # "etsi" (default): WIA carries an x5c chain, verified against the
+    # Trusted List for Wallet Providers.
+    # "ietf": WIA carries iss + kid, resolved via JWKS discovery.
+    mode: "etsi"
+    wallet_name: "Example Wallet"
+    wallet_version: "1.4.0"
 ```
+
+See the [Wallet Backend Configuration Reference](/wallet/wallet-backend-configuration)
+for the full key list, and [Wallet Attestation](./wallet-attestation.md) for the
+issuer side.
 
 ## Trust Evaluation Flow
 
@@ -377,24 +440,37 @@ sequenceDiagram
 
 ## Multi-Framework Support
 
-SIROS ID can use multiple trust frameworks simultaneously with priority ordering:
+Go-Trust can use several trust frameworks at once. Enable each registry you
+need; the registry manager evaluates them in registration order and the first
+positive decision wins (`first_match`). To restrict a particular role to a
+subset of registries, name them in that role's policy:
 
 ```yaml
-trust:
-  frameworks:
-    - type: "etsi_tsl"
-      priority: 1
-      # ... config
-    - type: "openid_federation"
-      priority: 2
-      # ... config
-    - type: "x509"
-      priority: 3
-      # ... config
-  
-  # How to handle multiple matches
-  policy: "first_match"  # or "all_must_match", "any_match"
+registries:
+  etsi:
+    enabled: true
+    cert_bundle: "/var/lib/go-trust/eu-certs.pem"
+  oidfed:
+    enabled: true
+    trust_anchors:
+      - entity_id: "https://federation.example.com"
+  whitelist:
+    enabled: true
+    config_file: "/config/trusted-entities.yaml"
+
+policies:
+  default_policy: credential-verifier
+  policies:
+    credential-issuer:
+      # Only these registries may answer for this role
+      registries: ["etsi", "oidfed"]
+      etsi:
+        service_statuses:
+          - "http://uri.etsi.org/TrstSvc/TrustedList/Svcstatus/granted"
 ```
+
+There is no `priority:` field and no `all_must_match` / `any_match` setting;
+see [Resolution Strategy](./go-trust#resolution-strategy).
 
 ## RP Certificate Validation
 
@@ -410,13 +486,26 @@ See [X5C Enrichment](./go-trust#x5c-enrichment--certificate-policy-validation) a
 
 ### Development Mode
 
-For development, you can temporarily disable strict trust:
+There is no `development_mode` switch. To bypass trust while developing, use
+one of these instead:
 
 ```yaml
-trust:
-  development_mode: true  # ⚠️ Never use in production
-  allow_self_signed: true
+# Go-Trust: allow everything
+registries:
+  always_trusted:
+    enabled: true
 ```
+
+`gt --registry always-trusted` does the same from the command line, and
+`never-trusted` gives the opposite for testing rejection paths.
+
+On the vc side, leaving `verifier.trust.pdp_url` (or `apigw.trust.pdp_url`)
+unset puts the service in "allow all" mode: keys are still resolved, but are
+always considered trusted.
+
+:::danger
+Both of these disable trust enforcement entirely. Never use them in production.
+:::
 
 ## Troubleshooting
 

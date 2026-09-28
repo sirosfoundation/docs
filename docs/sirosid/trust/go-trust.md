@@ -102,35 +102,126 @@ Create `trust-config.yaml`:
 
 ```yaml
 server:
-  addr: ":6001"
-  metrics_addr: ":9090"
+  host: "0.0.0.0"
+  port: "6001"
 
-# ETSI Trust Status List support
-etsi:
-  enabled: true
-  trust_list_url: "https://ec.europa.eu/tools/lotl/eu-lotl.xml"
-  cache_duration: 3600
-  follow_refs: true
-  max_ref_depth: 3
+registries:
+  # ETSI Trust Status List support
+  etsi:
+    enabled: true
+    name: "EU-TSL"
+    tsl_files:
+      - "/var/lib/go-trust/eu-lotl.xml"
+    follow_refs: true
+    max_ref_depth: 3
 
-# OpenID Federation support
-openid_federation:
-  enabled: true
-  trust_anchors:
-    - entity_id: "https://federation.example.com"
-  cache_duration: 1800
+  # OpenID Federation support
+  oidfed:
+    enabled: true
+    trust_anchors:
+      - entity_id: "https://federation.example.com"
+    cache_ttl: "30m"
 
-# DID:web support
-did_web:
-  enabled: true
-  allowed_domains:
-    - "*.example.com"
-    - "issuer.trusted.org"
-
-# Resolution strategy for multiple registries
-resolution:
-  strategy: "first_match"  # first_match, all_registries, best_match, sequential
+  # DID:web support
+  didweb:
+    enabled: true
+    timeout: "30s"
 ```
+
+The configuration file has exactly five top-level sections — `server`,
+`logging`, `security`, `registries` and `policies`. Every registry is a named
+key under `registries`; the names are fixed (see the inventory below). There is
+no top-level `trust:`, `etsi:` or `resolution:` block, and `/metrics` is served
+on the same listener as the API — there is no separate metrics port.
+
+Which *domains*, service types or trust marks a registry accepts is a
+**policy** concern, not a registry setting — see
+[Policy-Based Trust Decisions](#policy-based-trust-decisions) below.
+
+### Server and Security Settings
+
+```yaml
+server:
+  host: "0.0.0.0"
+  port: "6001"
+  # Advertised in /.well-known/authzen-configuration so clients can discover
+  # the evaluation endpoint behind a proxy
+  external_url: "https://pdp.example.com"
+  tls:
+    enabled: true
+    cert_file: "/pki/pdp.crt"
+    key_file: "/pki/pdp.key"
+
+logging:
+  level: "info"     # debug | info | warn | error
+  format: "json"    # text | json
+  output: "stdout"
+
+security:
+  # Cap on the size of any HTTP response a registry will read, in bytes.
+  # Default 10 MB. Guards against a hostile trust-list endpoint.
+  max_response_body_bytes: 10485760
+```
+
+`server`, `logging` and `security.max_response_body_bytes` also take `GT_*`
+environment overrides (`GT_HOST`, `GT_PORT`, `GT_LOG_LEVEL`,
+`GT_MAX_RESPONSE_BODY_BYTES`, …) — the
+[generated reference](/sirosid/trust/go-trust-configuration) lists each one.
+Registry and policy settings are YAML-only.
+
+:::caution Config keys that currently do nothing
+Four keys are accepted and validated but never reach any code path in the `gt`
+server:
+
+| Key | Status |
+|---|---|
+| `server.frequency` (`GT_FREQUENCY`) | Defaults to `5m`, validated as `> 0`, read by nothing |
+| `security.rate_limit_rps` | A rate-limiting middleware exists in `pkg/api`, but `gt` never constructs it from config |
+| `security.enable_cors` | No CORS middleware is installed |
+| `security.allowed_origins` | Unused, as above |
+
+Terminate rate limiting and CORS at your reverse proxy instead. Only
+`security.max_response_body_bytes` is actually applied.
+:::
+
+### Registry Inventory
+
+Every trust registry in `pkg/registry`, and whether the `gt` server can be told
+to use it from `config.yaml`:
+
+| Registry | Config key | Validates | Resource types | Resolution-only |
+|---|---|---|---|---|
+| ETSI TSL | `etsi` | X.509 chains against ETSI TS 119 612 trust lists, or a plain PEM `cert_bundle` | `x5c`, `jwk`, `x509_san_dns`, `x509_san_uri` | No |
+| LoTE | `lote` | Entities in ETSI TS 119 602 JSON Lists of Trusted Entities | `jwk`, `x5c` | Yes |
+| OpenID Federation | `oidfed` | Trust chains from a leaf entity to a configured trust anchor | `entity`, `openid_provider`, `relying_party`, `oauth_client`, `oauth_server`, … | Yes |
+| Whitelist | `whitelist` | A file-based entity allowlist, with JWKS fetched per entity | `jwk`, `x5c`, `x509_san_dns`, `x509_san_uri` | Yes |
+| DID (self-contained) | `didlocal` | Self-contained DID methods — `did:key`, `did:jwk` — resolved with no network access. Pick methods with `methods: ["key", "jwk"]`; empty enables all | `jwk`, `kid` | Yes |
+| DID:web | `didweb` | DID documents fetched over HTTPS | `jwk` | Yes |
+| DID:webvh | `didwebvh` | DID documents with a verifiable history log | `jwk` | Yes |
+| did:jwks | `didjwks` | Existing OAuth2/OIDC JWKS endpoints addressed as DIDs; the DID document is generated from the fetched JWKS | `jwk` | Yes |
+| mDOC IACA | `mdociaca` | mdoc **issuer** chains against IACA certificates fetched from OpenID4VCI issuers | `x5c` | No |
+| VICAL | `vical` | mdoc **issuer** certificates against an ISO/IEC 18013-5 Annex C Verified Issuer CA List, including its per-certificate doctype restrictions | `x5c` | No |
+| RICAL | `mdocrical` | mdoc **reader** certificates against a Reader Identity CA List (ISO/IEC 18013-5 2nd ed. Annex F) | `x5c` | No |
+| FIDO MDS3 | `fidomds3` | FIDO2/CTAP2 authenticator attestation certificates against the FIDO Alliance Metadata Service v3 blob | `x5c` | No |
+| Always-trusted | `always_trusted` | Nothing — returns `decision: true` | `*` | Yes |
+| Never-trusted | `never_trusted` | Nothing — returns `decision: false` | `*` | Yes |
+| **System cert pool** | *(none)* | X.509 chains against the **operating system's root CA store** | `x5c`, `jwk` | No |
+| **Composite** | *(none)* | Combines other registries with `AND` / `OR` / `MAJORITY` / `QUORUM` | inherited | inherited |
+
+The last two are fully implemented and tested, but have no configuration key
+and are not instantiated by `cmd/gt/main.go` — they are available only to
+programs that embed `pkg/registry`. See
+[System Certificate Pool](#system-certificate-pool-registry) and
+[Composite Registries](#composite-registries-boolean-logic--library-only).
+
+:::tip A recurring pattern worth knowing
+Several capabilities exist in `pkg/registry` but are not reachable from
+`config.yaml`, because `cmd/gt/main.go` is what translates YAML into registry
+objects and it does not cover everything. The system cert pool registry,
+composite registries, non-default resolution strategies, the ETSI refresh loop
+and the x5c-enrichment policy fields are all in this category. When a feature
+seems to do nothing, check `cmd/gt/main.go` before assuming a YAML typo.
+:::
 
 ### ETSI TSL Multi-Source Configuration
 
@@ -143,31 +234,81 @@ The ETSI TSL registry supports loading trust data from **multiple sources simult
 All certificates from all sources are merged into a single trust pool, and the individual TSL documents are kept for filtered evaluation via policies.
 
 ```yaml
-etsi:
-  enabled: true
-  name: "EU-TSL"
+registries:
+  etsi:
+    enabled: true
+    name: "EU-TSL"
 
-  # PEM bundle with pre-extracted certificates (fast, no XML parsing)
-  cert_bundle: "/var/lib/go-trust/eu-trusted-certs.pem"
+    # PEM bundle with pre-extracted certificates (fast, no XML parsing)
+    cert_bundle: "/var/lib/go-trust/eu-trusted-certs.pem"
 
-  # Multiple local TSL XML files
-  tsl_files:
-    - "/var/lib/go-trust/eu-lotl.xml"
-    - "/var/lib/go-trust/se-tsl.xml"
-    - "/var/lib/go-trust/de-tsl.xml"
+    # Multiple local TSL XML files
+    tsl_files:
+      - "/var/lib/go-trust/eu-lotl.xml"
+      - "/var/lib/go-trust/se-tsl.xml"
+      - "/var/lib/go-trust/de-tsl.xml"
 
-  # Multiple remote (or file://) TSL URLs
-  tsl_urls:
-    - "https://ec.europa.eu/tools/lotl/eu-lotl.xml"
-    - "file:///var/lib/go-trust/backup-tsl.xml"
+    # Multiple remote (or file://) TSL URLs.
+    # http(s) URLs are refused unless allow_network_access is true.
+    allow_network_access: true
+    tsl_urls:
+      - "https://ec.europa.eu/tools/lotl/eu-lotl.xml"
+      - "file:///var/lib/go-trust/backup-tsl.xml"
 
-  # Follow TSL references (pointers to member state TSLs in a LOTL)
-  follow_refs: true
-  max_ref_depth: 3
+    # Follow TSL references (pointers to member state TSLs in a LOTL)
+    follow_refs: true
+    max_ref_depth: 3
 
-  # Periodic re-fetch of all sources
-  refresh_interval: "24h"
+    # HTTP client settings for remote fetches
+    fetch_timeout: "30s"
+    user_agent: "Go-Trust/1.0 TSL Registry"
 ```
+
+#### Verifying the Trust List's Own Signature
+
+By default a TSL is parsed without checking who signed it. For a LOTL fetched
+over the network that is usually not good enough:
+
+```yaml
+registries:
+  etsi:
+    enabled: true
+    allow_network_access: true
+    tsl_urls:
+      - "https://ec.europa.eu/tools/lotl/eu-lotl.xml"
+
+    # PEM file of certificates permitted to sign the LOTL
+    lotl_signer_bundle: "/var/lib/go-trust/lotl-signers.pem"
+
+    # Reject a TSL whose signature is missing or does not verify,
+    # instead of loading it anyway
+    require_signature: true
+
+    # Follow ETSI TS 119 615 pivot LOTLs to discover a signer that is
+    # not yet in the bundle. Requires network access.
+    follow_pivots: true
+```
+
+`require_signature: true` is what turns a failed verification into a refusal —
+with `lotl_signer_bundle` set but `require_signature` left false, an unverifiable
+list still loads. `follow_pivots` exists because the EU rotates LOTL signers
+through pivot lists: when the signer is unknown to the bundle, the registry can
+walk the pivot chain to establish it rather than failing outright.
+
+:::caution No background refresh on a stock `gt` server
+`registries.etsi` has no `refresh_interval` key, and `gt` never starts the
+registry's refresh loop — so it loads all of its sources **once, at startup**.
+To pick up a new trust list, restart the service (or regenerate the
+`cert_bundle` and restart).
+
+The `lote`, `whitelist` and `fidomds3` registries *are* different: `gt` calls
+`StartRefreshLoop` for each of them, so their `refresh_interval` works.
+
+The capability itself exists for ETSI — `etsi.TSLConfig` has a
+`RefreshInterval` field and the registry has a `StartRefreshLoop(ctx)` method —
+it is simply not reachable from the configuration file. Programs embedding
+`pkg/registry/etsi` can set it and call the loop themselves.
+:::
 
 :::tip
 For production, pre-process trust lists into a PEM `cert_bundle` using `tsl-tool` from [g119612](https://github.com/sirosfoundation/g119612). This avoids runtime XML parsing and reference following, giving faster startup and predictable behavior.
@@ -175,36 +316,33 @@ For production, pre-process trust lists into a PEM `cert_bundle` using `tsl-tool
 
 ### Multi-Registry Configuration
 
-Go-Trust can query multiple trust frameworks simultaneously:
+Go-Trust can query multiple trust frameworks simultaneously. Enable each one
+under its own fixed key — registries are a map, not a list, so there is no
+`type:` or `priority:` field:
 
 ```yaml
 registries:
-  - name: "eu-tsl"
-    type: "etsi_tsl"
-    priority: 1
-    config:
-      trust_list_url: "https://ec.europa.eu/tools/lotl/eu-lotl.xml"
-      
-  - name: "edu-federation"
-    type: "openid_federation"
-    priority: 2
-    config:
-      trust_anchors:
-        - entity_id: "https://edugateway.org"
-      required_trust_marks:
-        - "https://edugateway.org/tm/accredited"
-        
-  - name: "company-did"
-    type: "did_web"
-    priority: 3
-    config:
-      allowed_domains:
-        - "*.company.internal"
+  etsi:
+    enabled: true
+    name: "eu-tsl"
+    cert_bundle: "/var/lib/go-trust/eu-certs.pem"
 
-resolution:
-  strategy: "first_match"
-  policy: "any_match"  # any_match, all_must_match
+  oidfed:
+    enabled: true
+    name: "edu-federation"
+    trust_anchors:
+      - entity_id: "https://edugateway.org"
+    required_trust_marks:
+      - "https://edugateway.org/tm/accredited"
+
+  didweb:
+    enabled: true
+    name: "company-did"
 ```
+
+Which registries a given request may consult, and any per-role constraints
+(allowed DID domains, ETSI service types, required trust marks), are expressed
+as **policies** — see below.
 
 ### LoTE Registry Configuration
 
@@ -240,6 +378,197 @@ The LoTE registry evaluates trust by:
 :::tip
 To create and publish LoTE documents, use `tsl-tool` from [g119612](https://github.com/sirosfoundation/g119612). See the [LoTE Publishing Guide](./lote-publishing) for a complete walkthrough.
 :::
+
+### mdoc Registries (ISO/IEC 18013-5)
+
+Three registries cover mdoc/mDL trust. They differ in *whose* certificate they
+authenticate and in where the list of trust anchors comes from, so they are not
+interchangeable.
+
+| Registry | Authenticates | Trust anchors come from |
+|---|---|---|
+| `mdociaca` | The mdoc **issuer** (document signer) | Each issuer's own OpenID4VCI metadata, fetched per issuer |
+| `vical` | The mdoc **issuer** | One centrally-published, COSE_Sign1-signed VICAL (Annex C) |
+| `mdocrical` | The mdoc **reader** | One centrally-published, COSE_Sign1-signed RICAL (Annex F) |
+
+#### mDOC IACA Registry
+
+Validates an issuer's X.509 chain against IACA (Issuing Authority Certificate
+Authority) certificates discovered from the issuer itself:
+
+1. The request carries the issuer URL in `subject.id` and the chain in `resource.key`
+2. The registry fetches the issuer's OpenID4VCI metadata and reads `mdoc_iacas_uri`
+3. It fetches the IACA certificates from that endpoint
+4. It path-validates the presented chain against them
+5. It optionally enforces an issuer allowlist
+
+```yaml
+registries:
+  mdociaca:
+    enabled: true
+    name: "mdoc-iaca"
+    # Static allowlist; a policy can add to it per role
+    issuer_allowlist:
+      - "https://pid-issuer.eudiw.dev"
+    cache_ttl: "1h"
+    http_timeout: "30s"
+```
+
+:::note A SIROS convention, not an ISO mechanism
+Discovering IACAs from each issuer's `mdoc_iacas_uri` is a convention of this
+stack, not something ISO/IEC 18013-5 defines. This registry never sees a real
+VICAL structure and so has no concept of per-certificate doctype restrictions.
+Where a genuine VICAL is available, prefer the `vical` registry below.
+:::
+
+#### VICAL Registry
+
+Authenticates mdoc **issuers** against a Verified Issuer Certificate Authority
+List per ISO/IEC 18013-5 Annex C — one centrally-published, COSE_Sign1-signed
+document fetched from a single provider URL and refreshed on a cache TTL.
+
+Its distinguishing feature is that it enforces each `CertificateInfo` entry's
+required `docType` list, which `mdociaca` cannot. Pass the doctype being
+presented as `doc_type` in the request context; when it is present and the
+matched entry does not list it, the request is denied with
+`certificate not listed in VICAL for docType "..."`.
+
+```yaml
+registries:
+  vical:
+    enabled: true
+    name: "vical"
+    vical_provider_url: "https://vical.example.org/vical.cbor"
+    # Out-of-band trust anchor for the VICAL's own COSE_Sign1 signature
+    vical_root_certificate_pem: |
+      -----BEGIN CERTIFICATE-----
+      ...
+      -----END CERTIFICATE-----
+    cache_ttl: "1h"
+    http_timeout: "30s"
+```
+
+#### RICAL Registry
+
+The reader-side mirror of VICAL: authenticates an mdoc **reader's** end-entity
+certificate for reader authentication (ISO/IEC 18013-5 second edition §9.1.4,
+Annex F). The RICAL is a single COSE_Sign1-signed document (F.3.2) fetched from
+one provider URL, so a RICAL Provider can update the list without any reader or
+wallet redeploy — which is what makes it workable during an interop test event.
+
+The presented chain is path-validated against the RICAL's trust-anchor-flagged
+`CertificateInfo` entries, and the first matching entry's `TrustConstraints`
+are applied, per F.3.2.6.
+
+```yaml
+registries:
+  mdocrical:
+    enabled: true
+    name: "rical"
+    rical_provider_url: "https://rical.example.org/rical.cbor"
+    rical_root_certificate_pem: |
+      -----BEGIN CERTIFICATE-----
+      ...
+      -----END CERTIFICATE-----
+    cache_ttl: "1h"
+    http_timeout: "30s"
+```
+
+:::info Annex F does not define root trust
+Neither annex says how the root that signs the list is itself trusted, so
+`vical_root_certificate_pem` / `rical_root_certificate_pem` must be configured
+out of band by the operator.
+:::
+
+### FIDO MDS3 Registry
+
+Validates FIDO2/CTAP2 authenticator attestation certificates against the
+[FIDO Alliance Metadata Service v3](https://fidoalliance.org/metadata/) — the
+official, signed, periodically-updated registry of certified authenticator
+models, their attestation roots, and their certification/revocation status.
+
+The registry fetches the MDS3 blob, verifies its JWT signature, indexes entries
+by AAGUID, and re-fetches on a ticker. An evaluation identifies the
+authenticator model by AAGUID (a UUID, in `subject.id`/`resource.id`) and
+presents the attestation `x5c` chain as the key.
+
+```yaml
+registries:
+  fidomds3:
+    enabled: true
+    name: "fido-mds3"
+    url: "https://mds3.fidoalliance.org/"
+    root_certificate_pem: |
+      -----BEGIN CERTIFICATE-----
+      ...
+      -----END CERTIFICATE-----
+    fetch_timeout: "30s"
+    refresh_interval: "24h"
+    # Optional on-disk copy, so a restart does not depend on MDS3 reachability
+    cache_path: "/var/lib/go-trust/mds3-blob.jwt"
+```
+
+Two policy constraints narrow it further:
+
+```yaml
+policies:
+  policies:
+    wallet-provider:
+      fidomds3:
+        # Only these models are trusted, whatever MDS3 says
+        allowed_aaguids:
+          - "d8522d9f-575b-4866-88a9-ba99fa02f35b"
+        # Denied even if MDS3 certifies them.
+        # Only consulted when allowed_aaguids is empty.
+        blocked_aaguids: []
+```
+
+### DID Registries
+
+Four registries cover DIDs. `didlocal` needs no network access; the other three
+fetch something.
+
+#### Self-Contained DID Methods (`didlocal`)
+
+Resolves DID methods that carry their own key material in the identifier —
+`did:key` and `did:jwk` — with no network access at all. The `methods` list
+selects which to enable; an empty list enables every self-contained method, and
+an unrecognised method name is a startup error rather than a warning.
+
+```yaml
+registries:
+  didlocal:
+    enabled: true
+    methods: ["key", "jwk"]
+```
+
+`did:web` and `did:webvh` are configured separately, under `didweb` and
+`didwebvh`, because they fetch and cache documents.
+
+#### did:jwks Registry
+
+Lets an existing OAuth2/OIDC JWKS endpoint be addressed as a DID. The DID
+document is generated from the fetched JWKS rather than published, so the
+method is purely generative.
+
+Resolution parses the DID into a domain and optional path (colons in the path
+become slashes), then tries `/.well-known/jwks.json` for a root DID or
+`/{path}/jwks.json` for a path DID, falling back to OAuth2/OIDC discovery of
+`jwks_uri`. A DID URL fragment matches either a JWK's `kid` or its RFC 7638
+thumbprint.
+
+```yaml
+registries:
+  didjwks:
+    enabled: true
+    timeout: "30s"
+    allow_http: false
+    insecure_skip_verify: false
+    # Skip the OAuth2/OIDC discovery fallback and use the well-known paths only
+    disable_oidc_discovery: false
+```
+
+Spec: [did-jwks](https://github.com/catena-labs/did-jwks/blob/main/SPEC.md).
 
 ### Static Registries
 
@@ -331,7 +660,13 @@ When no explicit `jwks_endpoint_pattern` is set, the registry discovers keys via
 - Standard metadata discovery works for your entities
 
 :::tip Key Validation
-The whitelist registry performs full cryptographic key validation by default. Each entity's JWKS is fetched at startup and periodically refreshed. The registry reports healthy only when keys for all configured entities have been successfully loaded.
+The whitelist registry performs full cryptographic key validation by default. Each entity's JWKS is fetched at startup and periodically refreshed.
+
+Note what "healthy" means here: the registry reports healthy when the most
+recent refresh loaded **at least one** key, not when every configured entity
+resolved. A single reachable entity is enough to keep `/readyz` green while
+others are failing, so use `GET /readyz?verbose=true` or the logs to confirm
+that the entity you care about actually has keys cached.
 :::
 
 ##### Trusting X.509 Cert-Based Verifiers (No JWKS)
@@ -402,6 +737,42 @@ Some real-world reader-CA roots are issued with a negative serial number (RFC 52
 | Field | YAML key | Default | Description |
 |---|---|---|---|
 | Additional trusted roots | `whitelist.additional_trusted_roots` | *(none)* | List of PEM-encoded CA certificates merged into `trust_x509_via_system_ca`'s chain-validation pool, for verifiers whose signing certificate chains to a custom root rather than a publicly-trusted one. |
+
+#### System Certificate Pool Registry
+
+Validates an X.509 chain against the **operating system's root CA store** —
+simple PKI trust with no trust list, no federation and no allowlist. Useful
+when the signing certificates already chain to a publicly-trusted CA.
+
+Its limitations are deliberate and worth stating: it does **not** check
+revocation (no CRL, no OCSP), it enforces no service types or trust
+frameworks, and it refuses resolution-only requests. Trust rests entirely on
+the system CA bundle. Chain verification uses `ExtKeyUsageAny`, so a
+certificate carrying only `id-kp-clientAuth` (as WRPACs often do) still
+validates.
+
+:::caution No config key
+This registry has no `registries.*` entry and `gt` never instantiates it — it
+is available only when embedding `pkg/registry/static`:
+
+```go
+reg, err := static.NewSystemCertPoolRegistry(static.SystemCertPoolConfig{
+    Name:        "system-ca",
+    Description: "System root CA certificates",
+})
+```
+
+For a server deployment, the two configurable equivalents are:
+
+- `registries.etsi` with a `cert_bundle` pointing at a PEM file of the roots
+  you want to trust — the ETSI registry is a plain trust pool when given no
+  TSL XML, and unlike the system pool it can be scoped by policy.
+- `registries.whitelist` with `trust_x509_via_system_ca: true`, which reaches
+  the same OS root pool but only as a fallback for entities that are already
+  whitelisted and have no fetchable JWKS. That is a narrower, safer door than
+  trusting every certificate the OS trusts; see
+  [Trusting X.509 Cert-Based Verifiers](#trusting-x509-cert-based-verifiers-no-jwks).
+:::
 
 #### Always-Trusted Registry
 
@@ -511,6 +882,7 @@ This ensures that the same registry instance can enforce different trust require
 | **DID:webvh** | `allowed_domains`, `required_services` | Same domain and service filtering as DID:web, adapted for the `did:webvh` method format. |
 | **DID (generic)** | `allowed_domains`, `required_services` | Applies domain and service constraints for both `did:web` and `did:webvh` methods. DIDs without extractable domains (e.g., `did:key`) pass domain checks automatically. |
 | **mDOC IACA** | `issuer_allowlist`, `require_iaca_endpoint` | Checks the issuer URL against a **policy allowlist** in addition to any static allowlist. Normalizes trailing slashes for consistent matching. |
+| **FIDO MDS3** | `allowed_aaguids`, `blocked_aaguids` | Restricts which certified authenticator models are accepted. `allowed_aaguids` is an exclusive list; `blocked_aaguids` is consulted only when it is empty. |
 
 ### How Routing Works
 
@@ -529,25 +901,29 @@ flowchart TD
 4. Go-Trust queries the specified registries using the configured resolution strategy
 5. Returns the aggregated trust decision
 
-### Resolution Strategies
+### Resolution Strategy
 
-When multiple registries are applicable, Go-Trust uses a **resolution strategy** to determine the outcome:
+When more than one registry is applicable, the registry manager aggregates
+their answers using a **resolution strategy**. The `gt` server runs with
+`first_match`: registries are evaluated in registration order and the first
+positive decision wins; if none is positive, the request is denied.
 
-| Strategy | Description |
-|----------|-------------|
-| `first_match` | Return the first registry that gives a positive decision |
-| `all_registries` | Query all registries, return positive if all agree |
-| `best_match` | Query all registries, return the highest confidence match |
-| `sequential` | Query registries in order, stop at first definitive answer |
+:::info Not configurable from YAML
+`first_match` is the only strategy the `gt` binary uses — there is no
+`resolution:` section in the configuration file. The other strategies
+(`all`, `best_match`, `sequential`) exist in `pkg/registry` and are selectable
+only when embedding the library, via
+`registry.NewRegistryManager(registry.Sequential, timeout)`.
 
-```yaml
-resolution:
-  strategy: "first_match"  # Default behavior
-```
+To narrow which registries a given role may use, list them in a policy's
+`registries:` field instead — see
+[Policy-Based Trust Decisions](#policy-based-trust-decisions).
+:::
 
-### Composite Registries (Boolean Logic)
+### Composite Registries (Boolean Logic) — library only
 
-For advanced trust policies, Go-Trust supports **composite registries** that combine multiple registries using boolean logic operators. Composite registries can be nested to express complex trust requirements.
+`pkg/registry` also provides **composite registries** that combine several
+registries with boolean logic. Child registries are evaluated in parallel.
 
 | Operator | Description |
 |----------|-------------|
@@ -556,50 +932,20 @@ For advanced trust policies, Go-Trust supports **composite registries** that com
 | `MAJORITY` | More than 50% of child registries must agree |
 | `QUORUM` | A configurable threshold of child registries must agree |
 
-All child registries are evaluated in parallel for optimal performance.
+:::caution Go API, not YAML
+Composite registries are built in code and cannot be declared in `config.yaml`
+— there is no `composite:` section. They are only available to programs that
+embed `pkg/registry`:
 
-```yaml
-# Example: require BOTH EU TSL and OpenID Federation
-composite:
-  name: "defense-in-depth"
-  operator: "AND"
-  registries:
-    - name: "eu-tsl"
-      type: "etsi_tsl"
-      config:
-        cert_bundle: "/var/lib/go-trust/eu-certs.pem"
-    - name: "oidf"
-      type: "openid_federation"
-      config:
-        trust_anchors:
-          - entity_id: "https://federation.example.com"
+```go
+orGroup := registry.NewCompositeRegistry("any-trust-list", registry.LogicOR, etsiReg, loteReg)
+root := registry.NewCompositeRegistry("nested-policy", registry.LogicAND, orGroup, oidfReg)
 ```
 
-**Nesting example** — trust requires `(TSL OR LoTE) AND OpenID Federation`:
-
-```yaml
-composite:
-  name: "nested-policy"
-  operator: "AND"
-  registries:
-    - name: "any-trust-list"
-      operator: "OR"
-      registries:
-        - name: "eu-tsl"
-          type: "etsi_tsl"
-          config:
-            cert_bundle: "/var/lib/go-trust/eu-certs.pem"
-        - name: "lote"
-          type: "lote"
-          config:
-            sources:
-              - "https://lote.example.org/lote-SE.json"
-    - name: "oidf"
-      type: "openid_federation"
-      config:
-        trust_anchors:
-          - entity_id: "https://federation.example.com"
-```
+For a server deployment, express the same intent with policies: a policy that
+names several `registries:` under the default `first_match` strategy gives OR
+semantics.
+:::
 
 ### Example: Multi-Tenant Trust
 
@@ -690,6 +1036,27 @@ curl -X POST http://localhost:6001/evaluation \
 }
 ```
 
+### Other Endpoints
+
+| Endpoint | Method | Purpose |
+|---|---|---|
+| `/.well-known/authzen-configuration` | GET | AuthZEN PDP discovery document; names the access-evaluation endpoint |
+| `/evaluation` | POST | The AuthZEN evaluation endpoint |
+| `/registries` | GET | Lists the registered registries with name, type, description, trust anchors, resource types, resolution-only flag and health |
+| `/healthz` | GET | Liveness |
+| `/readyz` | GET | Readiness; `?verbose=true` adds per-registry detail |
+| `/metrics` | GET | Prometheus metrics |
+| `/swagger/index.html` | GET | Swagger UI for the API |
+| `/info` | GET | **Deprecated** — use `/registries` |
+| `/tsls` | GET | **Deprecated** — use `/registries` |
+| `/status` | GET | **Deprecated** — use `/readyz` |
+
+Each deprecated endpoint still answers, but sets `Deprecation: true`, an
+`X-API-Warn` header and a `Link: <...>; rel="alternate"` pointing at its
+replacement.
+
+All of these are served on `server.host:server.port`.
+
 ### Resolution-Only Requests
 
 To resolve trust metadata without key validation:
@@ -735,6 +1102,7 @@ trust backends (whitelist, LoTE, ETSI TSL, OIDFed, etc.).
 |---|---|
 | `x509_san_dns:verifier.example.com` | `https://verifier.example.com` |
 | `x509_san_uri:https://issuer.example.com` | `https://issuer.example.com` |
+| `decentralized_identifier:did:web:issuer.example.com` | `did:web:issuer.example.com` |
 | `https://issuer.example.com` | `https://issuer.example.com` (unchanged) |
 | `did:web:issuer.example.com` | `did:web:issuer.example.com` (unchanged) |
 
@@ -751,7 +1119,7 @@ will match requests with `subject.id` set to either
 Configure the verifier to use go-trust for credential validation:
 
 ```yaml
-verifier_proxy:
+verifier:
   trust:
     # AuthZEN PDP URL — when set, operates in "default deny" mode
     pdp_url: "http://go-trust:6001"
@@ -761,10 +1129,11 @@ When `pdp_url` is set, all trust decisions are evaluated via the PDP. When omitt
 
 ### Issuer Configuration
 
-Configure the issuer to validate wallet attestations:
+The issuer-side trust block lives on **APIGW**, the service that terminates
+OpenID4VCI — `issuer` (the signing service) has no `trust` section:
 
 ```yaml
-issuer:
+apigw:
   trust:
     pdp_url: "http://go-trust:6001"
 ```
@@ -776,14 +1145,24 @@ issuer:
 Validates X.509 certificates against EU Trust Status Lists:
 
 ```yaml
-etsi:
-  enabled: true
-  trust_list_url: "https://ec.europa.eu/tools/lotl/eu-lotl.xml"
-  accepted_schemes:
-    - "http://uri.etsi.org/TrstSvc/TrustedList/schemerules/EUcommon"
-  accepted_service_types:
-    - "http://uri.etsi.org/TrstSvc/Svctype/EDS/Q"  # Qualified e-signatures
-    - "http://uri.etsi.org/TrstSvc/Svctype/QESIG"  # Qualified e-sig creation
+registries:
+  etsi:
+    enabled: true
+    allow_network_access: true
+    tsl_urls:
+      - "https://ec.europa.eu/tools/lotl/eu-lotl.xml"
+
+policies:
+  policies:
+    credential-issuer:
+      etsi:
+        # Filtering by service type is a policy constraint, not a
+        # registry setting: the registry builds a cert pool restricted
+        # to services matching these types.
+        service_types:
+          - "http://uri.etsi.org/TrstSvc/Svctype/CA/QC"
+        service_statuses:
+          - "http://uri.etsi.org/TrstSvc/TrustedList/Svcstatus/granted"
 ```
 
 ### OpenID Federation
@@ -791,21 +1170,27 @@ etsi:
 Validates entities via federation trust chains:
 
 ```yaml
-openid_federation:
-  enabled: true
-  trust_anchors:
-    - entity_id: "https://federation.example.com"
-      # Optional: pin to specific JWKS
-      jwks_uri: "https://federation.example.com/.well-known/jwks.json"
-  
-  # Require specific trust marks
-  required_trust_marks:
-    - "https://example.eu/tm/wallet-provider"
-    
-  # Limit to specific entity types
-  allowed_entity_types:
-    - "openid_provider"
-    - "openid_credential_issuer"
+registries:
+  oidfed:
+    enabled: true
+    trust_anchors:
+      - entity_id: "https://federation.example.com"
+        # Optional: pin the trust anchor's keys inline (a JWKS document,
+        # not a URL)
+        # jwks: '{"keys":[...]}'
+
+    # Require specific trust marks
+    required_trust_marks:
+      - "https://example.eu/tm/wallet-provider"
+
+    # Limit to specific entity types
+    entity_types:
+      - "openid_provider"
+      - "openid_credential_issuer"
+
+    cache_ttl: "5m"
+    max_cache_size: 1000
+    max_chain_depth: 5
 ```
 
 ### DID:web
@@ -813,15 +1198,22 @@ openid_federation:
 Resolves DIDs from web infrastructure:
 
 ```yaml
-did_web:
-  enabled: true
-  allowed_domains:
-    - "*.example.com"
-    - "issuer.trusted.org"
-  
-  # TLS requirements
-  require_tls: true
-  min_tls_version: "1.2"
+registries:
+  didweb:
+    enabled: true
+    timeout: "30s"
+    # HTTPS is required unless allow_http is set (testing only)
+    allow_http: false
+    insecure_skip_verify: false
+
+policies:
+  policies:
+    credential-issuer:
+      did:
+        # Domain restriction is a policy constraint, not a registry setting
+        allowed_domains:
+          - "*.example.com"
+          - "issuer.trusted.org"
 ```
 
 ### DID:webvh
@@ -829,17 +1221,18 @@ did_web:
 Resolves DIDs with verifiable history – an extension of DID:web providing cryptographic integrity:
 
 ```yaml
-did_webvh:
-  enabled: true
-  
-  # HTTP timeout for DID log resolution
-  timeout: "30s"
-  
-  # TLS verification (disable only for testing)
-  insecure_skip_verify: false
-  
-  # Allow HTTP (only for testing - production requires HTTPS)
-  allow_http: false
+registries:
+  didwebvh:
+    enabled: true
+
+    # HTTP timeout for DID log resolution
+    timeout: "30s"
+
+    # TLS verification (disable only for testing)
+    insecure_skip_verify: false
+
+    # Allow HTTP (only for testing - production requires HTTPS)
+    allow_http: false
 ```
 
 **Features:**
@@ -848,7 +1241,7 @@ did_webvh:
 - **Pre-rotation keys** – Supports secure key rotation with hash commitments
 - **Witness support** – Third-party attestation of DID state changes
 
-**Resource types:** `did_document`, `jwk`, `verification_method`
+**Resource types:** `jwk`
 
 **Resolution-only:** Yes – Can resolve DID documents without key binding validation
 
@@ -856,19 +1249,32 @@ did_webvh:
 
 ### Prometheus Metrics
 
-Go-Trust exposes metrics at `/metrics`:
+Go-Trust exposes metrics at `GET /metrics`, on the **same listener as the API**
+(`server.port`, default 6001) — there is no separate metrics port:
 
 ```
-# Trust evaluation latency
-go_trust_evaluation_duration_seconds{registry="eu-tsl",decision="allow"}
+# API traffic
+go_trust_api_requests_total{method="POST",endpoint="/evaluation",status="200"}
+go_trust_api_request_duration_seconds{method="POST",endpoint="/evaluation"}
+go_trust_api_requests_in_flight
 
-# Cache statistics
-go_trust_cache_hits_total{registry="eu-tsl"}
-go_trust_cache_misses_total{registry="eu-tsl"}
+# Errors
+go_trust_errors_total{type="...",operation="..."}
 
-# Registry health
-go_trust_registry_healthy{registry="eu-tsl"} 1
+# Certificate chain validation
+go_trust_cert_validation_total{result="success"}
+go_trust_cert_validation_duration_seconds
+
+# Trust list refresh / processing
+go_trust_refresh_execution_total
+go_trust_refresh_execution_errors_total
+go_trust_refresh_execution_duration_seconds
+go_trust_tsl_count
+go_trust_tsl_processing_duration_seconds
 ```
+
+Registry readiness is reported by `GET /readyz?verbose=true` rather than by a
+metric.
 
 ### Health Endpoints
 
@@ -878,7 +1284,15 @@ curl http://localhost:6001/healthz
 
 # Readiness (checks all registries)
 curl http://localhost:6001/readyz
+
+# Readiness with per-registry detail
+curl "http://localhost:6001/readyz?verbose=true"
 ```
+
+:::note
+`GET /status` still exists but is deprecated in favour of `/readyz`; it returns
+a `Link: </readyz>; rel="alternate"` header and an `X-API-Warn`.
+:::
 
 ## Kubernetes Deployment
 
@@ -904,8 +1318,6 @@ spec:
           ports:
             - containerPort: 6001
               name: http
-            - containerPort: 9090
-              name: metrics
           volumeMounts:
             - name: config
               mountPath: /config
@@ -940,8 +1352,6 @@ spec:
   ports:
     - name: http
       port: 6001
-    - name: metrics
-      port: 9090
 ```
 
 ## X5C Enrichment & Certificate Policy Validation
@@ -968,7 +1378,19 @@ flowchart LR
 
 ### Enabling Enrichment
 
-Enrichment is controlled via policy configuration. Add these fields to your policy to enable specific enrichment features:
+Enrichment is driven by five keys that the evaluation pipeline reads from the
+**request context**:
+
+| Context key | Type | Effect |
+|---|---|---|
+| `required_cert_policy_oids` | list of strings | Leaf certificate must carry at least one of these policy OIDs |
+| `extract_rp_identity` | bool | Return structured RP identity in `trust_metadata.rp_identity` |
+| `allowed_attributes` | list of strings | The RP's entitled attributes, for over-request detection |
+| `strict_entitlement_check` | bool | `true` rejects an over-request instead of warning |
+| `allow_intermediaries` | bool | Accept intermediary/broker presentation requests |
+
+They belong under a policy's `etsi:` block (`registry.ETSIPolicyConstraints`),
+alongside `service_types` and `service_statuses`:
 
 ```yaml
 policies:
@@ -977,17 +1399,34 @@ policies:
       description: "Verifier trust with enrichment"
       etsi:
         service_types:
-          - "http://uri.etsi.org/TrstSvc/Svctype/QCert"
-      # Enrichment options
-      require_cert_policy_oids:
-        - "0.4.0.194118.1.1"   # NCP natural person
-        - "0.4.0.194118.1.2"   # NCP legal person
-        - "0.4.0.194118.1.3"   # QCP natural person
-        - "0.4.0.194118.1.4"   # QCP legal person
-      extract_rp_identity: true
-      strict_entitlement_check: false  # true = reject over-requests
-      allow_intermediaries: false
+          - "http://uri.etsi.org/TrstSvc/Svctype/CA/QC"
+        # Enrichment options
+        required_cert_policy_oids:
+          - "0.4.0.194118.1.1"   # NCP natural person
+          - "0.4.0.194118.1.2"   # NCP legal person
+          - "0.4.0.194118.1.3"   # QCP natural person
+          - "0.4.0.194118.1.4"   # QCP legal person
+        extract_rp_identity: true
+        strict_entitlement_check: false  # true = reject over-requests
+        allow_intermediaries: false
 ```
+
+:::caution The `gt` config file does not yet carry these through
+`configurePoliciesFromConfig` in `cmd/gt/main.go` copies only `service_types`,
+`service_statuses` and `countries` from a YAML `etsi:` policy block into the
+runtime policy. The five enrichment keys above are therefore **silently
+dropped** when set in `config.yaml` on a stock `gt` server.
+
+Until that gap is closed, enrichment on a stock server is driven per request:
+the caller sets the keys directly in the AuthZEN request's `context` object.
+Note that `action.parameters` cannot be used for them — only `query`,
+`requested_attributes`, `credential_types` and `purpose` are accepted from
+there, precisely so a client cannot turn `strict_entitlement_check` off or
+inject its own `required_cert_policy_oids`.
+
+Programs embedding `pkg/registry` can set the fields on
+`registry.ETSIPolicyConstraints` directly, and they work as documented.
+:::
 
 ### Enriched Response
 
@@ -1065,8 +1504,8 @@ flowchart LR
 
 The detection pipeline:
 
-1. **Requested attributes** are extracted from the DCQL query in `action.parameters.dcql_query` or from `action.parameters.requested_attributes`
-2. **Allowed attributes** come from the RP's entitlements (extracted from the WRPAC certificate or looked up via the National Register)
+1. **Requested attributes** are taken from `context.requested_attributes` (an explicit flat list) if present, otherwise extracted from the DCQL query in `action.parameters.query`
+2. **Allowed attributes** come from `context.allowed_attributes` — the RP's entitlements, as extracted from the WRPAC certificate or looked up via the National Register
 3. **Comparison** identifies any attributes requested but not in the entitlement set
 4. **Decision** depends on `strict_entitlement_check` — either warn (default) or deny
 
@@ -1080,12 +1519,24 @@ Over-request detection can parse [DCQL (Digital Credentials Query Language)](../
 policies:
   policies:
     credential-verifier:
-      # Enable strict mode to reject over-requests
-      strict_entitlement_check: true
-      
-      # Allow presentations when no WRPRC/entitlement data is available
-      allow_without_wrprc: true
+      etsi:
+        # Enable strict mode to reject over-requests
+        strict_entitlement_check: true
+
+        # The attributes this RP is entitled to request
+        allowed_attributes:
+          - "given_name"
+          - "family_name"
+          - "birth_date"
 ```
+
+When no entitlement data is available — no `allowed_attributes` in the
+request context — over-request detection is skipped and the decision is
+unaffected. There is no separate opt-out flag for that case.
+
+See the caution under [Enabling Enrichment](#enabling-enrichment): on a stock
+`gt` server these keys must currently be supplied in the request context
+rather than in `config.yaml`.
 
 ### Over-Request in Response
 
@@ -1123,7 +1574,8 @@ When an intermediary certificate chain is present in the request context:
 policies:
   policies:
     credential-verifier:
-      allow_intermediaries: false  # default: reject intermediary requests
+      etsi:
+        allow_intermediaries: false  # default: reject intermediary requests
 ```
 
 :::caution
@@ -1134,11 +1586,16 @@ Intermediary certificate validation is currently informational only — the inte
 
 Go-Trust implements retry and stale-cache fallback for JWKS (JSON Web Key Set) fetching. When a JWKS endpoint is temporarily unavailable:
 
-1. **Retry** — failed fetches are retried with exponential backoff
-2. **Stale cache** — if retries fail, the last successfully fetched JWKS is served from cache
-3. **Health degradation** — the registry reports degraded health but continues operating
+1. **Retry** — transient failures (transport errors, 5xx) are retried with exponential backoff, doubling the delay after each attempt
+2. **Stale cache** — if every retry fails, the last successfully fetched value is returned from cache, without an error
 
 This prevents transient network issues from causing trust evaluation failures.
+
+There is no separate "degraded" health state: a registry is either healthy or
+not. Because a stale-cache hit is not a failure, a registry can keep reporting
+healthy while its upstream has been unreachable for some time — watch the logs
+(`TSL refresh failed`, JWKS refresh warnings) rather than `/readyz` to notice
+that.
 
 ## Next Steps
 

@@ -219,43 +219,51 @@ Contact SIROS ID support to configure your Keycloak as an IdP, providing:
 Create or update `config.yaml`:
 
 ```yaml
-issuer:
-  api_server:
-    addr: :8080
-  external_url: "https://issuer.example.com"
-
-  # Keycloak OIDC configuration
-  authentication:
-    type: oidc
-    client_id: "siros-issuer"
-    client_secret: "${KEYCLOAK_CLIENT_SECRET}"
-    issuer_url: "https://keycloak.example.com/realms/myrealm"
-    scopes:
-      - openid
-      - profile
-      - email
-      - credential-claims
-    
-    # Optional: additional OIDC settings
-    response_type: "code"
-    use_pkce: true
-    
-  # Claim mapping for credentials
-  credential_constructor:
-    pid:
-      vct: "urn:eudi:pid:arf-1.8:1"
-      auth_method: oidc
-      claim_mapping:
-        given_name: "$.claims.given_name"
-        family_name: "$.claims.family_name"
-        birth_date: "$.claims.birthdate"
-        nationality: "$.claims.nationality"
-        personal_id: "$.claims.personal_id"
-
 common:
   mongo:
     uri: mongodb://mongo:27017
+  credential_metadata:
+    pid:
+      vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
+      format: "dc+sd-jwt"
+
+apigw:
+  api_server:
+    addr: :8080
+  public_url: "https://issuer.example.com"
+
+  auth_providers:
+    # Keycloak as the OIDC Provider
+    oidc:
+      enable: true
+      issuer_url: "https://keycloak.example.com/realms/myrealm"
+      redirect_uri: "https://issuer.example.com/oidcrp/callback"
+      registration:
+        preconfigured:
+          enable: true
+          client_id: "siros-issuer"
+          client_secret: "keycloak-client-secret"
+      scopes:
+        - openid
+        - profile
+        - email
+        - credential-claims
+      # Normalise Keycloak's claim names where they differ from the VCTM's
+      attribute_mapping:
+        birthdate:
+          claim: "birth_date"
+
+  # The OIDC claims ARE the credential data for this scope
+  data_sources:
+    assertion:
+      scopes:
+        pid:
+          auth_provider: oidc
 ```
+
+PKCE is always used by the OIDC RP; there is no `use_pkce` switch. APIGW serves
+the callback at `/oidcrp/callback`, so `redirect_uri` must be that path on your
+`public_url`, and the same value must be registered in Keycloak.
 
 ### Docker Compose with Keycloak
 
@@ -292,49 +300,65 @@ Map Keycloak claims to specific credential types.
 ### Person Identification Data (PID)
 
 ```yaml
-credential_constructor:
-  pid:
-    vct: "urn:eudi:pid:arf-1.8:1"
-    auth_method: oidc
-    format: "vc+sd-jwt"
-    validity_days: 365
-    claim_mapping:
-      # Required PID claims
-      given_name: "$.claims.given_name"
-      family_name: "$.claims.family_name"
-      birth_date: "$.claims.birthdate"
-      
-      # Optional PID claims
-      nationality: "$.claims.nationality"
-      resident_country: "$.claims.resident_country"
-      gender: "$.claims.gender"
-      
-      # Issuer-specific
-      issuance_date: "$.now"
-      issuing_authority: "Example Authority"
-      issuing_country: "SE"
+common:
+  credential_metadata:
+    pid:
+      vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
+      format: "dc+sd-jwt"
+
+apigw:
+  data_sources:
+    assertion:
+      scopes:
+        pid:
+          auth_provider: oidc
+  auth_providers:
+    oidc:
+      attribute_mapping:
+        # Required PID claims — only entries that need renaming or a
+        # transform; standard OIDC claim names pass through unchanged.
+        birthdate:
+          claim: "birth_date"
+
+        # Optional PID claims released by Keycloak under a different name
+        country:
+          claim: "resident_country"
+          transform: "country_alpha2"
+
+        # A claim every credential should carry, even if the IdP omits it
+        issuing_country:
+          claim: "issuing_country"
+          default: "SE"
 ```
+
+Claims the IdP does not release at all (`issuance_date`, `issuing_authority`)
+are filled in by the issuer at signing time, not by configuration here.
 
 ### European Health Insurance Card (EHIC)
 
+EHIC data does not come from the IdP — the health insurance institution is the
+authentic source. Declare the type, then bind the scope to the `datastore`
+data source, using OIDC only to identify the person:
+
 ```yaml
-credential_constructor:
-  ehic:
-    vct: "urn:eudi:ehic:1"
-    auth_method: oidc
-    format: "vc+sd-jwt"
-    validity_days: 730
-    claim_mapping:
-      given_name: "$.claims.given_name"
-      family_name: "$.claims.family_name"
-      birth_date: "$.claims.birthdate"
-      personal_id: "$.claims.personal_id"
-      
-      # EHIC-specific (from external system or Keycloak attributes)
-      card_number: "$.claims.ehic_card_number"
-      institution_id: "$.claims.ehic_institution"
-      institution_country: "SE"
+common:
+  credential_metadata:
+    ehic:
+      vctm_file_path: "/metadata/vctm_ehic.json"
+      format: "dc+sd-jwt"
+
+apigw:
+  data_sources:
+    datastore:
+      scopes:
+        ehic:
+          auth_provider: oidc
+          # Claims used to look the person up in the datastore
+          auth_claims: ["given_name", "family_name", "birthdate"]
 ```
+
+The institution then pushes each person's EHIC document through the
+[Datastore API](./api-integration).
 
 ## Step 6: Test the Integration
 
@@ -565,54 +589,68 @@ Import this client configuration:
 ### Complete Issuer Configuration
 
 ```yaml
-issuer:
-  api_server:
-    addr: :8080
-    tls:
-      enabled: false
-      
-  external_url: "https://issuer.example.com"
-  
-  # Keycloak authentication
-  authentication:
-    type: oidc
-    client_id: "siros-issuer"
-    client_secret: "${KEYCLOAK_CLIENT_SECRET}"
-    issuer_url: "https://keycloak.example.com/realms/myrealm"
-    scopes:
-      - openid
-      - profile
-      - email
-      - credential-claims
-    use_pkce: true
-    
-  # Signing configuration
-  signing:
-    key_path: "/pki/issuer_key.pem"
-    algorithm: "ES256"
-    
-  # Credential types
-  credential_constructor:
-    pid:
-      vct: "urn:eudi:pid:arf-1.8:1"
-      auth_method: oidc
-      format: "vc+sd-jwt"
-      validity_days: 365
-      claim_mapping:
-        given_name: "$.claims.given_name"
-        family_name: "$.claims.family_name"
-        birth_date: "$.claims.birthdate"
-        nationality: "$.claims.nationality"
-        
-  # Trust configuration (optional)
-  trust:
-    pdp_url: "http://go-trust:6001"
-
 common:
   mongo:
     uri: mongodb://mongo:27017
   production: true
+  credential_metadata:
+    pid:
+      vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
+      format: "dc+sd-jwt"
+
+# Signing service
+issuer:
+  issuer_url: "https://issuer.example.com"
+  api_server:
+    addr: :8080
+  grpc_server:
+    addr: :8090
+  key_config:
+    private_key_path: "/pki/issuer_key.pem"
+    chain_path: "/pki/issuer_chain.pem"
+
+# OpenID4VCI front end
+apigw:
+  api_server:
+    addr: :8080
+    tls:
+      enable: false
+
+  public_url: "https://issuer.example.com"
+
+  issuer_client:
+    addr: issuer:8090
+
+  # Keycloak authentication
+  auth_providers:
+    oidc:
+      enable: true
+      issuer_url: "https://keycloak.example.com/realms/myrealm"
+      redirect_uri: "https://issuer.example.com/oidcrp/callback"
+      registration:
+        preconfigured:
+          enable: true
+          client_id: "siros-issuer"
+          client_secret: "keycloak-client-secret"
+      scopes:
+        - openid
+        - profile
+        - email
+        - credential-claims
+
+  data_sources:
+    assertion:
+      scopes:
+        pid:
+          auth_provider: oidc
+
+  # Trust configuration (optional)
+  trust:
+    pdp_url: "http://go-trust:6001"
 ```
+
+Credential validity is taken from the VCTM / issuance logic, not from a
+`validity_days` config key.
 
 ## Next Steps
 

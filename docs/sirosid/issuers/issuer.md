@@ -20,7 +20,8 @@ The SIROS ID issuer exposes standard OID4VCI endpoints. For a self-hosted or on-
 
 | Endpoint | URL |
 |----------|-----|
-| Credential Offer | `https://issuer.example.org/credential-offer` |
+| Credential Offer (by UUID) | `https://issuer.example.org/credential-offer/{credential_offer_uuid}` |
+| Offer page (per scope/wallet) | `https://issuer.example.org/offers/{scope}/{wallet_id}` |
 | Token | `https://issuer.example.org/token` |
 | Credential | `https://issuer.example.org/credential` |
 | Metadata | `https://issuer.example.org/.well-known/openid-credential-issuer` |
@@ -33,7 +34,7 @@ https://<tenant>.issuer.id.siros.org
 ```
 
 For example, tenant `acme-corp`:
-- `https://acme-corp.issuer.id.siros.org/credential-offer`
+- `https://acme-corp.issuer.id.siros.org/credential-offer/{credential_offer_uuid}`
 - `https://acme-corp.issuer.id.siros.org/.well-known/openid-credential-issuer`
 
 Each tenant has isolated configuration and its own credential types and signing keys.
@@ -141,14 +142,16 @@ See [API Integration](./api-integration) for complete documentation on:
 - Pre-authorized code configuration
 
 ```yaml
-issuer:
-  pre_authorized_code:
-    enabled: true
-    pin_required: false  # Optional: require PIN confirmation
-    code_ttl: 300        # Code expiration in seconds
+apigw:
+  auth_providers:
+    preauth:
+      # Generate a numeric transaction code (PIN) for each pre-authorized
+      # offer; the wallet must include it in the token request.
+      enable_pin: false
 ```
 
-Pre-authorized codes are generated via the API and can be used once to retrieve a credential without additional authentication.
+Pre-authorized offers are created by `POST /api/v1/datastore/preauth_offer` and
+can be used once to retrieve a credential without additional authentication.
 
 ## Supported Credential Types
 
@@ -218,6 +221,7 @@ The `auth_provider` field in each data source scope determines how the user is a
 | `oidc`          | User redirected to OIDC Provider; claims from ID token | [OIDC Provider](./oidc-op) |
 | `saml`          | User redirected to SAML IdP; claims from assertion | [SAML IdP](./saml-idp) |
 | `openid4vp`     | User presents a Verifiable Credential via OpenID4VP | [API Integration](./api-integration) |
+| `preauth`       | No user authentication; the offer itself carries a pre-authorized code. Only valid under `datastore`, and required by `/api/v1/datastore/preauth_offer` | [API Integration](./api-integration) |
 
 #### Choosing the Right Data Source
 
@@ -285,12 +289,21 @@ apigw:
 ```
 
 :::tip VCTM Files
-The VCTM file defines the credential schema, including claim definitions, display names, and localization. Example files are available in the [vc repository metadata directory](https://github.com/sirosfoundation/vc/tree/main/metadata).
+The VCTM file defines the credential schema, including claim definitions, display names, and localization. Example files are available in the [vc repository metadata directory](https://github.com/SUNET/vc/tree/main/metadata).
 :::
 
 ### Step 3: Configure Trust
 
-Establish trust with the SIROS ID ecosystem. See [Trust Services](../trust/) for details on:
+Point APIGW at a Go-Trust PDP; the trust frameworks themselves are configured
+in Go-Trust, not in the issuer:
+
+```yaml
+apigw:
+  trust:
+    pdp_url: "http://go-trust:6001"
+```
+
+See [Trust Services](../trust/) for details on:
 
 - ETSI TSL registration
 - OpenID Federation
@@ -307,6 +320,69 @@ The steps above cover how the issuer establishes *its own* trust with the ecosys
 3. **Scan QR code**: Use the wallet to scan and accept the credential
 4. **Verify**: Check that the credential appears in the wallet
 
+## Resolving Credential Types from a Registry
+
+Instead of shipping a VCTM file with every deployment, a scope can name a `vct`
+(or, for mdoc, a `doctype`) and have it resolved at runtime from a TS11
+credential-type registry such as [registry.siros.org](https://registry.siros.org):
+
+```yaml
+common:
+  credential_registry:
+    enable: true
+    # Ordered list of independent registries. A later entry overrides an
+    # earlier one for the same vct/doctype.
+    registries:
+      - mirrors:
+          # Endpoints serving the same logical registry's content
+          - base_url: "https://registry.siros.org"
+            timeout: "10s"
+    # How long a registry's discovery index is trusted before re-fetching.
+    # Zero fetches once and caches for the process lifetime.
+    refresh_interval: "1h"
+
+  credential_metadata:
+    diploma:
+      vct: "https://registry.siros.org/credentials/diploma"
+      format: "dc+sd-jwt"
+```
+
+`enable: true` is required — naming a `vct` in a scope does not itself turn
+registry lookups on. Scopes configured with `vctm_file_path`, `vctm_url`,
+`mddl_file_path` or `mddl_url` are unaffected either way.
+
+:::caution
+Switching a deployment to registry-backed resolution affects **all** SD-JWT
+issuance. Make sure every scope either resolves in the registry or still points
+at a local file before enabling it.
+:::
+
+## Embedded Disclosure Policies
+
+Per CIR 2024/2979 Annex III and ETSI TS 119 472-3 §4.2.5, a QEAA or PuB-EAA can
+carry a policy limiting which relying parties may receive it. It is optional and
+off by default; when omitted, no `disclosure_policy` field appears in the issuer
+metadata. It does not apply to PIDs.
+
+```yaml
+common:
+  credential_metadata:
+    diploma:
+      vctm_file_path: "/metadata/vctm_diploma.json"
+      format: "dc+sd-jwt"
+      disclosure_policy:
+        # none | authorized_relying_parties | specific_root_of_trust
+        policy_type: "authorized_relying_parties"
+        # Required for authorized_relying_parties: EU-wide unique RP
+        # identifiers, as found in the RP's registration certificate
+        authorized_relying_parties:
+          - "urn:eudi:rp:se:1234567890"
+```
+
+With `policy_type: "specific_root_of_trust"`, supply `trusted_roots` instead —
+hex-encoded SHA-256 fingerprints (64 characters) of the roots an RP's access
+certificate must chain to.
+
 ## Credential Offer Methods
 
 ### QR Code
@@ -314,7 +390,7 @@ The steps above cover how the issuer establishes *its own* trust with the ecosys
 Generate a QR code containing a credential offer:
 
 ```
-openid-credential-offer://?credential_offer_uri=https://issuer.example.org/offers/abc123
+openid-credential-offer://?credential_offer_uri=https%3A%2F%2Fissuer.example.org%2Fcredential-offer%2F<uuid>
 ```
 
 ### Deep Link
@@ -322,18 +398,29 @@ openid-credential-offer://?credential_offer_uri=https://issuer.example.org/offer
 For mobile apps, use a deep link:
 
 ```
-openid-credential-offer://issuer.example.org/offers/abc123
+openid-credential-offer://?credential_offer_uri=https%3A%2F%2Fissuer.example.org%2Fcredential-offer%2F<uuid>
 ```
+
+:::caution
+The scheme keeps its empty authority (`openid-credential-offer://?...`). Do not
+round-trip this URI through a URI parser that normalises `scheme://?query` to
+`scheme:?query` — several wallets reject the normalised form.
+:::
 
 ### Pre-authorized Flow
 
-For server-initiated issuance (e.g., when user completes registration):
+For server-initiated issuance (e.g., when the user completes registration),
+create the offer through the datastore API:
 
-```yaml
-credential_offer:
-  type: pre_authorized
-  pin_required: true  # Optional: require PIN confirmation
+```bash
+curl -X POST https://issuer.example.org/api/v1/datastore/preauth_offer \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{ "authentic_source": "hr.example.org", "scope": "diploma", "document_id": "..." }'
 ```
+
+Turn the transaction-code (PIN) requirement on with
+`apigw.auth_providers.preauth.enable_pin`.
 
 ## API Reference
 
@@ -357,11 +444,93 @@ Full API documentation is available at:
 https://issuer.example.org/swagger/index.html
 ```
 
+## Audit Logging
+
+Issuance events can be written to any combination of console, file and webhook:
+
+```yaml
+issuer:
+  audit_log:
+    enable: true
+    destinations:
+      - "stdout"
+      - "/var/log/audit.log"
+      - "https://audit.example.org/webhook"
+    # 0 fsyncs after every write (strict durability, lower throughput);
+    # >0 batches fsyncs at this interval (better throughput, bounded
+    # data-loss window). No effect on console or webhook destinations.
+    file_sync_interval: "5s"
+```
+
+## Rate Limiting
+
+APIGW rate-limits its wallet-facing endpoints per client IP:
+
+```yaml
+apigw:
+  rate_limit:
+    token_requests_per_minute: 20
+    credential_requests_per_minute: 30
+    credential_offer_requests_per_minute: 20
+    datastore_requests_per_minute: 60
+```
+
+Those four values are the defaults.
+
+The issuer's `SignMetadata` gRPC endpoint has its own limiter. In an HA
+deployment every APIGW node refreshes two documents (VCI + OAuth2), so raise it
+to suit the cluster size:
+
+```yaml
+issuer:
+  sign_metadata_rate_limit:
+    requests_per_second: 2
+    burst: 20
+```
+
+## Blind BBS Issuance
+
+The `jwp` credential format is enabled by the presence of `issuer.bbs`; absent,
+it is disabled entirely.
+
+```yaml
+issuer:
+  bbs:
+    # Raw BLS12-381 secret scalar, base64url-encoded.
+    # Exactly one of secret_key_path / secret_key must be set, and
+    # independently exactly one of public_key_path / public_key.
+    secret_key_path: "/pki/bbs_secret.b64"
+    public_key_path: "/pki/bbs_public.b64"
+    default_validity: "8760h"
+```
+
+:::caution The BBS key is necessarily a software key
+Every other key this issuer signs with is an ECDSA key over a digest, which is
+what PKCS#11 is built around. A BBS secret key is a BLS12-381 scalar consumed
+inside the signing algebra itself, so it cannot be handed to an HSM that only
+offers "sign these bytes" — and mainstream HSMs do not implement the curve at
+all. This is a known and accepted property of the format, not an oversight.
+Prefer the `_path` variants so the key stays out of the rendered config.
+:::
+
+## Pseudonymous mdoc Issuance
+
+```yaml
+issuer:
+  pseudonym_seed: true
+```
+
+When set, the issuer attaches a fresh random `pseudonym_seed` claim to each
+issued mdoc — but only where the MDDL schema declares `pseudonym_seed` as a
+claim in some namespace, and only when the caller did not already supply one.
+The toggle is deliberately decoupled from any particular namespace or doctype:
+the schema opting in is what drives it.
+
 ## Security Considerations
 
-1. **Key Management**: The issuer signs credentials with keys managed in secure HSMs
+1. **Key Management**: The issuer signs credentials with keys managed in secure HSMs, configured via `issuer.key_config.pkcs11` (the BBS key excepted, above)
 2. **Revocation**: Configure status lists for credential revocation
-3. **Audit Logging**: All issuance events are logged for compliance
+3. **Audit Logging**: See [Audit Logging](#audit-logging) above
 
 ## Self-Hosted Deployment
 

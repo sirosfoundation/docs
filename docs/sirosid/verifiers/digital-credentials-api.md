@@ -44,7 +44,7 @@ Enable the Digital Credentials API in your verifier configuration:
 verifier:
   digital_credentials:
     # Enable W3C Digital Credentials API
-    enabled: true
+    enable: true
     
     # Use JWT Authorization Request (JAR) for enhanced security
     use_jar: true
@@ -185,7 +185,7 @@ Optionally show users the credentials being shared before completing authorizati
 verifier:
   credential_display:
     # Enable credential preview
-    enabled: true
+    enable: true
     
     # Require user to review credentials
     require_confirmation: false
@@ -203,32 +203,34 @@ verifier:
 verifier:
   api_server:
     addr: :8080
-  external_server_url: "https://verifier.example.org"
-  
+  public_url: "https://verifier.example.org"
+
   key_config:
     private_key_path: "/pki/signing_key.pem"
     chain_path: "/pki/signing_chain.pem"
-  
-  oidc:
-    issuer: "https://verifier.example.org"
-    session_duration: 900
-    code_duration: 600
-    access_token_duration: 3600
-    id_token_duration: 3600
-    refresh_token_duration: 86400
-    subject_type: "pairwise"
-    subject_salt: "change-in-production"
-  
-  openid4vp:
-    presentation_timeout: 300
-    supported_credentials:
-      - vct: "urn:eudi:pid:arf-1.8:1"
-        scopes:
-          - "profile"
-          - "pid"
-  
+
+  outbound:
+    oidc_provider:
+      issuer: "https://verifier.example.org"
+      session_duration: 900
+      code_duration: 600
+      access_token_duration: 3600
+      id_token_duration: 3600
+      refresh_token_duration: 86400
+      subject_type: "pairwise"
+      subject_salt: "change-in-production"
+
+  inbound:
+    openid4vp:
+      presentation_timeout: 300
+      supported_credentials:
+        - vct: "urn:eudi:pid:arf-1.8:1"
+          scopes:
+            - "profile"
+            - "pid"
+
   digital_credentials:
-    enabled: true
+    enable: true
     use_jar: true
     preferred_formats:
       - "vc+sd-jwt"

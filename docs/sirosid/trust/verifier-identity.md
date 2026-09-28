@@ -13,8 +13,11 @@ When the verifier sends an OID4VP request to a wallet, it includes a `client_id`
 
 | Scheme | Format | Trust Resolution |
 |--------|--------|-----------------|
-| `x509_san_dns` (default) | `x509_san_dns:verifier.example.com` | Wallet verifies X.509 cert chain via ETSI TSL or CA trust |
-| `did` | `did:web:verifier.example.com` | Wallet resolves DID Document, verifies signature against DID keys |
+| `x509_san_dns` (default) | `x509_san_dns:verifier.example.com` | Wallet verifies the X.509 chain from `x5c` via ETSI TSL or CA trust, and checks the DNS name appears as a dNSName SAN |
+| `x509_hash` | `x509_hash:<sha256-of-leaf>` | Wallet pins the exact leaf certificate by digest; no chain validation |
+| `did` | `did:web:verifier.example.com` | Wallet resolves the DID Document and verifies the signature against the DID's keys |
+
+`verifier.client_id_scheme` accepts exactly these three values.
 
 ### X.509 SAN DNS (Default)
 
@@ -69,19 +72,109 @@ The verifier automatically serves a DID Document at `GET /.well-known/did.json`:
 }
 ```
 
+## EUDI Relying Party Certificates
+
+Beyond identifying itself cryptographically, a verifier operating in the EUDI
+ecosystem carries two Registrar-issued documents. They answer different
+questions and are configured independently.
+
+| | **WRPAC** — access certificate | **WRPRC** — registration certificate |
+|---|---|---|
+| Question it answers | *Is this the party it claims to be?* | *What is this party registered to request?* |
+| Form | X.509 certificate + key, per ETSI TS 119 411-8 | A compact JWT, media type `rc-wrp+jwt`, per ETSI TS 119 475 |
+| Travels as | The `x5c` chain on the signed request | The OpenID4VP `verifier_info` request parameter |
+| Config key | `verifier.access_certificate` | `verifier.registration_certificate` |
+
+### Access Certificate (WRPAC)
+
+`access_certificate` does not supply the certificate — that is
+`verifier.key_config` — it enforces the WRPAC profile against it at startup:
+
+```yaml
+verifier:
+  access_certificate:
+    # Enforce the profile at startup: keyUsage must include nonRepudiation,
+    # subjectAltName must carry a contact, certificatePolicies must contain
+    # a recognised WRPAC policy OID
+    validate: true
+    # Optionally narrow which policy OIDs are accepted, for a deployment
+    # that must assert a specific assurance level
+    allowed_policy_oids:
+      - "0.4.0.194118.1.3"   # QCP-n-eudiwrp
+      - "0.4.0.194118.1.4"   # QCP-l-eudiwrp
+```
+
+Off by default; deployments outside an ARF trust framework are unaffected. See
+[RP Certificate Profiles](./go-trust#rp-certificate-profiles) for the OID table
+and what a verifying party checks.
+
+### Registration Certificate (WRPRC)
+
+vc does not issue these. A national Registrar issues a WRPRC out of band,
+attesting what the party is registered to do; the configuration just points at
+the resulting file:
+
+```yaml
+verifier:
+  registration_certificate:
+    file_path: "/pki/wrprc.jwt"
+    # Format identifier advertised alongside it; override only for an
+    # ecosystem that has profiled a different identifier
+    format: "rc-wrp+jwt"
+    revocation:
+      mode: "warn"            # off | warn | fail
+      refresh_interval: "1h"
+```
+
+The same document travels in both directions, which is why one configuration
+type serves both sides: a verifier conveys it in `verifier_info` to attest what
+it may request, and a credential issuer conveys the same thing in OpenID4VCI
+`issuer_info` (`apigw.issuer_metadata.registration_certificate`) to attest what
+it may provide. Either way it feeds the wallet's consent dialog and policy
+checks.
+
+:::caution Revocation policy is recorded, not yet enforced
+The `revocation` block is the policy half only — it says what a check result
+should mean. No scheduler runs the check yet, so configuring it today records
+intent without anything being verified. `warn` is the deliberate default: an
+unreachable CRL or status list is evidence of neither revocation nor validity,
+so it is reported as undetermined and the service proceeds. Choose `fail` only
+if you would rather stop than carry on without an answer.
+
+This is operational hygiene rather than a security control — a wallet checks
+independently regardless. What it buys is learning that your certificate was
+revoked before your users do.
+:::
+
+An issuer needs the same pair, because under CIR (EU) 2025/848 a PID or
+attestation provider is a registered relying party in its own right:
+`issuer.access_certificate` is deliberately separate from `issuer.key_config`,
+since the credential signing key, an mdoc document-signer certificate and a
+WRPAC follow three different profiles and rotate independently. Conflating them
+would make a WRPAC rotation force a credential-key rotation.
+
 ## OpenID Federation Entity Configuration
 
 Both the issuer and verifier can participate in [OpenID Federation](./openid-federation.md) by serving an entity configuration. This enables wallets and other parties to discover and validate the service through federation trust chains.
 
+The `federation` block is nested under the service it belongs to —
+`verifier.federation` for the verifier, `apigw.federation` for the issuance
+front end:
+
 ```yaml
-federation:
-  enabled: true
-  entity_id: "https://verifier.example.com"  # defaults to public_url
-  authority_hints:
-    - "https://federation.sunet.se"
-  organization_name: "Example University"
-  logo_uri: "https://verifier.example.com/logo.png"
-  ttl: 86400  # seconds
+verifier:
+  federation:
+    enabled: true
+    entity_id: "https://verifier.example.com"  # defaults to public_url
+    authority_hints:
+      - "https://federation.sunet.se"
+    organization_name: "Example University"
+    logo_uri: "https://verifier.example.com/logo.png"
+    ttl: 86400  # seconds
+    # Optional: pre-issued trust marks
+    # trust_marks:
+    #   - id: "https://federation.sunet.se/tm/rp"
+    #     jwt: "eyJ..."
 ```
 
 When enabled, both the APIGW (issuer) and verifier serve a self-signed JWT at:

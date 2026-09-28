@@ -78,7 +78,7 @@ Token Status Lists are configured in the `registry.token_status_lists` section.
 registry:
   api_server:
     addr: :8080
-  external_server_url: "https://registry.example.org"
+  public_url: "https://registry.example.org"
   grpc_server:
     addr: :8090
   

@@ -207,7 +207,7 @@ Every credential must declare its governance properties:
 |-------|------|---------|-------------|
 | `version` | string | `"0.1.0"` | Credential schema version (semver). Can also be derived from git tags. |
 | `rulebook_uri` | string | *(auto-detected)* | URL to attestation rulebook. Registry-cli auto-generates this from co-located `rulebook.md` if present. |
-| `trusted_authorities` | array | *(empty)* | Trust framework references per TS11 §4.3.3. See [Trusted Authorities](#trusted-authorities) below. |
+| `trusted_authorities` | array | *(empty)* | Trust framework references per TS11 §4.3.3. See [Full Example with Trusted Authorities](#full-example-with-trusted-authorities) below. |
 
 ### Auto-Generated Fields
 

@@ -70,13 +70,22 @@ https://issuer.example.org/api/v1
 
 ### Authentication
 
-The `/api/v1` endpoints support two authentication methods (exactly one must be enabled):
+The `/api/v1` endpoints authenticate with a JWT Bearer token. There are two
+ways to configure key discovery, and they are mutually exclusive — enable at
+most one:
 
-- **JWT Bearer Token** (recommended for production): Requests include an `Authorization: Bearer <JWT>` header. Tokens are validated against a JWKS endpoint. Optional [SPOCP](https://github.com/sirosfoundation/go-spocp) rules enable fine-grained per-endpoint authorization.
-- **HTTP Basic Auth** (development / simple deployments): Standard username/password via `Authorization: Basic <base64>` header.
+- **Static JWKS** (`api_auth.jwks`): tokens are validated against a JWKS URL or a local JWKS file you name.
+- **OIDC discovery** (`api_auth.oidc`): the JWKS endpoint is discovered from the provider's `.well-known/openid-configuration`. The same block's RP fields also drive the admin UI login flow.
 
-:::tip Production recommendation
-Use JWT Bearer with SPOCP rules for production. This allows you to define per-endpoint access policies (e.g., only certain subjects can call `/upload` or `/revoke`). See [Configuration](#configuration) below for examples.
+In both cases requests carry an `Authorization: Bearer <JWT>` header, and
+optional [SPOCP](https://github.com/sirosfoundation/go-spocp) rules add
+fine-grained per-endpoint authorization.
+
+:::caution
+If neither `jwks` nor `oidc` is enabled, **no authentication is applied** and
+the `/api/v1` route group is open. There is no HTTP Basic Auth option for these
+endpoints. Always enable one of the two in any deployment reachable from
+outside the host.
 :::
 
 ### Endpoint Summary
@@ -87,17 +96,17 @@ The API is organized into two resource groups under `/api/v1`:
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/datastore/` | Upload a document |
+| POST | `/datastore` | Upload a document |
 | POST | `/datastore/bulk` | Bulk upload multiple documents |
-| GET | `/datastore/` | Get document by key (query params) |
-| POST | `/datastore` | Get document (body) |
-| PUT | `/datastore/` | Replace an existing document |
+| GET | `/datastore` | Get document by key (query params) |
+| PUT | `/datastore` | Replace an existing document |
 | DELETE | `/datastore` | Delete a document (body) |
 | POST | `/datastore/list` | List documents for an identity |
 | POST | `/datastore/resolve` | Resolve identity attributes to documents |
 | GET | `/datastore/search` | Search documents |
 | PUT | `/datastore/identity` | Add identity mapping IDs to a document |
 | DELETE | `/datastore/identity` | Remove identity mapping from a document |
+| POST | `/datastore/preauth_offer` | Create a pre-authorized credential offer for a document |
 
 #### Identity Mapping Endpoints (`/api/v1/identity/mapping`)
 
@@ -401,16 +410,16 @@ sequenceDiagram
 
 ### Configuration
 
-Enable pre-authorized code flow in the issuer configuration:
+The pre-authorized code flow needs no switch to turn on — creating an offer
+with `POST /api/v1/datastore/preauth_offer` is what enables it. The only
+setting is whether each offer carries a transaction code (PIN) the wallet must
+present at the token endpoint:
 
 ```yaml
-issuer:
-  pre_authorized_code:
-    enabled: true
-    # Optional: require user to enter a PIN
-    pin_required: false
-    # Code expiration (default: 5 minutes)
-    code_ttl: 300
+apigw:
+  auth_providers:
+    preauth:
+      enable_pin: false
 ```
 
 ### Credential Offer Format
@@ -608,6 +617,31 @@ If no rules are configured, any valid JWT grants full access. The `subject` is r
 Since v0.6.2, the issuer strictly validates that all six s-expression parts are present and in the correct order. Rules with missing or reordered parts will be rejected at startup.
 :::
 
+### Pre-Authorized Offers
+
+A scope can only be minted as a pre-authorized offer if its **datastore** entry
+declares `auth_provider: preauth`. `POST /api/v1/datastore/preauth_offer`
+rejects anything else with `invalid_scope`, so the endpoint cannot be used to
+bypass the SAML/OIDC/OpenID4VP flow another scope declares.
+
+```yaml
+apigw:
+  auth_providers:
+    preauth:
+      # Adds a numeric transaction code (PIN) to every pre-authorized offer,
+      # returned as tx_code and deliverable to the user out-of-band.
+      enable_pin: true
+
+  data_sources:
+    datastore:
+      scopes:
+        diploma:
+          auth_provider: preauth
+```
+
+The reply carries `credential_offer`, `credential_offer_url`, and `tx_code`
+when `enable_pin` is set.
+
 ### Credential Metadata
 
 Map credential scopes to VCTM files:
@@ -639,29 +673,36 @@ The authentic source defines which attributes to store when creating identity ma
 
 ### Error Response Format
 
+Errors are returned as a single `error` object with a `title` and a free-form
+`details` payload:
+
 ```json
 {
   "error": {
-    "code": "DOCUMENT_NOT_FOUND",
-    "message": "No document found with the specified ID",
-    "details": {
-      "authentic_source": "hr.example.org",
-      "document_id": "invalid-id"
-    }
+    "title": "NO_DOCUMENT_FOUND",
+    "details": "no document found"
   }
 }
 ```
 
-### Common Error Codes
+For validation failures, `details` carries the per-field breakdown rather than
+a string.
 
-| Code | HTTP Status | Description |
-|------|-------------|-------------|
-| `DOCUMENT_NOT_FOUND` | 404 | Document does not exist |
-| `IDENTITY_MISMATCH` | 403 | Identity attributes do not match |
-| `ALREADY_REVOKED` | 409 | Credential already revoked |
-| `INVALID_FORMAT` | 400 | Request body is malformed |
-| `UNAUTHORIZED` | 401 | Invalid or missing credentials |
-| `RATE_LIMITED` | 429 | Too many requests |
+### Common Error Titles
+
+| Title | Description |
+|-------|-------------|
+| `NO_DOCUMENT_FOUND` | Document does not exist |
+| `NO_DOCUMENT_DATA` | The document carries no `document_data` |
+| `DOCUMENT_ALREADY_EXISTS` | A document with this key is already stored |
+| `DOCUMENT_IS_REVOKED` | The credential has been revoked |
+| `DOCUMENT_VALIDATION_FAILED` | Document data failed VCTM schema validation |
+| `NO_IDENTITY_FOUND` | No identity mapping matched the supplied attributes |
+| `DUPLICATE_KEY` | Unique-key conflict in storage |
+| `NO_TRANSACTION_ID` | Required `transaction_id` missing |
+| `NO_REVOCATION_ID` | Required `revocation_id` missing |
+| `ERR_NO_KNOWN_VCT` | The requested credential type is not configured |
+| `INTERNAL_SERVER_ERROR` | Unhandled server-side failure |
 
 ---
 
