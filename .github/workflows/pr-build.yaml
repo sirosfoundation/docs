@@ -1,0 +1,60 @@
+name: PR Build
+
+on:
+  pull_request:
+    branches:
+      - main
+
+# Read-only: this job only builds the site to prove the PR doesn't break it.
+# Unlike build-pages.yaml it publishes nothing, so it needs no pages/id-token write.
+permissions:
+  contents: read
+
+# One build per PR: pushing again cancels the superseded run.
+concurrency:
+  group: "pr-build-${{ github.event.pull_request.number }}"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # The fetch-* steps below must stay in lockstep with build-pages.yaml.
+      # Most of the site's reference content is NOT committed here — it is
+      # pulled from SUNET/vc, sirosfoundation/go-trust and
+      # sirosfoundation/go-wallet-backend at build time and is gitignored. A
+      # build over only the committed content can pass while the real deploy
+      # fails, so the PR build fetches exactly what the deploy fetches.
+      #
+      # CONFIG_DOC_MAX_VERSIONS is deliberately left at the Makefile default
+      # (20 tags per repo): the whole fetch-config-docs step measures ~16s,
+      # so capping it would buy nothing worth a gap in coverage. Lowering it
+      # would stop the PR build from rendering the older per-release pages,
+      # and those pages are real routes that a PR can break (e.g. by moving
+      # the slug they link back to, or by adding a doc whose filename
+      # collides with a tag's page).
+      - name: Fetch API specs
+        run: make fetch-api-specs
+
+      - name: Fetch config docs
+        run: make fetch-config-docs
+
+      - name: Fetch release notes
+        run: make fetch-release-notes
+
+      # Fails the PR on a broken link: docusaurus.config.ts sets
+      # onBrokenLinks: 'throw'. Note that broken *anchors* only warn
+      # (Docusaurus 3 defaults onBrokenAnchors to 'warn'), so they will not
+      # fail this job.
+      - name: Build Docusaurus
+        run: pnpm build
