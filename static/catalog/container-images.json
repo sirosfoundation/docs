@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-29T14:17:04Z",
+  "generated": "2026-09-29T22:16:43Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -233,6 +233,9 @@
       "image": "ghcr.io/sirosfoundation/wallet-frontend",
       "repo": "sirosfoundation/wallet-frontend",
       "tags": [
+        "unstable-51a02cd",
+        "0.6.0",
+        "unstable-65cadf7",
         "unstable-28bb8a3",
         "unstable-4df31d1",
         "0.6.0-beta.3",
@@ -436,6 +439,8 @@
       "image": "ghcr.io/sirosfoundation/vc/apigw",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "3f16c39-amd64",
+        "0.7.20-sirosid.3-amd64",
         "pr699-f8d627e8a-amd64",
         "dev-71fa1a782bba99e0a656a181f251fdbc53ead9af",
         "33f8983-amd64",
@@ -531,6 +536,8 @@
       "image": "ghcr.io/sirosfoundation/vc/issuer",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "3f16c39-amd64",
+        "0.7.20-sirosid.3-amd64",
         "pr699-f8d627e8a-amd64",
         "33f8983-amd64",
         "0.7.20-sirosid.2-amd64",
@@ -645,6 +652,8 @@
       "image": "ghcr.io/sirosfoundation/vc/registry",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "3f16c39-amd64",
+        "0.7.20-sirosid.3-amd64",
         "pr699-f8d627e8a-amd64",
         "ffc3593-amd64",
         "0.7.20-sirosid.1-amd64",
@@ -755,6 +764,8 @@
       "image": "ghcr.io/sirosfoundation/vc/verifier",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "3f16c39-amd64",
+        "0.7.20-sirosid.3-amd64",
         "pr699-f8d627e8a-amd64",
         "ffc3593-amd64",
         "0.7.20-sirosid.1-amd64",
@@ -884,6 +895,7 @@
       "image": "ghcr.io/sirosfoundation/go-wallet-backend",
       "repo": "sirosfoundation/go-wallet-backend",
       "tags": [
+        "e4f3557",
         "16bc558",
         "5429917",
         "ea99002",
@@ -1271,6 +1283,9 @@
       "image": "ghcr.io/sirosfoundation/facetec-api",
       "repo": "sirosfoundation/facetec-api",
       "tags": [
+        "0.14",
+        "0.14.0",
+        "d6a5c25",
         "0.13.1",
         "d6c4a51",
         "0.13",
