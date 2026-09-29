@@ -303,6 +303,18 @@ Build and serve the registry with a live API. Inherits all `build` flags plus:
 | `--issuer` | — | JWT issuer claim |
 | `--jku` | — | JWS Key URL header |
 
+:::note `--base-url` default differs from `build`
+`serve` redeclares `--base-url` with its own empty default rather than
+reusing `build`'s `https://registry.siros.org` — when omitted, it falls back
+to `http://<addr>:<port>`. Pass it explicitly if you're serving behind a
+different public hostname (e.g. a reverse proxy).
+:::
+
+`serve` also mounts two live, query-filterable endpoints alongside the
+static `/api/v1/*.json` files described below: `GET /api/v1/schemas` and
+`GET /api/v1/attributes` (no `.json` suffix), supporting query parameters
+such as `attestationLoS`, `bindingType` and `supportedFormats`.
+
 ### `registry-cli sign`
 
 Sign API responses with JWS (RFC 7515). Supports ephemeral keys, SoftHSM, and hardware HSMs.
@@ -333,7 +345,7 @@ The generated registry includes a TS11-compliant JSON API:
 | `/api/v1/attributes.json` | Catalogue of attributes |
 | `/api/v1/openapi.yaml` | OpenAPI 3.1 specification |
 | `/.well-known/vctm-registry.json` | VCTM registry discovery |
-| `/api/v1/.well-known/jwks.json` | Public signing keys (when signing is enabled) |
+| `/.well-known/jwks.json` | Public signing keys (when signing is enabled) — root-level `.well-known`, not under `/api/v1/` |
 
 When JWS signing is enabled, all JSON responses are also available as `.jwt` files (JWS compact serialization).
 

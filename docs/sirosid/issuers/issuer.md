@@ -21,7 +21,7 @@ The SIROS ID issuer exposes standard OID4VCI endpoints. For a self-hosted or on-
 | Endpoint | URL |
 |----------|-----|
 | Credential Offer (by UUID) | `https://issuer.example.org/credential-offer/{credential_offer_uuid}` |
-| Offer page (per scope/wallet) | `https://issuer.example.org/offers/{scope}/{wallet_id}` |
+| Offer page (per scope) | `https://issuer.example.org/offers/{scope}` |
 | Token | `https://issuer.example.org/token` |
 | Credential | `https://issuer.example.org/credential` |
 | Metadata | `https://issuer.example.org/.well-known/openid-credential-issuer` |
@@ -622,7 +622,7 @@ apigw:
         preconfigured:
           enable: true
           client_id: "issuer-client"
-          client_secret: "${OIDC_CLIENT_SECRET}"
+          client_secret: "the-client-secret"
       scopes:
         - openid
         - profile

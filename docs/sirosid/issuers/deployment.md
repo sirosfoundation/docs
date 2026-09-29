@@ -143,7 +143,7 @@ Verifiable Credential Type Metadata files define each credential type's schema, 
 }
 ```
 
-Example VCTM files are available in the [vc repository](https://github.com/sirosfoundation/vc/tree/main/metadata).
+Example VCTM files are available in the [vc repository](https://github.com/SUNET/vc/tree/main/metadata).
 
 ### PKI Files
 

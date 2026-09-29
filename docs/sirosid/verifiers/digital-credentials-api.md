@@ -69,12 +69,13 @@ verifier:
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `enabled` | boolean | `false` | Enable W3C Digital Credentials API support |
+| `enable` | boolean | `false` | Enable W3C Digital Credentials API support (note: `enable`, not `enabled`) |
 | `use_jar` | boolean | `false` | Use JWT Authorization Request (JAR) |
-| `preferred_formats` | array | `["vc+sd-jwt"]` | Credential formats in preference order |
-| `response_mode` | string | `"direct_post"` | Response mode: `dc_api.jwt`, `direct_post.jwt`, `direct_post` |
+| `preferred_formats` | array | `["vc+sd-jwt", "dc+sd-jwt", "mso_mdoc"]` | Credential formats in preference order |
+| `response_mode` | string | `"dc_api.jwt"` | Response mode: `dc_api.jwt`, `direct_post.jwt`, `direct_post` |
 | `allow_qr_fallback` | boolean | `true` | Auto-fallback to QR if DC API unavailable |
-| `deep_link_scheme` | string | `"openid4vp://"` | Deep link scheme for mobile wallets |
+| `auto_attempt` | boolean | `true` | Whether the presentation UI calls `navigator.credentials.get()` immediately, before showing the same-device wallet link/QR screen. Set `false` to skip straight to that fallback screen — useful because some OS-level DC API matchers reject a non-standard format (e.g. `mso_mdoc_zk`) with their own dialog, with no JS-catchable failure to fall back from. |
+| `deep_link_scheme` | string | *(none)* | Deep link scheme for mobile wallets, e.g. `"eudi-wallet://"` — no built-in default; unset means no deep-link option is offered |
 
 ### Response Modes
 

@@ -276,7 +276,6 @@ services:
       - "8080:8080"
     environment:
       - VC_CONFIG_YAML=config.yaml
-      - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
     volumes:
       - ./config.yaml:/config.yaml:ro
       - ./pki:/pki:ro
@@ -405,64 +404,72 @@ echo $TOKEN | cut -d'.' -f2 | base64 -d | jq
 
 ### SAML Integration
 
-If your organization uses SAML instead of OIDC:
+If your organization uses SAML instead of OIDC, configure it under
+`apigw.auth_providers.saml` (not `issuer.authentication`, which no longer
+exists). Like the OIDC provider, `attribute_mapping` is keyed by the SAML
+attribute identifier, with the target claim name as the value:
 
 ```yaml
-issuer:
-  authentication:
-    type: saml
-    entity_id: "https://issuer.example.com/sp"
-    metadata_url: "https://keycloak.example.com/realms/myrealm/protocol/saml/descriptor"
-    
-    # Attribute mapping from SAML assertions
-    attribute_mapping:
-      given_name: "urn:oid:2.5.4.42"
-      family_name: "urn:oid:2.5.4.4"
-      email: "urn:oid:0.9.2342.19200300.100.1.3"
-      birthdate: "urn:oid:1.3.6.1.5.5.7.9.1"
+apigw:
+  auth_providers:
+    saml:
+      enable: true
+      entity_id: "https://issuer.example.com/sp"
+      acs_endpoint: "https://issuer.example.com/saml/acs"
+      certificate_path: "/pki/sp-cert.pem"
+      private_key_path: "/pki/sp-key.pem"
+      attribute_mapping:
+        "urn:oid:2.5.4.42":
+          claim: "given_name"
+        "urn:oid:2.5.4.4":
+          claim: "family_name"
+        "urn:oid:0.9.2342.19200300.100.1.3":
+          claim: "email"
+        "urn:oid:1.3.6.1.5.5.7.9.1":
+          claim: "birth_date"
+
+  data_sources:
+    assertion:
+      scopes:
+        pid:
+          auth_provider: saml
 ```
+
+Keycloak's SAML descriptor is discovered via `mdq_server` or a single
+`static_idp_metadata` entry, not `metadata_url` — see
+[Using SAML Authentication](../../howto/custom-sd-jwt-credential#using-saml-authentication)
+for the full SAML provider field reference.
 
 ### Conditional Credential Issuance
 
-Issue different credentials based on user roles or groups:
+There is no config-level "issue credential X only to role/group Y" gate —
+`issuer.credential_policies` (and `required_roles`/`required_groups`) do not
+exist in vc. What Keycloak roles and groups control is which OIDC scopes and
+attributes end up in the ID token in the first place (via client scope and
+mapper assignment, Step 3 above); apigw then only ever sees the claims
+Keycloak chose to release. Two ways to get role/group-gated behavior in
+practice:
 
-```yaml
-issuer:
-  credential_policies:
-    # Only users with 'employee' role get employee credentials
-    employee_id:
-      required_roles:
-        - "employee"
-      vct: "urn:example:employee:1"
-      
-    # Healthcare workers get EHIC credentials
-    ehic:
-      required_groups:
-        - "/healthcare"
-      vct: "urn:eudi:ehic:1"
-```
-
-In Keycloak, configure role/group mappers to include these in tokens.
+- Give each population its own `credential-claims`-style client scope in
+  Keycloak, and map each scope to a different `common.credential_metadata`
+  entry — a user without the scope simply cannot obtain that credential
+  type, because APIGW never sees the OIDC scope requested.
+- For issuance triggered from your own backend rather than by the wallet,
+  use the [pre-authorized flow](#pre-authorized-code-flow) below and decide
+  eligibility in your own code before calling the API.
 
 ### Multi-Realm Support
 
-Support users from multiple Keycloak realms:
+`apigw.auth_providers.oidc` configures exactly one OIDC provider — there is
+no `providers:` list, and `issuer.authentication` does not exist. A
+deployment cannot register two Keycloak realms as two separate OIDC
+providers in the same apigw instance today.
 
-```yaml
-issuer:
-  authentication:
-    type: oidc
-    providers:
-      - name: "employees"
-        issuer_url: "https://keycloak.example.com/realms/employees"
-        client_id: "siros-issuer-emp"
-        client_secret: "${KC_EMP_SECRET}"
-        
-      - name: "customers"
-        issuer_url: "https://keycloak.example.com/realms/customers"
-        client_id: "siros-issuer-cust"
-        client_secret: "${KC_CUST_SECRET}"
-```
+To serve users from more than one Keycloak realm, use Keycloak's own
+**Identity Brokering**: configure one realm (e.g. `myrealm`) as the OIDC
+provider apigw talks to, and add the other realms to it as brokered identity
+providers. Keycloak handles the realm selection and federates the login;
+apigw still only ever sees one `issuer_url`.
 
 ### Automated Credential Provisioning
 
@@ -477,10 +484,13 @@ public class CredentialProvisioningListener implements EventListenerProvider {
         if (event.getResourceType() == ResourceType.USER && 
             event.getOperationType() == OperationType.CREATE) {
             
-            // Trigger credential issuance via API
+            // Call POST /api/v1/datastore/preauth_offer (see
+            // "Pre-Authorized Code Flow" below) with this user's identity
+            // and the scope to issue. issuerClient is your own HTTP client,
+            // not part of vc.
             issuerClient.createCredentialOffer(
                 event.getResourcePath(),
-                "urn:eudi:pid:arf-1.8:1"
+                "pid"
             );
         }
     }
@@ -489,22 +499,25 @@ public class CredentialProvisioningListener implements EventListenerProvider {
 
 ### Pre-Authorized Code Flow
 
-For server-initiated issuance (e.g., batch provisioning):
+For server-initiated issuance (e.g., batch provisioning), skip OIDC entirely
+and create the offer through the datastore API — the scope's `datastore`
+entry must declare `auth_provider: preauth` (see
+[API Integration](./api-integration#pre-authorized-code-flow)):
 
 ```bash
-# Create a pre-authorized credential offer
-curl -X POST "https://issuer.example.com/offers" \
+curl -X POST "https://issuer.example.com/api/v1/datastore/preauth_offer" \
   -H "Authorization: Bearer ${SERVICE_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{
-    "credential_type": "urn:eudi:pid:arf-1.8:1",
-    "user_id": "keycloak-user-uuid",
-    "pre_authorized": true,
-    "pin_required": false
+    "authentic_source": "hr.example.org",
+    "scope": "pid",
+    "document_id": "keycloak-user-uuid"
   }'
 ```
 
-The response contains a credential offer URL that can be sent to users via email or displayed as a QR code.
+The response contains a credential offer that can be sent to users via email
+or displayed as a QR code, plus a `tx_code` when
+`apigw.auth_providers.preauth.enable_pin` is set.
 
 ## Troubleshooting
 
