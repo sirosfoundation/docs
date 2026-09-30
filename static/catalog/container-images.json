@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-30T14:19:44Z",
+  "generated": "2026-09-30T22:17:11Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -1308,6 +1308,7 @@
       "image": "ghcr.io/sirosfoundation/facetec-api",
       "repo": "sirosfoundation/facetec-api",
       "tags": [
+        "d085fe6",
         "9c92470",
         "0.14",
         "0.14.0",
