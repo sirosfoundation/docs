@@ -1,10 +1,11 @@
 {
-  "generated": "2026-09-30T06:30:46Z",
+  "generated": "2026-09-30T14:19:44Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
       "repo": "sirosfoundation/go-trust",
       "tags": [
+        "6e862ff",
         "0.23.2",
         "b0ec45c",
         "b6c9520",
@@ -235,6 +236,8 @@
       "image": "ghcr.io/sirosfoundation/wallet-frontend",
       "repo": "sirosfoundation/wallet-frontend",
       "tags": [
+        "unstable-cdb644a",
+        "unstable-a57beab",
         "unstable-51a02cd",
         "0.6.0",
         "unstable-65cadf7",
@@ -441,6 +444,8 @@
       "image": "ghcr.io/sirosfoundation/vc/apigw",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "0a8ffb6-amd64",
+        "0.7.20-sirosid.4-amd64",
         "3f16c39-amd64",
         "0.7.20-sirosid.3-amd64",
         "pr699-f8d627e8a-amd64",
@@ -538,6 +543,8 @@
       "image": "ghcr.io/sirosfoundation/vc/issuer",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "0a8ffb6-amd64",
+        "0.7.20-sirosid.4-amd64",
         "3f16c39-amd64",
         "0.7.20-sirosid.3-amd64",
         "pr699-f8d627e8a-amd64",
@@ -654,6 +661,8 @@
       "image": "ghcr.io/sirosfoundation/vc/registry",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "0a8ffb6-amd64",
+        "0.7.20-sirosid.4-amd64",
         "3f16c39-amd64",
         "0.7.20-sirosid.3-amd64",
         "pr699-f8d627e8a-amd64",
@@ -766,6 +775,8 @@
       "image": "ghcr.io/sirosfoundation/vc/verifier",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "0a8ffb6-amd64",
+        "0.7.20-sirosid.4-amd64",
         "3f16c39-amd64",
         "0.7.20-sirosid.3-amd64",
         "pr699-f8d627e8a-amd64",
@@ -897,6 +908,18 @@
       "image": "ghcr.io/sirosfoundation/go-wallet-backend",
       "repo": "sirosfoundation/go-wallet-backend",
       "tags": [
+        "a6b37e2",
+        "12d7d05",
+        "e651381",
+        "294a02b",
+        "87f5b95",
+        "37b76b7",
+        "ebf8cf6",
+        "97867b5",
+        "340a169",
+        "ffdea47",
+        "a3c204d",
+        "512f171",
         "e4f3557",
         "16bc558",
         "5429917",
@@ -1285,6 +1308,7 @@
       "image": "ghcr.io/sirosfoundation/facetec-api",
       "repo": "sirosfoundation/facetec-api",
       "tags": [
+        "9c92470",
         "0.14",
         "0.14.0",
         "d6a5c25",
