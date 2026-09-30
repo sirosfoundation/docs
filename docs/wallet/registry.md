@@ -69,7 +69,7 @@ The registry uses the same token validator as the other backend roles. With `reg
 
 - **New-style tokens** (ES256, ES384, EdDSA) are verified against the JWKS at `<as.external_url>/auth/.well-known/jwks.json`. The JWKS URL is always derived from `as.external_url`; it cannot be overridden. These tokens must carry the `wallet-registry` audience.
 - **Legacy HMAC tokens** are accepted only while `as.legacy.enabled` is `true`. They are checked against `jwt.secret` (at least 32 bytes) and are never rejected because of the audience.
-- The expected issuer is `as.issuer`, falling back to `jwt.issuer`.
+- The expected issuer differs by token type: new-style tokens must have been issued by `as.issuer` (falling back to `jwt.issuer` when `as.issuer` is empty), while legacy HMAC tokens must have been issued by `jwt.issuer`. Setting a custom `as.issuer` therefore does not change the issuer accepted for legacy tokens.
 
 ### Registry-only deployments with `require_auth: true`
 
@@ -78,7 +78,7 @@ A registry-only process does not run the authorization server (keep `as.enabled`
 | Setting | Why |
 |---------|-----|
 | `as.external_url` | Source of the JWKS |
-| `as.issuer` (or `jwt.issuer`) | Expected `iss` claim |
+| `as.issuer` (or `jwt.issuer`) | Expected `iss` of new-style tokens; legacy HMAC tokens use `jwt.issuer` (see above) |
 | `jwt.secret` or `jwt.secret_path` (at least 32 bytes) | Only while `as.legacy.enabled` is `true`; set `as.legacy.enabled: false` to drop it |
 
 Startup fails with a message naming any missing field.
@@ -113,7 +113,7 @@ The `cmd/registry` binary, `configs/registry.yaml`, `configs/registry.production
 
 | Release | Behaviour |
 |---------|-----------|
-| The release including go-wallet-backend#431 | `--registry-config` (default `configs/registry.yaml`), that file and the `REGISTRY_*` variables still work as deprecated aliases. They are mapped onto `registry:` and a `DEPRECATED` warning names the new location. If the new `registry:` section (or `WALLET_REGISTRY_*`) is also set, the new section wins entirely and a second warning says the old configuration is ignored. |
+| The release including go-wallet-backend#431 | `--registry-config` (default `configs/registry.yaml`), that file and the `REGISTRY_*` variables still work as deprecated aliases. They are mapped onto `registry:` and a `DEPRECATED` warning names the new location. If the new `registry:` section (or `WALLET_REGISTRY_*`) is also set, the two are merged per key: keys set explicitly in the new section win, the remaining keys are filled from the deprecated file and variables, and a second warning lists the keys where the two disagree. Deprecated values therefore still affect runtime until the aliases are removed. |
 | The next release | The aliases and the `--registry-config` flag are removed. |
 
 If you pass an old-layout file with `--config` by mistake, top-level registry keys (`source`, `cache`, `filter`, ...) are not applied and a warning tells you to move them under `registry:`.
@@ -130,7 +130,7 @@ If you pass an old-layout file with `--config` by mistake, top-level registry ke
 | `rate_limit.*` | `registry.rate_limit.*` |
 | `jwt.require_auth` | `registry.require_auth` (`WALLET_REGISTRY_REQUIRE_AUTH`) |
 | `jwt.secret`, `jwt.secret_path` | top-level `jwt.secret` / `jwt.secret_path` (legacy HMAC only) |
-| `jwt.issuer` | `as.issuer` (falls back to `jwt.issuer`) |
+| `jwt.issuer` | top-level `jwt.issuer`, which is the issuer of legacy HMAC tokens (new-style tokens use `as.issuer`, falling back to `jwt.issuer`) |
 | `server.host`, `server.port` | `server.registry_host`, `server.registry_port` when the registry runs alone; the shared `server.host` / `server.port` when combined |
 | `server.cors`, `server.tls`, `server.served_by_header` | same keys in the backend's `server` section |
 | `logging.*` | `logging.*` |
