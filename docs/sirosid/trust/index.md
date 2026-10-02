@@ -348,6 +348,10 @@ actions:
 The whitelist registry performs full key validation by fetching each entity's JWKS and computing key fingerprints. See [Go-Trust Whitelist Registry](./go-trust#whitelist-registry) for details on JWKS discovery and configuration options, including `trust_x509_via_system_ca` for whitelisting X.509 cert-authenticated verifiers (`x509_san_dns`/`x509_hash` client_id_schemes) that have no JWKS to fetch.
 :::
 
+### eMRTD Document Signers (ePassport / ID chips)
+
+For identity documents with an ICAO 9303 chip, Go-Trust's `emrtd` registry decides whether the chip's Document Signer Certificate chains to a Country Signing CA (CSCA) in a reviewed set of anchors that you maintain, for the issuing state the document claims. It complements the service that verifies the chip's signed data: that service checks the SOD, Go-Trust decides whether the signer is trusted. Trust comes only from the anchors you review. See [eMRTD Document Signer Trust](./emrtd-document-signer).
+
 ## Trust Configuration
 
 ### For Issuers
@@ -544,6 +548,7 @@ Both of these disable trust enforcement entirely. Never use them in production.
 ## Next Steps
 
 - [Go-Trust AuthZEN Service](./go-trust.md) – Deploy trust abstraction layer
+- [eMRTD Document Signer Trust](./emrtd-document-signer.md) – Verify ePassport and ID chip signers against reviewed CSCA anchors
 - [Quick Start Guide](../quickstart)
 - [Issuer Configuration](../issuers/issuer)
 - [Verifier Configuration](../verifiers/verifier)
