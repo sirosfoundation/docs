@@ -1,10 +1,12 @@
 {
-  "generated": "2026-10-02T14:19:17Z",
+  "generated": "2026-10-02T22:16:12Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
       "repo": "sirosfoundation/go-trust",
       "tags": [
+        "28a2f7b",
+        "0388f34",
         "0.24",
         "0.24.0",
         "741f63e",
