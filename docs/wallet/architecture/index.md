@@ -29,9 +29,9 @@ A **Go service** (Gin framework) that can run as a single process or as separate
 | `backend` | 8080 | HTTP REST | User auth, credential CRUD, issuer/verifier metadata, proxy |
 | `engine` | 8082 | WebSocket | Real-time OID4VCI/OID4VP session management |
 | `admin` | 8081 | HTTP REST | Tenant and user administration (token-protected) |
-| `registry` | 8097 | HTTP REST | VCTM (Verifiable Credential Type Metadata) registry |
+| `registry` | 8097 | HTTP REST | VCTM (Verifiable Credential Type Metadata) registry — see [VCTM Registry Role](../registry) |
 
-In a small deployment, run all roles in a single process with `--mode=all`. For production with horizontal scaling, run each role as a separate container and connect them via `external_urls`.
+Roles are selected with `--mode` and can be combined (for example `--mode=backend,registry`). In a small deployment, run all roles in a single process with `--mode=all`. For production with horizontal scaling, run each role as a separate container and connect them via `external_urls`.
 
 ### Go-Trust
 

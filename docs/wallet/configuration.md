@@ -97,6 +97,8 @@ The backend is configured via a **YAML config file** and/or **environment variab
 | `WALLET_SERVER_ENGINE_PORT` | `server.engine_port` | `8082` | WebSocket engine port |
 | `WALLET_SERVER_ADMIN_PORT` | `server.admin_port` | `8081` | Admin API port |
 | `WALLET_SERVER_ADMIN_TOKEN` | `server.admin_token` | Auto-generated | Bearer token for admin API access |
+| `WALLET_SERVER_REGISTRY_HOST` | `server.registry_host` | Same as `server.host` | Bind address of a registry-only process |
+| `WALLET_SERVER_REGISTRY_PORT` | `server.registry_port` | `8097` | Port of a registry-only process |
 
 ### Storage
 
@@ -174,6 +176,10 @@ external_urls:
   registry_url: "https://wallet-registry.example.com"
   admin_url: "https://wallet-admin.internal.example.com"
 ```
+
+### VCTM Registry
+
+The `registry` role (`--mode=registry`) is configured by a `registry:` section of the backend config, with environment variables prefixed `WALLET_REGISTRY_` (for example `WALLET_REGISTRY_SOURCE_URL`, `WALLET_REGISTRY_REQUIRE_AUTH`). See [VCTM Registry Role](./registry) for the keys, authentication requirements and migration from the retired `registry.yaml` / `REGISTRY_*` configuration (applies from the release including go-wallet-backend#431).
 
 ### Logging
 
