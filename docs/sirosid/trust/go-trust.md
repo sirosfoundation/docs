@@ -207,6 +207,7 @@ to use it from `config.yaml`:
 | mDOC IACA | `mdociaca` | mdoc **issuer** chains against IACA certificates fetched from OpenID4VCI issuers | `x5c` | No |
 | VICAL | `vical` | mdoc **issuer** certificates against an ISO/IEC 18013-5 Annex C Verified Issuer CA List, including its per-certificate doctype restrictions | `x5c` | No |
 | RICAL | `mdocrical` | mdoc **reader** certificates against a Reader Identity CA List (ISO/IEC 18013-5 2nd ed. Annex F) | `x5c` | No |
+| eMRTD document signer | `emrtd` | ePassport/ID chip Document Signer Certificates against a reviewed set of CSCA anchors, per issuing state; see [eMRTD Document Signer Trust](./emrtd-document-signer) | `x5c` | No |
 | FIDO MDS3 | `fidomds3` | FIDO2/CTAP2 authenticator attestation certificates against the FIDO Alliance Metadata Service v3 blob | `x5c` | No |
 | Always-trusted | `always_trusted` | Nothing — returns `decision: true` | `*` | Yes |
 | Never-trusted | `never_trusted` | Nothing — returns `decision: false` | `*` | Yes |
@@ -489,6 +490,30 @@ Neither annex says how the root that signs the list is itself trusted, so
 `vical_root_certificate_pem` / `rical_root_certificate_pem` must be configured
 out of band by the operator.
 :::
+
+### eMRTD Document Signer Registry
+
+The `emrtd` registry decides whether the Document Signer Certificate (DSC) of an electronic passport or ID card chains, for the claimed issuing state, to a Country Signing CA (CSCA) in a reviewed anchor directory. The policy enforcement point verifies the chip's SOD itself and sends only the DSC and any other certificates carried in the SOD. The registry never sees the SOD or any personal data. It is available from v0.24.0.
+
+```yaml
+registries:
+  emrtd:
+    enabled: true
+    name: emrtd-csca
+    anchors_dir: /etc/go-trust/emrtd/anchors   # <ALPHA3>/*.pem, e.g. SWE/
+    crls_dir: /etc/go-trust/emrtd/crls         # optional, <ALPHA3>/*.crl
+    watch: true
+
+policies:
+  policies:
+    emrtd-document-signer:
+      registries: [emrtd-csca]
+      constraints:
+        require_key_binding: true
+        allowed_key_types: [x5c]
+```
+
+See [eMRTD Document Signer Trust](./emrtd-document-signer) for the anchor directory format, request and response, deny codes, validation rules and deployment.
 
 ### FIDO MDS3 Registry
 
@@ -892,6 +917,7 @@ This ensures that the same registry instance can enforce different trust require
 | **DID:webvh** | `allowed_domains`, `required_services` | Same domain and service filtering as DID:web, adapted for the `did:webvh` method format. |
 | **DID (generic)** | `allowed_domains`, `required_services` | Applies domain and service constraints for both `did:web` and `did:webvh` methods. DIDs without extractable domains (e.g., `did:key`) pass domain checks automatically. |
 | **mDOC IACA** | `issuer_allowlist`, `require_iaca_endpoint` | Checks the issuer URL against a **policy allowlist** in addition to any static allowlist. Normalizes trailing slashes for consistent matching. |
+| **eMRTD** | `constraints` (`require_key_binding`, `allowed_key_types`); optional `emrtd.path_len_mode`, `emrtd.path_len_override` | Routes the `emrtd-document-signer` action to the registry and requires an `x5c` key. The `emrtd` block opts in to `pathLenConstraint` enforcement (default: ignored); clients cannot set it. See [eMRTD Document Signer Trust](./emrtd-document-signer#path-length). |
 | **FIDO MDS3** | `allowed_aaguids`, `blocked_aaguids` | Restricts which certified authenticator models are accepted. `allowed_aaguids` is an exclusive list; `blocked_aaguids` is consulted only when it is empty. |
 
 ### How Routing Works
