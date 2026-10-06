@@ -29,13 +29,13 @@ https://developers.siros.org/catalog/container-images.json
 | `ghcr.io/sirosfoundation/vc/ui` | [sirosfoundation/vc](https://github.com/sirosfoundation/vc) | `v0.5.0-sirosid.4` | `dev-056efd6` | v0.5.0-sirosid.4, v0.5.0-sirosid.3, v0.5.0-sirosid.2, v0.5.0-sirosid.1 |
 | `ghcr.io/sirosfoundation/vc/verifier` | [sirosfoundation/vc](https://github.com/sirosfoundation/vc) | `0.7.20-sirosid.4-amd64` | `dev-56c4e10083dcd8aafcc76d91a8dbf3fbd459071a` | 0.7.20-sirosid.4-amd64, 0.7.20-sirosid.3-amd64, 0.7.20-sirosid.1-amd64, 0.7.20-sirosid.2-amd64, 0.7.20-sirosid.0-amd64, 0.7.5-sirosid.0, 0.7.3-sirosid.0, 0.7.0-sirosid.1, 0.7, 0.7.0 |
 | `ghcr.io/sirosfoundation/go-spocp` | [sirosfoundation/go-spocp](https://github.com/sirosfoundation/go-spocp) | `0.1` | `e4d1845` | 0.1, 0.1.0 |
-| `ghcr.io/sirosfoundation/go-wallet-backend` | [sirosfoundation/go-wallet-backend](https://github.com/sirosfoundation/go-wallet-backend) | `0.22.3` | `25104f0` | 0.22.3, 0.22.2, 0.22.1, 0.22, 0.22.0, 0.21, 0.21.0, 0.20, 0.20.0, 0.19 |
+| `ghcr.io/sirosfoundation/go-wallet-backend` | [sirosfoundation/go-wallet-backend](https://github.com/sirosfoundation/go-wallet-backend) | `0.22.3` | `8ee620d` | 0.22.3, 0.22.2, 0.22.1, 0.22, 0.22.0, 0.21, 0.21.0, 0.20, 0.20.0, 0.19 |
 | `ghcr.io/sirosfoundation/goff` | [sirosfoundation/goFF](https://github.com/sirosfoundation/goFF) | `0.1` | `d290f66` | 0.1, 0.1.0 |
 | `ghcr.io/sirosfoundation/facetec-api` | [sirosfoundation/facetec-api](https://github.com/sirosfoundation/facetec-api) | `0.15` | `6d2190c` | 0.15, 0.15.0, 0.14, 0.14.0, 0.13.1, 0.13, 0.13.0, 0.12, 0.12.0, 0.11 |
 | `ghcr.io/sirosfoundation/go-invite-op` | [sirosfoundation/go-invite-op](https://github.com/sirosfoundation/go-invite-op) | - | `9965482` |  |
-| `ghcr.io/sirosfoundation/go-grc` | [sirosfoundation/go-grc](https://github.com/sirosfoundation/go-grc) | `0.14` | `eb902b4` | 0.14, 0.14.0, 0.13.2, 0.13.1, 0.13, 0.13.0, 0.12, 0.12.0, 0.11.2, 0.11.1 |
+| `ghcr.io/sirosfoundation/go-grc` | [sirosfoundation/go-grc](https://github.com/sirosfoundation/go-grc) | `0.15` | `1745eed` | 0.15, 0.15.0, 0.14, 0.14.0, 0.13.2, 0.13.1, 0.13, 0.13.0, 0.12, 0.12.0 |
 | `ghcr.io/sirosfoundation/registry-cli` | [sirosfoundation/registry-cli](https://github.com/sirosfoundation/registry-cli) | `0.17` | `b3037df` | 0.17, 0.17.0, 0.16, 0.16.0, 0.15, 0.15.0, 0.14.1, 0.14, 0.14.0, 0.13.1 |
 | `ghcr.io/sirosfoundation/go-r2ps-service` | [sirosfoundation/go-r2ps-service](https://github.com/sirosfoundation/go-r2ps-service) | `0.1` | `45a5174` | 0.1, 0.1.0, 0.0, 0.0.1 |
 | `ghcr.io/sirosfoundation/mini-oidc` | [sirosfoundation/mini-oidc](https://github.com/sirosfoundation/mini-oidc) | `0.0.5` | `sha-5670a18` | 0.0.5, 0.0.4, 0.0.3, 0.0.2, 0.0, 0.0.1 |
 
-_Last updated: 2026-10-06T14:18:19Z_
+_Last updated: 2026-10-06T22:17:06Z_
