@@ -103,10 +103,12 @@ but the token endpoint currently reads `client_id` and `client_secret` only from
 the form body and does not parse an HTTP `Authorization: Basic` header. Register
 with `client_secret_post`, and configure your OIDC library to send the client
 credentials in the request body (the examples below show how).
+
+Known issue: https://github.com/SUNET/vc/issues/758
 :::
 
 Refresh tokens are not implemented: only the `authorization_code` grant is
-supported and no `refresh_token` is ever returned.
+supported and no `refresh_token` is ever returned. Known issue: https://github.com/SUNET/vc/issues/759
 
 ### Public Clients (SPAs, Mobile Apps)
 
@@ -135,7 +137,7 @@ works only if the verifier operator has listed its origin under
 Every client registered through `/register`, public or confidential, must use
 PKCE with `S256`: an `/authorize` request without a `code_challenge` fails with
 `invalid_request`. (Clients declared statically in the verifier's configuration
-are not subject to this.)
+are not subject to this; known issue: https://github.com/SUNET/vc/issues/757.)
 
 ## Step 2: Discover Endpoints
 

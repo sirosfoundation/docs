@@ -181,7 +181,7 @@ templates:
 ```
 
 All templates in the directory are active. A template's `enabled` field cannot
-disable it (`enabled: false` is overridden to `true` on load); remove the file
+disable it (`enabled: false` is overridden to `true` on load; known issue: https://github.com/SUNET/vc/issues/754); remove the file
 instead.
 
 Point the verifier at the directory with

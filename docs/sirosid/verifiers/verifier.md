@@ -190,6 +190,8 @@ Refresh tokens are not implemented: the verifier only supports the
 `authorization_code` grant. Registration accepts `refresh_token` in
 `grant_types` but the token endpoint rejects it with
 `unsupported_grant_type`.
+
+Known issue: https://github.com/SUNET/vc/issues/759
 :::
 
 :::caution Client authentication at the token endpoint
@@ -198,6 +200,8 @@ and discovery advertises it, but the token endpoint currently reads
 `client_id` and `client_secret` only from the form body. Register with
 `client_secret_post` (as above) and configure your OIDC library to send the
 credentials in the request body.
+
+Known issue: https://github.com/SUNET/vc/issues/758
 :::
 
 ### Static Registration
@@ -233,7 +237,7 @@ verifier:
 
 If `allowed_scopes` is omitted it defaults to `openid`, `profile`, `email`,
 `address` and `phone`, which does not include your credential scopes. PKCE is
-not enforced for static clients.
+not enforced for static clients (known issue: https://github.com/SUNET/vc/issues/757).
 
 ## Configuring Presentation Requests
 
@@ -297,7 +301,7 @@ templates:
 
 Every template in the directory is active; to disable one, remove it from the
 directory. (A template's `enabled` field cannot be used for this: `enabled:
-false` is overridden to `true` when the file is loaded.) The `vct_values` must
+false` is overridden to `true` when the file is loaded. Known issue: https://github.com/SUNET/vc/issues/754.) The `vct_values` must
 match the `vct` the issuer puts in the credentials your users hold.
 
 DCQL is the only query language the verifier supports; Presentation Exchange
@@ -406,6 +410,8 @@ no effect at present: the configuration loader treats an explicit `false` as
 unset and re-applies the default `true`. Until this is fixed the verifier
 always fails open on an unreachable or unparseable status list. Explicitly
 revoked or suspended credentials are always rejected.
+
+Known issue: https://github.com/SUNET/vc/issues/753
 :::
 
 ## Other Settings
@@ -422,6 +428,8 @@ revoked or suspended credentials are always rejected.
 :::caution `enable_userinfo: false` has no effect
 Like `fail_open` above, an explicit `false` is overwritten by the `true` default,
 so `/userinfo` cannot currently be switched off.
+
+Known issue: https://github.com/SUNET/vc/issues/753
 :::
 
 The full key list is in the
@@ -561,7 +569,7 @@ configuration options, browser requirements and troubleshooting.
 [PKCE (RFC 7636)](https://datatracker.ietf.org/doc/html/rfc7636) with `S256` is
 required for every client registered through `/register`, public or
 confidential: `/authorize` without a `code_challenge` fails with
-`invalid_request`. It is not enforced for static clients.
+`invalid_request`. It is not enforced for static clients (known issue: https://github.com/SUNET/vc/issues/757).
 
 ```javascript
 // Generate code verifier and challenge

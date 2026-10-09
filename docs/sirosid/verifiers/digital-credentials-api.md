@@ -94,6 +94,8 @@ With `use_jar: false` the authorization page requests the unsigned request
 object from `/verification/request/{session_id}`, which the verifier does not
 serve, so the "browser wallet" action fails with a 404. Currently the browser
 flow only works with `use_jar: true`.
+
+Known issue: https://github.com/SUNET/vc/issues/755
 :::
 
 ### Supported Credential Formats
