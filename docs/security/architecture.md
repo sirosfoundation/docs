@@ -157,13 +157,11 @@ flowchart LR
 
 ### Fail-Closed Design
 
-If the PDP is not configured or unreachable, the system operates in **fail-closed mode**:
+When a PDP is configured, trust is **fail-closed**: if the PDP errors or is unreachable, the evaluation returns `Trusted: false` and the flow is refused. Where an evaluation is requested and no PDP endpoint can be resolved, the result is likewise `Trusted: false` ("Trust evaluation not configured - no PDP endpoint available").
 
-- All trust evaluations return `Trusted: false`
-- No credentials can be issued or verified
-- Clear error message: "Trust evaluation not configured - no PDP endpoint available"
-
-This ensures that misconfiguration cannot lead to accepting untrusted credentials.
+:::caution A PDP is required for production
+A PDP is required for production use. If `trust.pdp_url` is not set at all, the wallet backend runs in a permissive development mode that is not supported: some flows may work, with allow-all trust, but key resolution through the PDP (including `did:` methods) is unavailable and nothing is guaranteed. The backend logs a warning (an error when `ENVIRONMENT=production`) at startup. Use this mode only for testing and development.
+:::
 
 ### Trust Sources
 
@@ -191,6 +189,7 @@ The Admin API provides tenant management capabilities:
 
 - Separate network port (recommended: internal network only)
 - Bearer token authentication with constant-time comparison
+- An explicit token (`server.admin_token` or `server.admin_token_path`) is mandatory when `ENVIRONMENT`, `GO_ENV` or `APP_ENV` is `production`; the admin server refuses to start without one
 - Supports secrets management integration (Kubernetes Secrets, HashiCorp Vault)
 
 ## Network Security
@@ -200,9 +199,11 @@ The Admin API provides tenant management capabilities:
 | Control | Requirement |
 |---------|-------------|
 | TLS | All public endpoints must use HTTPS |
-| CORS | Explicit origin allowlist (no wildcards in production) |
+| CORS | Explicit origin allowlist in `server.cors.allowed_origins` (the backend default is `*`, a development default; wildcards must not be combined with credentials) |
 | CSP | Content-Security-Policy headers recommended |
 | Network segmentation | Admin API must not be publicly accessible |
+| Trusted proxies | Set `server.trusted_proxies` to your reverse proxy addresses (or `none`). The default trusts `X-Forwarded-For` from every peer, which makes per-IP rate limits bypassable; the backend logs a startup warning |
+| TLS termination | `server.tls` and `server.admin_tls` can terminate TLS in the backend itself |
 
 ### Rate Limiting
 

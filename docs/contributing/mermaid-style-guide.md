@@ -10,26 +10,26 @@ All diagrams use the **SIROS Brand Blue** (`#1C4587`) as the foundation, with co
 
 | Usage | Color | Hex |
 |-------|-------|-----|
-| Light background | ![#E8EEF7](https://via.placeholder.com/15/E8EEF7/E8EEF7) | `#E8EEF7` |
-| Medium background | ![#D4E2F4](https://via.placeholder.com/15/D4E2F4/D4E2F4) | `#D4E2F4` |
-| **Brand primary** | ![#1C4587](https://via.placeholder.com/15/1C4587/1C4587) | `#1C4587` |
-| Dark accent | ![#14366B](https://via.placeholder.com/15/14366B/14366B) | `#14366B` |
+| Light background | <span style={{display: 'inline-block', width: '15px', height: '15px', background: '#E8EEF7', border: '1px solid #888'}} /> | `#E8EEF7` |
+| Medium background | <span style={{display: 'inline-block', width: '15px', height: '15px', background: '#D4E2F4', border: '1px solid #888'}} /> | `#D4E2F4` |
+| **Brand primary** | <span style={{display: 'inline-block', width: '15px', height: '15px', background: '#1C4587', border: '1px solid #888'}} /> | `#1C4587` |
+| Dark accent | <span style={{display: 'inline-block', width: '15px', height: '15px', background: '#14366B', border: '1px solid #888'}} /> | `#14366B` |
 
 ### Complement Colors (Orange - for Notes & Highlights)
 
 | Usage | Color | Hex |
 |-------|-------|-----|
-| Note background | ![#FFF3E0](https://via.placeholder.com/15/FFF3E0/FFF3E0) | `#FFF3E0` |
-| Note border | ![#C75A11](https://via.placeholder.com/15/C75A11/C75A11) | `#C75A11` |
-| Note text | ![#7C3A00](https://via.placeholder.com/15/7C3A00/7C3A00) | `#7C3A00` |
+| Note background | <span style={{display: 'inline-block', width: '15px', height: '15px', background: '#FFF3E0', border: '1px solid #888'}} /> | `#FFF3E0` |
+| Note border | <span style={{display: 'inline-block', width: '15px', height: '15px', background: '#C75A11', border: '1px solid #888'}} /> | `#C75A11` |
+| Note text | <span style={{display: 'inline-block', width: '15px', height: '15px', background: '#7C3A00', border: '1px solid #888'}} /> | `#7C3A00` |
 
 ### Secondary Colors (Teal - for Variety)
 
 | Usage | Color | Hex |
 |-------|-------|-----|
-| Success/Secondary bg | ![#E6F4F1](https://via.placeholder.com/15/E6F4F1/E6F4F1) | `#E6F4F1` |
-| Success border | ![#198754](https://via.placeholder.com/15/198754/198754) | `#198754` |
-| Success text | ![#0F5132](https://via.placeholder.com/15/0F5132/0F5132) | `#0F5132` |
+| Success/Secondary bg | <span style={{display: 'inline-block', width: '15px', height: '15px', background: '#E6F4F1', border: '1px solid #888'}} /> | `#E6F4F1` |
+| Success border | <span style={{display: 'inline-block', width: '15px', height: '15px', background: '#198754', border: '1px solid #888'}} /> | `#198754` |
+| Success text | <span style={{display: 'inline-block', width: '15px', height: '15px', background: '#0F5132', border: '1px solid #888'}} /> | `#0F5132` |
 
 ## Global Theme Configuration
 

@@ -19,7 +19,19 @@ A working deployment touches three independently-configured pieces: the **wallet
 
 ## Step 1 — Configure the wallet provider
 
-Enable WIA issuance and pick an identity format:
+Enable WIA issuance and pick an identity format. Once signing keys are configured, `wia.wallet_provider_uri` is required (it is the expected `aud` of the WIA request-PoP). A minimal `ietf` configuration with JWKS-only trust:
+
+```yaml
+wallet_provider:
+  private_key_path: /path/to/wallet-provider-key.pem
+  wia:
+    enabled: true
+    mode: "ietf"                                        # see the two formats below
+    issuer: "https://wallet-provider.example.com"       # required for mode: ietf
+    wallet_provider_uri: "https://wallet-provider.example.com"
+```
+
+and an `etsi` configuration, which additionally needs the certificate chain and the TS03 wallet identification:
 
 ```yaml
 wallet_provider:
@@ -27,21 +39,21 @@ wallet_provider:
   certificate_path: /path/to/wallet-provider-cert.pem   # required for mode: etsi
   wia:
     enabled: true
-    mode: "ietf"                                        # see the two formats below
-    issuer: "https://wallet-provider.example.com"       # required for mode: ietf
-    wallet_name: "Example Wallet"
-    wallet_version: "1.4.0"
+    mode: "etsi"
+    wallet_provider_uri: "https://wallet-provider.example.com"
+    wallet_name: "Example Wallet"                       # required for mode: etsi
+    wallet_version: "1.4.0"                             # required for mode: etsi
 ```
 
 `mode` picks the identity format, and the two are mutually exclusive:
 
 | | `mode: "etsi"` (default) | `mode: "ietf"` |
 |---|---|---|
-| WIA header carries | An `x5c` certificate chain, no `iss` | A `kid`, plus the `iss` claim — no `x5c` |
+| WIA header carries | An `x5c` certificate chain, no `iss` | A `kid`, plus the `iss` claim. `x5c` is added only if a `certificate_path` is configured — omit it for pure JWKS trust |
 | Relying party resolves the key from | The embedded certificate, verified against the Trusted List for Wallet Providers | The provider's own JWKS, discovered from `iss` |
 | Specified by | EUDI ARF v3.0 / EC TS03 v1.5.2 / ETSI TS 119 472-3 | draft-ietf-oauth-attestation-based-client-auth (no ARF counterpart) |
 | Use when | Interoperating with ARF-conformant PID/EAA providers — the only mode with a defined trust path under the EUDI specs | A generic, non-EUDI OAuth ecosystem, or you want to avoid managing a cert chain |
-| Also requires | `wallet_name`, `wallet_version` (TS03 §2.3.1) | `issuer` |
+| Also requires | `certificate_path`, `wallet_name`, `wallet_version` (TS03 §2.3.1) | `issuer` |
 
 If you pick `mode: "ietf"`, the wallet provider must publish its signing key somewhere the issuer's discovery can find it. go-wallet-backend does this automatically at two paths once `issuer` is set:
 
@@ -62,7 +74,7 @@ apigw:
       enabled: true
 ```
 
-That's the minimum. `wallet_attestation.policy` is optional and defaults to "open" — any wallet provider the PDP trusts is authorized for any scope. Add it only if you need per-scope tiering by attestation strength (e.g. requiring hardware-backed attestation for a specific credential type):
+That's the minimum. Optionally `wallet_attestation.mode` pins the accepted identity format: `"etsi"` requires an `x5c` chain, `"ietf"` requires `iss` and rejects a WIA that carries `x5c` (so the wallet provider must not have a `certificate_path` configured), and the default `""` accepts either. `wallet_attestation.policy` is optional and defaults to "open" — any wallet provider the PDP trusts is authorized for any scope. Add it only if you need per-scope tiering by attestation strength (e.g. requiring hardware-backed attestation for a specific credential type):
 
 ```yaml
 apigw:
@@ -72,7 +84,12 @@ apigw:
       policy:
         rules:
           - "(wallet (attestation_source ios_app_attest)(scope pid)(issuer *))"
+        # or load the rules from a file: rules_file: /path/to/rules.spocp
 ```
+
+:::caution A PDP is required
+Wallet attestation only activates when `trust.pdp_url` is set, and a PDP is required for production use of vc components. Running without a PDP is not supported: some things may work (allow-all trust, local `did:key`/`did:jwk` resolution), but resolution through the PDP (for example `did:web`) is unavailable and nothing is guaranteed. Use that mode for testing and development only.
+:::
 
 ## Step 3 — Make the wallet provider trusted by the PDP
 

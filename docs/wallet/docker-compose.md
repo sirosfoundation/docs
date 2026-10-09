@@ -38,8 +38,9 @@ services:
       - STATIC_PUBLIC_URL=https://wallet.example.com
       - STATIC_NAME=My Org Wallet
       # -- Transport --
-      - WALLET_ENGINE_URL=https://wallet.example.com/ws
-      - ALLOWED_TRANSPORTS=http_proxy,websocket,direct
+      # The frontend connects to wss://wallet.example.com/api/v2/wallet (see Reverse Proxy)
+      - WALLET_ENGINE_URL=https://wallet.example.com
+      - ALLOWED_TRANSPORTS=websocket
       # -- Trust --
       - DELEGATE_TRUST_TO_BACKEND=true
       # -- Security --
@@ -51,7 +52,7 @@ services:
   backend:
     image: ghcr.io/sirosfoundation/go-wallet-backend:latest
     restart: always
-    command: ["--mode=all"]
+    command: ["--mode=all", "--config=/config.yaml"]
     ports:
       - "8080:8080"   # REST API
       - "8082:8082"   # WebSocket engine
@@ -63,7 +64,13 @@ services:
       - WALLET_STORAGE_TYPE=mongodb
       - WALLET_STORAGE_MONGODB_URI=mongodb://mongo:27017
       - WALLET_STORAGE_MONGODB_DATABASE=wallet
-      - WALLET_JWT_SECRET=CHANGE_ME_TO_A_RANDOM_SECRET
+      # At least 32 bytes, otherwise the backend refuses to start
+      - WALLET_JWT_SECRET=CHANGE_ME_TO_A_RANDOM_SECRET_OF_AT_LEAST_32_BYTES
+      # Mandatory when ENVIRONMENT=production; otherwise a random, unusable token is generated
+      - WALLET_SERVER_ADMIN_TOKEN=CHANGE_ME_ADMIN_TOKEN
+      # Address(es) of your reverse proxy, so per-IP rate limits see the real client IP
+      - WALLET_SERVER_TRUSTED_PROXIES=172.16.0.0/12
+      - ENVIRONMENT=production
       - WALLET_TRUST_PDP_URL=http://go-trust:6001
       - WALLET_LOGGING_LEVEL=info
     volumes:
@@ -109,11 +116,17 @@ volumes:
   mongo-data:
 ```
 
-:::warning Change the JWT Secret
-The `WALLET_JWT_SECRET` value above is a placeholder. Generate a strong random secret before deploying:
+:::warning Change the secrets
+The `WALLET_JWT_SECRET` and `WALLET_SERVER_ADMIN_TOKEN` values above are placeholders. The JWT secret must be at least 32 bytes long. Generate strong random secrets before deploying:
 ```bash
 openssl rand -base64 32
 ```
+:::
+
+The backend reads its YAML configuration from the file given by `--config` (default `configs/config.yaml` inside the image, which is why the compose file passes `--config=/config.yaml`). The file is optional when everything is set through `WALLET_*` environment variables; environment variables override file values. Set `trusted_proxies` to the address(es) of your reverse proxy: by default the backend trusts `X-Forwarded-For` from every peer, which makes per-IP rate limits bypassable.
+
+:::caution A PDP is required for production
+The example points `WALLET_TRUST_PDP_URL` at a go-trust instance. A PDP is required for production use; running without one is not supported (it may appear to work, with allow-all trust and no PDP-based key resolution, but offers no guarantees). Omit it only for testing and development.
 :::
 
 ## Reverse Proxy
@@ -124,6 +137,8 @@ The compose file exposes the frontend on port 3000 and the backend on ports 8080
 2. Route requests to the correct service
 3. Handle WebSocket upgrades for the engine
 
+The frontend opens its WebSocket at `/api/v2/wallet` on the origin of `WALLET_ENGINE_URL`, and the engine serves it on that same path (port 8082). Route exactly that path to the engine before the generic `/api/` block, which strips the prefix and forwards to the REST API on port 8080.
+
 ### Example: Caddy
 
 ```
@@ -131,14 +146,14 @@ wallet.example.com {
     # Frontend (default)
     reverse_proxy frontend:80
 
+    # WebSocket engine (path is preserved; must come before /api/*)
+    handle /api/v2/wallet {
+        reverse_proxy backend:8082
+    }
+
     # Backend REST API
     handle_path /api/* {
         reverse_proxy backend:8080
-    }
-
-    # WebSocket engine
-    handle_path /ws/* {
-        reverse_proxy backend:8082
     }
 }
 ```
@@ -158,17 +173,17 @@ server {
         proxy_pass http://frontend:80;
     }
 
-    # Backend REST API
-    location /api/ {
-        proxy_pass http://backend:8080/;
-    }
-
-    # WebSocket engine
-    location /ws/ {
-        proxy_pass http://backend:8082/;
+    # WebSocket engine (path is preserved, so no URI on proxy_pass)
+    location = /api/v2/wallet {
+        proxy_pass http://backend:8082;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
+    }
+
+    # Backend REST API
+    location /api/ {
+        proxy_pass http://backend:8080/;
     }
 }
 ```
@@ -193,7 +208,7 @@ For a single-server deployment, `--mode=all` runs all backend roles in one proce
 
 1. **Separate the roles** — run `backend`, `engine`, and `admin` as separate containers with `--mode=backend`, `--mode=engine`, etc.
 2. **Add Redis** — set `WALLET_SESSION_STORE_TYPE=redis` for shared WebSocket session state across engine replicas
-3. **Configure `external_urls`** — so each role knows how to reach the others
+3. **Configure `server.external_urls`** — so each role knows how to reach the others
 4. **Use managed MongoDB** — with authentication, TLS, and replication
 
 ## What's Next

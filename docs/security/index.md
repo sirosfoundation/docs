@@ -12,7 +12,7 @@ SIROS ID is designed with the following security principles:
 
 - **Zero-knowledge architecture** — The platform operator cannot read user credentials or identify users
 - **Passkey-only authentication** — No passwords; all user authentication via FIDO2/WebAuthn
-- **Hardware-backed keys** — Cryptographic keys never leave the user's device (WSCD)
+- **Hardware-backed keys** — Cryptographic keys never leave the user's wallet secure cryptographic device (WSCD)
 - **Defense in depth** — Multiple layers of protection at network, application, and data levels
 - **Supply chain transparency** — Full visibility into dependencies via SBOMs
 
