@@ -97,6 +97,7 @@ wallet_provider:
     issuer: "https://wallet-provider.siros.se" # required for "ietf"
     wallet_name: "SIROS ID"                    # required for "etsi"
     wallet_version: "1.4.0"                    # required for "etsi"
+  certificate_path: "/pki/wallet-provider.pem" # required for "etsi": the provider's x5c certificate chain
 ```
 
 - **`mode: "etsi"` (default)** — the EUDI ARF v3.0 / EC TS03 v1.5.2 / ETSI TS 119 472-3 model. The WIA always carries an `x5c` certificate chain in its JOSE header and sets no `iss` or `kid`; relying parties verify the chain against the Trusted List for Wallet Providers. This is the only mode with a defined trust path under the current EUDI specs.
@@ -218,7 +219,7 @@ The SIROS ID Issuer verifies the WIA's signature **itself**, locally, before eve
 2. Verify the WIA's signature against that key
 3. Send the **resolved key**, not the raw token, to the PDP with `role=wallet_provider` (underscore — this is the string matched against whitelist `actions` and policy names)
 4. The PDP checks that key/provider against its configured trust registries (OIDF federation, trust lists, whitelists) — a pure membership/trust decision, no cryptographic verification
-5. If the PDP returns `trusted: true`, the wallet is accepted
+5. If the PDP returns `decision: true`, the wallet is accepted
 
 This means:
 - Adding/removing trusted wallet providers is a **PDP registry operation** (federation onboarding, trust list update)

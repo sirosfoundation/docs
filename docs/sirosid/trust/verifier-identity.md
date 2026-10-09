@@ -62,13 +62,19 @@ The verifier automatically serves a DID Document at `GET /.well-known/did.json`:
   "@context": ["https://www.w3.org/ns/did/v1", "https://w3id.org/security/suites/jws-2020/v1"],
   "id": "did:web:verifier.example.com",
   "verificationMethod": [{
-    "id": "did:web:verifier.example.com#key-1",
+    "id": "did:web:verifier.example.com#<kid>",
     "type": "JsonWebKey2020",
     "controller": "did:web:verifier.example.com",
     "publicKeyJwk": { "kty": "EC", "crv": "P-256", "x": "...", "y": "..." }
   }],
-  "authentication": ["did:web:verifier.example.com#key-1"],
-  "assertionMethod": ["did:web:verifier.example.com#key-1"]
+  "authentication": ["did:web:verifier.example.com#<kid>"],
+  "assertionMethod": ["did:web:verifier.example.com#<kid>"],
+  "service": [{
+    "id": "did:web:verifier.example.com#verifier",
+    "type": "OpenID4VP",
+    "serviceEndpoint": "https://verifier.example.com"
+  }],
+  "alsoKnownAs": ["https://verifier.example.com"]
 }
 ```
 
@@ -121,6 +127,11 @@ verifier:
     # Format identifier advertised alongside it; override only for an
     # ecosystem that has profiled a different identifier
     format: "rc-wrp+jwt"
+    # PEM bundle of the Registrar roots accepted as WRPRC issuers. Without it
+    # the WRPRC signature is checked but nothing establishes that its issuer
+    # is an accepted Registrar, and the ARF RPRC_16 binding (which compares
+    # the WRPRC and the access certificate) is not performed.
+    trusted_roots_path: "/pki/registrar-roots.pem"
     revocation:
       mode: "warn"            # off | warn | fail
       refresh_interval: "1h"
@@ -212,6 +223,7 @@ When a wallet receives an OID4VP request, it evaluates the verifier's identity:
 flowchart TD
     A[Receive OID4VP Request] --> B{client_id_scheme?}
     B -->|x509_san_dns| C[Extract x5c from JAR header]
+    B -->|x509_hash| C
     B -->|did| D[Resolve DID Document]
     
     C --> E[Verify JAR signature with leaf cert]
