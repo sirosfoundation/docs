@@ -9,12 +9,16 @@ Run the SIROS ID verifier and go-trust with Docker Compose and request a PID wit
 
 ## 1. Create the files
 
+Requires Docker Compose, `openssl`, `curl` and `jq`.
+
 ```bash
 mkdir -p vq/pki vq/metadata vq/presentation_requests && cd vq
 openssl ecparam -name prime256v1 -genkey -noout -out pki/verifier_key.pem
 openssl req -x509 -new -key pki/verifier_key.pem -sha256 -days 365 -subj "/CN=verifier.example.org" \
   -addext "subjectAltName=DNS:verifier.example.org" -out pki/verifier_chain.pem
-curl -fsSL -o metadata/vctm_pid.json https://raw.githubusercontent.com/SUNET/vc/main/metadata/vctm_pid.json
+curl -fsS https://registry.siros.org/api/v1/schemas/25e0b924-d5d9-5ecd-b5ef-dc32905efb1c.json \
+  | jq -r '.schemaURIs[] | select(.formatIdentifier=="dc+sd-jwt").uri' \
+  | xargs curl -fsSL -o metadata/vctm_pid.json
 ```
 
 `docker-compose.yml`:
@@ -32,6 +36,7 @@ services:
       - ./metadata:/metadata:ro
       - ./presentation_requests:/presentation_requests:ro
     depends_on: [mongo, go-trust]
+    healthcheck: {test: ["CMD-SHELL", "curl -fs http://localhost:8080/health | grep -q STATUS_OK"]}
   go-trust:
     image: ghcr.io/sirosfoundation/go-trust:latest
     command: ["--config", "/config.yaml"]
