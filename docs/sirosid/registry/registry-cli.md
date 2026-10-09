@@ -60,11 +60,13 @@ The registry is now available at `http://localhost:8080`.
 
 ```bash
 docker run -p 8080:8080 \
-  -v ./sources:/data/sources:ro \
-  -v ./output:/data/output \
+  -v "$(pwd)/sources:/data/sources:ro" \
+  -v "$(pwd)/output:/data/output" \
   -e GITHUB_TOKEN \
   ghcr.io/sirosfoundation/registry-cli:latest
 ```
+
+The container runs as an unprivileged user (uid 1000), so the bind-mounted `output` directory must be writable by it. The image also declares `/data/tokens` as a volume.
 
 ## Static Site Generation
 
@@ -106,6 +108,8 @@ sources:
   - url: "git:https://github.com/org/repo.git"
     branch: main           # override branch (default: repo default branch)
     organization: "My Org" # override organization display name
+    layout: default        # repository plugin layout (default: "default")
+    options: {}            # layout-specific string options
 ```
 
 ### Subfolder path targeting {#path-targeting}
@@ -156,7 +160,7 @@ Supported format names and aliases:
 |------|---------|-------------|
 | `vctm` | `sd-jwt`, `sdjwt` | `.vctm.json` |
 | `mddl` | `mdoc`, `mso_mdoc` | `.mdoc.json` |
-| `w3c` | `jwt_vc_json` | `.vc.json` |
+| `w3c` | – | `.vc.json` |
 | `jsonschema` | `json-schema`, `schema` | `.schema.json` |
 
 When `formats` is omitted or empty, all registered formats are generated.
@@ -325,8 +329,12 @@ Sign API responses with JWS (RFC 7515). Supports ephemeral keys, SoftHSM, and ha
 | `--pattern` | `*.json` | Glob pattern for files to sign |
 | `--pkcs11-uri` | — | PKCS#11 URI (ephemeral key if omitted) |
 | `--key-label` | `registry-signing` | HSM key label |
-| `--issuer` | `registry-cli` | JWT issuer |
+| `--issuer` | — | JWT issuer; with the ephemeral signer an empty value becomes `registry-cli`, with `--pkcs11-uri` it stays empty |
+| `--jku` | — | JWS Key URL (`jku` header) |
 | `--jwks-output` | — | Path for JWKS public key file |
+| `--aggregate` | — | Path to write the aggregate JWS (for the schemas list) |
+| `--previous-jwks` | — | Previous JWKS file, for key rotation |
+| `--key-retention` | `720h` | How long previous signing keys stay in the JWKS after rotation |
 
 ## Custom Templates
 
@@ -364,6 +372,7 @@ There is no static resource for an arbitrary *set* of organizations — fetch ea
 | Variable | Description |
 |----------|-------------|
 | `GITHUB_TOKEN` | GitHub personal access token for repository discovery and cloning |
+| `PKCS11_PIN` | PKCS#11 PIN, used when none is given in the `--pkcs11-uri` |
 
 ## Installation from Source
 
