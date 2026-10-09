@@ -27,7 +27,7 @@ These are the core components that power the SIROS ID platform.
 | Repository | Description |
 |------------|-------------|
 | [**go-trust**](https://github.com/sirosfoundation/go-trust) | AuthZEN-based Policy Decision Point (PDP) for trust evaluation. Supports ETSI Trust Lists (TSL), OpenID Federation, and DID resolution. |
-| [**goFF**](https://github.com/sirosfoundation/goFF) | Go implementation of OpenID Federation. Supports entity statements, trust chains, and trust marks. |
+| [**goFF**](https://github.com/sirosfoundation/goFF) | go Federation Feeder: a Go reimplementation of [pyFF](https://github.com/IdentityPython/pyFF), the SAML metadata processing pipeline engine used by identity federations. Runs pyFF-style pipeline YAML and serves metadata, including over MDQ. |
 | [**g119612**](https://github.com/sirosfoundation/g119612) | Go implementation of ETSI TS 119 612 (Trust Status Lists) and TS 119 602 (Lists of Trusted Entities). Provides `tsl-tool` for generating, validating, converting, and publishing trust lists. |
 | [**trust-lists**](https://github.com/sirosfoundation/trust-lists) | Published trust lists for the SIROS ecosystem. Source data and pipelines deployed to [trust.siros.org](https://trust.siros.org). |
 
@@ -53,7 +53,7 @@ See [Registry Services](../sirosid/registry) for full documentation on how the r
 |------------|-------------|
 | [**go-cryptoutil**](https://github.com/sirosfoundation/go-cryptoutil) | Cryptographic utilities for Go including key management, signing, and verification helpers. |
 | [**go-spocp**](https://github.com/sirosfoundation/go-spocp) | Go implementation of SPOCP (Simple Policy Control Protocol). |
-| [**go-r2ps-service**](https://github.com/sirosfoundation/go-r2ps-service) | Remote WSCD service implementing R2PS (Remote to Proximity Service) for hardware-backed key operations via PKCS#11. |
+| [**go-r2ps-service**](https://github.com/sirosfoundation/go-r2ps-service) | Server implementation of R2PS (Remote Two-Factor Protected Services) for remote WSCA/WSCD roles: hardware-backed key generation and signing via PKCS#11, with OPAQUE and FIDO2 authentication, and wallet/key attestation issuance (WIA/WKA). Roles are selected with `R2PS_MODE`. |
 
 ### Demo & Testing
 
@@ -71,11 +71,22 @@ See [Registry Services](../sirosid/registry) for full documentation on how the r
 
 Both SDKs connect to the same wallet backend infrastructure (go-wallet-backend) via the Wallet Messaging Protocol (WMP) and can be embedded into existing native applications. See [WSCA/WSCD Architecture](../wallet/architecture/wsca-wscd) for how the SDKs integrate with the `siros-wscd-manager` key management layer.
 
+### Wallet Messaging, Signing & Verification Tools
+
+| Repository | Description |
+|------------|-------------|
+| [**go-wmp**](https://github.com/sirosfoundation/go-wmp) | Go library for the Wallet Messaging Protocol (WMP), a JSON-RPC 2.0 based multi-party messaging protocol with optional MLS end-to-end encryption. |
+| [**siros-wscd-manager**](https://github.com/sirosfoundation/siros-wscd-manager) | Pluggable WSCD key management layer (software keys, R2PS, FIDO2) with native and WASM bindings. See [WSCA/WSCD Architecture](../wallet/architecture/wsca-wscd). |
+| [**siros-verifier-cli**](https://github.com/sirosfoundation/siros-verifier-cli) | Command-line ISO/IEC 18013-5 BLE proximity verifier for debugging mdoc device retrieval. |
+| [**siros-conformance**](https://github.com/sirosfoundation/siros-conformance) | Conformance test orchestration. See [Running Conformance Tests](../howto/running-conformance-tests). |
+| [**siros-wrpac-tool**](https://github.com/sirosfoundation/siros-wrpac-tool) | Access CA and Registrar for EUDI wallet-relying party access (WRPAC) and registration (WRPRC) certificates. |
+| [**siros-status-service**](https://github.com/sirosfoundation/siros-status-service) | Standalone status list service for digital credentials (draft-ietf-oauth-status-list). |
+
 ### Browser & Web Integration
 
 | Repository | Description |
 |------------|-------------|
-| [**wallet-companion**](https://github.com/sirosfoundation/wallet-companion) | Browser extension for wallet selection in browser-based credential flows. |
+| [**wallet-companion**](https://github.com/sirosfoundation/wallet-companion) | Browser extension for web wallets with standards-based credential flows, auto-registration and protocol-aware routing. |
 
 ---
 
@@ -98,7 +109,7 @@ The wwWallet project consists of several components:
 
 | Repository | Description |
 |------------|-------------|
-| [**wwWallet/wallet-frontend**](https://github.com/wwWallet/wallet-frontend) | React-based web frontend for the credential manager. Supports PWA deployment. |
+| [**wwWallet/wallet-frontend**](https://github.com/wwWallet/wallet-frontend) | React-based web frontend for the credential manager. Supports PWA deployment. SIROS ID uses its own fork, [sirosfoundation/wallet-frontend](https://github.com/sirosfoundation/wallet-frontend). |
 | [**wwWallet/wallet-backend-server**](https://github.com/wwWallet/wallet-backend-server) | Node.js backend server handling credential storage and protocol flows. |
 | [**wwWallet/wallet-common**](https://github.com/wwWallet/wallet-common) | Shared TypeScript types and utilities used by frontend and backend. |
 
@@ -153,4 +164,4 @@ We welcome contributions to all SIROS Foundation projects. Each repository conta
 
 ## License
 
-Most SIROS Foundation projects are released under the Apache 2.0 or MIT license. See individual repository LICENSE files for details.
+Most SIROS Foundation projects are released under the Apache 2.0, MIT or BSD-2-Clause license. See individual repository LICENSE files for details.
