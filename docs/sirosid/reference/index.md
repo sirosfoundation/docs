@@ -21,5 +21,5 @@ Configuration reference for each SIROS ID component. The VC reference is generat
 - [Go-Trust Configuration Reference](/sirosid/trust/go-trust-configuration)
 
 :::warning A trust PDP is required for production
-A Policy Decision Point (AuthZEN, e.g. [Go-Trust](/sirosid/trust/go-trust-configuration)) configured through `trust.pdp_url` is required for production use of the VC components. Without it, key resolution is limited to self-contained local DID methods (`did:key`, `did:jwk`), so resolving other `did:` methods and trust-framework lookups is unsupported, and trust evaluation runs in "allow all" mode: any resolved key is treated as trusted. Run without a PDP only for development and testing.
+A Policy Decision Point (AuthZEN, e.g. [Go-Trust](/sirosid/trust/go-trust-configuration)) configured through `trust.pdp_url` is required for production use of the VC components. Running without one is not supported and is for development and testing only. Some things may still work without a PDP (the resolver handles self-contained `did:key` and `did:jwk` locally, and trust evaluation runs in "allow all" mode where any resolved key is treated as trusted), but other `did:` methods and trust-framework lookups cannot be resolved, and there are no guarantees and no support for such a setup.
 :::

@@ -313,7 +313,7 @@ apigw:
 ```
 
 :::warning A PDP is required for production
-A PDP (AuthZEN, such as [Go-Trust](../trust/)) configured through `trust.pdp_url` is required for production use. Without it, key resolution is limited to the self-contained local DID methods (`did:key`, `did:jwk`), other `did:` methods cannot be resolved, and trust evaluation runs in "allow all" mode where every resolved key is treated as trusted. That mode is for development and testing only.
+A PDP (AuthZEN, such as [Go-Trust](../trust/)) configured through `trust.pdp_url` is required for production use. Running without one is not supported (development and testing only). Some things may still work: the resolver handles `did:key` and `did:jwk` locally and trust evaluation runs in "allow all" mode, treating every resolved key as trusted, but other `did:` methods cannot be resolved, and there are no guarantees and no support for such a setup.
 :::
 
 See [Trust Services](../trust/) for details on:

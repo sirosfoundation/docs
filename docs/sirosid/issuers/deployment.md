@@ -159,7 +159,7 @@ registry:
 The `jwt_attribute` block is required by the issuer service, and `apigw.delivery.credential_offers.issuer_url` must be byte-identical to `apigw.public_url`. Configure the OIDC secret inline (or via the file named by `common.secret_file_path`); the config file is not environment-interpolated.
 
 :::warning A PDP is required for production
-A PDP (AuthZEN, such as go-trust) configured through `apigw.trust.pdp_url` is required for production use. Without it, key resolution is limited to the self-contained local DID methods (`did:key`, `did:jwk`) and trust evaluation is "allow all". Omit it only for development and testing.
+A PDP (AuthZEN, such as go-trust) configured through `apigw.trust.pdp_url` is required for production use. Running without one is not supported (development and testing only). Some things may still work (local `did:key`/`did:jwk` resolution, "allow all" trust), but there are no guarantees and no support for such a setup.
 :::
 
 :::note No `credential_constructor`
