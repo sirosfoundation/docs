@@ -49,6 +49,16 @@ http://localhost:8081/admin
 
 In production, this should only be accessible from your internal network.
 
+### Authentication
+
+Every `/admin/*` endpoint except `GET /admin/status` requires a bearer token:
+
+```
+Authorization: Bearer <admin token>
+```
+
+Requests without it get `401` (`{"error": "Authorization header required"}`). Set the token with `server.admin_token` (`WALLET_SERVER_ADMIN_TOKEN`) or read it from a file with `server.admin_token_path` (`WALLET_SERVER_ADMIN_TOKEN_PATH`). In development an unset token is auto-generated at startup; in production the server refuses to start without one. The examples below omit the header for brevity, except the `curl` workflow at the end.
+
 ## Multi-Tenancy Model
 
 The wallet backend supports multiple tenants, each with complete isolation of:
@@ -63,9 +73,8 @@ The wallet backend supports multiple tenants, each with complete isolation of:
 ### Tenant IDs
 
 Tenant IDs must:
-- Be lowercase alphanumeric with hyphens
-- Start with a letter
-- Be 2-50 characters long
+- Match `^[a-z0-9][a-z0-9_-]*$` (lowercase letters, digits, hyphens and underscores; start with a letter or digit)
+- Be 1-63 characters long
 
 Examples: `acme-corp`, `university-demo`, `test-tenant`
 
@@ -73,7 +82,7 @@ Examples: `acme-corp`, `university-demo`, `test-tenant`
 
 ### OpenAPI Specification
 
-The complete OpenAPI 3.1.0 specification is available at:
+The complete OpenAPI specification (version 1.1.0) is available at:
 - [openapi-admin.yaml](https://github.com/sirosfoundation/go-wallet-backend/blob/main/docs/openapi-admin.yaml)
 
 You can import this into tools like Swagger UI, Postman, or Insomnia for interactive exploration.
@@ -333,7 +342,7 @@ Here's a complete example of setting up a new tenant with issuers and verifiers:
 
 ```bash
 # 1. Create the tenant
-curl -X POST http://localhost:8081/admin/tenants \
+curl -X POST -H "Authorization: Bearer $WALLET_SERVER_ADMIN_TOKEN" http://localhost:8081/admin/tenants \
   -H "Content-Type: application/json" \
   -d '{
     "id": "university-demo",
@@ -343,7 +352,7 @@ curl -X POST http://localhost:8081/admin/tenants \
   }'
 
 # 2. Add a credential issuer
-curl -X POST http://localhost:8081/admin/tenants/university-demo/issuers \
+curl -X POST -H "Authorization: Bearer $WALLET_SERVER_ADMIN_TOKEN" http://localhost:8081/admin/tenants/university-demo/issuers \
   -H "Content-Type: application/json" \
   -d '{
     "credential_issuer_identifier": "https://issuer.university.edu",
@@ -352,7 +361,7 @@ curl -X POST http://localhost:8081/admin/tenants/university-demo/issuers \
   }'
 
 # 3. Add a verifier
-curl -X POST http://localhost:8081/admin/tenants/university-demo/verifiers \
+curl -X POST -H "Authorization: Bearer $WALLET_SERVER_ADMIN_TOKEN" http://localhost:8081/admin/tenants/university-demo/verifiers \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Student Portal",
@@ -360,8 +369,8 @@ curl -X POST http://localhost:8081/admin/tenants/university-demo/verifiers \
   }'
 
 # 4. List the configuration
-curl http://localhost:8081/admin/tenants/university-demo/issuers
-curl http://localhost:8081/admin/tenants/university-demo/verifiers
+curl -H "Authorization: Bearer $WALLET_SERVER_ADMIN_TOKEN" http://localhost:8081/admin/tenants/university-demo/issuers
+curl -H "Authorization: Bearer $WALLET_SERVER_ADMIN_TOKEN" http://localhost:8081/admin/tenants/university-demo/verifiers
 ```
 
 ---
@@ -369,22 +378,33 @@ curl http://localhost:8081/admin/tenants/university-demo/verifiers
 ## Security Considerations
 
 :::danger Important
-The admin API has no authentication by default. It should **never** be exposed to the public internet.
+The admin API is protected by a single shared bearer token, not per-user credentials. It should **never** be exposed to the public internet. `GET /metrics` is served on the admin port without authentication, so keep that port network-isolated.
 :::
 
 **Recommended security measures:**
 
-1. **Network isolation**: Run the admin API on an internal-only network
-2. **Firewall rules**: Block external access to port 8081
-3. **VPN/Bastion**: Access admin API through VPN or bastion hosts
-4. **Authentication proxy**: Add authentication middleware if needed
+1. **Strong token**: Use a long random `admin_token` (or `admin_token_path`) and rotate it periodically
+2. **Network isolation**: Run the admin API on an internal-only network
+3. **Firewall rules**: Block external access to port 8081
+4. **VPN/Bastion**: Access admin API through VPN or bastion hosts
 
-### Environment Variables
+### Configuration
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `WALLET_SERVER_ADMIN_PORT` | `8081` | Port for the admin API |
-| `WALLET_SERVER_ADMIN_HOST` | `127.0.0.1` | Bind address (use `127.0.0.1` for local-only) |
+| Setting / variable | Default | Description |
+|--------------------|---------|-------------|
+| `server.admin_port` / `WALLET_SERVER_ADMIN_PORT` | `8081` | Port for the admin API; `0` disables the admin server |
+| `server.admin_token` / `WALLET_SERVER_ADMIN_TOKEN` | auto-generated (dev only) | Bearer token required by `/admin/*` |
+| `server.admin_token_path` / `WALLET_SERVER_ADMIN_TOKEN_PATH` | – | File containing the bearer token |
+
+:::caution Admin bind address
+The admin server currently binds to `server.host` (default `0.0.0.0`) on the admin port. `server.admin_host` / `WALLET_SERVER_ADMIN_HOST` is parsed but has no effect, so it cannot be used to restrict the admin API to `127.0.0.1`. Restrict access with a firewall or network policy instead (setting `server.host` would also move the public API).
+:::
+
+---
+
+## Additional Endpoints
+
+The router also serves, under `/admin/tenants/{tenantId}`: `GET issuers/{issuerId}` and `GET verifiers/{verifierId}`; invites (`/invites`, `/invites/{inviteId}`: list, create, get, update, delete); wallet instances (`/instances`, `/instances/{instanceId}`, `PUT /instances/{instanceId}/status`, `DELETE /instances/{instanceId}`, and `/users/{userId}/instances`); plus `GET /admin/status` (unauthenticated health). See the OpenAPI specification for request and response schemas. The `wallet-admin` command-line tool in the same repository wraps these endpoints.
 
 ---
 
@@ -405,6 +425,7 @@ All endpoints return consistent error responses:
 | `200` | Success |
 | `201` | Resource created |
 | `400` | Bad request (invalid input) |
+| `401` | Missing or invalid admin bearer token |
 | `403` | Forbidden (e.g., cannot delete default tenant) |
 | `404` | Resource not found |
 | `409` | Conflict (e.g., duplicate tenant ID) |
