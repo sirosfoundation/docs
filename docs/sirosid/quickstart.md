@@ -49,9 +49,13 @@ curl -X POST https://verifier.example.org/register \
     "token_endpoint_auth_method": "client_secret_post",
     "grant_types": ["authorization_code"],
     "response_types": ["code"],
-    "scope": "openid profile"
+    "scope": "openid pid"
   }'
 ```
+
+The `scope` string lists every scope this client may request later (the default
+is `openid` only). The scopes must exist on the verifier; `pid` is used here as
+an example, see [Requesting Specific Claims](#requesting-specific-claims).
 
 Save the returned `client_id` and `client_secret`.
 
@@ -84,6 +88,8 @@ Add SIROS ID verifier as an identity provider:
    - **Client ID**: *(from step 2)*
    - **Client Secret**: *(from step 2)*
    - **Client Authentication**: `Client secret sent as post`
+   - **Use PKCE**: ON, method `S256` (required for registered clients)
+   - **Default Scopes**: `openid pid`
 3. Save
 
 ### Auth0
@@ -93,20 +99,25 @@ Add SIROS ID verifier as an identity provider:
    - **Issuer URL**: `https://verifier.example.org`
    - **Client ID**: *(from step 2)*
    - **Client Secret**: *(from step 2)*
+   - Send the client credentials in the request body (not as HTTP Basic), and enable PKCE
 
 ### Direct Integration
 
 If not using an IAM, redirect users directly:
 
 ```javascript
+// codeChallenge: base64url(SHA-256(codeVerifier)); keep the verifier for the token request
 // Replace with your verifier URL
 const authUrl = 'https://verifier.example.org/authorize?' + 
   new URLSearchParams({
     response_type: 'code',
     client_id: 'your-client-id',
     redirect_uri: 'https://localhost:8080/callback',
-    scope: 'openid profile',
-    state: crypto.randomUUID()
+    scope: 'openid pid',
+    state: crypto.randomUUID(),
+    // PKCE is required for clients registered through /register
+    code_challenge: codeChallenge,
+    code_challenge_method: 'S256'
   });
 
 window.location = authUrl;
@@ -151,26 +162,20 @@ Your application received verified identity claims directly from the user's cred
 
 ## Requesting Specific Claims
 
-Use scopes to request different credentials:
-
-| Scope | What You Get |
-|-------|--------------|
-| `openid` | Basic authentication |
-| `profile` | Name, birthdate from PID |
-| `pid` | Full Person ID claims |
-| `ehic` | Health insurance card |
-| `diploma` | Educational credentials |
-
-Example:
+Use scopes to request different credentials. There is no fixed scope list:
+the scopes are the credential types the verifier operator configured
+(`scopes_supported` in the discovery document lists them), and each must also be
+in the `scope` you registered in step 2. For example, a verifier configured with
+`pid` and `ehic` supports:
 
 ```
-scope=openid profile ehic
+scope=openid pid ehic
 ```
 
 ## Going to Production
 
 1. **Register for production**: Contact SIROS ID to get production credentials or deploy your own infrastructure
-2. **Configure trust**: Set up your trust framework registration
+2. **Configure trust**: Run an AuthZEN PDP such as [go-trust](/sirosid/trust/go-trust) and set `verifier.trust.pdp_url`. A PDP is required for production; a verifier without one trusts every issuer and is for development and testing only
 3. **Update URLs**: Point to your production verifier endpoint
 
 ## Next Steps
@@ -189,7 +194,7 @@ scope=openid profile ehic
 
 ### Claims Not Appearing
 
-- Check that requested scopes match available credentials
+- Check that requested scopes were registered for your client and exist on the verifier
 - Verify the credential type in your wallet matches the request
 
 ### Token Validation Fails

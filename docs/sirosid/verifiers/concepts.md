@@ -113,8 +113,10 @@ graph TB
 
 A **presentation request** specifies what credentials and claims the verifier needs. It can be defined using:
 
-1. **OIDC Scopes** – Simple mapping (`openid profile pid`)
+1. **OIDC Scopes** – Simple mapping (`openid pid`): a scope selects a credential type configured on the verifier
 2. **DCQL Queries** – Fine-grained control over credential types and claims
+
+DCQL is the only query language the verifier supports.
 
 Presentation requests are defined in `presentation_requests/*.yaml`. Each file
 holds a `templates:` list; a template binds OIDC scopes to a DCQL query and a
@@ -131,19 +133,22 @@ templates:
           format: dc+sd-jwt
           meta:
             vct_values:
-              - urn:eudi:pid:arf-1.8:1
+              - urn:eudi:pid:1
           claims:
             - path: ["given_name"]
             - path: ["family_name"]
             - path: ["birthdate"]
     claim_mappings:
       "*": "*"
-    enabled: true
 ```
 
 ### Trust Verification
 
-The verifier doesn't blindly accept credentials—it validates them against a **trust framework** to ensure they come from authorized issuers.
+The verifier doesn't blindly accept credentials—it validates them against a **trust framework** to ensure they come from authorized issuers. This evaluation is delegated to an AuthZEN Policy Decision Point (PDP) such as [go-trust](../trust/go-trust), configured with `verifier.trust.pdp_url`.
+
+:::danger A PDP is required for production
+Without `verifier.trust.pdp_url` the verifier runs in "allow all" mode: every issuer is trusted, only `did:key` and `did:jwk` are resolved (locally; other DID methods are unavailable), and only a log warning is emitted. That mode may work for some things but is not supported: development and testing only.
+:::
 
 ```mermaid
 flowchart LR
@@ -277,31 +282,34 @@ sequenceDiagram
 
 ### 2. OpenID4VP Direct
 
-For applications that need direct control over the verification flow:
+The verifier speaks OpenID4VP to wallets directly: the QR code, same-device
+link and Digital Credentials API all deliver an OpenID4VP request object that
+the wallet answers at the verifier's `direct_post` endpoint.
 
 ```mermaid
 sequenceDiagram
-    participant App
+    participant Browser as User's browser (verifier page)
     participant Verifier
     participant Wallet
 
-    App->>Verifier: GET /authorize (scopes select the request template)
-    Verifier->>App: session created
-    App->>Verifier: GET /qr/{session_id} — or invoke the DC API
-    App->>App: Display QR or deep link
+    Browser->>Verifier: GET /authorize (scopes select the request template)
+    Verifier->>Browser: HTML page with QR code / deep link / DC API button
     Wallet->>Verifier: GET /verification/request-object/{session_id}
     Wallet->>Verifier: POST /verification/oidc-direct_post
-    App->>Verifier: GET /poll/{session_id}
-    Verifier->>App: Verified claims (via the OIDC code exchange)
+    Browser->>Verifier: GET /poll/{session_id}
+    Verifier->>Browser: Redirect to the client's redirect_uri with a code
 ```
 
-A presentation session is always created by the OIDC `/authorize` request —
-there is no separate endpoint that starts one.
+A presentation session is always created by the OIDC `/authorize` request, and
+the page that drives the wallet is served by the verifier itself. There is no
+separate endpoint that starts a session, and no API that hands a session to
+your backend; your application receives the verified claims through the OIDC
+code exchange.
 
 **Benefits:**
-- Full control over UX
-- Custom presentation logic
-- Real-time status updates
+- Wallet-facing protocol is standard OpenID4VP
+- Customisable verifier page (themes, logo, credential preview)
+- QR, same-device and browser-native flows from one endpoint
 
 ## Cross-Device vs Same-Device Flow
 
@@ -361,7 +369,7 @@ flowchart TB
 
 ### W3C Digital Credentials API
 
-Native browser integration (Chrome 116+):
+Native browser integration (in browsers that implement the API):
 
 ```mermaid
 flowchart LR
@@ -509,14 +517,14 @@ The verifier implements privacy-preserving practices:
 
 | Feature | Description |
 |---------|-------------|
-| **Pairwise Identifiers** | Users get different `sub` per relying party |
+| **Pairwise Identifiers** | With `subject_type: pairwise`, users get a different `sub` per relying party |
 | **Selective Disclosure** | Only requested claims are revealed |
-| **No Credential Storage** | Presentations are validated and discarded |
+| **Short-lived Storage** | Verified credentials and session context are cached only for the session (minutes) and then expire |
 | **Minimal Data** | Request only what you need |
 
 ### Trust Evaluation
 
-Every credential is validated against configured trust frameworks:
+Every credential is validated through the configured trust PDP (`verifier.trust.pdp_url`); without a PDP, issuer trust is not evaluated (development and testing only):
 
 ```mermaid
 flowchart TB
@@ -550,7 +558,7 @@ flowchart TB
 
 | Protection | Implementation |
 |------------|----------------|
-| **PKCE** | Required for public clients |
+| **PKCE** | Required for every client registered via `/register` |
 | **State** | Prevents CSRF attacks |
 | **Nonce** | Prevents replay attacks |
 | **Short-lived codes** | 5-minute authorization codes |

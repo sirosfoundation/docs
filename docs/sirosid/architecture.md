@@ -45,11 +45,11 @@ Built on [SUNET/vc](https://github.com/SUNET/vc), the issuer creates and signs d
 
 ### Credential Verifier
 
-Also built on SUNET/vc, the verifier validates credential presentations via **OID4VP** and acts as an **OIDC Relying Party** for downstream applications. It supports:
+Also built on SUNET/vc, the verifier validates credential presentations via **OID4VP** and acts as an **OpenID Connect Provider** for downstream applications. It supports:
 
 - Same-device and cross-device flows (QR codes, deep links)
 - **W3C Digital Credentials API** for browser-native verification
-- Selective disclosure and presentation exchange
+- Selective disclosure with DCQL presentation queries
 
 ### Trust Services
 
@@ -59,7 +59,7 @@ Also built on SUNET/vc, the verifier validates credential presentations via **OI
 - **OpenID Federation** — Dynamic federation trust chains
 - **DID Resolution** — did:web, did:webvh document resolution
 
-The system operates in **fail-closed mode**: if the PDP is unreachable, all trust evaluations return negative.
+With a PDP configured (`trust.pdp_url`), the system operates in **fail-closed mode**: if the PDP is unreachable, all trust evaluations return negative. A PDP is required for production use; without one, vc components run in an allow-all mode (every issuer trusted) that is for development and testing only and is not supported.
 
 ### Credential Registry
 
