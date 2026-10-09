@@ -38,9 +38,13 @@ SBOMs are automatically generated on:
 
 - Push to `main` branch
 - Tag creation (`v*`)
+- Pull requests
 - Release publication
 - Manual workflow dispatch
 
+(The exact triggers are set per repository; they all call the shared reusable SBOM workflow of the organisation.)
+
+Two SBOMs are produced: one for the source tree (`<name>-sbom.cdx.json`) and one for the container image (`<name>-container-sbom.cdx.json`). When signing is enabled for a repository, each SBOM is accompanied by a keyless [Cosign](https://github.com/sigstore/cosign) signature (`.sig`) and certificate (`.pem`).
 Each SBOM undergoes vulnerability scanning using [Grype](https://github.com/anchore/grype), with results uploaded to GitHub Security.
 
 ## Downloading SBOMs
@@ -51,7 +55,7 @@ For tagged releases, SBOMs are attached as release assets:
 
 1. Navigate to the repository's **Releases** page
 2. Find the release version you're interested in
-3. Download the `*-sbom.cyclonedx.json` asset
+3. Download the `*-sbom.cdx.json` asset (and `*-container-sbom.cdx.json` for the container image)
 
 ### From Workflow Artifacts
 
@@ -95,13 +99,13 @@ jq '{
   specVersion: .specVersion,
   componentCount: (.components | length),
   project: .metadata.component.name
-}' sbom.cyclonedx.json
+}' sbom.cdx.json
 
 # List all components
-jq '.components[].name' sbom.cyclonedx.json
+jq '.components[].name' sbom.cdx.json
 
 # Find specific component versions
-jq '.components[] | select(.name | contains("crypto")) | {name, version}' sbom.cyclonedx.json
+jq '.components[] | select(.name | contains("crypto")) | {name, version}' sbom.cdx.json
 ```
 
 ### Using CycloneDX CLI
@@ -113,10 +117,10 @@ The [CycloneDX CLI](https://github.com/CycloneDX/cyclonedx-cli) provides validat
 brew install cyclonedx/cyclonedx/cyclonedx-cli
 
 # Validate SBOM
-cyclonedx validate --input-file sbom.cyclonedx.json
+cyclonedx validate --input-file sbom.cdx.json
 
 # Convert to other formats
-cyclonedx convert --input-file sbom.cyclonedx.json --output-file sbom.spdx.json --output-format spdxjson
+cyclonedx convert --input-file sbom.cdx.json --output-file sbom.spdx.json --output-format spdxjson
 ```
 
 ### Using Dependency-Track
@@ -128,7 +132,7 @@ For enterprise SBOM management, import SBOMs into [Dependency-Track](https://dep
 curl -X POST "https://your-dtrack-instance/api/v1/bom" \
   -H "X-Api-Key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
-  -d @sbom.cyclonedx.json
+  -d @sbom.cdx.json
 ```
 
 ## Vulnerability Scanning
@@ -148,10 +152,10 @@ You can scan downloaded SBOMs locally:
 brew install anchore/grype/grype
 
 # Scan SBOM
-grype sbom:sbom.cyclonedx.json
+grype sbom:sbom.cdx.json
 
 # Output in table format with severity filtering
-grype sbom:sbom.cyclonedx.json -o table --fail-on high
+grype sbom:sbom.cdx.json -o table --fail-on high
 ```
 
 ## SBOM Contents
