@@ -46,7 +46,7 @@ Each tenant has isolated configuration, and each verifier instance has its own c
 |--------|----------|-------------|
 | **SIROS ID Hosted** | Quick integration, SaaS model | API credentials only |
 | **Self-Hosted (Docker)** | On-premise, data sovereignty | Docker, MongoDB |
-| **Self-Hosted (Binary)** | Custom infrastructure | Go 1.25+, MongoDB |
+| **Self-Hosted (Binary)** | Custom infrastructure | Go (version per `go.mod`), MongoDB or a SQL database |
 
 :::tip Recommendation
 Start with the hosted service for development and testing. Move to self-hosted when you need data sovereignty or to integrate with internal trust frameworks.
@@ -111,7 +111,9 @@ Add the SIROS ID verifier as an identity provider in your IAM system. This works
 
 ### Option 2: Direct OIDC Integration
 
-Integrate directly as an OIDC Relying Party:
+Your application acts as an OIDC Relying Party and the verifier is its OpenID
+Provider. Clients registered through `/register` must use PKCE (see
+[PKCE Enforcement](#pkce-enforcement)):
 
 ```javascript
 // Example: Standard OIDC authorization request
@@ -129,26 +131,17 @@ window.location = authUrl.toString();
 
 ### Option 3: Direct OpenID4VP
 
-There is no separate "start a presentation" REST API — a presentation session
-is always created by an OIDC authorization request. Drive it the same way as
-Option 2, then use the session endpoints to render your own UI:
+There is no separate "start a presentation" REST API, and no JSON API that
+returns a session to a backend. A presentation session is always created by an
+OIDC authorization request: `GET /authorize` renders the verifier's own HTML
+page, which shows the QR code or same-device link, drives the wallet and polls
+`/poll/{session_id}` itself. Your application starts the flow exactly as in
+Option 2 and receives the verified claims through the normal OIDC code exchange.
 
-```javascript
-// 1. Send the user to /authorize with the scopes that select a
-//    presentation-request template.
-// 2. The verifier creates a session and renders the QR page itself, or you
-//    can fetch the pieces for your own page:
-
-// QR code image for a session
-//   GET /qr/{session_id}
-// Poll session state until the wallet has responded
-//   GET /poll/{session_id}
-// The signed request object the wallet fetches
-//   GET /verification/request-object/{session_id}
-```
-
-For browser-native presentation without a QR code, use the
-[W3C Digital Credentials API](./digital-credentials-api) instead.
+To customise the page, use `verifier.authorization_page_css` (see
+[UI Customization](./digital-credentials-api#ui-customization)). For
+browser-native presentation without a QR code, use the
+[W3C Digital Credentials API](./digital-credentials-api).
 
 ## Client Registration
 
@@ -163,11 +156,16 @@ curl -X POST https://verifier.example.org/register \
     "client_name": "My Application",
     "redirect_uris": ["https://my-app.com/callback"],
     "token_endpoint_auth_method": "client_secret_post",
-    "grant_types": ["authorization_code", "refresh_token"],
+    "grant_types": ["authorization_code"],
     "response_types": ["code"],
-    "scope": "openid profile pid ehic"
+    "scope": "openid pid ehic"
   }'
 ```
+
+The `scope` string is the allow-list for this client: any scope not listed
+here is later rejected with `invalid_scope`, and the default is `openid` only.
+Register every scope you intend to request. The scopes must also exist on the
+verifier (see [Scope-Based Requests](#scope-based-requests)).
 
 Response:
 ```json
@@ -175,26 +173,94 @@ Response:
   "client_id": "abc123",
   "client_secret": "secret456",
   "client_id_issued_at": 1704067200,
-  "client_secret_expires_at": 0
+  "client_secret_expires_at": 0,
+  "registration_access_token": "...",
+  "registration_client_uri": "https://verifier.example.org/register/abc123"
 }
 ```
 
+The `registration_access_token` authorizes the [RFC 7592](https://datatracker.ietf.org/doc/html/rfc7592)
+management endpoints `GET`, `PUT` and `DELETE /register/{client_id}`. Who may
+call `POST /register` is controlled by
+`verifier.outbound.oidc_provider.dynamic_registration_auth` (`open` by default,
+or `static` bearer token, or `jwt`).
+
+:::note Refresh tokens
+Refresh tokens are not implemented: the verifier only supports the
+`authorization_code` grant. Registration accepts `refresh_token` in
+`grant_types` but the token endpoint rejects it with
+`unsupported_grant_type`.
+
+Known issue: https://github.com/SUNET/vc/issues/759
+:::
+
+:::caution Client authentication at the token endpoint
+Registration defaults `token_endpoint_auth_method` to `client_secret_basic`
+and discovery advertises it, but the token endpoint currently reads
+`client_id` and `client_secret` only from the form body. Register with
+`client_secret_post` (as above) and configure your OIDC library to send the
+credentials in the request body.
+
+Known issue: https://github.com/SUNET/vc/issues/758
+:::
+
 ### Static Registration
 
-For production deployments, contact your verifier administrator or use the admin API to pre-register clients.
+There is no admin API. For clients that must exist at startup, declare them in
+the verifier's own configuration under
+`verifier.outbound.oidc_provider.static_clients`:
+
+```yaml
+verifier:
+  outbound:
+    oidc_provider:
+      static_clients:
+        - client_id: "my-app"
+          # Replaced by the value in the secrets file, see below
+          client_secret: "set-in-secrets-file"
+          redirect_uris: ["https://my-app.example.com/callback"]
+          # Must list every credential scope the client will request
+          allowed_scopes: ["openid", "pid", "ehic"]
+          token_endpoint_auth_method: "client_secret_post"
+          client_name: "My Application"
+```
+
+```yaml
+# secrets.yaml (mode 0600)
+verifier:
+  outbound:
+    oidc_provider:
+      subject_salt: "random-secret-value"
+      static_clients:
+        "my-app": "the-client-secret"
+```
+
+If `allowed_scopes` is omitted it defaults to `openid`, `profile`, `email`,
+`address` and `phone`, which does not include your credential scopes. PKCE is
+not enforced for static clients (known issue: https://github.com/SUNET/vc/issues/757).
 
 ## Configuring Presentation Requests
 
 ### Scope-Based Requests
 
-Map OIDC scopes to credential types:
+There is no built-in scope table. A scope you request at `/authorize` must pass
+two checks:
 
-| Scope | Credential | Claims |
-|-------|------------|--------|
-| `profile` | PID | `given_name`, `family_name`, `birth_date` |
-| `pid` | PID | All PID claims |
-| `ehic` | EHIC | Health insurance claims |
-| `diploma` | Diploma | Educational credentials |
+1. It is in the client's allowed scopes (the `scope` string given at
+   registration, or `allowed_scopes` for a static client).
+2. It selects a credential on the verifier: it is either listed in a
+   presentation-request template's `oidc_scopes`, or it is a key of
+   `common.credential_metadata` (the scope then requests that credential
+   type).
+
+Scopes that match neither are ignored, and a request where no scope selects a
+credential fails with "no valid credentials found for requested scopes". The
+scopes the verifier advertises in discovery are `openid`, `profile`, `email`
+plus every scope in `inbound.openid4vp.supported_credentials`.
+
+The scopes available on your verifier are therefore whatever you configured. In
+the example configuration on this page they are `pid` and `ehic`; the sample
+templates shipped in the vc repository also define `profile` and `pid_full`.
 
 ### DCQL Queries (Advanced)
 
@@ -215,7 +281,7 @@ templates:
           format: dc+sd-jwt
           meta:
             vct_values:
-              - urn:eudi:pid:arf-1.8:1
+              - urn:eudi:pid:1
           claims:
             - path: ["given_name"]
             - path: ["family_name"]
@@ -231,8 +297,39 @@ templates:
             - path: ["institution"]
     claim_mappings:
       "*": "*"
-    enabled: true
 ```
+
+Every template in the directory is active; to disable one, remove it from the
+directory. (A template's `enabled` field cannot be used for this: `enabled:
+false` is overridden to `true` when the file is loaded. Known issue: https://github.com/SUNET/vc/issues/754.) The `vct_values` must
+match the `vct` the issuer puts in the credentials your users hold.
+
+DCQL is the only query language the verifier supports; Presentation Exchange
+is not.
+
+## Trust Evaluation
+
+Issuer trust is decided by an [AuthZEN](https://openid.github.io/authzen/)
+Policy Decision Point such as [go-trust](../trust/go-trust):
+
+```yaml
+verifier:
+  trust:
+    # AuthZEN PDP used for every trust decision
+    pdp_url: "http://go-trust:6001"
+    # Restrict accepted JWT signature algorithms (default: ES*, RS*, PS*, EdDSA)
+    allowed_signature_algorithms: ["ES256", "ES384"]
+```
+
+:::danger A PDP is required for production
+A PDP is required for production use. With `pdp_url` set, every trust decision
+goes through the PDP in "default deny" mode. If `pdp_url` is omitted, the
+verifier runs in "allow all" mode: issuer trust is not evaluated (every issuer
+is trusted, with only a log warning at startup) and only self-contained
+`did:key` and `did:jwk` identifiers are resolved, locally; other DID methods
+cannot be resolved. That mode may work for some things but is not supported:
+use it for development and testing only, with no guarantees.
+:::
 
 ## Verification Presets
 
@@ -299,20 +396,44 @@ verifier:
     # Seconds to cache fetched status list tokens
     cache_ttl: 300
     # true (the default) logs a warning and allows the credential through
-    # when the status list is unreachable or unparseable; false rejects it
-    fail_open: false
+    # when the status list is unreachable or unparseable
+    fail_open: true
     # Scopes exempt from checking — e.g. credentials valid < 24h
     skip_scopes:
       - "short_lived_badge"
 ```
 
-:::caution `fail_open` defaults to `true`
-An unreachable status list is not evidence that a credential is valid, but the
-default lets it through anyway. Turning revocation checking on without also
-setting `fail_open: false` therefore buys less than it looks like: any
-status-list outage silently disables the check. Set it to `false` unless
-availability genuinely outranks the check for your deployment.
+:::caution `fail_open` cannot currently be set to `false`
+`fail_open` defaults to `true`, so any status-list outage silently lets
+credentials through. The intended fail-closed setting, `fail_open: false`, has
+no effect at present: the configuration loader treats an explicit `false` as
+unset and re-applies the default `true`. Until this is fixed the verifier
+always fails open on an unreachable or unparseable status list. Explicitly
+revoked or suspended credentials are always rejected.
+
+Known issue: https://github.com/SUNET/vc/issues/753
 :::
+
+## Other Settings
+
+| Key | Purpose |
+|-----|---------|
+| `verifier.inbound.openid4vp.response_mode` | `direct_post` or `direct_post.jwt`: the response mode for request objects delivered by QR code or same-device link. When unset it is derived from `digital_credentials.response_mode`, with any `dc_api` mode mapped to the equivalent `direct_post` mode |
+| `verifier.api_server.cors.allowed_origins` | Origins allowed to call `/token`, `/jwks`, `/register` from a browser (needed by single-page applications) |
+| `verifier.api_server.trust_proxy_tls` | Set `true` behind a TLS-terminating proxy so session cookies keep the `Secure` flag |
+| `verifier.outbound.oidc_provider.enable_userinfo` | Advertise `/userinfo` and issue JWT access tokens (default `true`) |
+| `verifier.client_id_scheme` | `x509_san_dns` (default), `x509_hash` or `did`; `did` also needs `verifier.did` |
+| `common.sql.backend` | Use a SQL database as the primary store instead of MongoDB |
+
+:::caution `enable_userinfo: false` has no effect
+Like `fail_open` above, an explicit `false` is overwritten by the `true` default,
+so `/userinfo` cannot currently be switched off.
+
+Known issue: https://github.com/SUNET/vc/issues/753
+:::
+
+The full key list is in the
+[VC Configuration Reference](/sirosid/reference/vc-configuration).
 
 ## Combined Presentation Binding
 
@@ -328,9 +449,9 @@ verifier:
     enforcement: "enforce"
     # Every listed path must match across all presented credentials
     binding_attributes:
-      - paths: ["family_name", "birth_date", "place_of_birth.locality"]
-    # Compare cnf.jwk / device key across credentials.
-    # Cross-format comparison is limited — see below.
+      - paths: ["family_name", "birthdate", "place_of_birth.locality"]
+    # Compare cnf.jwk / device key across credentials. Works across formats
+    # (SD-JWT cnf.jwk vs mdoc device key) by comparing RFC 7638 thumbprints.
     key_binding_enabled: true
 ```
 
@@ -352,6 +473,11 @@ verifier:
     sources:
       - "https://zk-circuits.fly.dev"
 ```
+
+This setting is only consulted by builds with the `zknative` Go build tag
+(`make build-verifier-zknative`, or the `verifier-zknative` Docker image); the
+default build ignores it and does not verify `mso_mdoc_zk` presentations
+natively.
 
 The default is the live deployed service (`https://zk-circuits.fly.dev`). The
 entries are mirrors of one catalog, not distinct registries — listing several
@@ -386,7 +512,7 @@ Verified credentials are mapped to standard OIDC claims in the ID token:
   "given_name": "Alice",
   "family_name": "Smith",
   "birthdate": "1990-01-15",
-  "nationality": "SE"
+  "nationalities": ["SE"]
 }
 ```
 
@@ -417,46 +543,33 @@ templates:
       given_name: "given_name"
       family_name: "family_name"
       employee_number: "employee_id"   # rename on the way into the ID token
-    enabled: true
 ```
 
-Use `"*": "*"` to pass every disclosed claim through unchanged. Optional
-`claim_transforms` can post-process individual values.
+Use `"*": "*"` to pass every disclosed claim through unchanged. There is no
+claim transformation step: a template that contains a `claim_transforms` key
+is rejected when it is loaded.
 
 ## W3C Digital Credentials API
 
-For browser-based verification, the SIROS ID verifier supports the [W3C Digital Credentials API](https://wicg.github.io/digital-credentials/):
+For browser-based verification the verifier supports the [W3C Digital Credentials API](https://w3c-fedid.github.io/digital-credentials/). When
+`verifier.digital_credentials.enable` is `true`, the authorization page asks
+the browser for the credential with a single click, without a QR code. The page
+uses the [`@sirosfoundation/dc-api`](https://github.com/sirosfoundation/dc-api)
+library and the signed OpenID4VP protocol (`openid4vp-v1-signed`), so the
+browser must allow that protocol. If it does not, or the API is unavailable,
+the page falls back to the QR code / same-device link.
 
-```javascript
-// Browser-native credential request
-const credential = await navigator.credentials.get({
-  digital: {
-    providers: [{
-      protocol: "openid4vp",
-      request: requestObject
-    }]
-  }
-});
-```
-
-When enabled, users can present credentials with a single click—no QR code scanning needed.
-
-### Browser Support
-
-| Browser | Status |
-|---------|--------|
-| Chrome 116+ | ✅ Supported (with flag) |
-| Edge 116+ | ✅ Supported (with flag) |
-| Safari 17+ | ⚠️ Partial support |
-| Firefox | 🔜 Planned |
-
-The verifier automatically falls back to QR code when the DC API is unavailable.
+See [W3C Digital Credentials API](./digital-credentials-api) for the
+configuration options, browser requirements and troubleshooting.
 
 ## Security Features
 
 ### PKCE Enforcement
 
-Public clients must use [PKCE (RFC 7636)](https://datatracker.ietf.org/doc/html/rfc7636):
+[PKCE (RFC 7636)](https://datatracker.ietf.org/doc/html/rfc7636) with `S256` is
+required for every client registered through `/register`, public or
+confidential: `/authorize` without a `code_challenge` fails with
+`invalid_request`. It is not enforced for static clients (known issue: https://github.com/SUNET/vc/issues/757).
 
 ```javascript
 // Generate code verifier and challenge
@@ -464,27 +577,40 @@ const verifier = generateRandomString(64);
 const challenge = base64url(sha256(verifier));
 ```
 
-### Pairwise Subject Identifiers
+### Subject Identifiers
 
-By default, users receive different `sub` claims for each relying party, preventing cross-site tracking:
+The ID token `sub` is controlled by two settings, both required, and applies to
+every client of the verifier (a `subject_type` given at client registration is
+ignored). With `pairwise`, `sub` is derived from the wallet, the client and the
+salt, so each relying party sees a different value and cannot correlate users
+across sites:
 
 ```yaml
 verifier:
   outbound:
     oidc_provider:
       subject_type: "pairwise"  # or "public"
-      subject_salt: "random-secret-value"
+      subject_salt: "random-secret-value"  # put it in the secrets file
 ```
 
 ### Credential Verification
 
-The verifier automatically:
+For each presentation the verifier:
 
-1. ✅ Validates credential signature
-2. ✅ Checks issuer trust (via trust framework)
-3. ✅ Verifies credential status (revocation)
-4. ✅ Validates credential expiration
-5. ✅ Confirms credential type matches request
+1. Validates the credential signature
+2. Checks issuer trust through the configured PDP (see below)
+3. Checks credential status (revocation), when `verifier.revocation.enabled` is set
+4. Validates credential expiration
+5. Confirms the credential type matches the request
+
+:::danger A PDP is required for production
+Issuer trust is only evaluated when `verifier.trust.pdp_url` points at an
+AuthZEN Policy Decision Point such as [go-trust](../trust/go-trust). Without it
+the verifier starts in "allow all" mode: it logs a warning, every issuer is
+trusted, and only `did:key` and `did:jwk` are resolved (locally). It may work
+for some things but is not supported. Run without `pdp_url` only for
+development and testing, never in production.
+:::
 
 ## API Endpoints
 
@@ -497,7 +623,8 @@ The verifier automatically:
 | `/authorize` | GET | Start authorization |
 | `/token` | POST | Exchange code for tokens |
 | `/userinfo` | GET | Get user claims |
-| `/register` | POST | Dynamic client registration |
+| `/register` | POST | Dynamic client registration (RFC 7591) |
+| `/register/{client_id}` | GET, PUT, DELETE | Client configuration management (RFC 7592, needs the `registration_access_token`) |
 
 ### OpenID4VP Endpoints
 
@@ -573,22 +700,23 @@ services:
       - "8080:8080"
     volumes:
       - ./config.yaml:/config.yaml:ro
+      - ./secrets.yaml:/etc/vc/secrets.yaml:ro   # chmod 0600
       - ./pki:/pki:ro
+      - ./metadata:/metadata:ro
       - ./presentation_requests:/presentation_requests:ro
     environment:
-      - VC_CONFIG_YAML=config.yaml
+      - VC_CONFIG_YAML=/config.yaml
     depends_on:
       - mongo
+      - go-trust
 
   mongo:
     image: mongo:7
     restart: always
     volumes:
       - mongo-data:/data/db
-    ports:
-      - "27017:27017"
 
-  # Optional: go-trust for trust evaluation
+  # go-trust: the AuthZEN PDP. Required for production use, see below.
   go-trust:
     image: ghcr.io/sirosfoundation/go-trust:latest
     restart: always
@@ -602,49 +730,87 @@ volumes:
   mongo-data:
 ```
 
+The `metadata/` directory holds the Verifiable Credential Type Metadata (VCTM)
+files that `common.credential_metadata` points at. Copy the ones you need from
+the `metadata/` directory of the [vc repository](https://github.com/SUNET/vc)
+(for example `vctm_pid.json` and `vctm_ehic.json`).
+
+:::danger A PDP is required for production
+The `go-trust` service above provides the Policy Decision Point that
+`verifier.trust.pdp_url` refers to. A PDP is required for production use.
+Without `pdp_url` the verifier trusts every issuer and resolves only `did:key`/`did:jwk`
+locally; that mode may work for some things but is not supported, so use it for
+development and testing only.
+:::
+
 #### Verifier Configuration
 
-Create `config.yaml`:
+Create `config.yaml`. This configuration passes the verifier's startup
+validation:
 
 ```yaml
+common:
+  mongo:
+    uri: mongodb://mongo:27017
+  production: true
+  secret_file_path: "/etc/vc/secrets.yaml"
+
+  # Required: the credential types this verifier can request. Each key is a
+  # scope name usable at /authorize.
+  credential_metadata:
+    pid:
+      vctm_file_path: "/metadata/vctm_pid.json"
+      format: "dc+sd-jwt"
+    ehic:
+      vctm_file_path: "/metadata/vctm_ehic.json"
+      format: "dc+sd-jwt"
+
 verifier:
   api_server:
     addr: :8080
-    tls:
-      enable: false  # Use reverse proxy for TLS in production
-  public_url: "https://verifier.example.com"
+    # TLS is terminated by a reverse proxy; keep session cookies Secure
+    trust_proxy_tls: true
+  public_url: "https://verifier.example.org"
 
-  # Signs JARs and OIDC tokens; published at /jwks
+  # Signs request objects (JARs) and OIDC tokens; published at /jwks
   key_config:
     private_key_path: "/pki/verifier_key.pem"
     chain_path: "/pki/verifier_chain.pem"
 
-  # How the verifier identifies itself to wallets
+  # How the verifier identifies itself to wallets. x509_san_dns needs a
+  # certificate whose DNS SAN matches the host of public_url.
   client_id_scheme: "x509_san_dns"   # or "x509_hash", "did"
 
   # Wallet-facing side: OpenID4VP
   inbound:
     openid4vp:
-      presentation_timeout: 300
+      token_endpoint: "https://verifier.example.org/token"
       presentation_requests_dir: "/presentation_requests"
+      # Every scope here must appear in some clients[].scopes entry below, and
+      # vice versa, or startup validation fails.
       supported_credentials:
-        - vct: "urn:eudi:pid:arf-1.8:1"
-          scopes: ["openid", "profile"]
+        - vct: "urn:eudi:pid:1"
+          scopes: ["pid"]
         - vct: "urn:eudi:ehic:1"
           scopes: ["ehic"]
+      clients:
+        "default":
+          type: "public"
+          redirect_uri: "https://verifier.example.org/"
+          scopes: ["pid", "ehic"]
 
-  # RP-facing side: the verifier acting as an OIDC Provider
+  # RP-facing side: the verifier acting as an OpenID Provider
   outbound:
     oidc_provider:
-      issuer: "https://verifier.example.com"
-      session_duration: 900
+      issuer: "https://verifier.example.org"
       code_duration: 300
       access_token_duration: 3600
       id_token_duration: 3600
       subject_type: "pairwise"
-      subject_salt: "put-this-in-the-secrets-file"
+      # Overwritten by the value in the secrets file
+      subject_salt: "set-in-secrets-file"
 
-  # Trust evaluation via go-trust (AuthZEN)
+  # Trust evaluation via go-trust (AuthZEN). Required for production.
   trust:
     pdp_url: "http://go-trust:6001"
 
@@ -652,25 +818,47 @@ verifier:
     enable: true
     use_jar: true
     allow_qr_fallback: true
+```
 
-common:
-  mongo:
-    uri: mongodb://mongo:27017
-  production: true
-  secret_file_path: "/etc/vc/secrets.yaml"
+`inbound.openid4vp.clients` and `token_endpoint` are required by validation.
+The only cross-check is that the scopes in `clients` and in
+`supported_credentials` match each other, so a single entry listing all your
+credential scopes is enough. Relying parties are registered separately, see
+[Client Registration](#client-registration).
+
+Create `secrets.yaml` with mode `0600` or `0400` (the verifier refuses a
+secrets file that is readable by group or others unless
+`common.skip_secrets_perm_check` is `true`):
+
+```yaml
+verifier:
+  outbound:
+    oidc_provider:
+      subject_salt: "a-long-random-secret"
 ```
 
 :::note
 The vc config file is not environment-interpolated. Secrets such as
 `subject_salt` go in the file referenced by `common.secret_file_path`, not in
-`${VAR}` placeholders.
+`${VAR}` placeholders. The reference configuration for every key is the
+[VC Configuration Reference](/sirosid/reference/vc-configuration).
 :::
 
 #### Start the Services
 
 ```bash
 # Generate the verifier signing key
+mkdir -p pki
 openssl ecparam -name prime256v1 -genkey -noout -out pki/verifier_key.pem
+
+# Development only: a self-signed certificate whose DNS SAN matches public_url.
+# In production use a certificate chain issued by a CA your wallets trust.
+openssl req -x509 -new -key pki/verifier_key.pem -sha256 -days 365 \
+  -subj "/CN=verifier.example.org" \
+  -addext "subjectAltName=DNS:verifier.example.org" \
+  -out pki/verifier_chain.pem
+
+chmod 600 secrets.yaml
 
 # Start all services
 docker compose up -d
@@ -691,7 +879,8 @@ For non-Docker environments:
 git clone https://github.com/SUNET/vc.git
 cd vc
 
-# Build the verifier
+# Build the verifier (does not verify mso_mdoc_zk natively; for that use
+# make build-verifier-zknative)
 make build-verifier
 
 # Run
@@ -732,9 +921,13 @@ spec:
             - name: pki
               mountPath: /pki
             # subject_salt and other secrets come from the file named by
-            # common.secret_file_path, not from environment variables.
+            # common.secret_file_path (/etc/vc/secrets.yaml), not from
+            # environment variables.
             - name: secrets
               mountPath: /etc/vc
+            # VCTM files referenced by common.credential_metadata
+            - name: metadata
+              mountPath: /metadata
           livenessProbe:
             httpGet:
               path: /health
@@ -754,7 +947,16 @@ spec:
         - name: secrets
           secret:
             secretName: verifier-secrets
+            # Kubernetes' default 0644 is rejected by the secrets loader
+            defaultMode: 0400
+        - name: metadata
+          configMap:
+            name: verifier-metadata
 ```
+
+The ConfigMap and Secret are not shown. The mounted paths must match the paths
+referenced in `config.yaml` (`/pki`, `/metadata`, `common.secret_file_path`,
+and `presentation_requests_dir` if you set it).
 
 ## Next Steps
 

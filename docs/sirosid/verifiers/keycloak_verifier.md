@@ -63,9 +63,16 @@ curl -X POST https://verifier.example.org/register \
     "token_endpoint_auth_method": "client_secret_post",
     "grant_types": ["authorization_code"],
     "response_types": ["code"],
-    "scope": "openid profile"
+    "scope": "openid pid"
   }'
 ```
+
+The `scope` string is the list of scopes Keycloak may request. Include every
+scope you will configure in Keycloak in Step 2 (the default is `openid` only,
+and any other requested scope is rejected with `invalid_scope`). The scopes
+must also exist on the verifier, see [Scopes](#scopes) below. The verifier
+requires PKCE for clients registered this way, which is why **Use PKCE** is ON
+in Step 2.
 
 :::info SIROS Hosted Example
 For the SIROS hosted service with tenant `acme` and verifier instance `main`:
@@ -75,8 +82,6 @@ curl -X POST https://main.acme.verifier.id.siros.org/register \
   -d '{ ... }'
 ```
 :::
-  }'
-```
 
 Save the returned `client_id` and `client_secret` for the next step.
 
@@ -102,8 +107,8 @@ Configure the following settings:
 | **Alias** | `sirosid` | Internal identifier (used in redirect URI) |
 | **Display Name** | `Login with Credential` | Shown on login page |
 | **Enabled** | ON | Enable the provider |
-| **Store Tokens** | ON | Required for debugging; optional in production |
-| **Trust Email** | ON | Trust email from verified credentials |
+| **Store Tokens** | OFF | Turn ON to inspect the raw ID token while debugging |
+| **Trust Email** | OFF | The default presentation requests do not return an `email` claim; enable only if your verifier's template provides a verified email |
 
 ### OpenID Connect Settings
 
@@ -119,25 +124,21 @@ Configure the following settings:
 | Setting | Value | Description |
 |---------|-------|-------------|
 | **Validate Signatures** | ON | Verify ID token signatures |
-| **Use PKCE** | ON | Proof Key for Code Exchange |
+| **Use PKCE** | ON | Required: the verifier rejects authorization requests from registered clients without PKCE |
 | **PKCE Method** | `S256` | SHA-256 challenge method |
 
-### Scopes
+### Scopes {#scopes}
 
 | Setting | Value |
 |---------|-------|
-| **Default Scopes** | `openid profile` |
+| **Default Scopes** | `openid pid` |
 
-To request additional credentials, add scopes:
-
-| Scope | Credential Type |
-|-------|-----------------|
-| `profile` | Basic PID (name, birthdate) |
-| `pid` | Full Person Identification Data |
-| `ehic` | European Health Insurance Card |
-| `diploma` | Educational credentials |
-
-Example for health services: `openid profile ehic`
+The scopes select which credentials the verifier requests from the wallet.
+There is no fixed list: the available scopes are those the verifier operator
+configured (discovery's `scopes_supported` lists them), and each one must also
+be in the `scope` string you registered in Step 1. For example, with `pid` and
+`ehic` configured on the verifier and both registered, use `openid pid ehic` for
+health services.
 
 ## Step 3: Configure Claim Mappers
 
@@ -178,6 +179,10 @@ Navigate to **Identity Providers** → **sirosid** → **Mappers** → **Add map
 
 #### Email
 
+The PID presentation requests shipped with the verifier do not request an
+`email` claim, so this mapper only has a value if your verifier uses a template
+that does.
+
 | Setting | Value |
 |---------|-------|
 | **Name** | `email` |
@@ -202,10 +207,10 @@ Navigate to **Identity Providers** → **sirosid** → **Mappers** → **Add map
 
 | Setting | Value |
 |---------|-------|
-| **Name** | `nationality` |
+| **Name** | `nationalities` |
 | **Mapper Type** | `Attribute Importer` |
-| **Claim** | `nationality` |
-| **User Attribute Name** | `nationality` |
+| **Claim** | `nationalities` (an array in the PID) |
+| **User Attribute Name** | `nationalities` |
 | **Sync Mode** | `inherit` |
 
 ## Step 4: Configure First Login Behavior
@@ -218,7 +223,7 @@ Navigate to **Authentication** → **Flows** and configure the **first broker lo
 |--------|---------------------|-------------|
 | **Create User If Unique** | ON | Auto-create accounts for new users |
 | **Confirm Link Existing Account** | ON | Prompt before linking to existing accounts |
-| **Verify Existing Account By Email** | OFF | Skip if Trust Email is enabled |
+| **Verify Existing Account By Email** | ON | Keep ON unless Trust Email is enabled and your verifier supplies a verified email |
 
 ### Auto-Linking by Email
 
@@ -253,15 +258,17 @@ If you don't have credentials yet:
 
 ### Step-Up Authentication
 
-Require credential verification for sensitive operations:
+Require credential verification for sensitive operations by sending the user
+back through the SIROS ID identity provider. With a Keycloak OIDC client
+adapter, add `kc_idp_hint=sirosid` and `prompt=login` to the authorization
+request so Keycloak skips its own login screen and re-authenticates against the
+verifier:
 
-```java
-// In your application, request step-up authentication
-KeycloakSecurityContext context = getSecurityContext();
-context.getToken().getOtherClaims().get("acr"); // Check authentication level
-
-// Force re-authentication with SIROS ID
-redirectToKeycloak("?kc_idp_hint=sirosid&prompt=login");
+```text
+https://keycloak.example.com/realms/myrealm/protocol/openid-connect/auth
+  ?client_id=my-app&response_type=code&scope=openid
+  &redirect_uri=https%3A%2F%2Fmy-app.example.com%2Fcallback
+  &kc_idp_hint=sirosid&prompt=login
 ```
 
 ### Conditional Authentication
@@ -334,7 +341,7 @@ Check for:
 **Solutions**:
 1. Configure the first login flow to link existing accounts
 2. Use email as the linking attribute
-3. Ensure **Trust Email** is enabled if using email linking
+3. If using email linking, make sure your verifier's template returns a verified `email` claim and enable **Trust Email**
 
 ## Configuration Reference
 
@@ -348,7 +355,7 @@ Export this configuration to replicate the setup:
   "displayName": "Login with Credential",
   "providerId": "oidc",
   "enabled": true,
-  "trustEmail": true,
+  "trustEmail": false,
   "storeToken": false,
   "linkOnly": false,
   "firstBrokerLoginFlowAlias": "first broker login",
@@ -365,20 +372,17 @@ Export this configuration to replicate the setup:
     "validateSignature": "true",
     "pkceEnabled": "true",
     "pkceMethod": "S256",
-    "defaultScope": "openid profile"
+    "defaultScope": "openid pid"
   }
 }
 ```
 
-### Environment Variables
+### Client Secret
 
-For production deployments, use environment variables:
-
-```bash
-# Keycloak environment
-KC_SPI_IDENTITY_PROVIDER_OIDC_SIROSID_CLIENT_ID=your-client-id
-KC_SPI_IDENTITY_PROVIDER_OIDC_SIROSID_CLIENT_SECRET=your-client-secret
-```
+Keycloak stores the identity provider's client ID and secret in its realm
+configuration. Keep the secret out of exported realm files, and inject it at
+import time (for example with the `${CLIENT_SECRET}` placeholder above and your
+realm-import tooling) rather than committing it.
 
 ## Next Steps
 

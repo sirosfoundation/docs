@@ -59,9 +59,9 @@ flowchart LR
 
 1. **Issuance**: Your identity provider authenticates users, and the issuer creates digital credentials stored in the user's wallet of choice. Any OID4VCI-compatible wallet can receive credentials.
 
-2. **Verification**: When users access your application, they present credentials from their wallet. The verifier validates them and returns standard OIDC tokens to your app. Any OID4VP-compatible wallet can participate.
+2. **Verification**: When users access your application, they present credentials from their wallet. The verifier validates them (trust decisions come from the PDP, see below) and returns standard OIDC tokens to your app. Any OID4VP-compatible wallet can participate.
 
-3. **Trust**: Go-Trust provides unified trust evaluation via AuthZEN, querying ETSI Trust Lists, OpenID Federation, and DID documents.
+3. **Trust**: Go-Trust provides unified trust evaluation via AuthZEN, querying ETSI Trust Lists, OpenID Federation, and DID documents. A PDP such as Go-Trust is required for production use of the issuer and verifier; without one they run in an allow-all mode that is for development and testing only.
 
 ## Core Components
 
