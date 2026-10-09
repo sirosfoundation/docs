@@ -13,9 +13,11 @@ The issuer deployment uses the following container images:
 
 | Image | Purpose | Required |
 |-------|---------|:--------:|
-| `ghcr.io/sirosfoundation/vc/issuer` | Credential issuer service (includes SAML & OIDC support) | ✅ |
+| `ghcr.io/sirosfoundation/vc/apigw` | Public OpenID4VCI/OAuth endpoints and user authentication (OIDC, SAML) | ✅ |
+| `ghcr.io/sirosfoundation/vc/issuer` | Credential signing service (gRPC) | ✅ |
+| `ghcr.io/sirosfoundation/vc/registry` | Token Status Lists | ✅ |
 | `mongo:7` | Database for sessions and state | ✅ |
-| `ghcr.io/sirosfoundation/go-trust` | Trust evaluation (AuthZEN) | Optional |
+| `ghcr.io/sirosfoundation/go-trust` | Trust evaluation (AuthZEN PDP); required for production | ✅ (production) |
 
 For complete image documentation, see [Docker Images](/sirosid/operations/docker-images).
 
@@ -28,8 +30,8 @@ issuer/
 ├── docker-compose.yaml      # Container orchestration
 ├── config.yaml              # Main issuer configuration
 ├── pki/
-│   ├── issuer_key.pem       # Credential signing key
-│   └── issuer_cert.pem      # Signing certificate (if using X.509)
+│   ├── signing_ec_private.pem  # Credential signing key
+│   └── signing_ec_chain.pem    # Signing certificate chain (X.509)
 ├── metadata/
 │   ├── vctm_pid.json        # PID credential type metadata
 │   ├── vctm_ehic.json       # EHIC credential type metadata
@@ -46,31 +48,38 @@ issuer/
 
 The main configuration file that controls all issuer behavior.
 
-Issuance is split across two services: **apigw** terminates OpenID4VCI and
-authenticates the user, **issuer** signs the credential.
+Issuance is split across three services: **apigw** terminates OpenID4VCI and
+authenticates the user, **issuer** signs the credential, and **registry**
+serves Token Status Lists. They all read the same `config.yaml`.
 
 | Section | Purpose |
 |---------|---------|
 | `issuer.api_server` / `issuer.grpc_server` | Issuer service listeners |
 | `issuer.issuer_url` | Issuer identifier URL |
 | `issuer.key_config` | Credential signing key (file or PKCS#11) |
+| `issuer.jwt_attribute` | Required issuer-side JWT settings (`issuer`, `verifiable_credential_type`) |
+| `apigw.key_config` | APIGW signing key (metadata and tokens) |
+| `apigw.issuer_client` / `apigw.registry_client` | gRPC addresses of the issuer and registry |
 | `apigw.api_server` | APIGW HTTP server settings (port, TLS) |
 | `apigw.public_url` | Public URL of the issuance front end |
 | `apigw.auth_providers` | User authentication backend (`oidc`, `saml`, `preauth`) |
 | `apigw.data_sources` | Binds credential scopes to auth providers and data sources |
 | `apigw.delivery.openid4vci` | OpenID4VCI clients and token endpoint |
-| `apigw.trust` | Trust evaluation endpoint (go-trust) |
+| `apigw.delivery.credential_offers` | Offer `issuer_url` (must equal `apigw.public_url`) and wallet list |
+| `apigw.trust` | Trust evaluation endpoint (go-trust PDP) |
+| `registry.token_status_lists` | Status list signing key |
 | `common.credential_metadata` | Credential type definitions (VCTM path + format) |
 | `common.mongo` | MongoDB connection settings |
 
 ```yaml
-# Minimal config.yaml structure
+# Minimal config.yaml (passes startup validation for issuer, apigw and registry)
 common:
+  production: true
   mongo:
     uri: mongodb://mongo:27017
   credential_metadata:
     pid:
-      vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
+      vctm_file_path: "/metadata/vctm_pid.json"
       format: "dc+sd-jwt"
 
 issuer:
@@ -79,26 +88,79 @@ issuer:
     addr: :8080
   grpc_server:
     addr: :8090
+  registry_client:
+    addr: registry:8090
   key_config:
-    private_key_path: "/pki/issuer_key.pem"
-    chain_path: "/pki/issuer_chain.pem"
+    private_key_path: "/pki/signing_ec_private.pem"
+    chain_path: "/pki/signing_ec_chain.pem"
+  jwt_attribute:
+    issuer: "https://issuer.example.org"
+    verifiable_credential_type: "urn:eudi:pid:1"
 
 apigw:
   api_server:
     addr: :8080
   public_url: "https://issuer.example.org"
+  key_config:
+    private_key_path: "/pki/signing_ec_private.pem"
+    chain_path: "/pki/signing_ec_chain.pem"
   issuer_client:
     addr: issuer:8090
+  registry_client:
+    addr: registry:8090
   auth_providers:
     oidc:
       enable: true
-      # ... see the OIDC Provider integration guide
+      issuer_url: "https://your-idp.example.com"
+      redirect_uri: "https://issuer.example.org/oidcrp/callback"
+      registration:
+        preconfigured:
+          enable: true
+          client_id: "issuer-client"
+          client_secret: "the-client-secret"
+      scopes:
+        - openid
+        - profile
   data_sources:
     assertion:
       scopes:
         pid:
           auth_provider: oidc
+  delivery:
+    openid4vci:
+      token_endpoint: "https://issuer.example.org/token"
+      clients:
+        "1003":
+          type: "public"
+          redirect_uri: "https://wallet.example.com"
+          scopes:
+            - "pid"
+    credential_offers:
+      issuer_url: "https://issuer.example.org"
+      wallets:
+        my_wallet:
+          label: "My Wallet"
+          redirect_uri: "https://wallet.example.com/credential-offer"
+  trust:
+    pdp_url: "http://go-trust:6001"
+
+registry:
+  api_server:
+    addr: :8080
+  public_url: "https://registry.example.org"
+  grpc_server:
+    addr: :8090
+  token_status_lists:
+    key_config:
+      private_key_path: "/pki/signing_ec_private.pem"
+      chain_path: "/pki/signing_ec_chain.pem"
 ```
+
+The `jwt_attribute` block is required by the issuer service, and `apigw.delivery.credential_offers.issuer_url` must be byte-identical to `apigw.public_url`. Configure the OIDC secret inline (or via the file named by `common.secret_file_path`); the config file is not environment-interpolated.
+
+:::warning A PDP is required for production
+A PDP (AuthZEN, such as go-trust) configured through `apigw.trust.pdp_url` is required for production use. Without it, key resolution is limited to the self-contained local DID methods (`did:key`, `did:jwk`) and trust evaluation is "allow all". Omit it only for development and testing.
+:::
 
 :::note No `credential_constructor`
 The old `credential_constructor` section was removed from vc. Credential types
@@ -124,7 +186,7 @@ Verifiable Credential Type Metadata files define each credential type's schema, 
 
 ```json
 {
-  "vct": "urn:eudi:pid:arf-1.8:1",
+  "vct": "urn:eudi:pid:1",
   "name": "Person Identification Data",
   "display": [
     {
@@ -149,8 +211,8 @@ Example VCTM files are available in the [vc repository](https://github.com/SUNET
 
 | File | Purpose | Format |
 |------|---------|--------|
-| `issuer_key.pem` | Credential signing private key | PEM (EC P-256 or RSA) |
-| `issuer_cert.pem` | Signing certificate (optional) | PEM X.509 |
+| `signing_ec_private.pem` | Credential signing private key | PEM (EC P-256 or RSA) |
+| `signing_ec_chain.pem` | Signing certificate chain | PEM X.509 |
 | `sp-cert.pem` | SAML SP certificate | PEM X.509 |
 | `sp-key.pem` | SAML SP private key | PEM |
 
@@ -158,21 +220,21 @@ Example VCTM files are available in the [vc repository](https://github.com/SUNET
 
 ```bash
 # EC P-256 key (recommended for SD-JWT VC)
-openssl ecparam -name prime256v1 -genkey -noout -out pki/issuer_key.pem
+openssl ecparam -name prime256v1 -genkey -noout -out pki/signing_ec_private.pem
 
 # RSA 2048 key (alternative)
-openssl genrsa -out pki/issuer_key.pem 2048
+openssl genrsa -out pki/signing_ec_private.pem 2048
 ```
 
 ## docker-compose.yaml
 
 ```yaml
 services:
-  issuer:
-    image: ghcr.io/sirosfoundation/vc/issuer:latest
+  apigw:
+    image: ghcr.io/sirosfoundation/vc/apigw:latest
     restart: always
     ports:
-      - "8080:8080"
+      - "8080:8080"   # public OpenID4VCI / OAuth endpoints
     volumes:
       - ./config.yaml:/config.yaml:ro
       - ./pki:/pki:ro
@@ -180,7 +242,44 @@ services:
     environment:
       - VC_CONFIG_YAML=config.yaml
     depends_on:
+      - issuer
+      - registry
       - mongo
+
+  issuer:
+    image: ghcr.io/sirosfoundation/vc/issuer:latest
+    restart: always
+    volumes:
+      - ./config.yaml:/config.yaml:ro
+      - ./pki:/pki:ro
+      - ./metadata:/metadata:ro
+    environment:
+      - VC_CONFIG_YAML=config.yaml
+    depends_on:
+      - registry
+      - mongo
+
+  registry:
+    image: ghcr.io/sirosfoundation/vc/registry:latest
+    restart: always
+    ports:
+      - "8081:8080"   # Token Status List HTTP endpoint
+    volumes:
+      - ./config.yaml:/config.yaml:ro
+      - ./pki:/pki:ro
+    environment:
+      - VC_CONFIG_YAML=config.yaml
+    depends_on:
+      - mongo
+
+  go-trust:
+    image: ghcr.io/sirosfoundation/go-trust:latest
+    restart: always
+    volumes:
+      - ./trust-config.yaml:/config.yaml:ro
+    # go-trust binds 127.0.0.1 by default; listen on all interfaces so
+    # apigw can reach it on the compose network.
+    command: ["--host", "0.0.0.0", "--config", "/config.yaml"]
 
   mongo:
     image: mongo:7
@@ -192,39 +291,21 @@ volumes:
   mongo-data:
 ```
 
+The same `config.yaml` is mounted into all three vc services; each reads only its own section (`apigw`, `issuer`, `registry`) plus `common`. The apigw is the only service that needs to be reachable by wallets; the issuer and registry gRPC ports (`8090`) only need to be reachable from the other vc services. See [Go-Trust configuration](/sirosid/trust/go-trust-configuration) for `trust-config.yaml`.
+
 ### With SAML Support
 
-For SAML IdP authentication, mount the SAML SP certificate and key:
+For SAML IdP authentication, also mount the SAML SP certificate and key into the **apigw** service (the SAML SP runs in apigw):
 
 ```yaml
 services:
-  issuer:
-    image: ghcr.io/sirosfoundation/vc/issuer:latest
+  apigw:
     volumes:
       - ./config.yaml:/config.yaml:ro
       - ./pki:/pki:ro
       - ./metadata:/metadata:ro
       - ./saml:/saml:ro  # SAML SP keys and IdP metadata
     # ... rest of configuration
-```
-
-### With Trust Evaluation
-
-For issuer trust validation, add the go-trust service:
-
-```yaml
-services:
-  issuer:
-    # ... issuer configuration
-    
-  go-trust:
-    image: ghcr.io/sirosfoundation/go-trust:latest
-    restart: always
-    ports:
-      - "6001:6001"
-    volumes:
-      - ./trust-config.yaml:/config.yaml:ro
-    command: ["--config", "/config.yaml"]
 ```
 
 ## Environment Variables
@@ -250,12 +331,12 @@ manager. The file's permissions are checked at startup unless
 
 Before deploying, ensure you have:
 
-- [ ] Generated signing keys (`pki/issuer_key.pem`)
+- [ ] Generated signing keys (`pki/signing_ec_private.pem`)
 - [ ] Created VCTM files for each credential type (`metadata/*.json`)
 - [ ] Configured your IdP to allow the issuer as a client
 - [ ] Set up MongoDB (or have connection details for existing instance)
 - [ ] Configured external URL and TLS termination
-- [ ] (Optional) Configured trust evaluation via go-trust
+- [ ] Configured trust evaluation via a go-trust PDP (required for production)
 
 ## Next Steps
 

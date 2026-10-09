@@ -69,7 +69,7 @@ OIDC Relying Party authentication is configured in the `apigw.auth_providers.oid
 common:
   credential_metadata:
     pid:
-      vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
+      vctm_file_path: "/metadata/vctm_pid.json"
       format: "dc+sd-jwt"
 
 apigw:
@@ -113,8 +113,14 @@ apigw:
       scopes:
         ehic:
           auth_provider: oidc
-          auth_claims: ["given_name", "family_name", "birthdate"]
+          # auth_claims are matched verbatim against the stored identity
+          # fields (given_name, family_name, birth_date, ...)
+          auth_claims: ["given_name", "family_name", "birth_date"]
 ```
+
+:::note Claim names for datastore lookups
+For `datastore` scopes the `auth_claims` names are used as-is to look up the user's identity record, so they must be the stored field names (for example `birth_date`, not the OIDC `birthdate`). Map an OIDC claim onto the stored name with `attribute_mapping` (for example `birthdate: {claim: birth_date}`).
+:::
 
 ### Dynamic Client Registration
 
@@ -156,14 +162,14 @@ OpenID Connect defines standard claims:
 
 | OIDC Claim | Description |
 |------------|-------------|
-| \`sub\` | Subject identifier |
-| \`given_name\` | First name |
-| \`family_name\` | Last name |
-| \`email\` | Email address |
-| \`email_verified\` | Email verification status |
-| \`birthdate\` | Birth date (YYYY-MM-DD) |
-| \`address\` | Address object |
-| \`phone_number\` | Phone number |
+| `sub` | Subject identifier |
+| `given_name` | First name |
+| `family_name` | Last name |
+| `email` | Email address |
+| `email_verified` | Email verification status |
+| `birthdate` | Birth date (YYYY-MM-DD) |
+| `address` | Address object |
+| `phone_number` | Phone number |
 
 ### Attribute Mapping (Optional)
 
@@ -179,8 +185,8 @@ apigw:
       registration:
         preconfigured:
           enable: true
-          client_id: "${OIDC_CLIENT_ID}"
-          client_secret: "${OIDC_CLIENT_SECRET}"
+          client_id: "your-client-id"
+          client_secret: "your-client-secret"
 
       scopes:
         - openid
@@ -195,7 +201,6 @@ apigw:
       #   sub:
       #     claim: "subject_id"
       #     required: true
-      #     transform: "lowercase"
 ```
 
 ### Attribute Configuration Options
@@ -204,7 +209,14 @@ apigw:
 |--------|------|-------------|
 | `claim` | string | Canonical claim name to map to |
 | `required` | boolean | Whether the OIDC claim must be present |
-| `transform` | string | Optional: `lowercase`, `uppercase`, `trim` |
+| `default` | string | Value used when the claim is absent |
+| `as_array` | boolean | Wrap a scalar value in a single-element array |
+
+Mapping only renames claims and checks presence. To transform values (lowercase, trim, country codes, ...), add `derivations` to the data source scope; see [Concepts](./concepts#building-the-claim-set).
+
+:::note Secrets
+The config file is not environment-interpolated, so `${VAR}` placeholders are not expanded. Put client secrets inline, or keep them in the file named by `common.secret_file_path` (under `apigw.auth_providers.oidc.registration.preconfigured.client_secret`), mounted with restrictive permissions.
+:::
 
 ## Provider-Specific Examples
 
@@ -219,8 +231,8 @@ apigw:
       registration:
         preconfigured:
           enable: true
-          client_id: "${GOOGLE_CLIENT_ID}"
-          client_secret: "${GOOGLE_CLIENT_SECRET}"
+          client_id: "your-client-id"
+          client_secret: "your-client-secret"
       redirect_uri: "https://issuer.example.org/oidcrp/callback"
       scopes:
         - openid
@@ -239,8 +251,8 @@ apigw:
       registration:
         preconfigured:
           enable: true
-          client_id: "${AZURE_CLIENT_ID}"
-          client_secret: "${AZURE_CLIENT_SECRET}"
+          client_id: "your-client-id"
+          client_secret: "your-client-secret"
       redirect_uri: "https://issuer.example.org/oidcrp/callback"
       scopes:
         - openid
@@ -260,8 +272,8 @@ apigw:
       registration:
         preconfigured:
           enable: true
-          client_id: "${KEYCLOAK_CLIENT_ID}"
-          client_secret: "${KEYCLOAK_CLIENT_SECRET}"
+          client_id: "your-client-id"
+          client_secret: "your-client-secret"
       redirect_uri: "https://issuer.example.org/oidcrp/callback"
       scopes:
         - openid
@@ -280,8 +292,8 @@ apigw:
       registration:
         preconfigured:
           enable: true
-          client_id: "${AUTH0_CLIENT_ID}"
-          client_secret: "${AUTH0_CLIENT_SECRET}"
+          client_id: "your-client-id"
+          client_secret: "your-client-secret"
       redirect_uri: "https://issuer.example.org/oidcrp/callback"
       scopes:
       - openid
@@ -291,85 +303,94 @@ apigw:
 
 ## Docker Deployment
 
-```yaml
-services:
-  apigw:
-    image: ghcr.io/sirosfoundation/vc/apigw:latest
-    restart: always
-    ports:
-      - "8080:8080"
-    environment:
-      - OIDC_CLIENT_ID=${OIDC_CLIENT_ID}
-      - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}
-    volumes:
-      - ./config.yaml:/config.yaml:ro
-      - ./pki:/pki:ro
-    depends_on:
-      - mongo
-      - issuer
-
-  issuer:
-    image: ghcr.io/sirosfoundation/vc/issuer:latest
-    # ...
-
-  mongo:
-    image: mongo:7
-    volumes:
-      - mongo-data:/data/db
-
-volumes:
-  mongo-data:
-```
+OIDC runs inside the **apigw** service, which also needs the issuer and registry services and MongoDB. See [Deployment](./deployment#docker-composeyaml) for the full Compose file. Credentials are not passed as environment variables; the only variables the vc services read are `VC_CONFIG_YAML` and `SSL_CERT_FILE`.
 
 ## Complete Configuration Example
 
+A complete `config.yaml` for the apigw, issuer and registry services using OIDC (as in [Deployment](./deployment)); change `issuer_url` and the client credentials for your OP:
+
 ```yaml
 common:
+  production: true
   mongo:
     uri: mongodb://mongo:27017
-
   credential_metadata:
     pid:
-      vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
+      vctm_file_path: "/metadata/vctm_pid.json"
       format: "dc+sd-jwt"
 
+issuer:
+  issuer_url: "https://issuer.example.org"
+  api_server:
+    addr: :8080
+  grpc_server:
+    addr: :8090
+  registry_client:
+    addr: registry:8090
+  key_config:
+    private_key_path: "/pki/signing_ec_private.pem"
+    chain_path: "/pki/signing_ec_chain.pem"
+  jwt_attribute:
+    issuer: "https://issuer.example.org"
+    verifiable_credential_type: "urn:eudi:pid:1"
+
 apigw:
+  api_server:
+    addr: :8080
   public_url: "https://issuer.example.org"
   key_config:
     private_key_path: "/pki/signing_ec_private.pem"
     chain_path: "/pki/signing_ec_chain.pem"
-
+  issuer_client:
+    addr: issuer:8090
+  registry_client:
+    addr: registry:8090
   auth_providers:
     oidc:
       enable: true
-      issuer_url: "https://accounts.google.com"
+      issuer_url: "https://your-idp.example.com"
       redirect_uri: "https://issuer.example.org/oidcrp/callback"
       registration:
         preconfigured:
           enable: true
-          client_id: "${OIDC_CLIENT_ID}"
-          client_secret: "${OIDC_CLIENT_SECRET}"
+          client_id: "issuer-client"
+          client_secret: "the-client-secret"
       scopes:
         - openid
         - profile
-        - email
-      session_duration: 300
-
   data_sources:
     assertion:
       scopes:
         pid:
           auth_provider: oidc
-
   delivery:
     openid4vci:
       token_endpoint: "https://issuer.example.org/token"
       clients:
         "1003":
           type: "public"
-          redirect_uri: "https://dev.wallet.sunet.se"
+          redirect_uri: "https://wallet.example.com"
           scopes:
             - "pid"
+    credential_offers:
+      issuer_url: "https://issuer.example.org"
+      wallets:
+        my_wallet:
+          label: "My Wallet"
+          redirect_uri: "https://wallet.example.com/credential-offer"
+  trust:
+    pdp_url: "http://go-trust:6001"
+
+registry:
+  api_server:
+    addr: :8080
+  public_url: "https://registry.example.org"
+  grpc_server:
+    addr: :8090
+  token_status_lists:
+    key_config:
+      private_key_path: "/pki/signing_ec_private.pem"
+      chain_path: "/pki/signing_ec_chain.pem"
 ```
 
 ## Troubleshooting
@@ -377,7 +398,7 @@ apigw:
 ### Invalid Client
 
 **Solutions:**
-1. Verify \`client_id\` and \`client_secret\` are correct
+1. Verify `client_id` and `client_secret` are correct
 2. Ensure the client is not expired or disabled at the OP
 3. Check redirect URI exactly matches what's registered
 
@@ -391,7 +412,7 @@ apigw:
 ### Token Signature Verification Failed
 
 **Solutions:**
-1. Verify \`issuer_url\` matches the token's \`iss\` claim
+1. Verify `issuer_url` matches the token's `iss` claim
 2. Check JWKS endpoint is accessible from your issuer
 3. Ensure server time is synchronized
 

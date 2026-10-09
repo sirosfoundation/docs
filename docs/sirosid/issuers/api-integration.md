@@ -426,19 +426,19 @@ apigw:
 
 ### Credential Offer Format
 
-The deep link contains a credential offer with pre-authorized code grant:
+The offer carries a pre-authorized code grant. `credential_configuration_ids` holds the credential **scope** (here `diploma`), and the offer is valid for 5 minutes. The `tx_code` object is present only when `enable_pin` is on:
 
 ```json
 {
   "credential_issuer": "https://issuer.example.org",
-  "credential_configuration_ids": ["urn:eudi:diploma:1"],
+  "credential_configuration_ids": ["diploma"],
   "grants": {
     "urn:ietf:params:oauth:grant-type:pre-authorized_code": {
       "pre-authorized_code": "oaKazRN8I0IbtZ...",
       "tx_code": {
         "input_mode": "numeric",
         "length": 6,
-        "description": "Enter the PIN sent to your email"
+        "description": "Enter the PIN provided by the issuer"
       }
     }
   }
@@ -449,21 +449,9 @@ The deep link contains a credential offer with pre-authorized code grant:
 
 ## Revocation
 
-Credential revocation is managed via [Token Status Lists](/sirosid/reference/token-status-lists). When a credential needs to be revoked, delete the underlying document and the issuer updates the status list entry:
+Credential status is published as [Token Status Lists](/sirosid/reference/token-status-lists) by the registry service. Deleting a document through `DELETE /api/v1/datastore` removes the stored document so no further credentials can be issued from it, but it does **not** change the status of credentials that were already issued: apigw never calls the registry to update a status.
 
-```bash
-DELETE /api/v1/datastore
-Content-Type: application/json
-Authorization: Bearer <your-jwt-token>
-
-{
-  "authentic_source": "hr.example.org",
-  "scope": "diploma",
-  "document_id": "diploma-2025-001234"
-}
-```
-
-Verifiers checking the Token Status List will see the credential as revoked.
+To revoke an issued credential, update its status entry in the registry, either through the registry admin GUI (`registry.admin_gui`, `POST /admin/status`) or by calling the registry's `TokenStatusListUpdateStatus` gRPC method directly. Verifiers checking the Token Status List then see the credential as revoked.
 
 ---
 
@@ -478,7 +466,11 @@ service IssuerService {
     rpc MakeSDJWT (MakeSDJWTRequest) returns (MakeSDJWTReply) {}
     rpc MakeMDoc (MakeMDocRequest) returns (MakeMDocReply) {}
     rpc MakeVC20 (MakeVC20Request) returns (MakeVC20Reply) {}
+    rpc MakeJWP (MakeJWPRequest) returns (MakeJWPReply) {}
     rpc JWKS (Empty) returns (JwksReply) {}
+    rpc SignMetadata (SignMetadataRequest) returns (SignMetadataReply) {}
+    rpc GetIACAs (Empty) returns (GetIACAsReply) {}
+    rpc Status (v1.status.StatusRequest) returns (v1.status.StatusReply) {}
 }
 ```
 
@@ -499,22 +491,25 @@ message MakeSDJWTRequest {
 ```protobuf
 message MakeMDocRequest {
     string scope = 1;            // Credential scope
-    string doc_type = 2;         // e.g., "org.iso.18013.5.1.mDL"
+    reserved 2;                  // was: string doc_type; the doctype now comes from mddl
     bytes document_data = 3;     // JSON encoded mDL data
     bytes device_public_key = 4; // CBOR encoded COSE_Key
     string device_key_format = 5; // "cose", "jwk", or "x509"
+    bytes mddl = 6;              // Raw MDDL (mso_mdoc) schema JSON bytes
 }
 ```
 
 ### Connection
 
+The generated Go stubs live under `internal/` in the [vc repository](https://github.com/SUNET/vc) and cannot be imported from other modules; generate your own client from `proto/v1-issuer.proto`. The gRPC server listens on `issuer.grpc_server.addr` (default `:8090`).
+
 ```go
 import (
     "google.golang.org/grpc"
-    pb "vc/internal/gen/issuer/apiv1_issuer"
+    pb "example.org/yourmodule/gen/issuer/apiv1_issuer" // generated from proto/v1-issuer.proto
 )
 
-conn, err := grpc.Dial("issuer.example.org:9090", grpc.WithTransportCredentials(creds))
+conn, err := grpc.Dial("issuer.example.org:8090", grpc.WithTransportCredentials(creds))
 client := pb.NewIssuerServiceClient(conn)
 
 reply, err := client.MakeSDJWT(ctx, &pb.MakeSDJWTRequest{
@@ -604,6 +599,9 @@ apigw:
         enable: true
         issuer_url: "https://auth.example.com"
         audience: "vc-issuer"
+        # client_id and redirect_uri are required whenever oidc.enable is true
+        client_id: "vc-apigw"
+        redirect_uri: "https://issuer.example.org/ui/callback"
 ```
 
 When SPOCP rules are configured, each request is evaluated as a **six-part s-expression** (all six parts are mandatory and must appear in this exact order):
@@ -714,7 +712,7 @@ a string.
 3. **mTLS for gRPC**: Use mutual TLS for the internal Issuer gRPC service (configurable via `grpc_server.tls`)
 4. **Input Validation**: The issuer validates all document data against VCTM schemas
 5. **Audit Logging**: All API operations are logged for compliance (configurable webhook destinations)
-6. **Rate Limiting**: Implement rate limiting at the reverse proxy level to prevent abuse
+6. **Rate Limiting**: apigw has built-in per-IP rate limiting (`apigw.rate_limit`, including `datastore_requests_per_minute`); add reverse-proxy limits on top if needed
 
 ---
 

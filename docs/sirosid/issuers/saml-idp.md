@@ -66,7 +66,7 @@ SAML authentication is configured in the `apigw.auth_providers.saml` section. Cr
 common:
   credential_metadata:
     pid:
-      vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
+      vctm_file_path: "/metadata/vctm_pid.json"
       format: "dc+sd-jwt"
     diploma:
       vctm_file_path: "/metadata/vctm_diploma.json"
@@ -82,7 +82,7 @@ apigw:
       entity_id: "https://issuer.example.org/sp"
 
       # Assertion Consumer Service endpoint (where IdP sends responses)
-      acs_endpoint: "https://issuer.example.org/saml/acs"
+      acs_endpoint: "https://issuer.example.org/samlsp/acs"
 
       # SP signing/encryption certificates
       certificate_path: "/pki/sp-cert.pem"
@@ -101,7 +101,6 @@ apigw:
           claim: "birth_date"
         "urn:oid:0.9.2342.19200300.100.1.3":
           claim: "email_address"
-          transform: "lowercase"
 
   # Data sources bind credential scopes to auth providers
   data_sources:
@@ -132,17 +131,17 @@ apigw:
     saml:
       enable: true
       entity_id: "https://issuer.example.org/sp"
-      acs_endpoint: "https://issuer.example.org/saml/acs"
+      acs_endpoint: "https://issuer.example.org/samlsp/acs"
       certificate_path: "/pki/sp-cert.pem"
       private_key_path: "/pki/sp-key.pem"
     
       # MDQ configuration
-      mdq_server: "https://mds.swamid.se/md"
+      mdq_server: "https://mds.swamid.se/entities/"
     
-      # Cache TTL in seconds (default: 86400)
-      metadata_cache_ttl: 86400
+      # Cache TTL in seconds (default: 3600)
+      metadata_cache_ttl: 3600
     
-      # Optional: verify metadata XML signatures (recommended for production)
+      # Verify metadata XML signatures (required for MDQ and URL metadata)
       metadata_signing_cert_path: "/pki/federation-signing.pem"
 ```
 
@@ -150,8 +149,8 @@ apigw:
 
 | Federation | MDQ Endpoint |
 |------------|--------------|
-| **SWAMID** | \`https://mds.swamid.se/entities/\` |
-| **InCommon** | \`https://mdq.incommon.org/entities/\` |
+| **SWAMID** | `https://mds.swamid.se/entities/` |
+| **InCommon** | `https://mdq.incommon.org/entities/` |
 
 :::note eduGAIN Metadata
 eduGAIN provides aggregate metadata intended for national federations. For individual entity queries, use your national federation's MDQ service.
@@ -159,7 +158,7 @@ eduGAIN provides aggregate metadata intended for national federations. For indiv
 
 #### Metadata Signature Validation
 
-When fetching IdP metadata from an MDQ service or a remote URL, you should verify that the metadata is signed by the federation operator. This prevents tampering with metadata in transit and ensures you only trust IdPs that are registered in the federation.
+When fetching IdP metadata from an MDQ service or a remote URL, the issuer verifies that the metadata is signed by the federation operator. This prevents tampering with metadata in transit and ensures you only trust IdPs that are registered in the federation.
 
 Configure the `metadata_signing_cert_path` option to point to the federation's metadata signing certificate (PEM format):
 
@@ -178,7 +177,8 @@ apigw:
 **Behavior:**
 - When `metadata_signing_cert_path` is set, the issuer validates the enveloped XML signature on every metadata document before parsing it.
 - Metadata without a valid signature from the configured certificate is **rejected**.
-- When not set, metadata is accepted without signature verification (suitable for testing or environments where transport security is sufficient).
+- MDQ and URL-based metadata **require** `metadata_signing_cert_path`: with neither it nor `allow_unsigned_metadata: true` set, apigw refuses to start. Only static metadata loaded from a local file (`metadata_path`) may be unsigned (a warning is logged).
+- `allow_unsigned_metadata: true` lifts the requirement for MDQ/URL sources. It is insecure and meant for development only.
 
 :::tip Federation Signing Certificates
 Federation operators publish their metadata signing certificates. Common sources:
@@ -188,8 +188,8 @@ Federation operators publish their metadata signing certificates. Common sources
 Download the certificate in PEM format and mount it into your container.
 :::
 
-:::caution Production Recommendation
-Always configure `metadata_signing_cert_path` in production. Without signature verification, a compromised network path could inject malicious IdP metadata, redirecting authentication to an attacker-controlled IdP.
+:::caution Never run unsigned in production
+`allow_unsigned_metadata: true` exposes the issuer to a compromised network path injecting malicious IdP metadata, redirecting authentication to an attacker-controlled IdP. Use it for development only.
 :::
 
 #### Option 2: Static IdP Metadata
@@ -202,7 +202,7 @@ apigw:
     saml:
       enable: true
       entity_id: "https://issuer.example.org/sp"
-      acs_endpoint: "https://issuer.example.org/saml/acs"
+      acs_endpoint: "https://issuer.example.org/samlsp/acs"
       certificate_path: "/pki/sp-cert.pem"
       private_key_path: "/pki/sp-key.pem"
     
@@ -251,7 +251,6 @@ apigw:
           claim: "family_name"
         "urn:oid:0.9.2342.19200300.100.1.3":
           claim: "email_address"
-          transform: "lowercase"
         "urn:oid:1.2.752.29.4.13":
           claim: "personal_administrative_number"
         "urn:oid:2.5.4.6":
@@ -274,36 +273,58 @@ Each attribute mapping supports:
 |--------|------|-------------|
 | `claim` | string | Canonical claim name to map to |
 | `required` | boolean | Whether the attribute must be present |
-| `transform` | string | Optional transformation: `lowercase`, `uppercase`, `trim` |
+| `default` | string | Value used when the attribute is absent |
+| `as_array` | boolean | Wrap a scalar value in a single-element array |
+
+Mapping only renames attributes and checks presence. Value transformations (lowercase, trim, country codes, ...) are `derivations` on the data source scope, for example:
+
+```yaml
+apigw:
+  data_sources:
+    assertion:
+      scopes:
+        pid:
+          auth_provider: saml
+          derivations:
+            - lowercase:
+                input: email_address
+```
+
+See [Concepts](./concepts#building-the-claim-set) for the available primitives.
 
 ## Docker Deployment
 
+The SAML SP runs inside the **apigw** service, which also needs the issuer and registry services and MongoDB. See [Deployment](./deployment#docker-composeyaml) for the full Compose file, and mount the SP certificate, key and any static IdP metadata into apigw (`./pki:/pki:ro`, `./metadata:/metadata:ro`).
+
+### SP metadata and publication
+
+apigw serves its SAML SP metadata at `https://issuer.example.org/samlsp/metadata`. For federation acceptance (for example SWAMID) add a `metadata` block describing the organization, contacts and UI information; it is published in the SP metadata:
+
 ```yaml
-services:
-  apigw:
-    image: ghcr.io/sirosfoundation/vc/apigw:latest
-    restart: always
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./config.yaml:/config.yaml:ro
-      - ./pki:/pki:ro
-      - ./metadata:/metadata:ro  # For static IdP metadata
-    depends_on:
-      - mongo
-      - issuer
-
-  issuer:
-    image: ghcr.io/sirosfoundation/vc/issuer:latest
-    # ...
-
-  mongo:
-    image: mongo:7
-    volumes:
-      - mongo-data:/data/db
-
-volumes:
-  mongo-data:
+apigw:
+  auth_providers:
+    saml:
+      metadata:
+        organization:
+          name: "Example Org"
+          display_name: "Example Org"
+          url: "https://example.org"
+          lang: "en"
+        contact_persons:
+          - type: technical
+            given_name: "Ops"
+            email: "ops@example.org"
+          - type: administrative
+            email: "admin@example.org"
+        ui_info:
+          display_name: "Example Org Credential Issuer"
+          description: "Issues digital credentials to Example Org members"
+          information_url: "https://example.org/credentials"
+          privacy_statement_url: "https://example.org/privacy"
+          logo:
+            url: "https://example.org/logo.png"
+            height: 80
+            width: 200
 ```
 
 ### Generate SP Certificates
@@ -319,38 +340,55 @@ openssl req -x509 -newkey rsa:2048 \
 
 ## Complete Configuration Example
 
+A complete `config.yaml` for the apigw, issuer and registry services using SAML (as in [Deployment](./deployment)):
+
 ```yaml
 common:
+  production: true
   mongo:
     uri: mongodb://mongo:27017
-
   credential_metadata:
     pid:
-      vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
-      format: "dc+sd-jwt"
-    diploma:
-      vctm_file_path: "/metadata/vctm_diploma.json"
+      vctm_file_path: "/metadata/vctm_pid.json"
       format: "dc+sd-jwt"
 
+issuer:
+  issuer_url: "https://issuer.example.org"
+  api_server:
+    addr: :8080
+  grpc_server:
+    addr: :8090
+  registry_client:
+    addr: registry:8090
+  key_config:
+    private_key_path: "/pki/signing_ec_private.pem"
+    chain_path: "/pki/signing_ec_chain.pem"
+  jwt_attribute:
+    issuer: "https://issuer.example.org"
+    verifiable_credential_type: "urn:eudi:pid:1"
+
 apigw:
+  api_server:
+    addr: :8080
   public_url: "https://issuer.example.org"
   key_config:
     private_key_path: "/pki/signing_ec_private.pem"
     chain_path: "/pki/signing_ec_chain.pem"
-
+  issuer_client:
+    addr: issuer:8090
+  registry_client:
+    addr: registry:8090
   auth_providers:
     saml:
       enable: true
       entity_id: "https://issuer.example.org/sp"
-      acs_endpoint: "https://issuer.example.org/saml/acs"
+      acs_endpoint: "https://issuer.example.org/samlsp/acs"
       certificate_path: "/pki/sp-cert.pem"
       private_key_path: "/pki/sp-key.pem"
 
       # MDQ for SWAMID federation
-      mdq_server: "https://mds.swamid.se/md"
-      metadata_cache_ttl: 86400
-
-      # Verify metadata signatures (recommended for production)
+      mdq_server: "https://mds.swamid.se/entities/"
+      metadata_cache_ttl: 3600
       metadata_signing_cert_path: "/pki/swamid-signing.pem"
 
       session_duration: 300
@@ -366,26 +404,42 @@ apigw:
           claim: "personal_administrative_number"
         "urn:oid:0.9.2342.19200300.100.1.3":
           claim: "email_address"
-          transform: "lowercase"
-
   data_sources:
     assertion:
       scopes:
         pid:
           auth_provider: saml
-        diploma:
-          auth_provider: saml
-
+          derivations:
+            - lowercase:
+                input: email_address
   delivery:
     openid4vci:
       token_endpoint: "https://issuer.example.org/token"
       clients:
         "1003":
           type: "public"
-          redirect_uri: "https://dev.wallet.sunet.se"
+          redirect_uri: "https://wallet.example.com"
           scopes:
             - "pid"
-            - "diploma"
+    credential_offers:
+      issuer_url: "https://issuer.example.org"
+      wallets:
+        my_wallet:
+          label: "My Wallet"
+          redirect_uri: "https://wallet.example.com/credential-offer"
+  trust:
+    pdp_url: "http://go-trust:6001"
+
+registry:
+  api_server:
+    addr: :8080
+  public_url: "https://registry.example.org"
+  grpc_server:
+    addr: :8090
+  token_status_lists:
+    key_config:
+      private_key_path: "/pki/signing_ec_private.pem"
+      chain_path: "/pki/signing_ec_chain.pem"
 ```
 
 ## Troubleshooting
@@ -408,7 +462,7 @@ apigw:
 ### MDQ Lookup Failed
 
 **Solutions:**
-1. Verify MDQ server URL ends with \`/\`
+1. Verify the MDQ server URL (for example `https://mds.swamid.se/entities/`); a trailing `/` is added automatically if missing
 2. Check the IdP is registered in the federation
 3. Verify network connectivity to MDQ service
 
