@@ -16,7 +16,7 @@ The fastest way to run conformance tests is to comment on any PR in a repo that 
 @conformance
 ```
 
-This triggers the wallet conformance profile using the golden-release baseline images.
+This runs all three profiles (issuer, verifier and wallet) using the golden-release baseline images.
 A rocket reaction confirms the trigger, and a summary comment is posted
 with a link to the running workflow.
 
