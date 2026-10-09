@@ -149,6 +149,12 @@ sequenceDiagram
     App->>User: Welcome, Alice!
 ```
 
+:::caution Not enforced on the OIDC `/authorize` path
+The "Verify signature & trust" step above is intended behaviour. Currently, a presentation that answers an OIDC `/authorize` session (QR code or same-device link) is posted to `/verification/oidc-direct_post`, which does not verify the SD-JWT VC or mdoc signature and does not ask the PDP about the issuer. The checks run on `/verification/direct_post`, used by the verifier's own page at `/`.
+
+Known issue: https://github.com/SUNET/vc/issues/761
+:::
+
 Your application received verified identity claims directly from the user's credential:
 
 ```json
@@ -181,6 +187,7 @@ scope=openid pid ehic
 ## Next Steps
 
 - 📖 [Full Verifier Guide](/sirosid/verifiers/verifier) – Complete verification documentation
+- 🤝 [Verifier Quick Start: Trust an Issuer](/howto/verifier-quickstart) – Get a verifier accepting one issuer's credentials
 - 🎫 [Issuing Credentials](/sirosid/issuers/issuer) – Issue your own credentials
 - 🔐 [Trust Services](/sirosid/trust/) – Configure trust framework
 - 🔧 [Keycloak Integration](/sirosid/verifiers/keycloak_verifier) – Detailed Keycloak setup

@@ -91,6 +91,12 @@ sequenceDiagram
     App->>User: Access granted
 ```
 
+:::caution Not enforced on the OIDC `/authorize` path
+The "verify" step above is intended behaviour. Currently, a presentation that answers an OIDC `/authorize` session (QR code or same-device link) is posted to `/verification/oidc-direct_post`, which does not verify the SD-JWT VC or mdoc signature and does not ask the PDP about the issuer. The checks run on `/verification/direct_post`, used by the verifier's own page at `/`.
+
+Known issue: https://github.com/SUNET/vc/issues/761
+:::
+
 ## Integration Options
 
 ### Option 1: OIDC Identity Provider (Recommended)
@@ -595,7 +601,7 @@ verifier:
 
 ### Credential Verification
 
-For each presentation the verifier:
+For each presentation that reaches `/verification/direct_post` (the verifier's own page) the verifier:
 
 1. Validates the credential signature
 2. Checks issuer trust through the configured PDP (see below)
@@ -611,6 +617,8 @@ trusted, and only `did:key` and `did:jwk` are resolved (locally). It may work
 for some things but is not supported. Run without `pdp_url` only for
 development and testing, never in production.
 :::
+
+Presentations answering an OIDC `/authorize` session (`/verification/oidc-direct_post`) currently skip steps 1 and 2 for SD-JWT VC and mdoc (known issue: https://github.com/SUNET/vc/issues/761).
 
 ## API Endpoints
 
@@ -741,6 +749,10 @@ The `go-trust` service above provides the Policy Decision Point that
 Without `pdp_url` the verifier trusts every issuer and resolves only `did:key`/`did:jwk`
 locally; that mode may work for some things but is not supported, so use it for
 development and testing only.
+:::
+
+:::note Mounted keys and secrets must be readable by the container user
+The verifier image runs as an unprivileged user (uid 100 or 65532, depending on the image build), so a `0600` key or secrets file owned by you on the host is unreadable inside the container: the key fails to load (`PKI signing key not loaded ... permission denied`) or startup panics with `failed to load secrets file`. Either `chown` the files to the container's uid (keeping mode `0600` or `0400`) or run the service as your own user with `user: "<uid>:<gid>"` in the Compose file.
 :::
 
 #### Verifier Configuration
@@ -960,6 +972,7 @@ and `presentation_requests_dir` if you set it).
 
 ## Next Steps
 
+- [Verifier Quick Start: Trust an Issuer](/howto/verifier-quickstart)
 - [Keycloak Integration Guide](./keycloak_verifier)
 - [Trust Services Configuration](../trust/)
 - [Go-Trust AuthZEN Service](../trust/go-trust)

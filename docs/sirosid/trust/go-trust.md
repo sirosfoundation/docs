@@ -90,8 +90,9 @@ services:
       - ./trust-data:/data:ro  # For local TSL files
     command: ["--config", "/config.yaml"]   # config must set server.host: "0.0.0.0"
     healthcheck:
-      # The image ships wget, not curl
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:6001/healthz"]
+      # The image ships wget, not curl. /healthz does not answer HEAD requests,
+      # so do not use "wget --spider"
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:6001/healthz"]
       interval: 30s
       timeout: 10s
       retries: 3
