@@ -23,17 +23,13 @@ The Verifiable Credentials (VC) platform provides multiple services.
 | Service | Image |
 |---------|-------|
 | **Verifier** | `ghcr.io/sirosfoundation/vc/verifier` |
-| **Issuer** | `ghcr.io/sirosfoundation/vc/issuer` |
-| **API Gateway** | `ghcr.io/sirosfoundation/vc/apigw` |
-| **Registry** | `ghcr.io/sirosfoundation/vc/registry` |
-| **Mock AS** | `ghcr.io/sirosfoundation/vc/mockas` |
-| **UI** | `ghcr.io/sirosfoundation/vc/ui` |
+| **Issuer** (credential signing, gRPC) | `ghcr.io/sirosfoundation/vc/issuer` |
+| **API Gateway** (public OpenID4VCI/OAuth endpoints, user authentication) | `ghcr.io/sirosfoundation/vc/apigw` |
+| **Registry** (Token Status Lists) | `ghcr.io/sirosfoundation/vc/registry` |
 
 All images include SAML 2.0 SP, OIDC RP, and all credential format support.
 
-:::info Deprecated `-full` variants
-Previous versions shipped separate `-full` images that included SAML, OIDC RP, and VC 2.0 support via Go build tags. As of the current release, **all features are included in the standard images** and the `-full` suffix is no longer needed. Existing `-full` image references will continue to work as aliases but should be updated.
-:::
+A credential issuer deployment needs the `issuer`, `apigw` and `registry` images together (plus MongoDB); the issuer image alone does not serve the wallet-facing endpoints. See [Issuer Deployment](/sirosid/issuers/deployment).
 
 ### Version Tags
 
@@ -41,10 +37,14 @@ Images are tagged with multiple version identifiers:
 
 | Tag Pattern | Description | Example |
 |-------------|-------------|---------|
-| `latest` | Latest build from main branch | `vc/verifier:latest` |
-| `{major}.{minor}.{patch}` | Semantic version release | `vc/verifier:1.2.3` |
+| `{major}.{minor}.{patch}` | Semantic version release | `vc/verifier:0.7.23` |
+| `{major}.{minor}`, `{major}` | Moving tags for the latest patch release | `vc/verifier:0.7` |
+| `latest` | Latest tagged release (not the head of `main`) | `vc/verifier:latest` |
+| `<git-sha>` | A specific commit | `vc/verifier:3f2c1a9...` |
 
-**Recommended for production:** Use semantic version tags (e.g., `1.2.3`) for reproducible deployments.
+SIROS-built images are additionally published with a `-sirosid.N` suffix (for example `0.7.20-sirosid.4`) and `dev-<sha>` tags; some per-architecture builds carry an `-amd64` or `-arm64` suffix. The [Container Image Catalog](/opensource/container-images) lists the tags currently published.
+
+**Recommended for production:** Pin an exact version tag (e.g., `0.7.23` or `0.7.23-sirosid.0`) for reproducible deployments; do not track `latest`.
 
 ## Trust Service Images
 
@@ -71,12 +71,25 @@ Backend service for the SIROS ID wallet application.
 | Image | Description |
 |-------|-------------|
 | `ghcr.io/sirosfoundation/go-wallet-backend` | Wallet backend service |
+| `ghcr.io/sirosfoundation/go-wallet-registry` | Credential type registry role of the wallet backend binary |
+| `ghcr.io/sirosfoundation/go-wallet-admin` | `wallet-admin` administration tool for the wallet backend |
+| `ghcr.io/sirosfoundation/wallet-frontend` | SIROS ID wallet web frontend |
 
 **Tags:** Same tagging scheme as VC images (`latest`, `{major}.{minor}.{patch}`)
 
 ```bash
 docker pull ghcr.io/sirosfoundation/go-wallet-backend:latest
 ```
+
+## Registry Tooling Images
+
+| Image | Description |
+|-------|-------------|
+| `ghcr.io/sirosfoundation/registry-cli` | [registry-cli](/sirosid/registry/registry-cli): builds and serves a credential type registry |
+
+## Other Images
+
+Further images (for example `go-spocp`, `goff`, `go-invite-op`, `go-grc`, `go-r2ps-service`, `facetec-api`) are listed in the [Container Image Catalog](/opensource/container-images).
 
 ## Testing & Development Images
 
@@ -133,8 +146,10 @@ echo $GITHUB_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
 # Standard verifier (latest)
 docker pull ghcr.io/sirosfoundation/vc/verifier:latest
 
-# Standard issuer
+# Issuer stack
 docker pull ghcr.io/sirosfoundation/vc/issuer:latest
+docker pull ghcr.io/sirosfoundation/vc/apigw:latest
+docker pull ghcr.io/sirosfoundation/vc/registry:latest
 
 # Trust service
 docker pull ghcr.io/sirosfoundation/go-trust:latest
@@ -165,7 +180,7 @@ Docker automatically selects the correct platform for your system.
 flowchart TD
     A[What are you deploying?] --> B{Service Type}
     B -->|Verifier| C[vc/verifier]
-    B -->|Issuer| D[vc/issuer]
+    B -->|Issuer| D[vc/apigw + vc/issuer + vc/registry]
     B -->|Trust| E[go-trust]
     B -->|Wallet Backend| F[go-wallet-backend]
 ```
@@ -174,16 +189,20 @@ flowchart TD
 
 All features (SAML, OIDC, SD-JWT VC, VC 2.0) are included in every image.
 
-| Scenario | Verifier Image | Issuer Image |
+| Scenario | Verifier Image | Issuer Images |
 |----------|---------------|--------------|
-| Basic OID4VC deployment | `vc/verifier` | `vc/issuer` |
-| Academic federation (eduGAIN/SAML) | `vc/verifier` | `vc/issuer` |
-| Government identity (SAML) | `vc/verifier` | `vc/issuer` |
-| Enterprise OIDC | `vc/verifier` | `vc/issuer` |
+| Basic OID4VC deployment | `vc/verifier` | `vc/apigw`, `vc/issuer`, `vc/registry` |
+| Academic federation (eduGAIN/SAML) | `vc/verifier` | `vc/apigw`, `vc/issuer`, `vc/registry` |
+| Government identity (SAML) | `vc/verifier` | `vc/apigw`, `vc/issuer`, `vc/registry` |
+| Enterprise OIDC | `vc/verifier` | `vc/apigw`, `vc/issuer`, `vc/registry` |
 
 ## Example Docker Compose
 
-### Standard Deployment
+### Issuer Stack
+
+A complete issuer deployment (apigw, issuer, registry, go-trust and MongoDB) with its `config.yaml` is described in [Issuer Deployment](/sirosid/issuers/deployment#docker-composeyaml). For SAML, mount the SP key material and IdP metadata into the `apigw` service.
+
+### Verifier
 
 ```yaml
 services:
@@ -196,22 +215,20 @@ services:
       - ./config.yaml:/config.yaml:ro
     environment:
       - VC_CONFIG_YAML=config.yaml
-
-  issuer:
-    image: ghcr.io/sirosfoundation/vc/issuer:latest
-    restart: always
-    ports:
-      - "8081:8080"
-    volumes:
-      - ./issuer-config.yaml:/config.yaml:ro
-    environment:
-      - VC_CONFIG_YAML=config.yaml
+    depends_on:
+      - trust
+      - mongo
 
   trust:
     image: ghcr.io/sirosfoundation/go-trust:latest
     restart: always
     ports:
       - "8082:6001"
+    volumes:
+      - ./trust-config.yaml:/config.yaml:ro
+    # go-trust binds 127.0.0.1 by default; listen on all interfaces so the
+    # verifier can reach it on the compose network.
+    command: ["--host", "0.0.0.0", "--config", "/config.yaml"]
 
   mongo:
     image: mongo:7
@@ -223,47 +240,15 @@ volumes:
   mongo-data:
 ```
 
-### SAML Deployment
-
-```yaml
-services:
-  verifier:
-    image: ghcr.io/sirosfoundation/vc/verifier:latest
-    restart: always
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./config.yaml:/config.yaml:ro
-      - ./saml-metadata:/saml-metadata:ro
-    environment:
-      - VC_CONFIG_YAML=config.yaml
-
-  issuer:
-    image: ghcr.io/sirosfoundation/vc/issuer:latest
-    restart: always
-    ports:
-      - "8081:8080"
-    volumes:
-      - ./issuer-config.yaml:/config.yaml:ro
-      - ./idp-metadata:/idp-metadata:ro
-    environment:
-      - VC_CONFIG_YAML=config.yaml
-
-  mongo:
-    image: mongo:7
-    restart: always
-    volumes:
-      - mongo-data:/data/db
-
-volumes:
-  mongo-data:
-```
+:::warning A PDP is required for production
+The trust service is a PDP (AuthZEN). A PDP referenced through `trust.pdp_url` is required for production use of the vc services. Running without one is not supported (development and testing only): local `did:key`/`did:jwk` resolution and "allow all" trust may work, with no guarantees and no support.
+:::
 
 ## Source Code & CI/CD
 
 | Component | Repository | Workflow |
 |-----------|------------|----------|
-| VC Services | [sirosfoundation/vc](https://github.com/sirosfoundation/vc) | `docker-publish.yaml` |
+| VC Services | [sirosfoundation/vc](https://github.com/sirosfoundation/vc) | `docker-build-push.yml` |
 | go-trust | [sirosfoundation/go-trust](https://github.com/sirosfoundation/go-trust) | `docker-publish.yml` |
 | go-wallet-backend | [sirosfoundation/go-wallet-backend](https://github.com/sirosfoundation/go-wallet-backend) | `docker-publish.yml` |
 | mini-oidc | [sirosfoundation/mini-oidc](https://github.com/sirosfoundation/mini-oidc) | `docker-publish.yml` |

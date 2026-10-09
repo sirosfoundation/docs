@@ -16,7 +16,7 @@ After reading this guide, you will understand how to:
 
 ## Endpoints
 
-The SIROS ID issuer exposes standard OID4VCI endpoints. For a self-hosted or on-premise deployment at `issuer.example.org`:
+The OID4VCI and OAuth endpoints are served by the **apigw** service (the `vc/apigw` image), which fronts the issuer. The `issuer` service itself only speaks gRPC to apigw and exposes `GET /health` and `/swagger/*` over HTTP. For a self-hosted or on-premise deployment where apigw is published at `issuer.example.org`:
 
 | Endpoint | URL |
 |----------|-----|
@@ -45,8 +45,8 @@ Each tenant has isolated configuration and its own credential types and signing 
 | Option | Best For | Requirements |
 |--------|----------|-------------|
 | **SIROS ID Hosted** | Quick start, SaaS model | API credentials only |
-| **Self-Hosted (Docker)** | On-premise, data sovereignty | Docker, MongoDB |
-| **Self-Hosted (Binary)** | Custom infrastructure | Go 1.25+, MongoDB |
+| **Self-Hosted (Docker)** | On-premise, data sovereignty | Docker, MongoDB (services: apigw, issuer, registry) |
+| **Self-Hosted (Binary)** | Custom infrastructure | Go 1.27+, MongoDB |
 
 :::tip Recommendation
 Start with the hosted service for development and testing. Move to self-hosted when you need data sovereignty or custom integrations.
@@ -119,11 +119,14 @@ apigw:
     saml:
       enable: true
       entity_id: "https://issuer.example.org/sp"
-      acs_endpoint: "https://issuer.example.org/saml/acs"
+      acs_endpoint: "https://issuer.example.org/samlsp/acs"
       certificate_path: "/pki/sp-cert.pem"
       private_key_path: "/pki/sp-key.pem"
-      # Use MDQ for federation metadata lookup
-      mdq_server: "https://mds.swamid.se/md"
+      # Use MDQ for federation metadata lookup. MDQ metadata must be
+      # signature-verified, so metadata_signing_cert_path is required
+      # (or allow_unsigned_metadata: true for testing only).
+      mdq_server: "https://mds.swamid.se/entities/"
+      metadata_signing_cert_path: "/pki/mdq-signing-cert.pem"
       attribute_mapping:
         "urn:oid:2.5.4.42":
           claim: "given_name"
@@ -161,26 +164,28 @@ SIROS ID supports issuing credentials in multiple formats:
 |--------|-------------|---------------|----------|
 | **SD-JWT VC** | SD-JWT Verifiable Credential | [draft-ietf-oauth-sd-jwt-vc](https://datatracker.ietf.org/doc/draft-ietf-oauth-sd-jwt-vc/) | EU Digital Identity, general VCs |
 | **mDL/mDoc** | ISO 18013-5 mobile document | [ISO/IEC 18013-5:2021](https://www.iso.org/standard/69084.html) | Mobile driving licenses |
-| **JWT VC** | JWT-encoded credential | [W3C VC Data Model](https://www.w3.org/TR/vc-data-model/) | Legacy systems |
+| **W3C VC 2.0 (Data Integrity)** | `ldp_vc` / `vc+ld+json` credential with a Data Integrity proof | [W3C VC Data Model 2.0](https://www.w3.org/TR/vc-data-model-2.0/) | Linked-data ecosystems |
+| **JWP (blind BBS)** | `jwp` credential, enabled by `issuer.bbs` (see [Blind BBS Issuance](#blind-bbs-issuance)) | [draft-ietf-jose-json-web-proof](https://datatracker.ietf.org/doc/draft-ietf-jose-json-web-proof/) | Unlinkable presentations |
 
-### Built-in Credential Types
+JWT-encoded W3C credentials (`jwt_vc_json`) are not issued.
 
-The SIROS ID platform includes preconfigured schemas for common EU credential types based on the [EUDI Wallet Architecture Reference Framework](https://github.com/eu-digital-identity-wallet/eudi-doc-architecture-and-reference-framework):
+### Credential Type Metadata Shipped with vc
 
-| Credential | VCT | Description |
-|------------|-----|-------------|
-| **PID (ARF 1.5)** | `urn:eudi:pid:arf-1.5:1` | Person Identification Data (ARF 1.5) |
-| **PID (ARF 1.8)** | `urn:eudi:pid:arf-1.8:1` | Person Identification Data (ARF 1.8+) |
-| **EHIC** | `urn:eudi:ehic:1` | European Health Insurance Card |
-| **PDA1** | `urn:eudi:pda1:1` | Portable Document A1 |
-| **Diploma** | `urn:eudi:diploma:1` | Educational credentials |
-| **ELM** | `urn:eudi:elm:1` | [European Learning Model](https://europa.eu/europass/elm-browser/index.html) |
-| **Microcredential** | `urn:eudi:micro_credential:1` | Short learning achievements |
-| **OpenBadge** | `urn:eudi:openbadge_complete:1` | Open Badges 3.0 (complete) |
+The [vc repository `metadata/` directory](https://github.com/SUNET/vc/tree/main/metadata) ships type metadata files for common credential types, several based on the [EUDI Wallet Architecture Reference Framework](https://github.com/eu-digital-identity-wallet/eudi-doc-architecture-and-reference-framework). Point a `common.credential_metadata` entry at one of them (or at your own file):
 
-:::note Credential Type Aliases
-For backwards compatibility with some systems, the generic VCT `urn:eudi:pid:1` may be accepted and mapped to the appropriate ARF version based on configuration.
-:::
+| File | VCT / doctype | Description |
+|------|---------------|-------------|
+| `vctm_pid.json` | `urn:eudi:pid:1` | Person Identification Data (SD-JWT VC) |
+| `vctm_pid_urn.json` | `urn:eudi:pid:1` | PID variant |
+| `vctm_ehic.json` | `urn:eudi:ehic:1` | European Health Insurance Card |
+| `vctm_pda1.json` | `urn:eudi:pda1:1` | Portable Document A1 |
+| `vctm_diploma.json` | `urn:eudi:diploma:1` | Educational credentials |
+| `vctm_elm.json` | `urn:eudi:elm:1` | [European Learning Model](https://europa.eu/europass/elm-browser/index.html) |
+| `vctm_microcredential.json` | `urn:eudi:micro_credential:1` | Short learning achievements |
+| `vctm_eduid.json` | `urn:credential:eduid:1` | eduID |
+| `vctm_eduid_age_verification.json` | `urn:credential:eduid_age_verification:1` | eduID age verification |
+| `pid_mdoc.mdoc.json` | `eu.europa.ec.eudi.pid.1` | PID as mdoc |
+| `mdl.mdoc.json` | `org.iso.18013.5.1.mDL` | Mobile driving licence (mdoc) |
 
 ## Integration Steps
 
@@ -190,7 +195,7 @@ Configure your IdP to allow the issuer as a client:
 
 **For OIDC IdPs:**
 1. Register a new OIDC client
-2. Set redirect URI to: `https://issuer.example.org/callback`
+2. Set redirect URI to: `https://issuer.example.org/oidcrp/callback`
 3. Enable required scopes (openid, profile, email, etc.)
 
 **For SAML IdPs:**
@@ -247,15 +252,15 @@ The `auth_provider` field in each data source scope determines how the user is a
 - Scenarios requiring multiple credential types for identity matching (configurable via `auth_scopes`)
 
 When using `openid4vp` auth_provider, you must also configure:
-- **`auth_scopes`**: List of acceptable credential types that can be presented for authentication (e.g., `["pid_1_5", "pid_1_8"]`)
-- **`auth_claims`**: List of claims required from the presented credential (e.g., `["given_name", "birth_date", "family_name"]`)
+- **`auth_scopes`**: A map of acceptable credential types that can be presented for authentication, keyed by `credential_metadata` scope name (e.g. `pid`). Each key must name a configured `common.credential_metadata` scope or startup fails.
+- **`auth_claims`** (inside each `auth_scopes` entry): List of claims required from the presented credential (e.g., `["given_name", "birth_date", "family_name"]`). The top-level `auth_claims` is not used with `openid4vp`.
 
 ```yaml
 common:
   credential_metadata:
     # Credential type definitions (VCTM path + format)
     pid:
-      vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
+      vctm_file_path: "/metadata/vctm_pid.json"
       format: "dc+sd-jwt"
     ehic:
       vctm_file_path: "/metadata/vctm_ehic.json"
@@ -277,8 +282,9 @@ apigw:
       scopes:
         ehic:
           auth_provider: openid4vp
-          auth_scopes: ["pid"]
-          auth_claims: ["given_name", "family_name", "birth_date"]
+          auth_scopes:
+            pid:
+              auth_claims: ["given_name", "family_name", "birth_date"]
 
     # External API: data fetched from a remote API
     external_api:
@@ -294,14 +300,21 @@ The VCTM file defines the credential schema, including claim definitions, displa
 
 ### Step 3: Configure Trust
 
-Point APIGW at a Go-Trust PDP; the trust frameworks themselves are configured
-in Go-Trust, not in the issuer:
+`apigw.trust` configures trust evaluation for credentials and keys that are
+presented *to* apigw, for example when a scope uses the `openid4vp`
+auth provider or wallet attestation. It does not register the issuer in any
+trust framework. Point it at a Go-Trust PDP; the trust frameworks themselves are
+configured in Go-Trust, not in the issuer:
 
 ```yaml
 apigw:
   trust:
     pdp_url: "http://go-trust:6001"
 ```
+
+:::warning A PDP is required for production
+A PDP (AuthZEN, such as [Go-Trust](../trust/)) configured through `trust.pdp_url` is required for production use. Running without one is not supported (development and testing only). Some things may still work: the resolver handles `did:key` and `did:jwk` locally and trust evaluation runs in "allow all" mode, treating every resolved key as trusted, but other `did:` methods cannot be resolved, and there are no guarantees and no support for such a setup.
+:::
 
 See [Trust Services](../trust/) for details on:
 
@@ -310,7 +323,7 @@ See [Trust Services](../trust/) for details on:
 - X.509 certificate chains
 
 :::tip Accepting wallets without pre-registering each one
-The steps above cover how the issuer establishes *its own* trust with the ecosystem. Separately, you can let the issuer accept **any wallet whose provider is trusted** — instead of maintaining a static client map — via [Wallet Attestation](../trust/wallet-attestation.md). See the [Attestation-Based Authentication how-to](../../howto/attestation-based-authentication.md) for a full worked setup.
+You can let the issuer accept **any wallet whose provider is trusted** — instead of maintaining a static client map — via [Wallet Attestation](../trust/wallet-attestation.md). See the [Attestation-Based Authentication how-to](../../howto/attestation-based-authentication.md) for a full worked setup.
 :::
 
 ### Step 4: Test the Integration
@@ -385,17 +398,10 @@ certificate must chain to.
 
 ## Credential Offer Methods
 
-### QR Code
+### QR Code / Deep Link
 
-Generate a QR code containing a credential offer:
-
-```
-openid-credential-offer://?credential_offer_uri=https%3A%2F%2Fissuer.example.org%2Fcredential-offer%2F<uuid>
-```
-
-### Deep Link
-
-For mobile apps, use a deep link:
+Wallet-initiated and UI-initiated offers are served by reference. Encode the
+following URI as a QR code, or use it as a deep link on mobile:
 
 ```
 openid-credential-offer://?credential_offer_uri=https%3A%2F%2Fissuer.example.org%2Fcredential-offer%2F<uuid>
@@ -419,12 +425,12 @@ curl -X POST https://issuer.example.org/api/v1/datastore/preauth_offer \
   -d '{ "authentic_source": "hr.example.org", "scope": "diploma", "document_id": "..." }'
 ```
 
-Turn the transaction-code (PIN) requirement on with
+The reply carries the offer inline (`openid-credential-offer://?credential_offer=<json>`) rather than by reference. Turn the transaction-code (PIN) requirement on with
 `apigw.auth_providers.preauth.enable_pin`.
 
 ## API Reference
 
-The issuer exposes OpenID4VCI-compliant endpoints:
+apigw exposes the following OpenID4VCI and OAuth endpoints (see also `/op/par`, `/jwks`, `/.well-known/jwt-vc-issuer` and `/type-metadata/{scope}`):
 
 | Endpoint | Description |
 |----------|-------------|
@@ -439,10 +445,7 @@ The issuer exposes OpenID4VCI-compliant endpoints:
 
 ### Swagger Documentation
 
-Full API documentation is available at:
-```
-https://issuer.example.org/swagger/index.html
-```
+The issuer service serves its (currently empty) Swagger UI at `/swagger/index.html` on its own HTTP port; the REST surface that matters is apigw's, see [API Integration](./api-integration).
 
 ## Audit Logging
 
@@ -529,7 +532,7 @@ the schema opting in is what drives it.
 ## Security Considerations
 
 1. **Key Management**: The issuer signs credentials with keys managed in secure HSMs, configured via `issuer.key_config.pkcs11` (the BBS key excepted, above)
-2. **Revocation**: Configure status lists for credential revocation
+2. **Revocation**: Credential status is published as Token Status Lists by the registry service; see [Token Status Lists](../reference/token-status-lists)
 3. **Audit Logging**: See [Audit Logging](#audit-logging) above
 
 ## Self-Hosted Deployment
@@ -538,11 +541,18 @@ If you need to run the issuer in your own infrastructure, you can deploy it usin
 
 ### Docker Deployment (Recommended)
 
-The issuer is available as a Docker image:
+A working issuer deployment consists of three vc services plus MongoDB:
+
+| Service | Image | Role |
+|---------|-------|------|
+| apigw | `ghcr.io/sirosfoundation/vc/apigw` | Public OpenID4VCI/OAuth endpoints, user authentication (OIDC, SAML), datastore API |
+| issuer | `ghcr.io/sirosfoundation/vc/issuer` | Credential signing (gRPC) |
+| registry | `ghcr.io/sirosfoundation/vc/registry` | Token Status Lists (revocation) |
 
 ```bash
-# Pull the issuer image (includes SAML, OIDC, and all credential formats)
+docker pull ghcr.io/sirosfoundation/vc/apigw:latest
 docker pull ghcr.io/sirosfoundation/vc/issuer:latest
+docker pull ghcr.io/sirosfoundation/vc/registry:latest
 ```
 
 #### Docker Compose
@@ -551,11 +561,11 @@ Create a `docker-compose.yaml`:
 
 ```yaml
 services:
-  issuer:
-    image: ghcr.io/sirosfoundation/vc/issuer:latest
+  apigw:
+    image: ghcr.io/sirosfoundation/vc/apigw:latest
     restart: always
     ports:
-      - "8080:8080"
+      - "8080:8080"   # public OpenID4VCI / OAuth endpoints
     volumes:
       - ./config.yaml:/config.yaml:ro
       - ./pki:/pki:ro
@@ -563,49 +573,90 @@ services:
     environment:
       - VC_CONFIG_YAML=config.yaml
     depends_on:
+      - issuer
+      - registry
       - mongo
+
+  issuer:
+    image: ghcr.io/sirosfoundation/vc/issuer:latest
+    restart: always
+    volumes:
+      - ./config.yaml:/config.yaml:ro
+      - ./pki:/pki:ro
+      - ./metadata:/metadata:ro
+    environment:
+      - VC_CONFIG_YAML=config.yaml
+    depends_on:
+      - registry
+      - mongo
+
+  registry:
+    image: ghcr.io/sirosfoundation/vc/registry:latest
+    restart: always
+    ports:
+      - "8081:8080"   # Token Status List HTTP endpoint
+    volumes:
+      - ./config.yaml:/config.yaml:ro
+      - ./pki:/pki:ro
+    environment:
+      - VC_CONFIG_YAML=config.yaml
+    depends_on:
+      - mongo
+
+  go-trust:
+    image: ghcr.io/sirosfoundation/go-trust:latest
+    restart: always
+    volumes:
+      - ./trust-config.yaml:/config.yaml:ro
+    # go-trust binds 127.0.0.1 by default; listen on all interfaces so
+    # apigw can reach it on the compose network.
+    command: ["--host", "0.0.0.0", "--config", "/config.yaml"]
 
   mongo:
     image: mongo:7
     restart: always
     volumes:
       - mongo-data:/data/db
-    ports:
-      - "27017:27017"
 
 volumes:
   mongo-data:
 ```
 
-#### Issuer Configuration
+The same `config.yaml` is mounted into all three vc services; each reads only its own section (`apigw`, `issuer`, `registry`) plus `common`. The apigw is the only service that needs to be reachable by wallets; the issuer and registry gRPC ports (`8090`) only need to be reachable from the other vc services. See [Go-Trust configuration](/sirosid/trust/go-trust-configuration) for `trust-config.yaml`.
+
+#### Configuration
 
 Create `config.yaml`:
 
 ```yaml
 common:
+  production: true
   mongo:
     uri: mongodb://mongo:27017
-  production: true
-
   credential_metadata:
     pid:
-      vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
+      vctm_file_path: "/metadata/vctm_pid.json"
       format: "dc+sd-jwt"
 
 issuer:
-  issuer_url: "https://issuer.example.com"
+  issuer_url: "https://issuer.example.org"
   api_server:
     addr: :8080
   grpc_server:
     addr: :8090
+  registry_client:
+    addr: registry:8090
   key_config:
     private_key_path: "/pki/signing_ec_private.pem"
     chain_path: "/pki/signing_ec_chain.pem"
+  jwt_attribute:
+    issuer: "https://issuer.example.org"
+    verifiable_credential_type: "urn:eudi:pid:1"
 
 apigw:
   api_server:
     addr: :8080
-  public_url: "https://issuer.example.com"
+  public_url: "https://issuer.example.org"
   key_config:
     private_key_path: "/pki/signing_ec_private.pem"
     chain_path: "/pki/signing_ec_chain.pem"
@@ -617,7 +668,7 @@ apigw:
     oidc:
       enable: true
       issuer_url: "https://your-idp.example.com"
-      redirect_uri: "https://issuer.example.com/oidcrp/callback"
+      redirect_uri: "https://issuer.example.org/oidcrp/callback"
       registration:
         preconfigured:
           enable: true
@@ -633,14 +684,35 @@ apigw:
           auth_provider: oidc
   delivery:
     openid4vci:
-      token_endpoint: "https://issuer.example.com/token"
+      token_endpoint: "https://issuer.example.org/token"
       clients:
         "1003":
           type: "public"
           redirect_uri: "https://wallet.example.com"
           scopes:
             - "pid"
+    credential_offers:
+      issuer_url: "https://issuer.example.org"
+      wallets:
+        my_wallet:
+          label: "My Wallet"
+          redirect_uri: "https://wallet.example.com/credential-offer"
+  trust:
+    pdp_url: "http://go-trust:6001"
+
+registry:
+  api_server:
+    addr: :8080
+  public_url: "https://registry.example.org"
+  grpc_server:
+    addr: :8090
+  token_status_lists:
+    key_config:
+      private_key_path: "/pki/signing_ec_private.pem"
+      chain_path: "/pki/signing_ec_chain.pem"
 ```
+
+The `jwt_attribute` block is required by the issuer service, and `apigw.delivery.credential_offers.issuer_url` must be byte-identical to `apigw.public_url`. Configure the OIDC secret inline (or via the file named by `common.secret_file_path`); the config file is not environment-interpolated.
 
 #### Start the Service
 
@@ -649,51 +721,56 @@ apigw:
 docker compose up -d
 
 # Check logs
-docker compose logs -f issuer
+docker compose logs -f apigw issuer registry
 
-# Verify health
-curl http://localhost:8080/health
+# Verify the public endpoint serves issuer metadata
+curl https://issuer.example.org/.well-known/openid-credential-issuer
 ```
 
 ### Binary Deployment
 
-For non-Docker environments:
+For non-Docker environments, build and run each service:
 
 ```bash
 # Clone the repository
 git clone https://github.com/SUNET/vc.git
 cd vc
 
-# Build the issuer
-make build-issuer
+# Build the services
+make build-apigw build-issuer build-registry
 
-# Run
+# Run each service (in separate processes) against the same config
 export VC_CONFIG_YAML=config.yaml
-./bin/vc_issuer
+./bin/vc_registry &
+./bin/vc_issuer &
+./bin/vc_apigw
 ```
 
 ### Kubernetes Deployment
 
-For production Kubernetes deployments:
+Deploy apigw, issuer and registry as three Deployments sharing one config
+ConfigMap, with a Service for each gRPC port (`issuer:8090`, `registry:8090`).
+Only apigw needs an Ingress. The example below shows the apigw Deployment; the
+issuer and registry follow the same pattern with their own image:
 
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: issuer
+  name: apigw
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: issuer
+      app: apigw
   template:
     metadata:
       labels:
-        app: issuer
+        app: apigw
     spec:
       containers:
-        - name: issuer
-          image: ghcr.io/sirosfoundation/vc/issuer:latest
+        - name: apigw
+          image: ghcr.io/sirosfoundation/vc/apigw:latest
           ports:
             - containerPort: 8080
           env:
@@ -716,10 +793,10 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: issuer-config
+            name: vc-config
         - name: pki
           secret:
-            secretName: issuer-pki
+            secretName: vc-pki
 ```
 
 ## Next Steps

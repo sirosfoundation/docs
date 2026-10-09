@@ -84,7 +84,7 @@ Configure the redirect URLs for your issuer:
 | Setting | Value |
 |---------|-------|
 | **Root URL** | `https://issuer.example.org` |
-| **Valid redirect URIs** | `https://issuer.example.org/callback` |
+| **Valid redirect URIs** | `https://issuer.example.org/oidcrp/callback` |
 | **Valid post logout redirect URIs** | `https://issuer.example.org` |
 | **Web origins** | `https://issuer.example.org` |
 
@@ -224,7 +224,7 @@ common:
     uri: mongodb://mongo:27017
   credential_metadata:
     pid:
-      vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
+      vctm_file_path: "/metadata/vctm_pid.json"
       format: "dc+sd-jwt"
 
 apigw:
@@ -267,30 +267,7 @@ the callback at `/oidcrp/callback`, so `redirect_uri` must be that path on your
 
 ### Docker Compose with Keycloak
 
-```yaml
-services:
-  issuer:
-    image: ghcr.io/sirosfoundation/vc/issuer:latest
-    restart: always
-    ports:
-      - "8080:8080"
-    environment:
-      - VC_CONFIG_YAML=config.yaml
-    volumes:
-      - ./config.yaml:/config.yaml:ro
-      - ./pki:/pki:ro
-    depends_on:
-      - mongo
-
-  mongo:
-    image: mongo:7
-    restart: always
-    volumes:
-      - mongo-data:/data/db
-
-volumes:
-  mongo-data:
-```
+A working issuer needs the `apigw`, `issuer` and `registry` services plus MongoDB; the OIDC client to Keycloak lives in apigw. Use the Compose file from [Deployment](./deployment#docker-composeyaml) unchanged and put the Keycloak client credentials in `config.yaml` as shown above. The config file is not environment-interpolated, so keep the client secret inline or in the file named by `common.secret_file_path`.
 
 ## Step 5: Configure Credential Types
 
@@ -302,7 +279,7 @@ Map Keycloak claims to specific credential types.
 common:
   credential_metadata:
     pid:
-      vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
+      vctm_file_path: "/metadata/vctm_pid.json"
       format: "dc+sd-jwt"
 
 apigw:
@@ -311,18 +288,21 @@ apigw:
       scopes:
         pid:
           auth_provider: oidc
+          # Value transformations are derivations on the scope
+          derivations:
+            - country_alpha2:
+                input: resident_country
   auth_providers:
     oidc:
       attribute_mapping:
-        # Required PID claims — only entries that need renaming or a
-        # transform; standard OIDC claim names pass through unchanged.
+        # Required PID claims — only entries that need renaming;
+        # standard OIDC claim names pass through unchanged.
         birthdate:
           claim: "birth_date"
 
         # Optional PID claims released by Keycloak under a different name
         country:
           claim: "resident_country"
-          transform: "country_alpha2"
 
         # A claim every credential should carry, even if the IdP omits it
         issuing_country:
@@ -352,8 +332,15 @@ apigw:
       scopes:
         ehic:
           auth_provider: oidc
-          # Claims used to look the person up in the datastore
-          auth_claims: ["given_name", "family_name", "birthdate"]
+          # Claims used to look the person up in the datastore. Names are
+          # matched verbatim against the stored identity fields.
+          auth_claims: ["given_name", "family_name", "birth_date"]
+  auth_providers:
+    oidc:
+      attribute_mapping:
+        # Keycloak releases `birthdate`; the stored field is `birth_date`
+        birthdate:
+          claim: "birth_date"
 ```
 
 The institution then pushes each person's EHIC document through the
@@ -372,18 +359,13 @@ The institution then pushes each person's EHIC document through the
 
 ### Direct Testing
 
-Test the OIDC flow manually:
-
-```bash
-# 1. Start authorization (opens browser)
-open "https://issuer.example.org/authorize?client_id=wallet&redirect_uri=https://id.siros.org/callback&scope=openid%20pid&response_type=code"
-
-# 2. After authentication, check the issued credential
-```
+The wallet-facing authorization flow is OpenID4VCI (pushed authorization request at `/op/par`, then `/authorize`), so it cannot be exercised with a bare browser URL. Create a credential offer from `https://issuer.example.org/offers/pid` and open it in a wallet.
 
 ### Verify Claim Mapping
 
 Check that Keycloak claims appear correctly:
+
+This check uses the password grant, which requires **Direct access grants** to be enabled on the client in Keycloak (turn it on temporarily on a test client; the production client JSON below leaves it off).
 
 ```bash
 # Get a token from Keycloak directly
@@ -415,7 +397,7 @@ apigw:
     saml:
       enable: true
       entity_id: "https://issuer.example.com/sp"
-      acs_endpoint: "https://issuer.example.com/saml/acs"
+      acs_endpoint: "https://issuer.example.com/samlsp/acs"
       certificate_path: "/pki/sp-cert.pem"
       private_key_path: "/pki/sp-key.pem"
       attribute_mapping:
@@ -552,7 +534,7 @@ curl -H "Authorization: Bearer ${ACCESS_TOKEN}" \
 **Symptoms**: Credential contains incorrect or default values
 
 **Solutions**:
-1. Check claim mapping JSONPath expressions
+1. Check the `attribute_mapping` entries (a flat claim-name to canonical-name rename; there is no JSONPath)
 2. Verify Keycloak attribute names match mapper configuration
 3. Enable issuer debug logging to see raw claims
 4. Test token claims directly from Keycloak
@@ -579,7 +561,7 @@ Import this client configuration:
   "enabled": true,
   "clientAuthenticatorType": "client-secret",
   "redirectUris": [
-    "https://issuer.example.com/callback"
+    "https://issuer.example.com/oidcrp/callback"
   ],
   "webOrigins": [
     "https://issuer.example.com"
@@ -599,47 +581,51 @@ Import this client configuration:
 }
 ```
 
-### Complete Issuer Configuration
+### Complete Configuration
+
+A complete `config.yaml` for the apigw, issuer and registry services with Keycloak as the OIDC provider (as in [Deployment](./deployment)):
 
 ```yaml
 common:
+  production: true
   mongo:
     uri: mongodb://mongo:27017
-  production: true
   credential_metadata:
     pid:
-      vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
+      vctm_file_path: "/metadata/vctm_pid.json"
       format: "dc+sd-jwt"
 
-# Signing service
 issuer:
-  issuer_url: "https://issuer.example.com"
+  issuer_url: "https://issuer.example.org"
   api_server:
     addr: :8080
   grpc_server:
     addr: :8090
+  registry_client:
+    addr: registry:8090
   key_config:
-    private_key_path: "/pki/issuer_key.pem"
-    chain_path: "/pki/issuer_chain.pem"
+    private_key_path: "/pki/signing_ec_private.pem"
+    chain_path: "/pki/signing_ec_chain.pem"
+  jwt_attribute:
+    issuer: "https://issuer.example.org"
+    verifiable_credential_type: "urn:eudi:pid:1"
 
-# OpenID4VCI front end
 apigw:
   api_server:
     addr: :8080
-    tls:
-      enable: false
-
-  public_url: "https://issuer.example.com"
-
+  public_url: "https://issuer.example.org"
+  key_config:
+    private_key_path: "/pki/signing_ec_private.pem"
+    chain_path: "/pki/signing_ec_chain.pem"
   issuer_client:
     addr: issuer:8090
-
-  # Keycloak authentication
+  registry_client:
+    addr: registry:8090
   auth_providers:
     oidc:
       enable: true
       issuer_url: "https://keycloak.example.com/realms/myrealm"
-      redirect_uri: "https://issuer.example.com/oidcrp/callback"
+      redirect_uri: "https://issuer.example.org/oidcrp/callback"
       registration:
         preconfigured:
           enable: true
@@ -650,16 +636,42 @@ apigw:
         - profile
         - email
         - credential-claims
-
+      attribute_mapping:
+        birthdate:
+          claim: "birth_date"
   data_sources:
     assertion:
       scopes:
         pid:
           auth_provider: oidc
-
-  # Trust configuration (optional)
+  delivery:
+    openid4vci:
+      token_endpoint: "https://issuer.example.org/token"
+      clients:
+        "1003":
+          type: "public"
+          redirect_uri: "https://wallet.example.com"
+          scopes:
+            - "pid"
+    credential_offers:
+      issuer_url: "https://issuer.example.org"
+      wallets:
+        my_wallet:
+          label: "My Wallet"
+          redirect_uri: "https://wallet.example.com/credential-offer"
   trust:
     pdp_url: "http://go-trust:6001"
+
+registry:
+  api_server:
+    addr: :8080
+  public_url: "https://registry.example.org"
+  grpc_server:
+    addr: :8090
+  token_status_lists:
+    key_config:
+      private_key_path: "/pki/signing_ec_private.pem"
+      chain_path: "/pki/signing_ec_chain.pem"
 ```
 
 Credential validity is taken from the VCTM / issuance logic, not from a

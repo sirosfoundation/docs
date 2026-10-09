@@ -15,7 +15,7 @@ flowchart TB
     subgraph "Credential Formats"
         SDJWT[SD-JWT VC]
         MDOC[mDL/mDoc]
-        JWTVC[JWT VC]
+        VC20[W3C VC 2.0]
     end
 
     subgraph "Issuance Protocols"
@@ -42,7 +42,7 @@ flowchart TB
 
     OID4VCI --> SDJWT
     OID4VCI --> MDOC
-    OID4VCI --> JWTVC
+    OID4VCI --> VC20
 
     OID4VP --> SDJWT
     OID4VP --> MDOC
@@ -64,24 +64,27 @@ Standards and specifications implemented by the SIROS ID **Issuer** for credenti
 | Attribute | Value |
 |-----------|-------|
 | **Specification** | [OpenID for Verifiable Credential Issuance 1.0](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html) |
-| **Status** | Draft (ID1) |
-| **Component** | Issuer |
+| **Status** | Final (1.0) |
+| **Component** | Issuer (served by the API gateway, apigw) |
 
 The core protocol for issuing credentials to wallets. SIROS ID implements:
 
 - **Authorization Code Flow** – User authenticates via IdP, then receives credential
 - **Pre-Authorized Code Flow** – Server-to-server issuance without user redirect
 - **Credential Offer** – Deep links and QR codes for initiating issuance
-- **Batch Issuance** – Multiple credentials in a single flow
+- **Batch Issuance** – Multiple credentials in a single flow, by sending several proofs in the `proofs` array of one `/credential` request (limit advertised as `batch_credential_issuance.batch_size` in issuer metadata)
 - **Deferred Issuance** – Credentials delivered asynchronously
 
 **Endpoints:**
 - `/.well-known/openid-credential-issuer` – Issuer metadata
-- `/credential-offer` – Initiate credential offer
+- `/credential-offer/{credential_offer_uuid}` – Serves a credential offer by reference (offers are created through the `/offers/{scope}` page or `POST /api/v1/datastore/preauth_offer`)
+- `/op/par` – Pushed Authorization Request (RFC 9126)
+- `/authorize` – Authorization endpoint
 - `/token` – OAuth2 token endpoint
+- `/nonce` – Nonce endpoint (`POST`)
 - `/credential` – Credential endpoint
-- `/batch-credential` – Batch credential endpoint
-- `/deferred-credential` – Deferred credential endpoint
+- `/deferred_credential` – Deferred credential endpoint
+- `/notification` – Credential notification endpoint
 
 ### SD-JWT VC (Selective Disclosure JWT Verifiable Credentials)
 
@@ -111,7 +114,7 @@ Mobile driving license format, used for government-issued documents:
 - **CBOR Encoding** – Binary format for efficient transmission
 - **COSE Signatures** – CBOR Object Signing and Encryption
 - **Selective Disclosure** – Hardware-backed claim selection
-- **Proximity Presentation** – NFC and Bluetooth LE support
+- **Proximity Presentation** – NFC and Bluetooth LE are supported by the wallet SDKs, not by the vc issuer and verifier services
 
 ### VCTM (Verifiable Credential Type Metadata)
 
@@ -139,7 +142,7 @@ Standards and specifications implemented by the SIROS ID **Verifier** for creden
 | Attribute | Value |
 |-----------|-------|
 | **Specification** | [OpenID for Verifiable Presentations 1.0](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html) |
-| **Status** | Draft (ID2) |
+| **Status** | Final (1.0) |
 | **Component** | Verifier |
 
 Protocol for requesting and receiving credential presentations from wallets:
@@ -151,26 +154,28 @@ Protocol for requesting and receiving credential presentations from wallets:
 
 **Endpoints:**
 - `/authorize` – Authorization endpoint (OIDC-style)
-- `/direct_post` – Direct post response endpoint
-- `/request_uri` – Request object endpoint
+- `POST /verification/direct_post` – Direct post response endpoint (`POST /verification/oidc-direct_post` for the OIDC flow)
+- `/verification/request-object` and `/verification/request-object/{session_id}` – Request object endpoints
 
 ### DCQL (Digital Credentials Query Language)
 
 | Attribute | Value |
 |-----------|-------|
 | **Specification** | [OID4VP DCQL](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#name-digital-credentials-query-l) |
-| **Status** | Draft |
+| **Status** | Final (part of OpenID4VP 1.0) |
 | **Component** | Verifier |
 
 Query language for specifying credential requirements:
 
+An illustrative DCQL query (shown as YAML; on the wire DCQL is JSON):
+
 ```yaml
 credentials:
   - id: pid_credential
-    format: vc+sd-jwt
+    format: dc+sd-jwt
     meta:
       vct_values:
-        - urn:eudi:pid:arf-1.8:1
+        - urn:eudi:pid:1
     claims:
       - path: ["given_name"]
       - path: ["family_name"]
@@ -213,7 +218,7 @@ Browser-native API for credential presentation:
 |-----------|-------|
 | **Specification** | [draft-ietf-oauth-status-list](https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/) |
 | **Status** | IETF Draft |
-| **Component** | Issuer, Verifier |
+| **Component** | Issuer, Registry, Verifier |
 
 Efficient credential revocation mechanism:
 
@@ -445,6 +450,10 @@ Authorization interface for trust decisions:
 - **Standard API** – Interoperable authorization requests
 - **Policy-based Trust** – Configurable trust rules
 
+### Additional implemented standards
+
+The platform also implements W3C Verifiable Credentials 2.0 with Data Integrity proofs (`ldp_vc`, `vc+ld+json`), pushed authorization requests (RFC 9126), OAuth 2.0 Dynamic Client Registration (RFC 7591) with an open, static or JWT-based registration policy, OpenID4VCI credential request and response encryption (JWE), JWT VC issuer metadata (`/.well-known/jwt-vc-issuer`), and SAML 2.0 and OpenID Connect authentication of users at the issuer (`/samlsp/*`, `/oidcrp/*`).
+
 ---
 
 ## Protocol Profiles
@@ -455,7 +464,9 @@ Authorization interface for trust decisions:
 |--------|----------|--------------|---------------------|-------------|
 | **SD-JWT VC** | ✅ | ✅ | ✅ | ✅ |
 | **mDL/mDoc** | ✅ | ✅ | ✅ | ✅ |
-| **JWT VC** | ✅ | ✅ | ❌ | Optional |
+| **W3C VC 2.0 (Data Integrity)** | ✅ | ✅ | ❌ | ✅ |
+| **JWP (blind BBS)** | ✅ | – | ✅ | ✅ |
+| **JWT VC** (`jwt_vc_json`) | ❌ | ❌ | – | – |
 
 ### Transport Profiles
 

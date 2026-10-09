@@ -50,6 +50,7 @@ flowchart LR
     Registry[registry.siros.org<br/>Static catalogue + JSON API]
 
     subgraph Consumers
+        VCP[VC platform<br/>issuer / apigw]
         WB[go-wallet-backend<br/>Caches metadata for wallets]
         Wallet[Credential Manager<br/>Renders credentials]
         Verifier[Verifier<br/>Understands claim schemas]
@@ -58,12 +59,14 @@ flowchart LR
     Org1 --> CLI
     Org2 --> CLI
     CLI --> Registry
+    Registry --> VCP
     Registry --> WB
     WB --> Wallet
     Registry --> Verifier
 ```
 
 - **Issuers / credential designers** publish VCTM files in Git repositories. The registry discovers and aggregates them.
+- **The VC platform** (apigw, issuer, verifier) can resolve credential types directly from the registry through `common.credential_registry`; see [Resolving Credential Types from a Registry](../issuers/issuer#resolving-credential-types-from-a-registry).
 - **go-wallet-backend** fetches and caches metadata from the registry so wallets can render credentials with the correct display names, logos, and claim labels.
 - **Verifiers** can look up claim schemas to understand what a presented credential contains.
 
@@ -74,8 +77,8 @@ The SIROS ecosystem uses the word "registry" in several places:
 |-----------|------|-------------|
 | **registry-cli** | **Publisher** | CLI tool that builds the credential type catalogue. |
 | **registry.siros.org** | **Catalogue** | The public static site produced by registry-cli. |
-| **go-wallet-backend registry** | **Consumer** | Service in go-wallet-backend that fetches and caches metadata from registry.siros.org. |
-| **VC registry** (`vc/cmd/registry`) | **Token Status Lists** | A completely separate service managing credential revocation. Not related to credential type metadata. |
+| **go-wallet-backend registry** | **Consumer** | The registry role of the go-wallet-backend binary (`--mode=registry`, image `go-wallet-registry`) that fetches and caches metadata from registry.siros.org. |
+| **VC registry** (`vc/registry`) | **Token Status Lists** | A completely separate service managing credential revocation. Not related to credential type metadata. |
 :::
 
 ## Further Reading

@@ -28,7 +28,7 @@ The Go-Trust API is a multi-framework trust decision engine providing AuthZEN-ba
 
 Internal administration API for managing the wallet backend multi-tenant infrastructure. This API manages tenants, users, credential issuers, and verifiers.
 
-- **Version:** 1.0.0
+- **Version:** 1.1.0
 - **License:** Apache 2.0
 - **Repository:** [sirosfoundation/go-wallet-backend](https://github.com/sirosfoundation/go-wallet-backend)
 - **Spec:** [Download OpenAPI spec](/api/wallet-backend-admin-openapi.yaml)
@@ -46,7 +46,7 @@ The [VC platform](https://github.com/SUNET/vc) provides the core credential issu
 
 ### API Gateway (Datastore) {#vc-apigw}
 
-The API Gateway handles core data operations for the VC platform.
+The API Gateway (apigw) serves the OpenID4VCI/OAuth endpoints and the datastore REST API of the VC platform. The specification below covers the datastore operations only, not every apigw route. All paths in it already include the `/api/v1` prefix.
 
 - **Version:** 2.8
 - **Spec:** [Download Swagger spec](/api/vc-apigw-swagger.yaml)
@@ -58,32 +58,10 @@ The API Gateway handles core data operations for the VC platform.
 
 </details>
 
-### Registry API {#vc-registry}
+### Registry (Token Status Lists) {#vc-registry}
 
-The Registry service manages credential metadata and trust information.
+The VC registry service is the Token Status List service: it serves `GET /statuslists` and `GET /statuslists/{id}`, plus an optional admin GUI under `/admin`. See [Token Status Lists](./token-status-lists). The Swagger specification published for it, [vc-registry-swagger.yaml](/api/vc-registry-swagger.yaml), currently defines no paths, so no interactive documentation is shown here.
 
-- **Version:** 0.1.0
-- **Base path:** `/api/v1`
-- **Spec:** [Download Swagger spec](/api/vc-registry-swagger.yaml)
+### Issuer {#vc-issuer}
 
-<details>
-<summary>Expand Registry API</summary>
-
-<SwaggerUI specUrl="/api/vc-registry-swagger.yaml" />
-
-</details>
-
-### Issuer API {#vc-issuer}
-
-The Issuer service handles credential issuance workflows.
-
-- **Version:** 0.1.0
-- **Base path:** `/issuer/api/v1`
-- **Spec:** [Download Swagger spec](/api/vc-issuer-swagger.yaml)
-
-<details>
-<summary>Expand Issuer API</summary>
-
-<SwaggerUI specUrl="/api/vc-issuer-swagger.yaml" />
-
-</details>
+The VC issuer service is a gRPC service (`proto/v1-issuer.proto` in the [VC repository](https://github.com/SUNET/vc)); over HTTP it exposes only `/health` and `/swagger`. The Swagger specification published for it, [vc-issuer-swagger.yaml](/api/vc-issuer-swagger.yaml), currently defines no paths. See [API Integration](../issuers/api-integration#grpc-integration) for the gRPC interface.

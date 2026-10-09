@@ -15,7 +15,7 @@ Compatible wallets include:
 - **SIROS ID Credential Manager** (based on [wwWallet](/opensource#wwwallet-project)) – used in examples throughout this documentation
 - **EUDI Reference Wallet** – the EU Digital Identity reference implementation
 - **Native mobile wallets** – iOS and Android applications with OID4VCI support
-- **Third-party wallets** – any wallet implementing OID4VCI and supported formats (SD-JWT VC, mDL, JWT VC)
+- **Third-party wallets** – any wallet implementing OID4VCI and supported formats (SD-JWT VC, mDL/mdoc, W3C VC 2.0)
 
 :::tip Multi-Wallet Support
 A single issuer deployment can issue credentials to multiple different wallet implementations. The OID4VCI protocol ensures consistent behavior across all compliant wallets.
@@ -116,7 +116,8 @@ The SIROS ID Issuer supports multiple credential formats to meet different use c
 |--------|----------|----------|---------------------|
 | **SD-JWT VC** | [IETF SD-JWT VC](https://datatracker.ietf.org/doc/draft-ietf-oauth-sd-jwt-vc/) | EU Digital Identity, general use | ✅ Yes |
 | **mDL/mDoc** | [ISO 18013-5](https://www.iso.org/standard/69084.html) | Mobile driving licenses | ✅ Yes |
-| **JWT VC** | [W3C VC Data Model](https://www.w3.org/TR/vc-data-model/) | Legacy systems | ❌ No |
+| **W3C VC 2.0** (`ldp_vc`) | [W3C VC Data Model 2.0](https://www.w3.org/TR/vc-data-model-2.0/) with Data Integrity proofs | Linked-data ecosystems | Depends on cryptosuite |
+| **JWP** (blind BBS) | [IETF JSON Web Proof](https://datatracker.ietf.org/doc/draft-ietf-jose-json-web-proof/) | Unlinkable presentations | ✅ Yes |
 
 :::tip Recommended Format
 **SD-JWT VC** is the recommended format for new deployments. It provides selective disclosure (users can share only necessary claims) and is the format specified by the EU Digital Identity Wallet Architecture Reference Framework (ARF).
@@ -134,7 +135,7 @@ A **credential type** defines the schema and semantics of a credential. Each typ
 ```mermaid
 graph LR
     subgraph "Credential Type Definition (VCTM)"
-        VCT["VCT Identifier<br/>urn:eudi:pid:arf-1.8:1"]
+        VCT["VCT Identifier<br/>urn:eudi:pid:1"]
         Claims["Claim Schema<br/>given_name, family_name, ..."]
         Display["Display Rules<br/>Labels, logos, templates"]
     end
@@ -155,9 +156,9 @@ Each credential type is defined by a **VCTM file** that specifies:
 
 ```json
 {
-  "vct": "urn:eudi:pid:arf-1.8:1",
+  "vct": "urn:eudi:pid:1",
   "name": "Person Identification Data",
-  "description": "EU Person Identification Data credential (ARF 1.8)",
+  "description": "EU Person Identification Data credential",
   "display": [
     {
       "lang": "en-US",
@@ -178,24 +179,23 @@ Each credential type is defined by a **VCTM file** that specifies:
 }
 ```
 
-#### Built-in Credential Types
+#### Shipped Credential Types
 
-SIROS ID includes pre-configured types based on EU standards:
+The [vc repository `metadata/` directory](https://github.com/SUNET/vc/tree/main/metadata) ships type metadata for common types, which you reference from `common.credential_metadata`:
 
-| Type | VCT | Description |
-|------|-----|-------------|
-| **PID (ARF 1.5)** | `urn:eudi:pid:arf-1.5:1` | Person Identification Data (ARF 1.5) |
-| **PID (ARF 1.8)** | `urn:eudi:pid:arf-1.8:1` | Person Identification Data (ARF 1.8+) |
-| **EHIC** | `urn:eudi:ehic:1` | European Health Insurance Card |
-| **PDA1** | `urn:eudi:pda1:1` | Portable Document A1 |
-| **Diploma** | `urn:eudi:diploma:1` | Educational credentials |
-| **ELM** | `urn:eudi:elm:1` | European Learning Model |
-| **Microcredential** | `urn:eudi:micro_credential:1` | Short learning achievements |
-| **OpenBadge** | `urn:eudi:openbadge_complete:1` | Open Badges 3.0 |
+| Type | VCT / doctype | File |
+|------|---------------|------|
+| **PID** | `urn:eudi:pid:1` | `vctm_pid.json` |
+| **EHIC** | `urn:eudi:ehic:1` | `vctm_ehic.json` |
+| **PDA1** | `urn:eudi:pda1:1` | `vctm_pda1.json` |
+| **Diploma** | `urn:eudi:diploma:1` | `vctm_diploma.json` |
+| **ELM** | `urn:eudi:elm:1` | `vctm_elm.json` |
+| **Microcredential** | `urn:eudi:micro_credential:1` | `vctm_microcredential.json` |
+| **eduID** | `urn:credential:eduid:1` | `vctm_eduid.json` |
+| **PID (mdoc)** | `eu.europa.ec.eudi.pid.1` | `pid_mdoc.mdoc.json` |
+| **mDL (mdoc)** | `org.iso.18013.5.1.mDL` | `mdl.mdoc.json` |
 
-:::note ARF Version Selection
-SIROS ID supports both ARF 1.5 and ARF 1.8 PID schemas. Which one a scope uses is determined by the VCTM it points at in `common.credential_metadata`. The generic VCT `urn:eudi:pid:1` is accepted for compatibility but maps to a configured ARF version.
-:::
+Which schema a scope uses is determined by the VCTM (or MDDL) file it points at in `common.credential_metadata`.
 
 ### Building the Claim Set
 
@@ -208,7 +208,8 @@ configuration:
    from and which auth provider identifies the user.
 3. `apigw.auth_providers.<provider>.attribute_mapping` normalises the
    provider's own attribute names to canonical claim names, with optional
-   transforms and defaults.
+   defaults. Mapping is a rename-and-presence step only; value
+   transformations are `derivations` on the scope (see below).
 
 APIGW then validates the resulting claim set against the VCTM schema before
 sending it to the issuer for signing.
@@ -217,7 +218,7 @@ sending it to the issuer for signing.
 common:
   credential_metadata:
     pid:
-      vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
+      vctm_file_path: "/metadata/vctm_pid.json"
       format: "dc+sd-jwt"
 
 apigw:
@@ -234,7 +235,6 @@ apigw:
           required: true
         "urn:oid:0.9.2342.19200300.100.1.3":
           claim: "email_address"
-          transform: "lowercase"
 
   data_sources:
     # The SAML assertion's claims ARE the credential data
@@ -242,12 +242,21 @@ apigw:
       scopes:
         pid:
           auth_provider: saml
+          # Value transformations are derivations on the scope
+          derivations:
+            - lowercase:
+                input: email_address
 ```
 
-Supported `transform` values are `lowercase`, `uppercase`, `trim`,
-`country_alpha2`, `country_alpha3` and `yyyymmdd_to_iso`. `default:` supplies a
-value when the attribute is absent, and `as_array: true` wraps a scalar in a
-single-element array.
+`default:` supplies a value when the attribute is absent, and `as_array: true`
+wraps a scalar in a single-element array. Available derivation primitives are
+`age_over_thresholds`, `lowercase`, `uppercase`, `trim`, `country_alpha2`,
+`country_alpha3`, `yyyymmdd_to_iso`, `swamid_highest_assurance_level` and
+`random`. Derivations are supported on `datastore`, `assertion`, `external_api`
+and `presentation` scopes; each takes an `input` claim name and, where
+applicable, an `output` (default: in place). See the
+[VC Configuration Reference](/sirosid/reference/vc-configuration) for each
+primitive's parameters.
 
 :::note Removed configuration
 Earlier releases had a top-level `credential_constructor` section. It no longer
@@ -309,7 +318,7 @@ flowchart TB
 | **SAML SP** | Service Provider for SAML federations | SAML 2.0 |
 | **OIDC RP** | Relying Party for OIDC providers | OpenID Connect |
 | **Session Manager** | OAuth2 session and state management | OAuth 2.0 |
-| **Issuer API** | Core credential operations | gRPC + REST |
+| **Issuer API** | Core credential operations (called by apigw; the REST datastore API is served by apigw) | gRPC |
 | **Credential Constructor** | Builds credentials from claims | Internal |
 | **Signing Service** | Cryptographic signing (SW or HSM) | JWS, COSE |
 | **Status Lists** | Revocation status tracking | Token Status List |
@@ -317,24 +326,7 @@ flowchart TB
 
 ### Service Architecture
 
-The issuer can run as a single process or as separate microservices:
-
-<div className="row">
-<div className="col col--6">
-
-**Single Process Mode**
-
-```mermaid
-flowchart TB
-    Combined[apigw + issuer + registry]
-```
-
-All components in one binary—simplest deployment for development and small-scale production.
-
-</div>
-<div className="col col--6">
-
-**Microservices Mode**
+The issuer runs as three separate services (`apigw`, `issuer` and `registry`, each its own binary and container image) that talk gRPC to each other and share a MongoDB:
 
 ```mermaid
 flowchart TB
@@ -343,13 +335,11 @@ flowchart TB
     Registry[Registry Service]
 
     APIGW -->|gRPC| Issuer
+    APIGW -->|gRPC| Registry
     Issuer -->|gRPC| Registry
 ```
 
-Separate services for independent scaling and high availability.
-
-</div>
-</div>
+All three can run on one host (for example with Docker Compose, see [Deployment](./deployment)) or be scaled independently for high availability.
 
 ## Deployment Models
 
@@ -465,12 +455,12 @@ flowchart LR
 
 ### Model 4: Standalone Issuer
 
-Minimal deployment for testing or air-gapped environments.
+Minimal single-host deployment for testing or air-gapped environments: the same three services and MongoDB, run together on one machine.
 
 ```mermaid
 flowchart LR
     subgraph "Single Server"
-        All[Issuer + Registry<br/>Embedded MongoDB]
+        All[apigw + issuer + registry<br/>+ MongoDB]
     end
 
     TestWallet[Test Wallet]
@@ -479,7 +469,7 @@ flowchart LR
 
 | Aspect | Details |
 |--------|---------|
-| **Setup** | Minutes – single Docker container |
+| **Setup** | Minutes – one Docker Compose file |
 | **Maintenance** | Minimal |
 | **Data location** | Local |
 | **Customization** | Development/testing |
