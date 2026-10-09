@@ -7,7 +7,7 @@ sidebar_label: OIDC RP Integration
 
 This guide explains how to integrate the SIROS ID verifier with any application using standard [OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.html). After reading this guide, you will understand how to:
 
-- Add SIROS ID as an OpenID Connect identity provider
+- Add SIROS ID as an OpenID Connect provider for your application
 - Configure authentication requests
 - Handle ID tokens and claims
 - Implement the [authorization code flow with PKCE](https://datatracker.ietf.org/doc/html/rfc7636)
@@ -61,18 +61,20 @@ curl -X POST "https://verifier.example.org/register" \
   -d '{
     "client_name": "My Application",
     "redirect_uris": [
-      "https://my-app.example.com/callback",
-      "https://my-app.example.com/silent-callback"
+      "https://my-app.example.com/callback"
     ],
-    "post_logout_redirect_uris": [
-      "https://my-app.example.com"
-    ],
-    "grant_types": ["authorization_code", "refresh_token"],
+    "grant_types": ["authorization_code"],
     "response_types": ["code"],
     "token_endpoint_auth_method": "client_secret_post",
-    "scope": "openid profile"
+    "scope": "openid pid ehic"
   }'
 ```
+
+The `scope` string is the list of scopes this client may request later. It
+defaults to `openid` only, and any scope you request at `/authorize` that is not
+listed here is rejected with `invalid_scope`. Register every scope you will use,
+and use scopes that exist on your verifier (see
+[Step 4](#step-4-request-credentials-via-scopes)).
 
 Response:
 
@@ -83,11 +85,28 @@ Response:
   "client_id_issued_at": 1704067200,
   "client_secret_expires_at": 0,
   "redirect_uris": ["https://my-app.example.com/callback"],
-  "grant_types": ["authorization_code", "refresh_token"],
+  "grant_types": ["authorization_code"],
   "response_types": ["code"],
-  "token_endpoint_auth_method": "client_secret_post"
+  "token_endpoint_auth_method": "client_secret_post",
+  "scope": "openid pid ehic",
+  "registration_access_token": "...",
+  "registration_client_uri": "https://verifier.example.org/register/abc123xyz"
 }
 ```
+
+The registration access token lets you read, update (`PUT`) or delete the
+registration at `registration_client_uri` ([RFC 7592](https://datatracker.ietf.org/doc/html/rfc7592)).
+
+:::caution Use `client_secret_post`
+The registration default is `client_secret_basic`, and discovery advertises it,
+but the token endpoint currently reads `client_id` and `client_secret` only from
+the form body and does not parse an HTTP `Authorization: Basic` header. Register
+with `client_secret_post`, and configure your OIDC library to send the client
+credentials in the request body (the examples below show how).
+:::
+
+Refresh tokens are not implemented: only the `authorization_code` grant is
+supported and no `refresh_token` is ever returned.
 
 ### Public Clients (SPAs, Mobile Apps)
 
@@ -102,11 +121,21 @@ curl -X POST "https://verifier.example.org/register" \
     "grant_types": ["authorization_code"],
     "response_types": ["code"],
     "token_endpoint_auth_method": "none",
+    "scope": "openid pid",
     "application_type": "web"
   }'
 ```
 
-Public clients **must** use PKCE.
+A browser application calls `/token`, `/jwks` and `/register` cross-origin, which
+works only if the verifier operator has listed its origin under
+`verifier.api_server.cors.allowed_origins`.
+
+### PKCE
+
+Every client registered through `/register`, public or confidential, must use
+PKCE with `S256`: an `/authorize` request without a `code_challenge` fails with
+`invalid_request`. (Clients declared statically in the verifier's configuration
+are not subject to this.)
 
 ## Step 2: Discover Endpoints
 
@@ -125,14 +154,23 @@ Response:
   "token_endpoint": "https://verifier.example.org/token",
   "userinfo_endpoint": "https://verifier.example.org/userinfo",
   "jwks_uri": "https://verifier.example.org/jwks",
-  "scopes_supported": ["openid", "profile", "pid", "ehic", "diploma"],
-  "response_types_supported": ["code"],
-  "grant_types_supported": ["authorization_code", "refresh_token"],
-  "subject_types_supported": ["pairwise"],
+  "registration_endpoint": "https://verifier.example.org/register",
+  "response_types_supported": ["code", "id_token", "token id_token"],
+  "subject_types_supported": ["public", "pairwise"],
   "id_token_signing_alg_values_supported": ["RS256", "ES256"],
-  "code_challenge_methods_supported": ["S256"]
+  "scopes_supported": ["openid", "profile", "email", "pid", "ehic"],
+  "claims_supported": ["sub", "name", "given_name", "family_name", "email", "email_verified", "birthdate", "address"],
+  "grant_types_supported": ["authorization_code"],
+  "code_challenge_methods_supported": ["S256"],
+  "token_endpoint_auth_methods_supported": ["client_secret_basic", "client_secret_post", "none"]
 }
 ```
+
+The values shown are illustrative: `scopes_supported` lists `openid`, `profile`,
+`email` plus the scopes the operator configured, and `userinfo_endpoint` is
+present when the operator has `enable_userinfo` on (the default). Only the
+authorization code flow (`response_type=code`) works, and
+`client_secret_basic` is advertised but not honoured (see above).
 
 ## Step 3: Implement Authorization Code Flow
 
@@ -182,7 +220,7 @@ async function startAuthentication() {
     response_type: 'code',
     client_id: 'your-client-id',
     redirect_uri: 'https://my-app.example.com/callback',
-    scope: 'openid profile',
+    scope: 'openid pid',
     state: state,
     code_challenge: codeChallenge,
     code_challenge_method: 'S256'
@@ -253,11 +291,14 @@ async function validateIdToken(idToken) {
   const header = JSON.parse(atob(headerB64));
   const key = jwks.keys.find(k => k.kid === header.kid);
   
-  // Import key and verify signature
+  // Import key and verify signature. The algorithm follows header.alg
+  // (ES256 or RS256, depending on the verifier's signing key): use
+  // { name: 'ECDSA', namedCurve: 'P-256' } for ES256, or
+  // { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' } for RS256.
   const publicKey = await crypto.subtle.importKey(
     'jwk',
     key,
-    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    { name: 'ECDSA', namedCurve: 'P-256' },
     false,
     ['verify']
   );
@@ -289,15 +330,18 @@ async function validateIdToken(idToken) {
 
 ## Step 4: Request Credentials via Scopes
 
-Control which credentials are requested:
+The scopes you request control which credentials the verifier asks the wallet
+for. There is no fixed list: the available credential scopes are whatever the
+verifier operator configured, and discovery's `scopes_supported` shows them.
+A scope is accepted when
 
-| Scope | Credential Requested |
-|-------|----------------------|
-| `openid` | Required base scope |
-| `profile` | Basic PID (name, birthdate) |
-| `pid` | Full Person ID |
-| `ehic` | European Health Insurance Card |
-| `diploma` | Educational credentials |
+1. it is in the scopes you registered for your client (Step 1), and
+2. it selects a credential on the verifier, either through a
+   presentation-request template's `oidc_scopes` or as a key of the verifier's
+   `common.credential_metadata`.
+
+`openid` is the base scope. The examples below use `pid` and `ehic`, which exist
+on a verifier configured as in [Verifier Configuration](./verifier).
 
 ### Example: Request PID and EHIC
 
@@ -306,7 +350,7 @@ const params = new URLSearchParams({
   response_type: 'code',
   client_id: 'your-client-id',
   redirect_uri: 'https://my-app.example.com/callback',
-  scope: 'openid profile ehic',  // Request PID profile + EHIC
+  scope: 'openid pid ehic',  // must all have been registered in Step 1
   state: state,
   code_challenge: codeChallenge,
   code_challenge_method: 'S256'
@@ -331,7 +375,9 @@ async function initializeClient() {
     client_id: 'your-client-id',
     client_secret: 'your-client-secret',
     redirect_uris: ['http://localhost:3000/callback'],
-    response_types: ['code']
+    response_types: ['code'],
+    // The verifier reads client credentials from the request body only
+    token_endpoint_auth_method: 'client_secret_post'
   });
 }
 
@@ -344,7 +390,7 @@ app.get('/login', (req, res) => {
   req.session.state = state;
   
   const authUrl = client.authorizationUrl({
-    scope: 'openid profile',
+    scope: 'openid pid',
     state: state,
     code_challenge: codeChallenge,
     code_challenge_method: 'S256'
@@ -385,7 +431,13 @@ oauth.register(
     client_id='your-client-id',
     client_secret='your-client-secret',
     server_metadata_url='https://verifier.example.org/.well-known/openid-configuration',
-    client_kwargs={'scope': 'openid profile'}
+    client_kwargs={
+        'scope': 'openid pid',
+        # The verifier reads client credentials from the request body only,
+        # and requires PKCE for registered clients
+        'token_endpoint_auth_method': 'client_secret_post',
+        'code_challenge_method': 'S256',
+    }
 )
 
 @app.route('/login')
@@ -421,8 +473,13 @@ func main() {
         ClientID:     "your-client-id",
         ClientSecret: "your-client-secret",
         RedirectURL:  "http://localhost:8080/callback",
-        Endpoint:     provider.Endpoint(),
-        Scopes:       []string{oidc.ScopeOpenID, "profile"},
+        // Send client credentials in the body, not an Authorization header
+        Endpoint: oauth2.Endpoint{
+            AuthURL:   provider.Endpoint().AuthURL,
+            TokenURL:  provider.Endpoint().TokenURL,
+            AuthStyle: oauth2.AuthStyleInParams,
+        },
+        Scopes:       []string{oidc.ScopeOpenID, "pid"},
     }
     
     verifier := provider.Verifier(&oidc.Config{ClientID: "your-client-id"})
@@ -430,8 +487,11 @@ func main() {
     // Login handler
     http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
         state := generateState()
-        // Store state in session
-        http.Redirect(w, r, oauth2Config.AuthCodeURL(state), http.StatusFound)
+        // Store state and the PKCE verifier in the session
+        pkceVerifier := oauth2.GenerateVerifier()
+        http.Redirect(w, r,
+            oauth2Config.AuthCodeURL(state, oauth2.S256ChallengeOption(pkceVerifier)),
+            http.StatusFound)
     })
     
     // Callback handler
@@ -439,7 +499,8 @@ func main() {
         // Verify state
         code := r.URL.Query().Get("code")
         
-        token, _ := oauth2Config.Exchange(ctx, code)
+        // pkceVerifier is the value stored in the session at login
+        token, _ := oauth2Config.Exchange(ctx, code, oauth2.VerifierOption(pkceVerifier))
         rawIDToken, _ := token.Extra("id_token").(string)
         idToken, _ := verifier.Verify(ctx, rawIDToken)
         
@@ -463,8 +524,10 @@ spring:
           sirosid:
             client-id: your-client-id
             client-secret: your-client-secret
-            scope: openid,profile
+            scope: openid,pid
             authorization-grant-type: authorization_code
+            # The verifier reads client credentials from the request body only
+            client-authentication-method: client_secret_post
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
         provider:
           sirosid:
@@ -492,70 +555,18 @@ public class SecurityConfig {
 }
 ```
 
-## Advanced Topics
+## Claims in the ID Token
 
-### Requesting Specific Claims
+The claims you receive are decided by the verifier, not by the request: they
+come from the presentation-request template (or the credential's metadata) that
+the requested scopes select, after the template's `claim_mappings` are applied.
+The OIDC `claims` request parameter is not supported. To get different claims,
+request different scopes or ask the verifier operator to change the template.
 
-Use the `claims` parameter for fine-grained control:
-
-```javascript
-const claims = {
-  id_token: {
-    given_name: { essential: true },
-    family_name: { essential: true },
-    birthdate: null,  // Request but not essential
-    nationality: null
-  }
-};
-
-const params = new URLSearchParams({
-  response_type: 'code',
-  client_id: 'your-client-id',
-  redirect_uri: 'https://my-app.example.com/callback',
-  scope: 'openid',
-  claims: JSON.stringify(claims),
-  // ... other params
-});
-```
-
-### Silent Authentication
-
-For session refresh without user interaction:
-
-```javascript
-async function silentRefresh() {
-  const iframe = document.createElement('iframe');
-  iframe.style.display = 'none';
-  
-  const params = new URLSearchParams({
-    response_type: 'code',
-    client_id: 'your-client-id',
-    redirect_uri: 'https://my-app.example.com/silent-callback',
-    scope: 'openid profile',
-    prompt: 'none',  // Silent - no UI
-    // ... PKCE params
-  });
-  
-  iframe.src = `https://verifier.example.org/authorize?${params}`;
-  document.body.appendChild(iframe);
-  
-  // Handle response in iframe
-}
-```
-
-### Logout
-
-```javascript
-function logout() {
-  const params = new URLSearchParams({
-    id_token_hint: sessionStorage.getItem('id_token'),
-    post_logout_redirect_uri: 'https://my-app.example.com',
-    state: generateState()
-  });
-  
-  window.location.href = `https://verifier.example.org/logout?${params}`;
-}
-```
+Authentication always requires the user to interact with their wallet. The
+`prompt` parameter is ignored, so silent authentication (`prompt=none`) is not
+possible, and the verifier has no logout or `end_session` endpoint: end the
+session in your own application.
 
 ## Troubleshooting
 
@@ -566,22 +577,28 @@ function logout() {
 **Solutions**:
 1. Verify client_id is correct
 2. For confidential clients, check client_secret
-3. Ensure token_endpoint_auth_method matches registration
+3. Ensure token_endpoint_auth_method matches registration, and that your library sends credentials in the request body (`client_secret_post`): HTTP Basic client authentication is not supported by the token endpoint
 
 ### Invalid Grant
 
 **Error**: `invalid_grant`
 
 **Solutions**:
-1. Authorization code may have expired (typically 60 seconds)
+1. Authorization code may have expired (5 minutes by default)
 2. Code verifier doesn't match code challenge
 3. Code was already used (single-use)
 
 ### PKCE Required
 
-**Error**: `invalid_request` with message about PKCE
+**Error**: `invalid_request` at `/authorize`
 
-**Solution**: Public clients must use PKCE. Add `code_challenge` and `code_challenge_method` parameters.
+**Solution**: Clients registered through `/register` must use PKCE. Add `code_challenge` and `code_challenge_method=S256` to the authorization request.
+
+### Invalid Scope
+
+**Error**: `invalid_scope`
+
+**Solution**: Every requested scope must have been included in the `scope` string at registration (the default is `openid` only). Register the client again, or update it through its `registration_client_uri`, with the scopes you need.
 
 ### Claims Missing
 
@@ -599,11 +616,11 @@ function logout() {
 3. **Use nonce** - Prevents token replay
 4. **Validate all claims** - iss, aud, exp, iat
 5. **Store tokens securely** - HttpOnly cookies or secure storage
-6. **Use short token lifetimes** - Implement refresh token rotation
-7. **Implement logout** - Clear tokens on logout
+6. **Use short token lifetimes** - There are no refresh tokens; run a new authorization when the session expires
+7. **Handle logout in your application** - Clear tokens and your own session on logout
 
 ## Next Steps
 
 - [Verifier Configuration](./verifier.md) – Full verifier documentation
 - [Keycloak Integration](./keycloak_verifier) – IAM-based integration
-- [Trust Services](../trust/) – Understand trust validation
+- [Trust Services](../trust/) – Understand trust validation (a PDP is required for production)
