@@ -72,7 +72,7 @@ flowchart LR
 
 | Repository | Description |
 |------------|-------------|
-| [sirosfoundation/wallet-frontend](https://github.com/wwWallet/wallet-frontend) | Wallet frontend (SIROS fork of wwWallet) |
+| [sirosfoundation/wallet-frontend](https://github.com/sirosfoundation/wallet-frontend) | Wallet frontend (SIROS fork of wwWallet) |
 | [sirosfoundation/go-wallet-backend](https://github.com/sirosfoundation/go-wallet-backend) | Wallet backend |
 | [sirosfoundation/go-trust](https://github.com/sirosfoundation/go-trust) | Trust evaluation service |
 

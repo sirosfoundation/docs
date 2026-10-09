@@ -24,16 +24,20 @@ The frontend is configured entirely through **environment variables** passed to 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `WALLET_ENGINE_URL` | Same as `WALLET_BACKEND_URL` | WebSocket engine URL (set if running engine on a separate host) |
-| `WS_URL` | Auto-derived from `WALLET_ENGINE_URL` | Explicit WebSocket URL override |
-| `ALLOWED_TRANSPORTS` | `http_proxy,websocket,direct` | Comma-separated list of enabled OID4VCI/VP transports |
-| `TRANSPORT_PREFERENCE` | — | Transport priority order |
+| `WS_URL` | `/api/v2/wallet` on the origin of `WALLET_ENGINE_URL` (`ws(s)://`) | Explicit WebSocket URL override |
+| `ALLOWED_TRANSPORTS` | `websocket` | Comma-separated list of enabled OID4VCI/VP transports. Accepted values: `websocket`, `direct` (anything else is ignored) |
+| `TRANSPORT_PREFERENCE` | `websocket,direct` | Transport priority order (first allowed transport wins) |
+
+:::note WebSocket path
+The frontend always connects to the absolute path `/api/v2/wallet` on the engine origin. Any path component in `WALLET_ENGINE_URL` or `WALLET_BACKEND_URL` is discarded when deriving `WS_URL`, so a reverse proxy must route `/api/v2/wallet` to the engine port (8082). See [Docker Compose](./docker-compose.md#reverse-proxy).
+:::
 
 ### Protocol Settings
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `OPENID4VCI_REDIRECT_URI` | — | OID4VCI redirect URI for authorization code flows |
-| `OPENID4VCI_PROOF_TYPE_PRECEDENCE` | `attestation,jwt` | Proof type preference order |
+| `OPENID4VCI_PROOF_TYPE_PRECEDENCE` | `jwt` | Proof type preference order (for example `attestation,jwt`) |
 | `OPENID4VP_SAN_DNS_CHECK` | — | Enable SAN DNS verification for OID4VP verifier certificates |
 | `OPENID4VP_SAN_DNS_CHECK_SSL_CERTS` | — | Enable SSL certificate SAN validation |
 | `DID_KEY_VERSION` | `jwk_jcs-pub` | DID key format |
@@ -42,7 +46,7 @@ The frontend is configured entirely through **environment variables** passed to 
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `DELEGATE_TRUST_TO_BACKEND` | — | Delegate trust evaluation to the backend's AuthZEN proxy instead of direct evaluation |
+| `DELEGATE_TRUST_TO_BACKEND` | `true` | Delegate trust evaluation to the backend's AuthZEN proxy. Setting `false` (local certificate pinning) is only honoured in development builds; production builds force `true` |
 | `VCT_REGISTRY_URL` | — | URL of the VCTM registry for credential type metadata |
 
 ### Privacy (OHTTP)
@@ -58,10 +62,8 @@ The frontend is configured entirely through **environment variables** passed to 
 |----------|---------|-------------|
 | `I18N_WALLET_NAME_OVERRIDE` | — | Override wallet name in all translations |
 | `MULTI_LANGUAGE_DISPLAY` | — | Enable language selector |
-| `LOGIN_WITH_PASSWORD` | — | Show legacy username/password login (not recommended) |
 | `SHOW_PWA_INSTALL_PROMPT` | — | Prompt users to install as PWA on login page |
 | `POLICY_LINKS` | — | Terms of service and policy links (`LABEL::URL,LABEL::URL`) |
-| `DISPLAY_CONSOLE` | — | Enable browser console output |
 | `LOG_LEVEL` | — | Frontend log level |
 
 ### Mobile App Association
@@ -93,10 +95,20 @@ The backend is configured via a **YAML config file** and/or **environment variab
 | `WALLET_SERVER_PORT` | `server.port` | `8080` | HTTP API port |
 | `WALLET_SERVER_BASE_URL` | `server.base_url` | — | Public base URL of the backend |
 | `WALLET_SERVER_RP_ID` | `server.rp_id` | `localhost` | WebAuthn Relying Party ID — **must match frontend's `WEBAUTHN_RPID`** |
-| `WALLET_SERVER_RP_ORIGIN` | `server.rp_origin` | `http://localhost:8080` | WebAuthn RP origin — **must match the user-facing origin** |
+| `WALLET_SERVER_RP_ORIGIN` | `server.rp_origin` | `http://localhost:8080` | WebAuthn RP origin — **must match the user-facing origin**. For several origins use `server.rp_origins` (list); `rp_origin` is the legacy single-value form |
 | `WALLET_SERVER_ENGINE_PORT` | `server.engine_port` | `8082` | WebSocket engine port |
 | `WALLET_SERVER_ADMIN_PORT` | `server.admin_port` | `8081` | Admin API port |
-| `WALLET_SERVER_ADMIN_TOKEN` | `server.admin_token` | Auto-generated | Bearer token for admin API access |
+| `WALLET_SERVER_ADMIN_TOKEN` | `server.admin_token` | — | Bearer token for admin API access |
+| `WALLET_SERVER_ADMIN_TOKEN_PATH` | `server.admin_token_path` | — | Load the admin token from a file |
+| `WALLET_SERVER_TRUSTED_PROXIES` | `server.trusted_proxies` | trusts every peer | Comma-separated IPs/CIDRs of reverse proxies whose `X-Forwarded-For` is trusted, or `none`. Per-IP rate limits depend on it; the backend logs a warning when it is unset |
+| `WALLET_SERVER_ENGINE_WS_PING_INTERVAL` | `server.engine_ws_ping_interval` | `3s` | WebSocket ping interval for the engine |
+| `WALLET_SERVER_ENGINE_WS_PONG_TIMEOUT` | `server.engine_ws_pong_timeout` | `5s` | How long to wait for a pong before dropping the connection |
+
+:::caution Admin token
+When no admin token is configured, a random token is generated and only a prefix is logged at debug level, so the admin API is effectively unusable. If `ENVIRONMENT`, `GO_ENV` or `APP_ENV` is set to `production`, the admin server refuses to start without `server.admin_token` or `server.admin_token_path`. Always set one explicitly.
+:::
+
+CORS is configured under `server.cors.*`; the default `allowed_origins` is `*` (development default), so restrict it in production.
 
 ### Storage
 
@@ -116,25 +128,29 @@ For Kubernetes deployments, use `storage.mongodb.password_path` to load the pass
 
 | Env Var | Config Key | Default | Description |
 |---------|------------|---------|-------------|
-| `WALLET_JWT_SECRET` | `jwt.secret` | — | JWT signing secret — **must be set in production** |
+| `WALLET_JWT_SECRET` | `jwt.secret` | — | JWT signing secret — **required, at least 32 bytes**; the backend refuses to start otherwise |
 | `WALLET_JWT_SECRET_PATH` | `jwt.secret_path` | — | Load JWT secret from file |
 
 ### Trust
 
 | Env Var | Config Key | Default | Description |
 |---------|------------|---------|-------------|
-| `WALLET_TRUST_PDP_URL` | `trust.pdp_url` | — | URL of the go-trust AuthZEN PDP (e.g., `http://go-trust:6001`) |
+| `WALLET_TRUST_PDP_URL` | `trust.pdp_url` | — | URL of the go-trust AuthZEN PDP (e.g., `http://go-trust:6001`). **Required for production.** Per-flow overrides: `trust.issuer.pdp_url`, `trust.verifier.pdp_url` (`none` disables trust for that flow) |
 | `WALLET_TRUST_REGISTRY_URL` | `trust.registry_url` | — | URL of the VCTM registry |
 
-When `trust.pdp_url` is set, the `/v1/resolve` endpoint includes `credential_types` extracted from issuer/verifier OID4VCI metadata in the AuthZEN evaluation request. This enables credential-type-aware trust policies in Go-Trust.
+:::caution A PDP is required for production
+A Policy Decision Point (an AuthZEN service such as [go-trust](/sirosid/trust/go-trust)) is required for production use. Running without `trust.pdp_url` is **not supported** and is for testing and development only, with no guarantees. Some things may happen to work: the backend falls back to a permissive, client-mediated mode in which issuers and verifiers are accepted without server-side verification (it logs a warning, or an error when `ENVIRONMENT=production`), but server-side key resolution through the PDP, including `did:` methods, is not available. If a PDP is configured but fails or is unreachable, evaluation fails closed.
+:::
+
+The `/v1/resolve` endpoint accepts an optional `credential_types` field in the request body and forwards it in `action.parameters` of the AuthZEN evaluation request. This enables credential-type-aware trust policies in Go-Trust.
 
 ### AuthZEN Proxy
 
 | Env Var | Config Key | Default | Description |
 |---------|------------|---------|-------------|
-| `WALLET_AUTHZEN_PROXY_ENABLED` | `authzen_proxy.enabled` | `false` | Expose the AuthZEN proxy on the backend API |
+| `WALLET_AUTHZEN_PROXY_ENABLED` | `authzen_proxy.enabled` | `true` | Expose the AuthZEN proxy on the backend API |
 
-The AuthZEN proxy allows the frontend to delegate trust evaluation to the backend, which forwards requests to Go-Trust with additional context (credential types, resource metadata). The proxy injects `credential_types` into `action.parameters`, enabling fine-grained trust decisions per credential format.
+The AuthZEN proxy allows the frontend to delegate trust evaluation to the backend, which forwards requests to Go-Trust with additional context (credential types, resource metadata). The proxy forwards the caller-supplied `credential_types` in `action.parameters`, enabling fine-grained trust decisions per credential format. It is enabled by default because engine flows depend on it.
 
 ### Session Store
 
@@ -168,12 +184,15 @@ Both SSRF protection and HTTPS enforcement are enabled by default. Only disable 
 When running roles in separate containers, configure cross-service discovery:
 
 ```yaml
-external_urls:
-  backend_url: "https://wallet-api.example.com"
-  engine_url: "wss://wallet-ws.example.com"
-  registry_url: "https://wallet-registry.example.com"
-  admin_url: "https://wallet-admin.internal.example.com"
+server:
+  external_urls:
+    backend_url: "https://wallet-api.example.com"
+    engine_url: "wss://wallet-ws.example.com"
+    registry_url: "https://wallet-registry.example.com"
+    admin_url: "https://wallet-admin.internal.example.com"
 ```
+
+The equivalent environment variables are `WALLET_SERVER_EXTERNAL_URLS_BACKEND_URL`, `WALLET_SERVER_EXTERNAL_URLS_ENGINE_URL`, `WALLET_SERVER_EXTERNAL_URLS_REGISTRY_URL` and `WALLET_SERVER_EXTERNAL_URLS_ADMIN_URL`. The roles of a process are selected with `--mode` (`backend` by default; comma-separated list of `backend`, `registry`, `engine`, `admin`, `auth`, `wallet-provider`, or `all`) and the config file with `--config` (default `configs/config.yaml`).
 
 ### Logging
 
@@ -205,7 +224,7 @@ Go-trust is configured via CLI flags, environment variables (prefix `GT_`), or a
 
 | Env Var | Default | Description |
 |---------|---------|-------------|
-| `GT_HOST` | `0.0.0.0` | Listen address |
+| `GT_HOST` | `127.0.0.1` | Listen address (set `0.0.0.0` in containers) |
 | `GT_PORT` | `6001` | Listen port |
 | `GT_EXTERNAL_URL` | — | Public URL for the AuthZEN discovery endpoint |
 | `GT_LOG_LEVEL` | `info` | Log level |

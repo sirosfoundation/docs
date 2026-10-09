@@ -123,7 +123,7 @@ graph LR
 ### Native Key Flow
 
 1. **Key Generation**: The wallet calls `WscdManager::generate_key()`. The manager resolves the target plugin (per configuration) and delegates. For R2PS, this triggers an OPAQUE-authenticated `p256_generate` call to the remote HSM. The key binding (`kid → plugin`) is recorded automatically.
-2. **Signing (PoP)**: The wallet calls `WscdManager::sign()` with the key ID. The manager looks up the key binding, resolves the plugin, and delegates. For R2PS, this runs the OPAQUE session protocol and calls `hsm_ecdsa`.
+2. **Signing (PoP)**: The wallet calls `WscdManager::sign()` with the key ID. The manager looks up the key binding, resolves the plugin, and delegates. For R2PS, this runs the OPAQUE session protocol and calls `sign_ecdsa`.
 3. **Callbacks**: The host app provides `AuthCallback` (to collect the user's PIN or trigger a WebAuthn assertion) and `ProgressCallback` (to update UI spinners). For FIDO2, `Ctap2Transport` relays CTAP2 commands over BLE/NFC.
 
 ## Web Deployment (Browser Extension)
@@ -229,7 +229,7 @@ graph TB
 
 | Role     | Handlers                                                                               | HSM Required | Purpose                                   |
 |----------|----------------------------------------------------------------------------------------|:------------:|-------------------------------------------|
-| **WSCD** | `p256_generate`, `hsm_ecdsa`, `agree_ecdh`, `list_keys` + OPAQUE 2FA                  | Yes          | Cryptographic operations on private keys  |
+| **WSCD** | `p256_generate`, `sign_ecdsa`, `agree_ecdh` + OPAQUE 2FA                              | Yes          | Cryptographic operations on private keys  |
 | **WSCA** | `eudiw_wka_etsi`, `eudiw_wia_etsi`, `eudiw_wi_revoke`, `eudiw_wi_suspend` + status lists | No           | Attestation issuance and lifecycle management |
 
 The key insight is that **public keys are exported to the shared MongoDB store at generation time**, allowing WSCA instances to resolve keys without HSM access. This means WSCA can be scaled, updated, and redeployed independently of the WSCD certification boundary.
@@ -260,10 +260,11 @@ The architecture supports a phased migration from remote to local WSCDs as certi
 timeline
     title WSCD Migration Roadmap
     section Phase 1 — Now
-        Remote WSCD (R2PS) : Primary plugin
+        Remote WSCD (R2PS) : Available plugin, currently deprioritized
         : Certified HSM in secure datacenter
         : OPAQUE/WebAuthn user auth
         Software keys : Development/testing fallback
+        FIDO2 rawSign : Preferred direction via the generic WscdManager
     section Phase 2 — 12–24 months
         FIDO2 rawSign : Certified FIDO tokens
         : YubiKey previewSign
