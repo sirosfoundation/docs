@@ -14,11 +14,11 @@ Token Status Lists provide an efficient, privacy-preserving mechanism for tracki
 flowchart LR
     subgraph Issuer
         Issue[Issue Credential]
-        Revoke[Revoke Credential]
     end
-    
+
     subgraph Registry
         TSL[Token Status List]
+        Revoke[Admin GUI / gRPC update]
     end
     
     subgraph Verifier
@@ -45,7 +45,7 @@ Credentials include a status reference:
   "status": {
     "status_list": {
       "idx": 12345,
-      "uri": "https://registry.example.org/status/list-001"
+      "uri": "https://registry.example.org/statuslists/1"
     }
   }
 }
@@ -53,20 +53,23 @@ Credentials include a status reference:
 
 ### Status List Format
 
-Status lists are signed JWTs containing a compressed bitmap:
+Status lists are signed Status List Tokens (`application/statuslist+jwt`, or `application/statuslist+cwt` when requested through the `Accept` header). The JWT payload carries a zlib-compressed, base64url-encoded status array with one byte (8 bits) per credential:
 
 ```json
 {
   "iss": "https://registry.example.org",
-  "sub": "https://registry.example.org/status/list-001",
+  "sub": "https://registry.example.org/statuslists/1",
   "iat": 1708963200,
   "exp": 1708966800,
+  "ttl": 43200,
   "status_list": {
-    "bits": 1,
-    "lst": "H4sIAAAAAAAAA..."
+    "bits": 8,
+    "lst": "eNrt..."
   }
 }
 ```
+
+The JWT header carries `typ: statuslist+jwt`, the signing `kid` and the signing key. The `uri` of a credential's `status_list` reference is `{registry.public_url}/statuslists/{section}`, where `section` is the integer number of the list section.
 
 ## Configuration
 
@@ -89,7 +92,7 @@ registry:
       chain_path: "/pki/tsl_signing_chain.pem"
     
     # How often new status list tokens are generated (seconds)
-    # Default: 43200 (12 hours)
+    # Default: 43200 (12 hours); must be between 301 and 86400
     token_refresh_interval: 43200
     
     # Number of entries per status list section
@@ -106,7 +109,7 @@ registry:
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `key_config` | object | required | Signing key configuration |
-| `token_refresh_interval` | int | 43200 | Token regeneration interval (seconds) |
+| `token_refresh_interval` | int | 43200 | Token regeneration interval in seconds (valid range 301-86400; token validity is the interval minus 5 minutes) |
 | `section_size` | int | 1000000 | Entries per status list section |
 | `rate_limit_requests_per_minute` | int | 60 | Rate limit per IP |
 
@@ -121,7 +124,7 @@ registry:
       pkcs11:
         module_path: /usr/lib/softhsm/libsofthsm2.so
         slot_id: 0
-        pin: "${HSM_PIN}"
+        pin: "1234"   # plaintext in the config, or supplied through the secrets file
         key_label: "registry-tsl-key"
 ```
 
@@ -132,7 +135,7 @@ registry:
 | `GET /statuslists/{list-id}` | Fetch a specific status list token (draft-ietf-oauth-status-list §8.1) |
 | `GET /statuslists` | Status List Aggregation — the list of all Status List Token URIs this registry hosts (draft-ietf-oauth-status-list §9.3) |
 
-The registry has no `.well-known` metadata endpoint of its own; a verifier
+The registry needs MongoDB (`common.mongo.uri`) and a `registry.public_url`. It has no `.well-known` metadata endpoint of its own; a verifier
 resolves its signing key the same way it resolves any other trust decision —
 via go-trust — rather than through SD-JWT VC issuer-metadata discovery. That
 discovery mechanism (`/.well-known/jwt-vc-issuer`) belongs to the credential
@@ -141,16 +144,20 @@ unrelated to status list verification.
 
 ## Revocation Flow
 
+Credential status is changed in the registry. apigw has no revoke endpoint and does not update statuses itself (deleting a document through the datastore API does not revoke credentials already issued). Two interfaces exist:
+
+- the **admin GUI**, enabled with `registry.admin_gui.enable` (plus `username` and `password`), which updates a status through `POST /admin/status`;
+- the registry's **gRPC** `TokenStatusListUpdateStatus` method, protected by mTLS (`registry.grpc_server.tls`).
+
 ```mermaid
 sequenceDiagram
     participant Admin
-    participant APIGW as API Gateway
     participant Registry
-    
-    Admin->>APIGW: Revoke credential
-    APIGW->>Registry: Update status (gRPC)
+
+    Admin->>Registry: Update status (admin GUI or gRPC)
     Registry->>Registry: Mark index as revoked
-    Note over Registry: Next refresh generates<br/>new status list token
+    Registry->>Registry: Refresh the affected section in the background
+    Note over Registry: New status list token<br/>is generated immediately
 ```
 
 ## Verification Flow
@@ -166,7 +173,7 @@ sequenceDiagram
     Verifier->>Verifier: Verify signature
     Verifier->>Verifier: Decompress bitmap
     Verifier->>Verifier: Check index bit
-    Note over Verifier: 0 = valid, 1 = revoked
+    Note over Verifier: 0 = valid, 1 = revoked (one status byte per index)
 ```
 
 ## Privacy Considerations
@@ -176,15 +183,15 @@ Token Status Lists are designed with privacy in mind:
 - **No correlation**: Verifiers only see the status at an index, not credential details
 - **Batch fetching**: Multiple credentials can be checked with one request
 - **Caching**: Status lists can be cached to reduce registry load
-- **Decoys**: Section size includes unallocated indices for privacy
+- **Decoys**: Sections are padded with decoy entries, and a new section is started when few decoys remain, so list size does not reveal how many credentials were issued
 
 ## Caching
 
-Verifiers should cache status lists based on the `exp` claim:
+The registry does not set a `Cache-Control` header on status list responses. Verifiers should cache a status list according to the token's `ttl` claim (equal to `token_refresh_interval`) and its `exp`.
 
-```
-Cache-Control: max-age=43200
-```
+## Separate Status Service
+
+SIROS also develops a separate, standalone status list service, [siros-status-service](https://github.com/sirosfoundation/siros-status-service) (a prototype implementing draft-ietf-oauth-status-list-21 with issuer authentication through a trust PDP, ingestion and verifier services, and sharding). The configuration above is for the registry that ships with the vc suite.
 
 ## Next Steps
 
