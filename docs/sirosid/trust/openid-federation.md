@@ -60,11 +60,10 @@ A Trust Anchor (TA) is the root of trust for your federation. For production dep
 [Inmor](https://github.com/SUNET/inmor) is a production-ready Trust Anchor implementation for OpenID Federation. It provides:
 
 - **Entity Configuration endpoint** (`/.well-known/openid-federation`)
-- **Subordinate Listing endpoint** (`/.well-known/openid-federation/list`)
-- **Fetch endpoint** for subordinate statements
+- **Federation endpoints**: fetch, list, resolve, trust mark, trust mark status, trust mark list and historical keys
 - **Trust Mark issuance** for certified entities
-- **Key management** with automatic rotation support
-- **PostgreSQL backend** for entity and trust mark storage
+- **Admin portal and REST API** for subordinates and trust marks
+- **Redis storage** for federation data
 - **Docker deployment** for quick setup
 
 #### Quick Start with Docker
@@ -74,30 +73,27 @@ A Trust Anchor (TA) is the root of trust for your federation. For production dep
 git clone https://github.com/SUNET/inmor.git
 cd inmor
 
-# Start with Docker Compose (includes PostgreSQL)
-docker-compose up -d
+# Build and start all services (see the repository's installation guide)
+just build
+just build-rs
+just up
 ```
 
-The development setup includes pre-generated signing keys. For production, generate your own keys:
-
-```bash
-# Generate Trust Anchor signing key
-openssl ecparam -genkey -name prime256v1 -out ta-key.pem
-openssl ec -in ta-key.pem -pubout -out ta-pub.pem
-```
+The repository includes development signing keys, so no key generation is needed to get started. For production, generate your own keys (the repository's `scripts/create-keys.py` generates a key set) and follow the Inmor installation guide.
 
 #### Configuration
 
-Inmor uses environment variables or a configuration file. Key settings:
+The Trust Anchor reads `taconfig.toml`; the admin portal is configured through Django settings (`localsettings.py`). Key settings:
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `INMOR_ENTITY_ID` | The Trust Anchor's entity identifier (URL) | `https://federation.example.com` |
-| `INMOR_SIGNING_KEY_PATH` | Path to the private signing key | `/keys/ta-key.pem` |
-| `INMOR_DATABASE_URL` | PostgreSQL connection string | `postgresql://user:pass@db/inmor` |
-| `INMOR_METADATA` | JSON metadata for the Trust Anchor | `{"organization_name": "Example Federation"}` |
+| Setting | Where | Description |
+|---------|-------|-------------|
+| `domain` | `taconfig.toml` | The Trust Anchor's entity identifier URL; must match its public URL |
+| `redis_uri` | `taconfig.toml` | Redis connection URI |
+| `tls_cert`, `tls_key` | `taconfig.toml` | TLS certificate and key (optional behind a reverse proxy) |
+| `TA_DOMAIN` | admin `localsettings.py` | Trust Anchor entity ID; must match `domain` |
+| `TRUSTMARK_PROVIDER` | admin `localsettings.py` | Endpoint for trust mark services (usually `TA_DOMAIN`) |
 
-For detailed configuration options, see the [Inmor documentation](https://inmor.readthedocs.io/en/latest/configuration/).
+For detailed configuration options, see the [Inmor documentation](https://inmor.readthedocs.io/en/latest/configuration.html).
 
 #### Federation Endpoints
 
@@ -106,10 +102,14 @@ Once running, Inmor exposes:
 | Endpoint | Purpose |
 |----------|---------|
 | `/.well-known/openid-federation` | Entity configuration JWT |
-| `/.well-known/openid-federation/list` | List of subordinate entity IDs |
+| `/list` | List of subordinate entity IDs |
 | `/fetch?sub=<entity_id>` | Fetch subordinate statement for an entity |
-| `/trust_mark` | Issue trust marks |
+| `/resolve` | Resolve a trust chain |
+| `/trust_mark` | Retrieve a trust mark |
 | `/trust_mark_status` | Check trust mark validity |
+| `/trust_mark_list` | List trust marks |
+
+These URLs are advertised in the entity configuration's `federation_entity` metadata (`federation_fetch_endpoint`, `federation_list_endpoint`, and so on).
 
 ### Manual Trust Anchor Setup
 
@@ -155,18 +155,21 @@ To add an entity to your federation:
 3. **Trust Anchor creates a subordinate statement** for the entity
 4. **Trust Anchor adds entity to subordinate list**
 
-With Inmor, use the admin API:
+With Inmor, register the entity as a subordinate through the admin API (authenticated with an API key):
 
 ```bash
-curl -X POST https://federation.example.com/admin/entities \
-  -H "Authorization: Bearer <admin-token>" \
+curl -X POST http://localhost:8000/api/v1/subordinates \
+  -H "X-API-Key: $INMOR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "entity_id": "https://issuer.example.com",
-    "entity_types": ["openid_credential_issuer"],
-    "trust_marks": ["https://federation.example.com/tm/issuer"]
+    "entityid": "https://issuer.example.com",
+    "metadata": {"openid_credential_issuer": {"credential_issuer": "https://issuer.example.com"}},
+    "jwks": {"keys": [{"kty": "EC", "crv": "P-256", "x": "...", "y": "..."}]},
+    "forced_metadata": {}
   }'
 ```
+
+See Inmor's admin API documentation for the full request schema and for the optional `fetch-config` helper.
 
 ### Entity Types
 
@@ -189,14 +192,13 @@ Go-Trust can validate trust chains against configured trust anchors. Add the Ope
 registries:
   oidfed:
     enabled: true
-    name: "OpenID Federation"
     description: "OpenID Federation trust chain validation"
     
     # Trust Anchors - entities you trust as roots
     trust_anchors:
       - entity_id: "https://federation.example.com"
         # Optional: provide JWKS if you want to pin the TA keys
-        # jwks: { "keys": [...] }
+        # jwks: '{"keys":[...]}'   # a JWKS document as a JSON string
       
       - entity_id: "https://dc4eu.eu"
         # DC4EU pilot federation
@@ -218,6 +220,8 @@ registries:
     max_chain_depth: 5
 ```
 
+This registry always reports the name `oidfed-registry`; a `name:` key in the `oidfed` block is not used. Refer to it by that name in a policy's `registries:` list.
+
 ### Policy-Based Federation Trust
 
 Define policies that require federation trust for specific actions:
@@ -233,7 +237,7 @@ policies:
         required_trust_marks:
           - "https://dc4eu.eu/tm/issuer"
     
-    wallet-provider:
+    wallet_provider:
       description: "Trust requirements for wallets"
       oidfed:
         entity_types:
@@ -276,15 +280,16 @@ Trust marks are signed attestations that an entity has been evaluated and meets 
 ### Issuing Trust Marks with Inmor
 
 ```bash
-curl -X POST https://federation.example.com/admin/trust_marks \
-  -H "Authorization: Bearer <admin-token>" \
+curl -X POST http://localhost:8000/api/v1/trustmarks \
+  -H "X-API-Key: $INMOR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "subject": "https://issuer.example.com",
-    "trust_mark_id": "https://federation.example.com/tm/certified",
-    "expires_at": "2025-12-31T23:59:59Z"
+    "tmt": 1,
+    "domain": "https://issuer.example.com"
   }'
 ```
+
+`tmt` is the id of a trust mark type previously created with `POST /api/v1/trustmarktypes`.
 
 ### Verifying Trust Marks
 

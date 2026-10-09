@@ -113,6 +113,8 @@ sequenceNumber: 1
 - `schemeName` — Display name for the scheme
 - `territory` — ISO 3166-1 alpha-2 country code
 - `sequenceNumber` — Integer that should be incremented on each publication
+- `validityDays` — How long the list is valid after issuance (default 180, maximum 3650)
+- `distributionPoints` — List of URIs the published list is served from (ETSI TS 119 602 distribution points)
 
 ### Step 3: Add Trusted Entities
 
@@ -464,10 +466,13 @@ registries:
     sources:
       - "https://lote.example.org/lote-SE.json"
       - "https://lote.example.org/lote-DE.json"
-    verify_jws: false           # Set to true if LoTEs are JWS-signed
     fetch_timeout: "30s"
     refresh_interval: "1h"      # Re-fetch interval
 ```
+
+:::warning Go-Trust does not verify LoTE signatures
+The `lote.verify_jws` key is accepted but currently has no effect in the `gt` server, so a LoTE fetched by Go-Trust is trusted on the strength of its source (HTTPS, or the local file you control), whether or not it is signed. Sign your LoTEs anyway for other consumers: `tsl-tool load-lote <url> cert.pem` does verify the signature against the certificate you give it.
+:::
 
 Go-Trust's LoTE registry:
 - Indexes entities by their identifiers and digital identity fingerprints

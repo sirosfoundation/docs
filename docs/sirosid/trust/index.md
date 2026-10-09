@@ -140,10 +140,13 @@ registries:
       - "https://lote.example.org/lote-SE.json"
       - "https://lote.example.org/lote-DE.json"
       - "/etc/go-trust/local-lote.json"
-    verify_jws: false
     fetch_timeout: "30s"
     refresh_interval: "1h"
 ```
+
+:::warning
+`gt` does not verify LoTE JWS signatures today (the `verify_jws` key is accepted but inert), so a LoTE is trusted on the strength of its source. See [LoTE Registry Configuration](./go-trust#lote-registry-configuration).
+:::
 
 :::info
 LoTE documents can be created and published using `tsl-tool` from the [g119612](https://github.com/sirosfoundation/g119612) project. See the [LoTE Publishing Guide](./lote-publishing) for a complete walkthrough.
@@ -262,20 +265,14 @@ Traditional PKI-based trust using certificate chains.
 - Requiring offline verification
 - Connecting to legacy systems
 
-Go-Trust has a **System Certificate Pool registry** that validates a presented
-chain against the operating system's root CA store. It is fully implemented in
-`pkg/registry/static`, but it has no `registries.*` key and `gt` never
-instantiates it — it is reachable only by embedding the library:
+Go-Trust has a **System Certificate Pool registry** (`registries.systemcertpool`)
+that validates a presented chain against the operating system's root CA store.
+It trusts every CA the OS trusts, so scope it to the roles that need it with a
+policy.
 
-```go
-reg, _ := static.NewSystemCertPoolRegistry(static.SystemCertPoolConfig{
-    Name: "system-ca",
-})
-```
+Choose the route that matches where your trust anchors actually live:
 
-For a server deployment, choose the configurable route that matches where your
-trust anchors actually live:
-
+- **The OS root pool** — enable `registries.systemcertpool`.
 - **A PEM bundle of roots** — load it through the ETSI registry's
   `cert_bundle`, which is just a trust pool of PEM certificates and needs no
   TSL XML at all. Unlike the OS pool, it can be narrowed per role by policy.
@@ -297,8 +294,7 @@ registries:
     cert_bundle: "/certs/root-ca.pem"
 ```
 
-See the [registry inventory](./go-trust#registry-inventory) for the full list,
-including which registries are configurable and which are library-only.
+See the [registry inventory](./go-trust#registry-inventory) for the full list.
 
 ### URL Whitelist
 
@@ -385,7 +381,7 @@ Configure which issuers to trust:
 ```yaml
 verifier:
   trust:
-    # AuthZEN PDP URL — when set, operates in "default deny" mode
+    # AuthZEN PDP URL (required in production)
     pdp_url: "http://go-trust:6001"
 
     # Optional: restrict accepted signature algorithms.
@@ -399,7 +395,13 @@ verifier:
 
 The same `trust` block exists under `apigw` for the issuance side.
 
-When `pdp_url` is configured, the verifier delegates all trust decisions to Go-Trust. When omitted, the verifier operates in "allow all" mode. Trust policies (which registries, ETSI service types, etc.) are configured in Go-Trust, not in the verifier itself.
+When `pdp_url` is configured, the verifier delegates all trust decisions to Go-Trust.
+
+:::danger A PDP is required in production
+Without `pdp_url` there is no trust evaluation: trust is allow-all and key resolution is limited to the self-contained `did:key` and `did:jwk` methods. That mode is for testing and development only.
+:::
+
+Trust policies (which registries, ETSI service types, etc.) are configured in Go-Trust, not in the verifier itself.
 
 ### For Wallet Providers
 
@@ -447,8 +449,9 @@ sequenceDiagram
 
 Go-Trust can use several trust frameworks at once. Enable each registry you
 need; the registry manager queries all applicable registries in parallel and
-whichever one returns a positive decision first wins (`first_match` — a race,
-not a scan in registration order). To restrict a particular role to a subset
+whichever one returns a positive decision first wins (the default `first_match`
+strategy — a race, not a scan in registration order; other strategies and
+boolean `composite` registries are available). To restrict a particular role to a subset
 of registries, name them in that role's policy:
 
 ```yaml
@@ -469,14 +472,17 @@ policies:
   policies:
     credential-issuer:
       # Only these registries may answer for this role
-      registries: ["etsi", "oidfed"]
+      registries: ["ETSI-TSL", "oidfed-registry"]
       etsi:
         service_statuses:
           - "http://uri.etsi.org/TrstSvc/TrustedList/Svcstatus/granted"
 ```
 
-There is no `priority:` field and no `all_must_match` / `any_match` setting;
-see [Resolution Strategy](./go-trust#resolution-strategy).
+Policies match registries by their reported name; see
+[Default registry names](./go-trust#default-registry-names). There is no
+`priority:` field. Use `registries.strategy` and `registries.composite` to
+change how answers are combined; see
+[Resolution Strategy](./go-trust#resolution-strategy).
 
 ## RP Certificate Validation
 
@@ -484,7 +490,7 @@ Beyond verifying issuer trust, Go-Trust can validate **Relying Party** certifica
 
 - **RP identity extraction** — structured identity from WRPAC certificates (organization, country, contact info)
 - **Over-request detection** — checks requested claims against RP entitlements per [ETSI TS 119 475](https://www.etsi.org/deliver/etsi_ts/119400_119499/119475/)
-- **Intermediary handling** — detects and validates proxy/broker presentation requests
+- **Intermediary handling** — detects proxy/broker presentation requests (the intermediary chain is not yet validated)
 
 See [X5C Enrichment](./go-trust#x5c-enrichment--certificate-policy-validation) and [Over-Request Detection](./go-trust#over-request-detection) for implementation details.
 
@@ -506,8 +512,8 @@ registries:
 `never-trusted` gives the opposite for testing rejection paths.
 
 On the vc side, leaving `verifier.trust.pdp_url` (or `apigw.trust.pdp_url`)
-unset puts the service in "allow all" mode: keys are still resolved, but are
-always considered trusted.
+unset puts the service in "allow all" mode: trust is allow-all and only
+`did:key` / `did:jwk` keys can be resolved.
 
 :::danger
 Both of these disable trust enforcement entirely. Never use them in production.

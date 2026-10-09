@@ -270,7 +270,7 @@ registries:
 
 ### Role-to-Service-Type Mapping
 
-When `vc` and `go-wallet-backend` make trust evaluation requests, they use application-level roles like `issuer` and `verifier`. Go-Trust uses **policies** to map these roles to ETSI service types.
+When `vc` and `go-wallet-backend` make trust evaluation requests, they send an `action.name` derived from an application-level role like `issuer` or `verifier` and, where known, the credential type or mdoc doctype. Go-Trust uses **policies** to map these roles to ETSI service types.
 
 #### How Role Mapping Works
 
@@ -281,8 +281,8 @@ sequenceDiagram
     participant Policy as Policy Manager
     participant ETSI as ETSI Registry
     
-    App->>Trust: Evaluate(role="issuer", x5c=cert)
-    Trust->>Policy: Get policy for action="issuer"
+    App->>Trust: Evaluate(action="credential-issuer", x5c=cert)
+    Trust->>Policy: Get policy for action="credential-issuer"
     Policy-->>Trust: Policy with ETSI constraints
     Trust->>ETSI: Evaluate with service_types filter
     ETSI-->>Trust: Certificate validated, service type matched
@@ -291,18 +291,23 @@ sequenceDiagram
 
 #### Standard Roles
 
-The trust evaluation API uses these standard roles:
+:::note
+The action name is what a policy key must match. If no policy matches, Go-Trust uses `default_policy`, or, with `policies.fail_closed_on_unknown_action: true`, denies the request. See [Action Names](./go-trust#action-names).
+:::
 
-| Role | Description | Typical ETSI Service Types |
+The vc services derive these action names:
+
+| Action name | Description | Typical ETSI Service Types |
 |------|-------------|---------------------------|
-| `issuer` | Credential issuer (generic) | QCert, CA/QC, EDS/Q |
-| `verifier` | Relying party/verifier | EDS/Q, TSA/QTST |
-| `credential-issuer` | OpenID4VCI issuer | QCert, CA/QC |
-| `credential-verifier` | OpenID4VP verifier | EDS/Q |
-| `pid-provider` | PID (Person ID) provider | QCert (with PID constraints) |
+| `pid-provider` | PID (Person ID) issuer | CA/QC (with PID constraints) |
+| `credential-issuer` | OpenID4VCI issuer, with a credential type | CA/QC |
+| `credential-verifier` | OpenID4VP verifier | EDS/Q, TSA/QTST |
+| `mdl-issuer`, `mdoc-issuer` | mdoc issuer (mDL docType / other docType) | mDOC IACA, VICAL |
+| `mdl-verifier`, `mdoc-verifier` | mdoc verifier / reader | RICAL |
+| `issuer`, `verifier` | Bare role, when no credential type or docType is known | as configured |
 | `wallet_provider` | Wallet unit attestation | CA/QC |
-
-:::info Subject ID Format
+| `status-list-signer` | Signer of a Token Status List (go-wallet-backend) | whitelist or CA/QC |
+| `emrtd-document-signer` | ePassport Document Signer Certificate | eMRTD CSCA anchors |
 
 When OpenID4VP verifiers send trust evaluation requests, the `subject.id`
 may use the `client_id_scheme` prefix format (e.g.
@@ -329,7 +334,6 @@ policies:
       description: "Validates credential issuers against qualified certificates"
       etsi:
         service_types:
-          - "http://uri.etsi.org/TrstSvc/Svctype/QCert"
           - "http://uri.etsi.org/TrstSvc/Svctype/CA/QC"
         service_statuses:
           - "http://uri.etsi.org/TrstSvc/TrustedList/Svcstatus/granted"
@@ -349,7 +353,7 @@ policies:
       description: "Validates PID providers with qualified certificate requirements"
       etsi:
         service_types:
-          - "http://uri.etsi.org/TrstSvc/Svctype/QCert"
+          - "http://uri.etsi.org/TrstSvc/Svctype/CA/QC"
         countries:
           - "DE"
           - "FR"
@@ -393,7 +397,6 @@ Common ETSI TS 119 612 service types:
 | URI | Description |
 |-----|-------------|
 | `http://uri.etsi.org/TrstSvc/Svctype/CA/QC` | CA issuing qualified certificates |
-| `http://uri.etsi.org/TrstSvc/Svctype/QCert` | Qualified certificate service |
 | `http://uri.etsi.org/TrstSvc/Svctype/EDS/Q` | Qualified electronic delivery service |
 | `http://uri.etsi.org/TrstSvc/Svctype/TSA/QTST` | Qualified timestamp authority |
 | `http://uri.etsi.org/TrstSvc/Svctype/TSA/TSS-QC` | Timestamp for qualified certificates |
@@ -401,22 +404,19 @@ Common ETSI TS 119 612 service types:
 
 #### Client-Side Usage
 
-Applications don't need to know about ETSI service types – they just specify the role:
+Applications don't need to know about ETSI service types. The vc services send the evaluation request with the role (and credential type or doctype), and the request's `action.name` selects the policy. For example, a raw request:
 
-```go
-// In vc package (issuer verification)
-req := trust.NewEvaluationRequest(issuerURL, trust.KeyTypeX5C, certChain)
-req.Role = trust.RoleIssuer
-decision, err := evaluator.Evaluate(ctx, req)
-
-// In go-wallet-backend (verifier verification)  
-req := trust.NewEvaluationRequest(verifierURL, trust.KeyTypeX5C, certChain)
-req.Role = trust.RoleVerifier
-req.CredentialType = "PID"  // May influence policy selection
-decision, err := evaluator.Evaluate(ctx, req)
+```bash
+curl -X POST http://go-trust:6001/evaluation \
+  -H "Content-Type: application/json" \
+  -d '{
+    "subject":  {"type": "key", "id": "https://issuer.example.com"},
+    "resource": {"type": "x5c", "id": "https://issuer.example.com", "key": ["MIIC..."]},
+    "action":   {"name": "credential-issuer"}
+  }'
 ```
 
-The Go-Trust server maps the role to the appropriate policy and ETSI constraints.
+The Go-Trust server maps the action name to the appropriate policy and ETSI constraints.
 
 ---
 
@@ -501,15 +501,13 @@ Inmor requires configuration for:
 
 #### Federation Endpoints
 
-A properly configured OpenID Federation entity exposes these endpoints:
-
-| Endpoint | Description |
-|----------|-------------|
-| `/.well-known/openid-federation` | Entity Configuration (self-signed JWT) |
-| `/federation/fetch` | Fetch subordinate statement by entity ID |
-| `/federation/list` | List all subordinate entities |
-| `/federation/resolve` | Resolve complete trust chain |
-| `/federation/trust_mark_status` | Check trust mark validity |
+An OpenID Federation entity publishes its Entity Configuration at
+`/.well-known/openid-federation`. Trust anchors and intermediates additionally
+expose federation endpoints (fetch, list, resolve, trust mark status). Their
+URLs are advertised in the `federation_entity` metadata of the entity
+configuration (for example `federation_fetch_endpoint`), and their paths depend
+on the implementation. Consult the Inmor documentation for the paths your
+deployment serves rather than hard-coding them.
 
 ### Registering Entities
 
@@ -525,56 +523,62 @@ To add an entity (issuer, verifier, wallet) to your federation:
 ```yaml
 # go-trust config.yaml
 registries:
-  - type: openid_federation
-    config:
-      trust_anchors:
-        - entity_id: "https://trust-anchor.example.org"
-          # Optional: pin the trust anchor's public key
-          jwks_uri: "https://trust-anchor.example.org/jwks.json"
-      cache_ttl: 5m
-      max_chain_length: 5
-      description: "Example Federation"
+  oidfed:
+    enabled: true
+    trust_anchors:
+      - entity_id: "https://trust-anchor.example.org"
+        # Optional: pin the trust anchor's keys (a JWKS document as a JSON
+        # string, not a URL)
+        # jwks: '{"keys":[...]}'
+    cache_ttl: "5m"
+    max_chain_depth: 5
 ```
 
 ---
 
 ## Combining Trust Frameworks
 
-For production deployments, you often need to support multiple trust frameworks simultaneously:
+For production deployments, you often need to support multiple trust frameworks simultaneously. Registries are a map keyed by registry type; enable each one you need:
 
 ```yaml
 # go-trust config.yaml with multiple frameworks
 registries:
   # ETSI TSL for EU compliance
-  - type: etsi_tsl
-    config:
-      trust_list_url: "https://ec.europa.eu/tools/lotl/eu-lotl.xml"
-      description: "EU Trust Lists"
-    
-  # OpenID Federation for dynamic trust
-  - type: openid_federation
-    config:
-      trust_anchors:
-        - entity_id: "https://federation.example.org"
-      description: "Example Federation"
-    
-  # Whitelist for known partners
-  - type: whitelist
-    config:
-      file: "/config/trusted-entities.json"
-      description: "Pre-approved entities"
+  etsi:
+    enabled: true
+    allow_network_access: true
+    tsl_urls:
+      - "https://ec.europa.eu/tools/lotl/eu-lotl.xml"
+    refresh_interval: "6h"
 
-# Query routing
-query_routing:
-  resolution_strategy: first_match
-  routes:
-    - match:
-        resource_type: "x5c"
-      registries: ["etsi_tsl"]
-    - match:
-        resource_type: "jwk"
-      registries: ["openid_federation", "whitelist"]
+  # OpenID Federation for dynamic trust
+  oidfed:
+    enabled: true
+    trust_anchors:
+      - entity_id: "https://federation.example.org"
+
+  # Whitelist for known partners
+  whitelist:
+    enabled: true
+    config_file: "/config/trusted-entities.yaml"
+
+  # How answers from several registries are combined (default: first_match)
+  strategy: first_match
+
+policies:
+  policies:
+    # Route by key type: x5c to the ETSI TSL, JWKs to federation and whitelist
+    credential-issuer:
+      constraints:
+        allowed_key_types: ["x5c"]
+      registries: ["ETSI-TSL"]
+    wallet_provider:
+      constraints:
+        allowed_key_types: ["jwk"]
+      registries: ["oidfed-registry", "whitelist"]
 ```
+
+Policies refer to registries by their reported name; see [Default registry names](./go-trust#default-registry-names).
 
 ---
 
