@@ -471,7 +471,7 @@ registries:
 ```
 
 :::warning Go-Trust does not verify LoTE signatures
-The `lote.verify_jws` key is accepted but currently has no effect in the `gt` server, so a LoTE fetched by Go-Trust is trusted on the strength of its source (HTTPS, or the local file you control), whether or not it is signed. Sign your LoTEs anyway for other consumers: `tsl-tool load-lote <url> cert.pem` does verify the signature against the certificate you give it.
+The `lote.verify_jws` key is accepted but currently has no effect in the `gt` server ([go-trust#200](https://github.com/sirosfoundation/go-trust/issues/200)), so a LoTE fetched by Go-Trust is trusted on the strength of its source (HTTPS, or the local file you control), whether or not it is signed. Sign your LoTEs anyway for other consumers: `tsl-tool load-lote <url> cert.pem` does verify the signature against the certificate you give it.
 :::
 
 Go-Trust's LoTE registry:

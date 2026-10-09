@@ -145,7 +145,7 @@ registries:
 ```
 
 :::warning
-`gt` does not verify LoTE JWS signatures today (the `verify_jws` key is accepted but inert), so a LoTE is trusted on the strength of its source. See [LoTE Registry Configuration](./go-trust#lote-registry-configuration).
+`gt` does not verify LoTE JWS signatures today (the `verify_jws` key is accepted but inert; [go-trust#200](https://github.com/sirosfoundation/go-trust/issues/200)), so a LoTE is trusted on the strength of its source. See [LoTE Registry Configuration](./go-trust#lote-registry-configuration).
 :::
 
 :::info

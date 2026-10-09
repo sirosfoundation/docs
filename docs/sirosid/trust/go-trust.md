@@ -71,7 +71,7 @@ docker run -p 6001:6001 -e GT_HOST=0.0.0.0 ghcr.io/sirosfoundation/go-trust:late
 ```
 
 :::caution Bind address
-`gt` defaults to `server.host: 127.0.0.1` and `server.port: "6001"`. In a container you must set `server.host: "0.0.0.0"` in the configuration file (or `GT_HOST=0.0.0.0`) or the published port will not reach the process. The image's built-in `HEALTHCHECK` probes port 8080 (the image `EXPOSE`s 8080), so if you keep the default port 6001 override the health check in your orchestrator, as in the Compose example below.
+`gt` defaults to `server.host: 127.0.0.1` and `server.port: "6001"`. In a container you must set `server.host: "0.0.0.0"` in the configuration file (or `GT_HOST=0.0.0.0`) or the published port will not reach the process. The image's built-in `HEALTHCHECK` probes port 8080 (the image `EXPOSE`s 8080), so if you keep the default port 6001 override the health check in your orchestrator, as in the Compose example below. Known issue: [go-trust#201](https://github.com/sirosfoundation/go-trust/issues/201).
 :::
 
 ### Docker Compose
@@ -384,7 +384,7 @@ registries:
 ```
 
 :::warning `gt` does not verify LoTE signatures
-`verify_jws` is accepted in the configuration but currently has **no effect** in the `gt` server: signature verification only runs when a trust-anchor provider is supplied to the registry, and `gt` never supplies one. A LoTE fetched by `gt` is trusted on the strength of the transport (HTTPS) and of who controls the source, whether or not it is JWS-signed. Use only sources you control or trust, and prefer local files or authenticated HTTPS endpoints. Do not rely on `verify_jws: true` as a control.
+`verify_jws` is accepted in the configuration but currently has **no effect** in the `gt` server: signature verification only runs when a trust-anchor provider is supplied to the registry, and `gt` never supplies one. A LoTE fetched by `gt` is trusted on the strength of the transport (HTTPS) and of who controls the source, whether or not it is JWS-signed. Use only sources you control or trust, and prefer local files or authenticated HTTPS endpoints. Do not rely on `verify_jws: true` as a control. Known issue: [go-trust#200](https://github.com/sirosfoundation/go-trust/issues/200).
 :::
 
 All entities across sources are indexed by EntityID and by key hash (SHA-256 fingerprint), enabling efficient lookup regardless of which source the entity came from. Sources are re-fetched periodically and the index is swapped atomically.
