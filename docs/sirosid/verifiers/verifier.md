@@ -972,7 +972,7 @@ and `presentation_requests_dir` if you set it).
 
 ## Next Steps
 
-- [Verifier Quick Start: Trust an Issuer](/howto/verifier-quickstart)
+- [Verifier Docker Quick Start](/howto/verifier-docker-quickstart)
 - [Keycloak Integration Guide](./keycloak_verifier)
 - [Trust Services Configuration](../trust/)
 - [Go-Trust AuthZEN Service](../trust/go-trust)

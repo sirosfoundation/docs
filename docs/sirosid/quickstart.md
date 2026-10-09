@@ -187,7 +187,7 @@ scope=openid pid ehic
 ## Next Steps
 
 - 📖 [Full Verifier Guide](/sirosid/verifiers/verifier) – Complete verification documentation
-- 🤝 [Verifier Quick Start: Trust an Issuer](/howto/verifier-quickstart) – Get a verifier accepting one issuer's credentials
+- 🤝 [Verifier Docker Quick Start](/howto/verifier-docker-quickstart) – Run a verifier and go-trust with Docker Compose
 - 🎫 [Issuing Credentials](/sirosid/issuers/issuer) – Issue your own credentials
 - 🔐 [Trust Services](/sirosid/trust/) – Configure trust framework
 - 🔧 [Keycloak Integration](/sirosid/verifiers/keycloak_verifier) – Detailed Keycloak setup
