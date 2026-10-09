@@ -132,7 +132,7 @@ Once you have your credential definition, you need to publish it so issuers, ver
 
 **To get your credential listed on registry.siros.org:**
 
-1. Fork or copy the [vctm-template](https://github.com/leifj/vctm-template) repository to create your own
+1. Fork or copy the [vctm-template](https://github.com/sirosfoundation/vctm-template) repository to create your own
 2. Place your credential markdown file(s) in the `credentials/` directory
 3. Push to the `main` branch — `registry-cli` will automatically convert your markdown to credential metadata during the next registry build cycle
 4. Tag your repository with the `vctm` GitHub topic so the registry autodiscovers it
