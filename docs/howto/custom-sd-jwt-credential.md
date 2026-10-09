@@ -113,7 +113,7 @@ See the [registry-cli format override reference](../sirosid/registry/registry-cl
 The `vct` value is a URI that uniquely identifies your credential type. Use a domain you control. For EU-regulated credentials, URN-based identifiers following the `urn:eudi:` scheme are conventional (e.g., `urn:eudi:pid:arf-1.8:1`).
 :::
 
-You can also write a `.vctm.json` file directly instead of markdown (see [Option B: Write VCTM JSON directly](#option-b-write-the-vctm-json-directly) below).
+You can also write a `.vctm.json` file directly instead of markdown (see [Alternative: Write the VCTM JSON Directly](#alternative-write-the-vctm-json-directly) below).
 
 ### Step 2: Publish to a Credential Type Registry
 
@@ -229,7 +229,7 @@ Then serve the `./output` directory with any static file server.
 
 See the [registry-cli documentation](https://github.com/sirosfoundation/registry-cli) for full configuration options including JWS signing, SoftHSM setup, and TS11 compliance testing.
 
-### Option B: Write the VCTM JSON Directly
+### Alternative: Write the VCTM JSON Directly
 
 If you prefer not to use the markdown authoring workflow, you can write a VCTM JSON file directly following the [SD-JWT VC Type Metadata specification](https://datatracker.ietf.org/doc/draft-ietf-oauth-sd-jwt-vc/). A minimal example:
 
@@ -366,7 +366,7 @@ apigw:
           auth_provider: oidc
 ```
 
-The issuer maps OIDC claims from the ID token to credential claims automatically when claim names match (e.g., `given_name` → `given_name`). For non-matching names, configure explicit mappings.
+The issuer maps OIDC claims from the ID token to credential claims automatically when claim names match (e.g., `given_name` → `given_name`). For non-matching names, configure `apigw.auth_providers.oidc.attribute_mapping`. Claims that the credential needs but the ID token does not carry (for example expiry dates) can be supplied with `defaults` and `expiry_duration` on the `data_sources.assertion.scopes.<scope>` entry.
 
 #### Using SAML Authentication
 
@@ -387,6 +387,9 @@ apigw:
       acs_endpoint: "https://issuer.example.com/saml/acs"
       certificate_path: "/pki/sp-cert.pem"
       private_key_path: "/pki/sp-key.pem"
+      # Exactly one IdP metadata source is required: mdq_server or static_idp_metadata
+      mdq_server: "https://md.example.org/entities/"           # must end with /
+      metadata_signing_cert_path: "/pki/mdq-signing-cert.pem"  # MDQ/URL metadata must be signed
       attribute_mapping:
         "urn:oid:2.5.4.42":
           claim: "given_name"
@@ -404,6 +407,8 @@ apigw:
         employee_badge:
           auth_provider: saml
 ```
+
+Instead of an MDQ server you can point the issuer at a single IdP with `static_idp_metadata` (`entity_id` plus `metadata_path` or `metadata_url`). Unsigned MDQ/URL metadata is only accepted with `allow_unsigned_metadata: true`, which is insecure and for development only.
 
 Attribute mapping is per auth provider, not per credential type — one SAML
 `attribute_mapping` normalises the assertion for every scope that uses it.
@@ -454,7 +459,8 @@ curl -X POST https://issuer.example.com/api/v1/identity/mapping \
       "birth_date": "1990-05-15"
     }
   }'
-# Response includes an "id" field — use it in the next step
+# The response is {"authentic_source_person_id": "EMP-12345"}; this person id
+# is what the next step references in identity_mapping_ids
 
 # 2. Upload document data to the datastore
 curl -X POST https://issuer.example.com/api/v1/datastore \
@@ -463,10 +469,10 @@ curl -X POST https://issuer.example.com/api/v1/datastore \
   -d '{
     "meta": {
       "authentic_source": "hr.example.org",
-      "scope": "employee-badge",
+      "scope": "employee_badge",
       "document_id": "emp-badge-001"
     },
-    "identity_mapping_ids": ["<mapping_id_from_step_1>"],
+    "identity_mapping_ids": ["EMP-12345"],
     "document_data": {
       "given_name": "Alice",
       "family_name": "Smith",
@@ -477,9 +483,19 @@ curl -X POST https://issuer.example.com/api/v1/datastore \
       "hire_date": "2023-03-15"
     }
   }'
+
+# 3. Create the pre-authorized credential offer for the uploaded document
+curl -X POST https://issuer.example.com/api/v1/datastore/preauth_offer \
+  -H "Authorization: Bearer ${JWT_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "authentic_source": "hr.example.org",
+    "scope": "employee_badge",
+    "document_id": "emp-badge-001"
+  }'
 ```
 
-Once uploaded, the credential offer is available at the issuer's `/offers` UI endpoint. Users can scan the QR code or follow the deep link to receive the credential in their wallet.
+The reply contains `credential_offer`, `credential_offer_url` and, when `enable_pin` is true, a `tx_code` that you must deliver to the user out-of-band. Deliver the offer (for example as a QR code or deep link) to the user so they can receive the credential in their wallet.
 
 See [API Integration](../sirosid/issuers/api-integration) for the full API reference.
 
@@ -489,7 +505,7 @@ See [API Integration](../sirosid/issuers/api-integration) for the full API refer
 |-------------|-------------|
 | `oidc` | Your organization uses an OIDC identity provider (Keycloak, Azure AD, Okta) |
 | `saml` | Your organization participates in a SAML federation (eduGAIN, national eID) |
-| `basic` | Your backend system has verified user data and pushes it via API |
+| `preauth` | Your backend system has verified user data and pushes it via API (pre-authorized code) |
 | `openid4vp` | Users must present an existing credential to prove eligibility |
 
 For the `openid4vp` method, you also specify which credential types and claims the user must present:
@@ -507,11 +523,14 @@ apigw:
       scopes:
         employee_badge:
           auth_provider: openid4vp
-          # Credential types the user may present to authenticate
-          auth_scopes: ["pid"]
-          # Claims taken from the presented credential for the identity lookup
-          auth_claims: ["given_name", "family_name", "birthdate"]
+          # Credential types the user may present to authenticate (any one of
+          # them), each with the claims taken from it for the identity lookup
+          auth_scopes:
+            pid:
+              auth_claims: [given_name, family_name, birth_date]
 ```
+
+The valid `auth_provider` values depend on the data source: `datastore` accepts `oidc`, `saml`, `openid4vp` and `preauth`; `assertion` and `external_api` accept `saml` and `oidc`. A further data source type, `presentation`, derives the credential from a credential presented by the user (`openid4vp`).
 
 ## Phase 3: Configure the Verifier
 
@@ -525,13 +544,29 @@ Map an OIDC scope to your credential type so applications can request it:
 verifier:
   inbound:
     openid4vp:
+      token_endpoint: "https://verifier.example.org/token"
       presentation_requests_dir: "/presentation_requests"
+      clients:
+        my-app:
+          type: "public"
+          redirect_uri: "https://my-app.example.com/callback"
+          scopes: ["employee"]
       supported_credentials:
         - vct: "https://example.com/credentials/employee-badge"
           scopes: ["employee"]
+  outbound:
+    oidc_provider:
+      issuer: "https://verifier.example.org"
+      subject_type: "public"
+      subject_salt: "change-me"
+      code_duration: 300
+      session_duration: 3600
+      access_token_duration: 3600
+      id_token_duration: 3600
+      refresh_token_duration: 86400
 ```
 
-Applications then include `employee` in their OIDC `scope` parameter to trigger a presentation request for this credential.
+Applications then include `employee` in their OIDC `scope` parameter to trigger a presentation request for this credential. The configuration is validated at startup: every scope used by a configured client must be listed in `supported_credentials`, and every scope in `supported_credentials` must be used by at least one client. The `outbound.oidc_provider` section is the OIDC provider that issues the ID tokens described below; claim mappings and the `/register` endpoint exist only when it is configured.
 
 ### 3.2 Configure DCQL Queries (Optional)
 

@@ -76,7 +76,7 @@ Full image references also work:
 ### What Happens
 
 1. The repo's `conformance.yml` workflow fires on the PR comment
-2. It checks out `parse-comment.mjs` from `siros-conformance` and parses the comment
+2. It calls the `trigger-conformance` composite action from `siros-conformance`, which parses the comment
 3. A `repository_dispatch` event is sent to `siros-conformance` for each profile
 4. The conformance suite runs against the specified (or golden-release baseline) images
 5. Results are published to GitHub Pages and posted back as a PR comment

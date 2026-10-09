@@ -15,12 +15,12 @@ This guide walks you through setting up a complete SIROS ID development environm
 
 For building from source you'll additionally need:
 
-- **Node.js 20+** — for the wallet frontend
-- **Go 1.22+** — for the wallet backend and go-trust
+- **Node.js 22** — for the wallet frontend (the version its Dockerfile builds with)
+- **Go 1.27+** — for the wallet backend, go-trust and vc (`go 1.27` in their `go.mod`)
 
 For `PDP=helm` and Fly.io deployment you'll additionally need:
 
-- **[`helm`](https://helm.sh/docs/intro/install/)** (CLI only — no cluster needed) — used to render config from the `siros-id-stack` chart via `helm template`
+- **[`helm`](https://helm.sh/docs/intro/install/)** (CLI only — no cluster needed) — used to render config from the in-repo `chart/` via `helm template`
 
 :::tip No source needed for golden releases
 If you just want to run the stack without building from source, use `GOLDEN=yes` — it pulls pre-built container images and only requires Docker. See [Golden Releases](#golden-releases) below.
@@ -45,7 +45,6 @@ This clones the following repositories into the current directory:
 | `wallet-common` | `release/sirosid` | Shared TypeScript types |
 | `vc` | `main` | Credential issuer, verifier, API gateway, registry |
 | `facetec-api` | `main` | FaceTec SDK ↔ vc-issuer bridge (only needed for `FACETEC=yes`) |
-| `siros-id-stack` | `main` | Public production Helm chart — config-rendering source for `PDP=helm` and Fly.io deployment; fast-forwarded rather than reset if it's on `main`, left alone otherwise |
 
 After cloning, start the stack:
 
@@ -53,6 +52,8 @@ After cloning, start the stack:
 cd sirosid-dev
 make up
 ```
+
+Alternatively, `make setup` from an existing checkout clones the sibling repositories and installs and launches the **boot manager**, a terminal UI over the option matrix (`make boot` launches it again later). It lists every environment (the local stack, each `environments/<name>.yaml` and each Fly deployment), shows what booting one would do, and runs the same `make` commands you could type yourself. `make plan <options>` prints what `make up` would do (compose files, storage, pre-flight checks) without starting anything.
 
 ## Starting the Stack
 
@@ -81,10 +82,11 @@ make up GOLDEN=yes
 | `VC=` | `yes` / `1` | off | Enable VC services |
 | `TRANSPORT=` | `wmp`, `http` | websocket | Transport protocol (`http` is deprecated) |
 | `CONFORMANCE=` | `yes` / `1` | off | Enable OpenID Conformance Suite (implies `VC=yes PDP=allow`) |
-| `R2PS=` | `yes` / `1` | off | Enable R2PS remote-signing service + SoftHSM2 — see [R2PS](#r2ps-remote-pake-protected-signing) |
+| `R2PS=` | `yes` / `1` | off | Enable R2PS remote-signing service + SoftHSM2 — see [R2PS](#r2ps-remote-two-factor-protected-services) |
 | `DOMAIN=` | `<hostname>` | off | Replace `localhost` with a local-network hostname, for mobile/other-device testing |
 | `TUNNELS=` | `yes` / `1` | off | Cloudflare quick tunnels for real-TLS public URLs — see [Cloudflare Tunnels](#cloudflare-tunnels-on-demand-tls-domains) |
 | `GOLDEN=` | `yes` / `<release-name>` | off | Use pre-built images |
+| `DC_API=` | `yes` / `1` | off | Enable the W3C Digital Credentials API integration (needs wallet-companion) |
 | `FACETEC=` | `yes` / `1` | off | Enable facetec-api bridge (implies `VC=yes`, requires `FACETEC_SERVER_URL` exported) |
 | `REBUILD=` | `yes` / `1` | off | Force a no-cache image rebuild before startup |
 | `ANDROID_APPS=` | `pkg=fingerprint,...` | — | Extra Android package/signing-key pairs to trust — see [Android SDK Testing](#android-sdk-testing) |
@@ -96,6 +98,8 @@ make up GOLDEN=yes
 ```bash
 make status        # Check service health
 make status-vc     # Check VC service health (when VC=yes)
+make storage-status  # Show every store: mode, size, whether it persists
+make storage-clear   # Wipe local data and re-register issuer/verifier
 make logs          # Tail Docker logs
 make down          # Stop everything
 make help          # Full option reference
@@ -129,7 +133,11 @@ The `PDP=` option selects how trust decisions are made:
 | `whitelist` | go-trust whitelist — only entities in `fixtures/vc-go-trust-whitelist.yaml` are trusted |
 | `deny` | go-trust deny-all — rejects everything (negative testing) |
 | `mock` | Legacy mock-trust-pdp (no go-trust) |
-| `helm` | go-trust whitelist + wallet-backend, both configured from files rendered off the [siros-id-stack](https://github.com/sirosfoundation/siros-id-stack) chart instead of hand-maintained env vars. Requires a sibling `../siros-id-stack` checkout. This is the transitional path towards aligning sirosid-dev's config with the production Helm chart. |
+| `helm` | go-trust whitelist + wallet-backend, both configured from files rendered off sirosid-dev's own `chart/` (forked from [siros-id-stack](https://github.com/sirosfoundation/siros-id-stack)) with `helm template`, instead of hand-maintained env vars. `make render-helm-config` renders them on their own. |
+
+:::caution Development only
+The `allow`, `deny` and `mock` modes exist for local development and testing. A real PDP (such as go-trust configured with trust lists) is required for production use of the wallet and vc components; running without one is not supported: some things may work with allow-all trust, but PDP-based key resolution is unavailable and nothing is guaranteed.
+:::
 
 ## AS Rules
 
@@ -196,9 +204,9 @@ To trust additional app/signing-key pairs (debug builds and Play Store upload ke
 
 See [ANDROID-TESTING.md](https://github.com/sirosfoundation/sirosid-dev/blob/main/ANDROID-TESTING.md) in the sirosid-dev repo for the full Android/Waydroid/USB device testing deep dive, including passkey troubleshooting.
 
-## R2PS (Remote PAKE-Protected Signing)
+## R2PS (Remote Two-Factor Protected Services)
 
-An advanced, currently deprioritized WSCD option: a remote HSM-backed signing service (SoftHSM2 + PAKE-authenticated protocol), as an alternative to the default on-device keystore.
+An advanced, currently deprioritized WSCD option: a remote HSM-backed signing service (SoftHSM2 + the R2PS protocol), as an alternative to the default on-device keystore.
 
 ```bash
 make up R2PS=yes VC=yes
@@ -229,10 +237,15 @@ Beyond local docker-compose, `sirosid-dev` can also spin up a full, independentl
 ```bash
 make fly-up ENV=alice              # deploy a new environment
 make fly-status ENV=alice          # check all apps
-make fly-down ENV=alice            # tear it down
+make fly-stop ENV=alice            # stop all machines, keep apps and data
+make fly-start ENV=alice           # start it again, in deploy order
+make fly-down ENV=alice            # tear it down (KEEP_DATA=yes keeps the Mongo apps and volumes)
+make fly-storage-clear ENV=alice   # wipe its data and re-register issuer/verifier
 ```
 
-Config is rendered from the `siros-id-stack` chart (the same mechanism as `PDP=helm`) and images are pulled straight from that chart's `values.yaml` — no local Docker build. Requires `flyctl` installed and authenticated, and a sibling `../siros-id-stack` checkout (`make setup` clones it).
+Persisted per-environment defaults live in `environments/<name>.yaml` (`make env-show ENV=alice` prints them); options on the command line add to or override them for that run. Further `fly-up` options include `WALLET_ATTESTATION=no`, `DC_API_ENABLE=true|false`, `ZK_CIRCUITS_SOURCES=`, `RICAL_PROVIDER_URL=` and `RICAL_ROOT_CERT=`.
+
+Config is rendered from sirosid-dev's in-repo `chart/` (the same mechanism as `PDP=helm`) and images are pulled straight from that chart's `values.yaml` — no local Docker build. Requires `flyctl` and `helm` installed, and `flyctl` authenticated.
 
 Multiple developers can run their own named environments (`ENV=alice`, `ENV=bob`, ...) at the same time with no collision. To test your own branch build in one environment without touching any checked-in file, use `IMAGES=`:
 
@@ -251,7 +264,7 @@ cd sirosid-dev
 make update
 ```
 
-This fetches and hard-resets each repo to its upstream branch (`main` or `release/sirosid` as appropriate). `siros-id-stack` is excluded — it's fast-forwarded separately by `make setup`/`install.sh` since it may deliberately be checked out to a branch under test.
+This fetches and hard-resets each repo to its upstream branch (`main` or `release/sirosid` as appropriate).
 
 ## Directory Layout
 
@@ -265,8 +278,7 @@ your-workspace/
 ├── go-trust/              # AuthZEN trust PDP
 ├── wallet-common/         # Shared TypeScript types (release/sirosid branch)
 ├── vc/                    # VC services (issuer, verifier, apigw, registry)
-├── facetec-api/           # FaceTec SDK bridge (optional, for FACETEC=yes)
-└── siros-id-stack/        # Public production Helm chart (optional, for PDP=helm / fly-up)
+└── facetec-api/           # FaceTec SDK bridge (optional, for FACETEC=yes)
 ```
 
 ## Developer Tools Container
