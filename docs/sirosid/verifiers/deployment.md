@@ -284,6 +284,10 @@ volumes:
   mongo-data:
 ```
 
+:::note Mounted keys and secrets must be readable by the container user
+The verifier image runs as an unprivileged user (uid 100 or 65532, depending on the image build), so a `0600` key or secrets file owned by you on the host is unreadable inside the container: the key fails to load (`PKI signing key not loaded ... permission denied`) or startup panics with `failed to load secrets file`. Either `chown` the files to the container's uid (keeping mode `0600` or `0400`) or run the service as your own user with `user: "<uid>:<gid>"` in the Compose file.
+:::
+
 This stack has no PDP and is suitable for development and testing only: remove
 `verifier.trust.pdp_url` from the configuration above or add the go-trust
 service below.

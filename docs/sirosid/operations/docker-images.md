@@ -37,14 +37,14 @@ Images are tagged with multiple version identifiers:
 
 | Tag Pattern | Description | Example |
 |-------------|-------------|---------|
-| `{major}.{minor}.{patch}` | Semantic version release | `vc/verifier:0.7.23` |
+| `{major}.{minor}.{patch}` | Semantic version release | `vc/verifier:0.7.0` |
 | `{major}.{minor}`, `{major}` | Moving tags for the latest patch release | `vc/verifier:0.7` |
 | `latest` | Latest tagged release (not the head of `main`) | `vc/verifier:latest` |
 | `<git-sha>` | A specific commit | `vc/verifier:3f2c1a9...` |
 
-SIROS-built images are additionally published with a `-sirosid.N` suffix (for example `0.7.20-sirosid.4`) and `dev-<sha>` tags; some per-architecture builds carry an `-amd64` or `-arm64` suffix. The [Container Image Catalog](/opensource/container-images) lists the tags currently published.
+SIROS-built images are additionally published with a `-sirosid.N` suffix (for example `0.7.20-sirosid.4`) and `dev-<sha>` tags; some per-architecture builds carry an `-amd64` or `-arm64` suffix. The [Container Image Catalog](/opensource/container-images) lists the tags currently published. Not every release is published as an image: as last checked on GHCR, `vc/verifier` has `0.7.0`, `0.7.5-sirosid.0` and `0.7.20-sirosid.0` to `.4` (`-amd64` only), and `latest` points at `0.7.5-sirosid.0`.
 
-**Recommended for production:** Pin an exact version tag (e.g., `0.7.23` or `0.7.23-sirosid.0`) for reproducible deployments; do not track `latest`.
+**Recommended for production:** Pin an exact version tag (e.g., `0.7.5-sirosid.0`, or `0.7.20-sirosid.4-amd64` for amd64 hosts) for reproducible deployments; do not track `latest`.
 
 ## Trust Service Images
 

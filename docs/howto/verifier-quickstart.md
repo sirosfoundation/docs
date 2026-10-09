@@ -262,7 +262,7 @@ The second answer is the trust gate working. `decision` is the only field the ve
 ## Step 7: Present a credential end to end
 
 :::caution Use the verifier's own page for this check
-The issuer check described in this guide currently applies to presentations that arrive at `POST /verification/direct_post`. That is the endpoint used by the verifier's own web page at `/`. The request object created for an OIDC `/authorize` session (the QR code and same-device link shown to a user logging in through Keycloak or another relying party) instead points the wallet at `POST /verification/oidc-direct_post`, which currently extracts the claims from SD-JWT VC and mdoc presentations without verifying the credential signature or asking the PDP. In a test, a credential from an untrusted issuer was accepted on that endpoint. Until this is fixed, do not rely on this trust configuration to protect an OIDC login flow, and use the page at `/` for the checks below.
+The issuer check described in this guide currently applies to presentations that arrive at `POST /verification/direct_post`. That is the endpoint used by the verifier's own web page at `/`. The request object created for an OIDC `/authorize` session (the QR code and same-device link shown to a user logging in through Keycloak or another relying party) instead points the wallet at `POST /verification/oidc-direct_post`, which currently extracts the claims from SD-JWT VC and mdoc presentations without verifying the credential signature or asking the PDP. In a test, a credential from an untrusted issuer was accepted on that endpoint. Known issue: https://github.com/SUNET/vc/issues/761. Until this is fixed, do not rely on this trust configuration to protect an OIDC login flow, and use the page at `/` for the checks below.
 :::
 
 1. Make sure the wallet holds a PID credential from the issuer whose certificate is in `trusted-issuers.pem`, signed with the `urn:eudi:pid:1` type.
@@ -358,7 +358,7 @@ printf '%s' "$CRED" \
 | `PKI signing key not loaded ... open /pki/verifier_key.pem: permission denied` | verifier log | The container user cannot read the key. Export `VC_UID`/`VC_GID` before `docker compose up` (step 5). If they were unset, Compose warns `The "VC_UID" variable is not set` and starts the container as the image user. |
 | `failed to load secrets file ... permission denied` | verifier startup panic | Only when you use `common.secret_file_path`: the file must be `0600` or `0400` **and** readable by the container's user, so own it with the same UID as above. |
 | Verifier shows `(unhealthy)` in `docker compose ps` although it works | Docker | The image's health check probes HTTPS and `trust_proxy_tls: true` serves plain HTTP. Override it with `healthcheck: {test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]}` or ignore it. |
-| An untrusted issuer was accepted | OIDC login flow | See the caution in step 7: the OIDC flow does not currently check issuers. |
+| An untrusted issuer was accepted | OIDC login flow | See the caution in step 7: the OIDC flow does not currently check issuers (known issue: https://github.com/SUNET/vc/issues/761). |
 
 ## Next steps
 
