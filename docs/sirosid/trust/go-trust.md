@@ -1348,7 +1348,7 @@ verifier:
 When `pdp_url` is set, all trust decisions are evaluated via the PDP.
 
 :::danger A PDP is required in production
-Without `trust.pdp_url` the service does no trust evaluation: trust is allow-all, and key resolution is limited to the self-contained `did:key` and `did:jwk` methods (`did:web` and every other method are unavailable). That mode is only for testing and development. Always point production verifiers and issuers at a PDP such as go-trust.
+Running without `trust.pdp_url` is **not supported**: it is for development and testing only, with no guarantees and no support. Some things may appear to work: trust evaluation becomes allow-all, and keys can still be resolved locally for the self-contained `did:key` and `did:jwk` methods, but `did:web` and other DID methods will not resolve. Always point production verifiers and issuers at a PDP such as go-trust.
 :::
 
 ### Issuer Configuration

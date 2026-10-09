@@ -398,7 +398,7 @@ The same `trust` block exists under `apigw` for the issuance side.
 When `pdp_url` is configured, the verifier delegates all trust decisions to Go-Trust.
 
 :::danger A PDP is required in production
-Without `pdp_url` there is no trust evaluation: trust is allow-all and key resolution is limited to the self-contained `did:key` and `did:jwk` methods. That mode is for testing and development only.
+Running without `pdp_url` is **not supported**: it is for development and testing only, with no guarantees and no support. Some things may appear to work: trust evaluation becomes allow-all, and keys can still be resolved locally for the self-contained `did:key` and `did:jwk` methods, but other DID methods will not resolve.
 :::
 
 Trust policies (which registries, ETSI service types, etc.) are configured in Go-Trust, not in the verifier itself.
@@ -512,8 +512,8 @@ registries:
 `never-trusted` gives the opposite for testing rejection paths.
 
 On the vc side, leaving `verifier.trust.pdp_url` (or `apigw.trust.pdp_url`)
-unset puts the service in "allow all" mode: trust is allow-all and only
-`did:key` / `did:jwk` keys can be resolved.
+unset is **not a supported configuration** (dev/test only): trust is
+allow-all and only `did:key` / `did:jwk` keys are resolved locally.
 
 :::danger
 Both of these disable trust enforcement entirely. Never use them in production.
