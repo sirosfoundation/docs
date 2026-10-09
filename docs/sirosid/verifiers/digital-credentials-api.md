@@ -46,7 +46,8 @@ verifier:
     # Enable W3C Digital Credentials API
     enable: true
     
-    # Use JWT Authorization Request (JAR) for enhanced security
+    # Serve signed request objects (JAR). Must be true for the browser flow,
+    # see the caution below
     use_jar: true
     
     # Credential format preference order
@@ -54,9 +55,6 @@ verifier:
       - "vc+sd-jwt"
       - "dc+sd-jwt"
       - "mso_mdoc"
-    
-    # Response mode for credential presentation
-    response_mode: "dc_api.jwt"
     
     # Fallback to QR code if DC API unavailable
     allow_qr_fallback: true
@@ -70,20 +68,33 @@ verifier:
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `enable` | boolean | `false` | Enable W3C Digital Credentials API support (note: `enable`, not `enabled`) |
-| `use_jar` | boolean | `false` | Use JWT Authorization Request (JAR) |
+| `use_jar` | boolean | `false` | Serve the request as a signed JWT (JAR). Required for the browser flow, see below |
 | `preferred_formats` | array | `["vc+sd-jwt", "dc+sd-jwt", "mso_mdoc"]` | Credential formats in preference order |
-| `response_mode` | string | `"dc_api.jwt"` | Response mode: `dc_api.jwt`, `direct_post.jwt`, `direct_post` |
 | `allow_qr_fallback` | boolean | `true` | Auto-fallback to QR if DC API unavailable |
 | `auto_attempt` | boolean | `true` | Whether the presentation UI calls `navigator.credentials.get()` immediately, before showing the same-device wallet link/QR screen. Set `false` to skip straight to that fallback screen — useful because some OS-level DC API matchers reject a non-standard format (e.g. `mso_mdoc_zk`) with their own dialog, with no JS-catchable failure to fall back from. |
 | `deep_link_scheme` | string | *(none)* | Deep link scheme for mobile wallets, e.g. `"eudi-wallet://"` — no built-in default; unset means no deep-link option is offered |
 
 ### Response Modes
 
-| Mode | Description |
-|------|-------------|
-| `dc_api.jwt` | Encrypted response via DC API (most secure) |
-| `direct_post.jwt` | Signed JWT via HTTP POST |
-| `direct_post` | Plain JSON via HTTP POST |
+The response mode of a request object is chosen by the verifier, not set per
+feature:
+
+- For requests issued through the OIDC `/authorize` flow, the mode is
+  `direct_post.jwt` (encrypted) or `direct_post`. Set
+  `verifier.inbound.openid4vp.response_mode` to choose between them. If it is
+  unset, the mode is derived from `digital_credentials.response_mode` (default
+  `dc_api.jwt`), with a `dc_api` mode mapped to the equivalent `direct_post`
+  mode so that encryption is preserved. A `dc_api` mode is never put in a link
+  or QR request.
+- The verifier's own interactive UI (the preset pages) additionally issues a
+  separate `dc_api.jwt` request object for `navigator.credentials.get()`.
+
+:::caution `use_jar: false` breaks the browser wallet button
+With `use_jar: false` the authorization page requests the unsigned request
+object from `/verification/request/{session_id}`, which the verifier does not
+serve, so the "browser wallet" action fails with a 404. Currently the browser
+flow only works with `use_jar: true`.
+:::
 
 ### Supported Credential Formats
 
@@ -95,16 +106,17 @@ verifier:
 
 ## Browser Support
 
-The W3C Digital Credentials API is currently supported in:
+The Digital Credentials API is implemented by recent Chromium-based browsers and
+by Safari; support and the protocols it allows differ by browser and operating
+system version, and change quickly, so check the current status for your target
+browsers. The verifier's page requires the browser to allow the signed OpenID4VP
+protocol (`openid4vp-v1-signed`); otherwise it behaves as if the API were
+unavailable.
 
-| Browser | Version | Notes |
-|---------|---------|-------|
-| Chrome | 128+ | Full support |
-| Edge | 128+ | Chromium-based |
-| Safari | Preview | Behind flag |
-| Firefox | - | Not yet supported |
-
-When a browser doesn't support the Digital Credentials API and `allow_qr_fallback` is enabled, the verifier automatically falls back to the QR code flow.
+When a browser doesn't support the Digital Credentials API (or the required
+protocol) and `allow_qr_fallback` is enabled, the verifier automatically falls
+back to the QR code / same-device link flow. Set `auto_attempt: false` to skip
+the native call and always show that screen first.
 
 ## How It Works
 
@@ -118,8 +130,11 @@ const authUrl = new URL('https://verifier.example.org/authorize');
 authUrl.searchParams.set('response_type', 'code');
 authUrl.searchParams.set('client_id', 'your-client-id');
 authUrl.searchParams.set('redirect_uri', 'https://your-app.com/callback');
-authUrl.searchParams.set('scope', 'openid profile pid');
+authUrl.searchParams.set('scope', 'openid pid');
 authUrl.searchParams.set('state', generateState());
+// PKCE is required for clients registered through /register
+authUrl.searchParams.set('code_challenge', generatePKCE());
+authUrl.searchParams.set('code_challenge_method', 'S256');
 
 window.location = authUrl.toString();
 ```
@@ -128,7 +143,7 @@ window.location = authUrl.toString();
 
 When a user visits the authorization page in a supported browser:
 
-1. The verifier renders an authorization page with embedded JavaScript
+1. The verifier renders an authorization page with embedded JavaScript (using the `@sirosfoundation/dc-api` library)
 2. The JavaScript calls `navigator.credentials.get()` with the presentation request
 3. The browser's credential UI prompts the user to select and share credentials
 4. The wallet returns the credential presentation to the verifier
@@ -174,8 +189,9 @@ verifier:
     custom_css: |
       .auth-container { border-radius: 12px; }
     
-    # Or external CSS file
-    css_file: "/static/custom-auth.css"
+    # Or a stylesheet URL, emitted as a <link href>. It is not served by the
+    # verifier: host it yourself (for example on your own web server)
+    css_file: "https://your-app.com/custom-auth.css"
 ```
 
 ## Credential Display
@@ -200,35 +216,55 @@ verifier:
 
 ## Complete Example
 
+This configuration passes the verifier's startup validation. The
+`credential_metadata` files, the signing key and certificate chain, and the
+secrets file are described in [Verifier Configuration](./verifier#verifier-configuration).
+
 ```yaml
+common:
+  mongo:
+    uri: mongodb://mongo:27017
+  production: true
+  secret_file_path: "/etc/vc/secrets.yaml"
+  credential_metadata:
+    pid:
+      vctm_file_path: "/metadata/vctm_pid.json"
+      format: "dc+sd-jwt"
+
 verifier:
   api_server:
     addr: :8080
+    trust_proxy_tls: true
   public_url: "https://verifier.example.org"
 
   key_config:
     private_key_path: "/pki/signing_key.pem"
     chain_path: "/pki/signing_chain.pem"
 
+  inbound:
+    openid4vp:
+      token_endpoint: "https://verifier.example.org/token"
+      supported_credentials:
+        - vct: "urn:eudi:pid:1"
+          scopes: ["pid"]
+      clients:
+        "default":
+          type: "public"
+          redirect_uri: "https://verifier.example.org/"
+          scopes: ["pid"]
+
   outbound:
     oidc_provider:
       issuer: "https://verifier.example.org"
-      session_duration: 900
-      code_duration: 600
+      code_duration: 300
       access_token_duration: 3600
       id_token_duration: 3600
-      refresh_token_duration: 86400
       subject_type: "pairwise"
-      subject_salt: "change-in-production"
+      subject_salt: "set-in-secrets-file"
 
-  inbound:
-    openid4vp:
-      presentation_timeout: 300
-      supported_credentials:
-        - vct: "urn:eudi:pid:arf-1.8:1"
-          scopes:
-            - "profile"
-            - "pid"
+  # Required for production; omit only for development and testing
+  trust:
+    pdp_url: "http://go-trust:6001"
 
   digital_credentials:
     enable: true
@@ -236,25 +272,27 @@ verifier:
     preferred_formats:
       - "vc+sd-jwt"
       - "dc+sd-jwt"
-    response_mode: "dc_api.jwt"
     allow_qr_fallback: true
-  
+
   authorization_page_css:
     theme: "light"
     logo_url: "https://your-org.com/logo.png"
     title: "Sign in with Your Credential"
-
-common:
-  mongo:
-    uri: mongodb://mongo:27017
 ```
+
+:::danger A PDP is required for production
+`verifier.trust.pdp_url` must point at an AuthZEN PDP such as
+[go-trust](../trust/go-trust). Without it the verifier trusts every issuer and
+resolves only `did:key` and `did:jwk` locally. That mode may work for some
+things but is not supported: development and testing only.
+:::
 
 ## Security Considerations
 
-1. **Use JAR**: Enable `use_jar: true` for signed request objects
-2. **Use encrypted response**: Set `response_mode: "dc_api.jwt"` for encrypted responses
+1. **Use JAR**: Keep `use_jar: true`; request objects are signed and the browser flow needs it
+2. **Encrypted responses**: Set `verifier.inbound.openid4vp.response_mode: "direct_post.jwt"` so wallet responses are encrypted to the verifier
 3. **Verify origins**: The browser verifies the requesting origin automatically
-4. **Trust framework**: Configure [Go-Trust](../trust/go-trust) for issuer verification
+4. **Trust framework**: A PDP is required for production. Configure [Go-Trust](../trust/go-trust) and set `verifier.trust.pdp_url`; without it every issuer is trusted
 
 ## Troubleshooting
 
@@ -264,14 +302,15 @@ common:
 
 **Solutions:**
 1. Ensure HTTPS is used (required for Credential API)
-2. Check browser version meets minimum requirements
-3. Verify no browser extensions are blocking the API
+2. Ensure `digital_credentials.enable` is `true` (the key is `enable`, not `enabled`; an unknown key is silently ignored) and `use_jar` is `true`
+3. Check the browser supports the API and allows the `openid4vp-v1-signed` protocol
+4. Verify no browser extensions are blocking the API
 
 ### Credential Not Accepted
 
 **Solutions:**
 1. Verify credential format is in `preferred_formats`
-2. Check credential VCT matches `supported_credentials`
+2. Check credential VCT matches `supported_credentials` and the template's `vct_values`
 3. Ensure issuer is trusted via trust configuration
 
 ## Next Steps
