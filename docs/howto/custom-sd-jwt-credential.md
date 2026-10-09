@@ -132,7 +132,7 @@ Once you have your credential definition, you need to publish it so issuers, ver
 
 **To get your credential listed on registry.siros.org:**
 
-1. Use the [vctm-template](https://github.com/sirosfoundation/vctm-template) — click **"Use this template"** to create your own repository
+1. Fork or copy the [vctm-template](https://github.com/leifj/vctm-template) repository to create your own
 2. Place your credential markdown file(s) in the `credentials/` directory
 3. Push to the `main` branch — `registry-cli` will automatically convert your markdown to credential metadata during the next registry build cycle
 4. Tag your repository with the `vctm` GitHub topic so the registry autodiscovers it
@@ -198,7 +198,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./sources:/data/sources:ro
+      - ./sources:/data/sources
       - ./output:/data/output
     environment:
       - GITHUB_TOKEN=${GITHUB_TOKEN:-}
@@ -209,17 +209,17 @@ docker compose up
 # Open http://localhost:8080
 ```
 
-Set `GITHUB_TOKEN` if your sources include GitHub topic searches or private repositories.
+Set `GITHUB_TOKEN` if your sources include GitHub topic searches or private repositories. Mount `./sources` read-write: for a local `file://` source registry-cli writes the generated files (`.vctm.json`, `.mdoc.json`, …) next to your markdown.
 
 3. For production, build the static site and deploy it to your web server:
 
 ```bash
 docker run --rm \
-  -v ./sources:/data/sources:ro \
+  -v ./sources:/data/sources \
   -v ./output:/data/output \
   -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
   ghcr.io/sirosfoundation/registry-cli:latest \
-  registry-cli build \
+  build \
     --sources /data/sources/sources.yaml \
     --output /data/output \
     --base-url https://registry.your-org.com
@@ -240,7 +240,7 @@ If you prefer not to use the markdown authoring workflow, you can write a VCTM J
   "description": "Employee identification credential",
   "display": [
     {
-      "lang": "en",
+      "locale": "en",
       "name": "Employee Badge",
       "description": "Verifies employment status and role",
       "rendering": {
@@ -258,37 +258,37 @@ If you prefer not to use the markdown authoring workflow, you can write a VCTM J
   "claims": [
     {
       "path": ["given_name"],
-      "display": [{"lang": "en", "label": "Given Name"}],
+      "display": [{"locale": "en", "label": "Given Name"}],
       "sd": "always"
     },
     {
       "path": ["family_name"],
-      "display": [{"lang": "en", "label": "Family Name"}],
+      "display": [{"locale": "en", "label": "Family Name"}],
       "sd": "always"
     },
     {
       "path": ["email"],
-      "display": [{"lang": "en", "label": "Email"}],
+      "display": [{"locale": "en", "label": "Email"}],
       "sd": "always"
     },
     {
       "path": ["employee_id"],
-      "display": [{"lang": "en", "label": "Employee ID"}],
+      "display": [{"locale": "en", "label": "Employee ID"}],
       "sd": "always"
     },
     {
       "path": ["department"],
-      "display": [{"lang": "en", "label": "Department"}],
+      "display": [{"locale": "en", "label": "Department"}],
       "sd": "always"
     },
     {
       "path": ["role"],
-      "display": [{"lang": "en", "label": "Role"}],
+      "display": [{"locale": "en", "label": "Role"}],
       "sd": "always"
     },
     {
       "path": ["hire_date"],
-      "display": [{"lang": "en", "label": "Hire Date"}],
+      "display": [{"locale": "en", "label": "Hire Date"}],
       "sd": "always"
     }
   ]
@@ -325,11 +325,6 @@ This takes two config sections:
 - `apigw.data_sources.<category>.scopes.<scope>` says where the data comes from
   (`assertion`, `datastore` or `external_api`) and which `auth_provider`
   authenticates the user.
-
-:::note
-Earlier releases used a single top-level `credential_constructor` section with
-an `auth_method` field. It was removed; the two sections above replace it.
-:::
 
 #### Using OIDC Authentication
 
@@ -523,6 +518,8 @@ apigw:
       scopes:
         employee_badge:
           auth_provider: openid4vp
+          # Identity-mapping namespace the lookup runs in
+          authentic_source: "hr.example.org"
           # Credential types the user may present to authenticate (any one of
           # them), each with the claims taken from it for the identity lookup
           auth_scopes:
@@ -588,6 +585,7 @@ templates:
           claims:
             - path: ["given_name"]
             - path: ["family_name"]
+            - path: ["email"]
             - path: ["employee_id"]
             - path: ["department"]
     claim_mappings:
@@ -616,7 +614,7 @@ Your application then receives these claims in a standard OIDC ID token:
 ```json
 {
   "iss": "https://verifier.example.org",
-  "sub": "pairwise-user-id",
+  "sub": "subject-id",
   "aud": "your-client-id",
   "given_name": "Alice",
   "family_name": "Smith",
@@ -643,6 +641,8 @@ curl -X POST https://verifier.example.org/register \
   }'
 ```
 
+`POST /register` is open by default; to require a bearer token or a signed JWT set `verifier.outbound.oidc_provider.dynamic_registration_auth` (see [Verifier Configuration](../sirosid/verifiers/verifier)). A client with fixed credentials can instead be listed under `outbound.oidc_provider.static_clients`.
+
 ## Phase 4: Establish Trust
 
 For the verifier to accept credentials from your issuer, the issuer must be trusted. SIROS ID supports several trust frameworks — choose the one that fits your deployment:
@@ -655,6 +655,10 @@ For the verifier to accept credentials from your issuer, the issuer must be trus
 | **OpenID Federation** | Dynamic, federated trust | [OpenID Federation](../sirosid/trust/openid-federation) |
 
 For development, a URL whitelist is the simplest approach. For production, use the trust framework required by your regulatory environment.
+
+:::caution A PDP is required
+Every trust framework above is applied by a PDP such as [go-trust](../sirosid/trust/go-trust), which the verifier reaches through `verifier.trust.pdp_url` (and the issuer through `apigw.trust.pdp_url`). A PDP is required for production use. Without `pdp_url` trust is allow-all and only local `did:key`/`did:jwk` keys can be resolved — use that for testing and development only.
+:::
 
 See [Trust Services](../sirosid/trust/) for detailed setup instructions.
 
