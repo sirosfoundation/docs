@@ -397,7 +397,7 @@ The admin API is protected by a single shared bearer token, not per-user credent
 | `server.admin_token_path` / `WALLET_SERVER_ADMIN_TOKEN_PATH` | – | File containing the bearer token |
 
 :::caution Admin bind address
-The admin server currently binds to `server.host` (default `0.0.0.0`) on the admin port. `server.admin_host` / `WALLET_SERVER_ADMIN_HOST` is parsed but has no effect, so it cannot be used to restrict the admin API to `127.0.0.1`. Restrict access with a firewall or network policy instead (setting `server.host` would also move the public API).
+The admin server currently binds to `server.host` (default `0.0.0.0`) on the admin port. `server.admin_host` / `WALLET_SERVER_ADMIN_HOST` is parsed but has no effect, so it cannot be used to restrict the admin API to `127.0.0.1` (known issue: [go-wallet-backend#444](https://github.com/sirosfoundation/go-wallet-backend/issues/444)). Restrict access with a firewall or network policy instead (setting `server.host` would also move the public API).
 :::
 
 ---
