@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-19T06:38:06Z",
+  "generated": "2026-10-19T14:17:05Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -258,6 +258,8 @@
       "image": "ghcr.io/sirosfoundation/wallet-frontend",
       "repo": "sirosfoundation/wallet-frontend",
       "tags": [
+        "unstable-b5f7520",
+        "0.7.0-beta.3",
         "unstable-df06a74",
         "unstable-72ae551",
         "unstable-89468da",
@@ -1378,6 +1380,7 @@
       "image": "ghcr.io/sirosfoundation/facetec-api",
       "repo": "sirosfoundation/facetec-api",
       "tags": [
+        "6d49ba4",
         "dcdd7a2",
         "8834296",
         "e75752d",
