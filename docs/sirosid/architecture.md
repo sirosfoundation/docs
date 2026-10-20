@@ -14,6 +14,14 @@ This page provides a comprehensive view of the SIROS ID platform architecture, s
 
 *Click the diagram to open full-size in a new tab.*
 
+## Wallet Layers
+
+The wallet is built in two ways on top of the same native capability modules. Native wallet apps (such as the SDK sample apps) use the SDK orchestration layer, which runs the issuance and presentation flows and talks to the engine. The Android and iOS wrapper apps instead host the wallet-frontend web wallet, which runs the flows itself; the wrapper exposes native capabilities to the page through a JavaScript bridge, backed by the SDK where it is used.
+
+<a href="/img/wallet-layers.svg" target="_blank">
+  <img src="/img/wallet-layers.svg" alt="SIROS wallet layers: sample apps over the SDK orchestration layer, and wrapper apps hosting wallet-frontend, over shared SDK capability modules, Rust libraries and the platform" style={{width: '100%', maxWidth: '1200px'}} />
+</a>
+
 ## Component Summary
 
 ### User Domain
