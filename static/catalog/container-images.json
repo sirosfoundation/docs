@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-26T06:37:37Z",
+  "generated": "2026-10-26T15:04:05Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -1404,6 +1404,7 @@
       "image": "ghcr.io/sirosfoundation/facetec-api",
       "repo": "sirosfoundation/facetec-api",
       "tags": [
+        "test-disable_pdp_https_enforcement-3",
         "8beb27d",
         "6d49ba4",
         "dcdd7a2",
@@ -1595,6 +1596,9 @@
       "image": "ghcr.io/sirosfoundation/registry-cli",
       "repo": "sirosfoundation/registry-cli",
       "tags": [
+        "9d21896",
+        "0.18",
+        "0.18.0",
         "c7ffe44",
         "0.17.1",
         "b3037df",
