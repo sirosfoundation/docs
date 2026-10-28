@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-28T14:12:29Z",
+  "generated": "2026-10-28T22:11:32Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -261,6 +261,8 @@
       "image": "ghcr.io/sirosfoundation/wallet-frontend",
       "repo": "sirosfoundation/wallet-frontend",
       "tags": [
+        "unstable-cff0947",
+        "unstable-ac3abfd",
         "unstable-8659154",
         "unstable-60f6a14",
         "unstable-7d2f434",
@@ -979,6 +981,14 @@
       "image": "ghcr.io/sirosfoundation/go-wallet-backend",
       "repo": "sirosfoundation/go-wallet-backend",
       "tags": [
+        "3fc34b6",
+        "e53e827",
+        "400a9dc",
+        "9fc23e3",
+        "5390f56",
+        "66c8542",
+        "0d1bc68",
+        "6877508",
         "d55ddc2",
         "5007307",
         "c86c663",
@@ -1430,6 +1440,13 @@
       "image": "ghcr.io/sirosfoundation/facetec-api",
       "repo": "sirosfoundation/facetec-api",
       "tags": [
+        "5760621",
+        "c4da346",
+        "a617b35",
+        "f4a8874",
+        "40c3d39",
+        "4ebe3bf",
+        "511c028",
         "test-disable_pdp_https_enforcement-3",
         "8beb27d",
         "6d49ba4",
