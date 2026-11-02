@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-01T22:08:58Z",
+  "generated": "2026-11-02T06:24:51Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -1791,6 +1791,7 @@
       "image": "ghcr.io/sirosfoundation/mini-oidc",
       "repo": "sirosfoundation/mini-oidc",
       "tags": [
+        "sha-ce7a04b",
         "0.0.5",
         "sha-5670a18",
         "sha-742950e",
