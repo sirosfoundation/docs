@@ -36,6 +36,6 @@ https://developers.siros.org/catalog/container-images.json
 | `ghcr.io/sirosfoundation/go-grc` | [sirosfoundation/go-grc](https://github.com/sirosfoundation/go-grc) | `0.17` | `f234b2e` | 0.17, 0.17.0, 0.16.1, 0.16, 0.16.0, 0.15.1, 0.15, 0.15.0, 0.14, 0.14.0 |
 | `ghcr.io/sirosfoundation/registry-cli` | [sirosfoundation/registry-cli](https://github.com/sirosfoundation/registry-cli) | `0.19` | `bf025c4` | 0.19, 0.19.0, 0.18, 0.18.0, 0.17.1, 0.17, 0.17.0, 0.16, 0.16.0, 0.15 |
 | `ghcr.io/sirosfoundation/go-r2ps-service` | [sirosfoundation/go-r2ps-service](https://github.com/sirosfoundation/go-r2ps-service) | `0.1` | `45a5174` | 0.1, 0.1.0, 0.0, 0.0.1 |
-| `ghcr.io/sirosfoundation/mini-oidc` | [sirosfoundation/mini-oidc](https://github.com/sirosfoundation/mini-oidc) | `0.0.5` | `sha-ce7a04b` | 0.0.5, 0.0.4, 0.0.3, 0.0.2, 0.0, 0.0.1 |
+| `ghcr.io/sirosfoundation/mini-oidc` | [sirosfoundation/mini-oidc](https://github.com/sirosfoundation/mini-oidc) | `0.0.6` | `sha-ce7a04b` | 0.0.6, 0.0.5, 0.0.4, 0.0.3, 0.0.2, 0.0, 0.0.1 |
 
-_Last updated: 2026-11-02T06:24:51Z_
+_Last updated: 2026-11-02T14:13:08Z_
