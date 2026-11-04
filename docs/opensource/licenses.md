@@ -22,41 +22,41 @@ https://developers.siros.org/catalog/license-inventory.json
 ```
 :::
 
-**27** repositories scanned · **3157** unique packages · **60** license types · **56** unresolved
+**27** repositories scanned · **3331** unique packages · **60** license types · **80** unresolved
 
 ## Policy Compliance
 
 | Category | Packages | Description |
 |----------|--------:|-------------|
-| allowed | 2857 | |
-| ci-only | 105 | |
+| allowed | 2993 | |
+| ci-only | 110 | |
+| unclassified | 100 | |
 | build-only | 87 | |
-| unclassified | 75 | |
 | test-only | 22 | |
-| weak-copyleft | 9 | |
+| weak-copyleft | 17 | |
 | documentation | 2 | |
 
-License policy overrides applied: **641** · Dual-license selections: **196**
+License policy overrides applied: **651** · Dual-license selections: **342**
 
 ## License Summary
 
 | License | Category | Unique Packages | Total Usages |
 |---------|----------|---------------:|-------------:|
-| MIT | allowed | 1292 | 2410 |
-| Apache-2.0 | allowed | 610 | 990 |
-| BSD-3-Clause | allowed | 91 | 180 |
+| MIT | allowed | 1350 | 2541 |
+| Apache-2.0 | allowed | 628 | 1041 |
+| BSD-3-Clause | allowed | 93 | 184 |
 | BSD-2-Clause | allowed | 86 | 177 |
 | ISC | allowed | 46 | 95 |
-| MPL-2.0 | build-only | 23 | 84 |
-| NOASSERTION | unclassified | 56 | 57 |
-| BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang | allowed | 9 | 41 |
+| MPL-2.0 | build-only | 31 | 92 |
+| NOASSERTION | unclassified | 79 | 81 |
+| BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang | allowed | 9 | 40 |
 | Apache-2.0 AND BSD-3-Clause | allowed | 15 | 29 |
 | LGPL-3.0 | ci-only | 1 | 21 |
 | LGPL-3.0-or-later | build-only | 10 | 20 |
 | Unicode-3.0 | allowed | 19 | 19 |
 | Apache-2.0 AND MIT | allowed | 9 | 15 |
 | BlueOak-1.0.0 | allowed | 10 | 14 |
-| mit | unclassified | 8 | 8 |
+| mit | unclassified | 9 | 9 |
 | MIT-0 | allowed | 3 | 7 |
 | CC0-1.0 AND MIT | allowed | 5 | 7 |
 | CC0-1.0 | allowed | 4 | 6 |
@@ -69,37 +69,37 @@ License policy overrides applied: **641** · Dual-license selections: **196**
 | ISC AND MIT | allowed | 3 | 5 |
 | EUPL-1.2 | weak-copyleft | 1 | 4 |
 | BSD-2-Clause-Views AND BSD-2-Clause AND BSD-2-Clause-Views | allowed | 1 | 4 |
+| MIT OR Apache-2.0 OR LGPL-2.1-or-later | allowed | 1 | 3 |
 | Apache-2.0 AND CC-BY-3.0 AND MIT | allowed | 1 | 2 |
 | CDLA-Permissive-2.0 | allowed | 1 | 2 |
 | apache-2.0 | unclassified | 2 | 2 |
 | mpl-2.0 | unclassified | 2 | 2 |
-| LicenseRef-scancode-unicode AND MIT | allowed | 2 | 2 |
-| Python-2.0 | allowed | 1 | 2 |
 | OFL-1.1 | unclassified | 1 | 2 |
 | Apache-2.0 AND LGPL-3.0-or-later AND MIT | build-only | 1 | 2 |
+| Python-2.0 | allowed | 1 | 2 |
+| LicenseRef-scancode-unicode AND MIT | allowed | 2 | 2 |
 | (MIT AND Zlib) | allowed | 1 | 2 |
 | Apache-2.0 AND BSD-2-Clause | allowed | 1 | 2 |
 | Apache-2.0 AND BSD-2-Clause AND CC0-1.0 AND ISC AND MIT | allowed | 1 | 1 |
 | BSD-3-Clause AND MIT | allowed | 1 | 1 |
 | Apache-2.0 AND ISC | allowed | 1 | 1 |
-| MIT OR Apache-2.0 OR LGPL-2.1-or-later | allowed | 1 | 1 |
 | MIT OR Apache-2.0 OR BSD-1-Clause | allowed | 1 | 1 |
-| LicenseRef-scancode-jdom | allowed | 1 | 1 |
-| LGPL-2.1 | build-only | 1 | 1 |
+| Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND Elastic-2.0 AND LicenseRef-scancode-public-domain AND MIT AND bzip2-1.0.6 | build-only | 1 | 1 |
+| LicenseRef-bad-non-standard | test-only | 1 | 1 |
+| Apache-2.0 AND LicenseRef-scancode-public-domain AND bzip2-1.0.6 | allowed | 1 | 1 |
+| CDDL-1.1 | build-only | 1 | 1 |
+| MPL-1.1 | build-only | 1 | 1 |
+| EPL-1.0 | test-only | 1 | 1 |
 | CDDL-1.0 | build-only | 1 | 1 |
 | Apache-2.0 AND CC0-1.0 | allowed | 1 | 1 |
-| Apache-2.0 AND LicenseRef-scancode-public-domain AND bzip2-1.0.6 | allowed | 1 | 1 |
-| MPL-1.1 | build-only | 1 | 1 |
-| LicenseRef-bad-non-standard | test-only | 1 | 1 |
 | LicenseRef-scancode-public-domain | allowed | 1 | 1 |
-| CDDL-1.1 | build-only | 1 | 1 |
-| EPL-1.0 | test-only | 1 | 1 |
-| Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND Elastic-2.0 AND LicenseRef-scancode-public-domain AND MIT AND bzip2-1.0.6 | build-only | 1 | 1 |
+| LicenseRef-scancode-jdom | allowed | 1 | 1 |
+| LGPL-2.1 | build-only | 1 | 1 |
 | Apache-2.0 AND LicenseRef-scancode-dco-1.1 AND MIT | allowed | 1 | 1 |
-| Apache-2.0 AND CC-BY-SA-4.0 | documentation | 1 | 1 |
 | BSD-2-Clause-Views | allowed | 1 | 1 |
-| BSD-2-Clause AND BSD-3-Clause | allowed | 1 | 1 |
+| Apache-2.0 AND CC-BY-SA-4.0 | documentation | 1 | 1 |
 | MIT AND Zlib | allowed | 1 | 1 |
+| BSD-2-Clause AND BSD-3-Clause | allowed | 1 | 1 |
 | CC-BY-4.0 | documentation | 1 | 1 |
 | AFL-2.1 AND AFL-3.0 AND BSD-3-Clause | allowed | 1 | 1 |
 
@@ -107,32 +107,32 @@ License policy overrides applied: **641** · Dual-license selections: **196**
 
 | Repository | Dependencies | Licenses |
 |------------|------------:|----------|
-| [browser-log](https://github.com/sirosfoundation/browser-log) | 276 | MIT (219), Apache-2.0 (24), MPL-2.0 (12), BSD-2-Clause (7), ISC (6), BSD-3-Clause (2), MIT-0 (2), 0BSD (1), Apache-2.0 AND BSD-2-Clause AND CC0-1.0 AND ISC AND MIT (1), CC0-1.0 (1), BlueOak-1.0.0 (1) |
+| [browser-log](https://github.com/sirosfoundation/browser-log) | 276 | MIT (219), Apache-2.0 (24), MPL-2.0 (12), BSD-2-Clause (7), ISC (6), BSD-3-Clause (2), MIT-0 (2), BlueOak-1.0.0 (1), 0BSD (1), Apache-2.0 AND BSD-2-Clause AND CC0-1.0 AND ISC AND MIT (1), CC0-1.0 (1) |
 | [dc-api](https://github.com/sirosfoundation/dc-api) | 143 | MIT (101), Apache-2.0 (24), MPL-2.0 (12), BSD-2-Clause (2), ISC (2), 0BSD (1), BSD-3-Clause (1) |
-| [facetec-api](https://github.com/sirosfoundation/facetec-api) | 67 | MIT (35), Apache-2.0 (13), BSD-3-Clause (6), BSD-2-Clause (5), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (2), Apache-2.0 AND BSD-3-Clause (2), NOASSERTION (1), BSD-2-Clause AND BSD-2-Clause-Views (1), Apache-2.0 AND MIT (1), LGPL-3.0 (1) |
-| [g119612](https://github.com/sirosfoundation/g119612) | 36 | MIT (16), BSD-2-Clause (7), Apache-2.0 (4), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (3), BSD-3-Clause (3), EUPL-1.2 (1), ISC (1), Apache-2.0 AND BSD-3-Clause (1) |
-| [go-cryptoutil](https://github.com/sirosfoundation/go-cryptoutil) | 24 | MIT (11), BSD-2-Clause (5), EUPL-1.2 (2), BSD-3-Clause (2), Apache-2.0 AND MIT (1), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (1), LGPL-3.0 (1), Apache-2.0 (1) |
-| [go-grc](https://github.com/sirosfoundation/go-grc) | 33 | MIT (12), BSD-3-Clause (7), Apache-2.0 (7), BSD-2-Clause (3), Apache-2.0 AND BSD-3-Clause (1), ISC (1), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (1), LGPL-3.0 (1) |
-| [go-invite-op](https://github.com/sirosfoundation/go-invite-op) | 135 | MIT (80), Apache-2.0 (18), MPL-2.0 (12), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (8), BSD-3-Clause (7), ISC (3), BSD-2-Clause (3), Apache-2.0 AND BSD-3-Clause (1), Apache-2.0 AND MIT (1), BSD-3-Clause AND Apache-2.0 AND MIT (1), LGPL-3.0 (1) |
-| [go-r2ps-service](https://github.com/sirosfoundation/go-r2ps-service) | 49 | MIT (21), Apache-2.0 (8), BSD-3-Clause (6), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (5), BSD-2-Clause (4), Apache-2.0 AND BSD-3-Clause (2), BSD-3-Clause AND Apache-2.0 AND MIT (1), Apache-2.0 AND MIT (1), LGPL-3.0 (1) |
-| [go-spocp](https://github.com/sirosfoundation/go-spocp) | 19 | MIT (13), BSD-2-Clause (3), BSD-3-Clause (1), LGPL-3.0 (1), Apache-2.0 (1) |
+| [facetec-api](https://github.com/sirosfoundation/facetec-api) | 67 | MIT (35), Apache-2.0 (13), BSD-3-Clause (6), BSD-2-Clause (5), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (2), Apache-2.0 AND BSD-3-Clause (2), Apache-2.0 AND MIT (1), NOASSERTION (1), BSD-2-Clause AND BSD-2-Clause-Views (1), LGPL-3.0 (1) |
+| [g119612](https://github.com/sirosfoundation/g119612) | 36 | MIT (16), BSD-2-Clause (7), Apache-2.0 (4), BSD-3-Clause (3), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (3), EUPL-1.2 (1), ISC (1), Apache-2.0 AND BSD-3-Clause (1) |
+| [go-cryptoutil](https://github.com/sirosfoundation/go-cryptoutil) | 24 | MIT (11), BSD-2-Clause (5), BSD-3-Clause (2), EUPL-1.2 (2), Apache-2.0 AND MIT (1), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (1), LGPL-3.0 (1), Apache-2.0 (1) |
+| [go-grc](https://github.com/sirosfoundation/go-grc) | 33 | MIT (12), BSD-3-Clause (7), Apache-2.0 (7), BSD-2-Clause (3), ISC (1), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (1), Apache-2.0 AND BSD-3-Clause (1), LGPL-3.0 (1) |
+| [go-invite-op](https://github.com/sirosfoundation/go-invite-op) | 135 | MIT (80), Apache-2.0 (18), MPL-2.0 (12), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (8), BSD-3-Clause (7), ISC (3), BSD-2-Clause (3), BSD-3-Clause AND Apache-2.0 AND MIT (1), Apache-2.0 AND BSD-3-Clause (1), Apache-2.0 AND MIT (1), LGPL-3.0 (1) |
+| [go-r2ps-service](https://github.com/sirosfoundation/go-r2ps-service) | 49 | MIT (21), Apache-2.0 (8), BSD-3-Clause (6), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (5), BSD-2-Clause (4), Apache-2.0 AND BSD-3-Clause (2), Apache-2.0 AND MIT (1), BSD-3-Clause AND Apache-2.0 AND MIT (1), LGPL-3.0 (1) |
+| [go-spocp](https://github.com/sirosfoundation/go-spocp) | 19 | MIT (13), BSD-2-Clause (3), Apache-2.0 (1), BSD-3-Clause (1), LGPL-3.0 (1) |
 | [go-tokenauth](https://github.com/sirosfoundation/go-tokenauth) | 45 | MIT (26), Apache-2.0 (8), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (4), BSD-3-Clause (3), BSD-2-Clause (2), Apache-2.0 AND BSD-3-Clause (1), LGPL-3.0 (1) |
-| [go-trust](https://github.com/sirosfoundation/go-trust) | 140 | MIT (65), Apache-2.0 (27), BSD-3-Clause (19), BSD-2-Clause (13), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (4), Apache-2.0 AND BSD-3-Clause (2), Apache-2.0 AND MIT (2), Apache-2.0 AND CC-BY-3.0 AND MIT (1), ISC (1), BSD-3-Clause AND Apache-2.0 AND MIT (1), EUPL-1.2 (1), BSD-2-Clause-Views AND BSD-2-Clause AND BSD-2-Clause-Views (1), MPL-2.0 (1), NOASSERTION (1), LGPL-3.0 (1) |
-| [go-wallet-backend](https://github.com/sirosfoundation/go-wallet-backend) | 107 | MIT (46), Apache-2.0 (21), BSD-3-Clause (15), BSD-2-Clause (12), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (3), Apache-2.0 AND BSD-3-Clause (2), Apache-2.0 AND MIT (2), BSD-2-Clause AND BSD-2-Clause-Views (1), BSD-3-Clause AND Apache-2.0 AND MIT (1), BSD-2-Clause-Views AND BSD-2-Clause AND BSD-2-Clause-Views (1), BSD-3-Clause AND MIT (1), MPL-2.0 (1), LGPL-3.0 (1) |
+| [go-trust](https://github.com/sirosfoundation/go-trust) | 140 | MIT (65), Apache-2.0 (27), BSD-3-Clause (19), BSD-2-Clause (13), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (4), Apache-2.0 AND BSD-3-Clause (2), Apache-2.0 AND MIT (2), BSD-3-Clause AND Apache-2.0 AND MIT (1), NOASSERTION (1), Apache-2.0 AND CC-BY-3.0 AND MIT (1), BSD-2-Clause-Views AND BSD-2-Clause AND BSD-2-Clause-Views (1), ISC (1), MPL-2.0 (1), EUPL-1.2 (1), LGPL-3.0 (1) |
+| [go-wallet-backend](https://github.com/sirosfoundation/go-wallet-backend) | 107 | MIT (46), Apache-2.0 (21), BSD-3-Clause (15), BSD-2-Clause (12), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (3), Apache-2.0 AND MIT (2), Apache-2.0 AND BSD-3-Clause (2), BSD-3-Clause AND MIT (1), BSD-3-Clause AND Apache-2.0 AND MIT (1), BSD-2-Clause AND BSD-2-Clause-Views (1), MPL-2.0 (1), BSD-2-Clause-Views AND BSD-2-Clause AND BSD-2-Clause-Views (1), LGPL-3.0 (1) |
 | [go-wmp](https://github.com/sirosfoundation/go-wmp) | 15 | MIT (8), BSD-2-Clause (3), Apache-2.0 (2), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (1), LGPL-3.0 (1) |
 | [goFF](https://github.com/sirosfoundation/goFF) | 32 | MIT (14), BSD-2-Clause (6), BSD-3-Clause (4), Apache-2.0 (4), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (2), ISC (1), LGPL-3.0 (1) |
 | [goxmldsig](https://github.com/sirosfoundation/goxmldsig) | 17 | MIT (7), Apache-2.0 (4), BSD-2-Clause (3), BSD-3-Clause (2), ISC (1) |
 | [mini-oidc](https://github.com/sirosfoundation/mini-oidc) | 18 | MIT (9), Apache-2.0 (6), Apache-2.0 AND BSD-3-Clause (1), LGPL-3.0 (1), BSD-2-Clause (1) |
-| [r2ps-client](https://github.com/sirosfoundation/r2ps-client) | 209 | MIT (126), Apache-2.0 (52), Unicode-3.0 (18), BSD-3-Clause (3), ISC (2), CDLA-Permissive-2.0 (2), Apache-2.0 AND ISC (1), MIT OR Apache-2.0 OR LGPL-2.1-or-later (1), MIT OR Apache-2.0 OR BSD-1-Clause (1), NOASSERTION (1), LGPL-3.0 (1), BSD-2-Clause (1) |
+| [r2ps-client](https://github.com/sirosfoundation/r2ps-client) | 209 | MIT (126), Apache-2.0 (52), Unicode-3.0 (18), BSD-3-Clause (3), CDLA-Permissive-2.0 (2), ISC (2), Apache-2.0 AND ISC (1), MIT OR Apache-2.0 OR LGPL-2.1-or-later (1), MIT OR Apache-2.0 OR BSD-1-Clause (1), NOASSERTION (1), LGPL-3.0 (1), BSD-2-Clause (1) |
 | [registry-cli](https://github.com/sirosfoundation/registry-cli) | 43 | MIT (16), BSD-3-Clause (12), Apache-2.0 (6), BSD-2-Clause (5), Apache-2.0 AND BSD-3-Clause (1), ISC (1), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (1), LGPL-3.0 (1) |
-| [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin) | 624 | Apache-2.0 (522), MIT (45), BSD-3-Clause (21), BSD-2-Clause (10), EPL-2.0 (6), NOASSERTION (3), LicenseRef-scancode-jdom (1), LGPL-2.1 (1), CDDL-1.0 (1), Apache-2.0 AND CC0-1.0 (1), MPL-2.0 (1), Apache-2.0 AND LicenseRef-scancode-public-domain AND bzip2-1.0.6 (1), Apache-2.0 AND BSD-3-Clause (1), MPL-1.1 (1), LicenseRef-bad-non-standard (1), Unicode-3.0 (1), LicenseRef-scancode-public-domain (1), CDDL-1.1 (1), CC0-1.0 (1), Apache-2.0 AND MIT (1), EPL-1.0 (1), Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND Elastic-2.0 AND LicenseRef-scancode-public-domain AND MIT AND bzip2-1.0.6 (1), LGPL-3.0 (1) |
-| [siros-sdk-swift](https://github.com/sirosfoundation/siros-sdk-swift) | 17 | MIT (11), BSD-2-Clause (4), Apache-2.0 (1), LGPL-3.0 (1) |
+| [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin) | 848 | Apache-2.0 (573), MIT (180), NOASSERTION (28), BSD-3-Clause (24), BSD-2-Clause (10), MPL-2.0 (9), EPL-2.0 (6), MIT OR Apache-2.0 OR LGPL-2.1-or-later (2), Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND Elastic-2.0 AND LicenseRef-scancode-public-domain AND MIT AND bzip2-1.0.6 (1), LicenseRef-bad-non-standard (1), Apache-2.0 AND LicenseRef-scancode-public-domain AND bzip2-1.0.6 (1), Apache-2.0 AND BSD-3-Clause (1), Unicode-3.0 (1), CDDL-1.1 (1), CC0-1.0 (1), MPL-1.1 (1), EPL-1.0 (1), CDDL-1.0 (1), Apache-2.0 AND CC0-1.0 (1), LicenseRef-scancode-public-domain (1), Apache-2.0 AND MIT (1), LicenseRef-scancode-jdom (1), LGPL-2.1 (1), LGPL-3.0 (1) |
+| [siros-sdk-swift](https://github.com/sirosfoundation/siros-sdk-swift) | 17 | MIT (11), BSD-2-Clause (4), LGPL-3.0 (1), Apache-2.0 (1) |
 | [siros-status-service](https://github.com/sirosfoundation/siros-status-service) | 1 | BSD-2-Clause (1) |
-| [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app) | 70 | NOASSERTION (40), MIT (8), mit (8), bsd-3-clause (6), BSD-2-Clause (2), apache-2.0 (2), mpl-2.0 (2), Apache-2.0 (1), LGPL-3.0 (1) |
+| [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app) | 70 | NOASSERTION (39), mit (9), MIT (8), bsd-3-clause (6), apache-2.0 (2), mpl-2.0 (2), BSD-2-Clause (2), Apache-2.0 (1), LGPL-3.0 (1) |
 | [siros-wrpac-tool](https://github.com/sirosfoundation/siros-wrpac-tool) | 33 | MIT (15), BSD-2-Clause (6), Apache-2.0 (6), BSD-3-Clause (3), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (1), BSD-2-Clause-Views AND BSD-2-Clause AND BSD-2-Clause-Views (1), LGPL-3.0 (1) |
-| [vc](https://github.com/sirosfoundation/vc) | 237 | MIT (97), Apache-2.0 (68), BSD-3-Clause (27), Apache-2.0 AND BSD-3-Clause (14), BSD-2-Clause (11), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (5), ISC (2), MPL-2.0 (2), Apache-2.0 AND MIT (2), BSD-2-Clause AND BSD-2-Clause-Views (1), Apache-2.0 AND LicenseRef-scancode-dco-1.1 AND MIT (1), MIT-0 (1), Apache-2.0 AND CC-BY-SA-4.0 (1), BSD-3-Clause AND Apache-2.0 AND MIT (1), BSD-2-Clause-Views (1), Apache-2.0 AND CC-BY-3.0 AND MIT (1), BSD-2-Clause-Views AND BSD-2-Clause AND BSD-2-Clause-Views (1), NOASSERTION (1) |
-| [wallet-companion](https://github.com/sirosfoundation/wallet-companion) | 649 | MIT (459), Apache-2.0 (68), ISC (30), BSD-2-Clause (28), MPL-2.0 (18), LGPL-3.0-or-later (10), BSD-3-Clause (9), CC0-1.0 AND MIT (5), BlueOak-1.0.0 (3), Apache-2.0 AND LGPL-3.0-or-later (3), Apache-2.0 AND MIT (2), MIT-0 (2), CC0-1.0 (2), BSD-2-Clause AND BSD-3-Clause (1), LicenseRef-scancode-unicode AND MIT (1), ISC AND MIT (1), Python-2.0 (1), MIT AND Zlib (1), 0BSD (1), BSD-2-Clause AND BSD-2-Clause-Views (1), OFL-1.1 (1), Apache-2.0 AND LGPL-3.0-or-later AND MIT (1), LGPL-3.0 (1) |
-| [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend) | 1110 | MIT (873), Apache-2.0 (70), ISC (43), BSD-2-Clause (28), BSD-3-Clause (25), MPL-2.0 (13), BlueOak-1.0.0 (10), LGPL-3.0-or-later (10), NOASSERTION (10), Apache-2.0 AND LGPL-3.0-or-later (3), ISC AND MIT (3), CC0-1.0 (2), 0BSD (2), Apache-2.0 AND MIT (2), MIT-0 (2), (MIT AND Zlib) (2), Apache-2.0 AND BSD-2-Clause (2), CC0-1.0 AND MIT (2), Python-2.0 (1), CC-BY-4.0 (1), LicenseRef-scancode-unicode AND MIT (1), BSD-2-Clause AND BSD-2-Clause-Views (1), AFL-2.1 AND AFL-3.0 AND BSD-3-Clause (1), OFL-1.1 (1), Apache-2.0 AND LGPL-3.0-or-later AND MIT (1), LGPL-3.0 (1) |
+| [vc](https://github.com/sirosfoundation/vc) | 233 | MIT (93), Apache-2.0 (68), BSD-3-Clause (28), Apache-2.0 AND BSD-3-Clause (14), BSD-2-Clause (11), BSD-3-Clause AND LicenseRef-scancode-google-patent-license-golang (4), ISC (2), Apache-2.0 AND MIT (2), MPL-2.0 (2), BSD-2-Clause AND BSD-2-Clause-Views (1), BSD-2-Clause-Views AND BSD-2-Clause AND BSD-2-Clause-Views (1), Apache-2.0 AND LicenseRef-scancode-dco-1.1 AND MIT (1), MIT-0 (1), Apache-2.0 AND CC-BY-3.0 AND MIT (1), BSD-2-Clause-Views (1), BSD-3-Clause AND Apache-2.0 AND MIT (1), Apache-2.0 AND CC-BY-SA-4.0 (1), NOASSERTION (1) |
+| [wallet-companion](https://github.com/sirosfoundation/wallet-companion) | 649 | MIT (459), Apache-2.0 (68), ISC (30), BSD-2-Clause (28), MPL-2.0 (18), LGPL-3.0-or-later (10), BSD-3-Clause (9), CC0-1.0 AND MIT (5), Apache-2.0 AND LGPL-3.0-or-later (3), BlueOak-1.0.0 (3), MIT-0 (2), Apache-2.0 AND MIT (2), CC0-1.0 (2), ISC AND MIT (1), 0BSD (1), BSD-2-Clause AND BSD-2-Clause-Views (1), OFL-1.1 (1), MIT AND Zlib (1), Apache-2.0 AND LGPL-3.0-or-later AND MIT (1), Python-2.0 (1), BSD-2-Clause AND BSD-3-Clause (1), LicenseRef-scancode-unicode AND MIT (1), LGPL-3.0 (1) |
+| [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend) | 1110 | MIT (873), Apache-2.0 (70), ISC (43), BSD-2-Clause (28), BSD-3-Clause (25), MPL-2.0 (13), NOASSERTION (10), BlueOak-1.0.0 (10), LGPL-3.0-or-later (10), Apache-2.0 AND LGPL-3.0-or-later (3), ISC AND MIT (3), CC0-1.0 (2), MIT-0 (2), (MIT AND Zlib) (2), Apache-2.0 AND BSD-2-Clause (2), CC0-1.0 AND MIT (2), 0BSD (2), Apache-2.0 AND MIT (2), CC-BY-4.0 (1), Apache-2.0 AND LGPL-3.0-or-later AND MIT (1), Python-2.0 (1), AFL-2.1 AND AFL-3.0 AND BSD-3-Clause (1), OFL-1.1 (1), LicenseRef-scancode-unicode AND MIT (1), BSD-2-Clause AND BSD-2-Clause-Views (1), LGPL-3.0 (1) |
 | [wmp-js](https://github.com/sirosfoundation/wmp-js) | 120 | MIT (77), Apache-2.0 (24), MPL-2.0 (12), BSD-3-Clause (2), BSD-2-Clause (2), ISC AND MIT (1), ISC (1), LGPL-3.0 (1) |
 
 ## Packages Requiring Review
@@ -141,7 +141,7 @@ The following packages do not fall into the **allowed** category and may require
 additional review. Each entry shows which repositories pull in the dependency,
 enabling audit of the dependency graph.
 
-### weak-copyleft (9 packages)
+### weak-copyleft (17 packages)
 
 | Package | Version | License | Source | Repositories | Reason |
 |---------|---------|---------|--------|--------------|--------|
@@ -154,8 +154,16 @@ enabling audit of the dependency graph.
 | github.com/hashicorp/go-uuid | v1.0.4 | MPL-2.0 | sbom | [vc](https://github.com/sirosfoundation/vc/network/dependencies) |  |
 | github.com/veraison/go-cose | v1.3.0 | MPL-2.0 | sbom | [go-trust](https://github.com/sirosfoundation/go-trust/network/dependencies), [go-wallet-backend](https://github.com/sirosfoundation/go-wallet-backend/network/dependencies) |  |
 | org.siros:zk-cred-longfellow | 0.1.2 | MPL-2.0 | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
+| uniffi | 0.29.5 | MPL-2.0 | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
+| uniffi_bindgen | 0.29.5 | MPL-2.0 | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
+| uniffi_core | 0.29.5 | MPL-2.0 | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
+| uniffi_internal_macros | 0.29.5 | MPL-2.0 | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
+| uniffi_macros | 0.29.5 | MPL-2.0 | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
+| uniffi_meta | 0.29.5 | MPL-2.0 | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
+| uniffi_pipeline | 0.29.5 | MPL-2.0 | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
+| uniffi_udl | 0.29.5 | MPL-2.0 | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
 
-### unclassified (75 packages)
+### unclassified (100 packages)
 
 | Package | Version | License | Source | Repositories | Reason |
 |---------|---------|---------|--------|--------------|--------|
@@ -163,18 +171,29 @@ enabling audit of the dependency graph.
 | @sd-jwt/core | ^0.10.0 | NOASSERTION | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) |  |
 | @sd-jwt/types | ^0.10.0 | NOASSERTION | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) |  |
 | @sirosfoundation/wcc-types | 0.1.0-beta.1 | NOASSERTION | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) |  |
+| android-actions/setup-android | 4.*.* | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
 | aquasecurity/trivy-action | ed142fd0673e97e23eac54620cfb913e5ce36c25 | NOASSERTION | sbom | [vc](https://github.com/sirosfoundation/vc/network/dependencies) |  |
 | args | 2.7.0 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | asn1js | ^3.0.10 | NOASSERTION | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) |  |
 | async | 2.13.1 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
+| base64 | >= 0.22.0,< 0.23.0 | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
+| bbs-cd | 0.1.0 | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
+| bbs-cd-plugin | 0.1.0 | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
 | bluez | 0.8.3 | mpl-2.0 | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | boolean_selector | 2.1.2 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
-| cbor | 6.5.1 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
+| cbor | 6.5.1 | mit | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
+| cd-date-range | 0.1.0 | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
+| cd-ecdsa-pop | 0.1.0 | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
+| cd-pseudonym | 0.1.0 | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
+| cd-tom256 | 0.1.0 | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
 | characters | 1.4.1 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | clock | 1.1.2 | apache-2.0 | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | collection | 1.19.1 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | com.github.peteroupc:datautilities | 1.1.0 | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
+| compile-algebra | 0.1.0 | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
 | convert | 3.1.2 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
+| core-algebra | 0.1.0 | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
+| core-proto | 0.1.0 | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
 | dbus | 0.7.14 | mpl-2.0 | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | dcql | ^3.0.1 | NOASSERTION | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) |  |
 | de.cketti.unicode:kotlin-codepoints | 0.9.0 | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
@@ -192,6 +211,7 @@ enabling audit of the dependency graph.
 | flutter_reactive_ble | 5.5.0 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | functional_data | 1.2.0 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | github.com/osanderson/brainpool | v1.0.0 | NOASSERTION | sbom | [facetec-api](https://github.com/sirosfoundation/facetec-api/network/dependencies) |  |
+| hex | >= 0.4.0,< 0.5.0 | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
 | hex | 0.2.0 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | js | 0.7.2 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | jsonld | ^9.0.0 | NOASSERTION | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) |  |
@@ -203,6 +223,9 @@ enabling audit of the dependency graph.
 | material_color_utilities | 0.13.0 | apache-2.0 | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | meta | 1.18.0 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | mobile_scanner | 5.2.3 | bsd-3-clause | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
+| nym-bbs | 0.1.0 | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
+| nym-longfellow | 0.1.0 | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
+| p256 | >= 0.13.0,< 0.14.0 | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
 | path | 1.9.1 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | permission_handler | 11.4.0 | mit | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | permission_handler_android | 12.1.0 | mit | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
@@ -218,7 +241,16 @@ enabling audit of the dependency graph.
 | r0adkll/upload-google-play | 1.*.* | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
 | reactive_ble_mobile | 5.5.0 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | reactive_ble_platform_interface | 5.5.0 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
+| runtime-algebra | 0.1.0 | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
+| runtime-ligero | 0.1.0 | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
+| runtime-merkle | 0.1.0 | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
+| runtime-proto | 0.1.0 | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
+| runtime-random | 0.1.0 | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
+| runtime-sumcheck | 0.1.0 | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
+| runtime-zk | 0.1.0 | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
 | rxdart | 0.28.0 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
+| serde_json | >= 1.0.0,< 2.0.0 | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
+| sha2 | >= 0.10.0,< 0.11.0 | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
 | source_span | 1.10.2 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | stack_trace | 1.12.1 | bsd-3-clause | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | stream_channel | 2.1.4 | NOASSERTION | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
@@ -234,6 +266,7 @@ enabling audit of the dependency graph.
 | web | 1.1.1 | bsd-3-clause | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | xml | 6.6.1 | mit | sbom | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) |  |
 | zod | ^3.25.76 | NOASSERTION | sbom | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) |  |
+| zstd | >= 0.13.0,< 0.14.0 | NOASSERTION | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) |  |
 
 ### build-only (87 packages)
 
@@ -354,7 +387,7 @@ enabling audit of the dependency graph.
 | org.junit.platform:junit-platform-engine | 1.8.2 | EPL-2.0 | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) | JUnit — EPL-2.0, test-only |
 | org.junit:junit-bom | 5.8.2 | LicenseRef-bad-non-standard | sbom | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) | JUnit — EPL-2.0, test-only |
 
-### ci-only (105 packages)
+### ci-only (110 packages)
 
 | Package | Version | License | Source | Repositories | Reason |
 |---------|---------|---------|--------|--------------|--------|
@@ -362,8 +395,9 @@ enabling audit of the dependency graph.
 | SonarSource/sonarqube-scan-action | 2f77a1ec69fb1d595b06f35ab27e97605bdef703 | LGPL-3.0 | policy-override | [go-invite-op](https://github.com/sirosfoundation/go-invite-op/network/dependencies), [mini-oidc](https://github.com/sirosfoundation/mini-oidc/network/dependencies), [r2ps-client](https://github.com/sirosfoundation/r2ps-client/network/dependencies), [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) | SonarQube action — CI-only |
 | SonarSource/sonarqube-scan-action | 22918119ff8e1ca75a623e15c8296b6ea4fbe28f | LGPL-3.0 | policy-override | [go-spocp](https://github.com/sirosfoundation/go-spocp/network/dependencies), [goFF](https://github.com/sirosfoundation/goFF/network/dependencies), [siros-wrpac-tool](https://github.com/sirosfoundation/siros-wrpac-tool/network/dependencies), [wallet-companion](https://github.com/sirosfoundation/wallet-companion/network/dependencies) | SonarQube action — CI-only |
 | SonarSource/sonarqube-scan-action | 5.*.* | LGPL-3.0 | policy-override | [registry-cli](https://github.com/sirosfoundation/registry-cli/network/dependencies) | SonarQube action — CI-only |
-| SonarSource/sonarqube-scan-action | d209202bc7d53ff1cc128f7f907dac145c9d6ae9 | LGPL-3.0 | policy-override | [siros-sdk-swift](https://github.com/sirosfoundation/siros-sdk-swift/network/dependencies), [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | SonarQube action — CI-only |
+| SonarSource/sonarqube-scan-action | 4d1dc0c91ee400dcf8a6dddf2f705ac36542e304 | LGPL-3.0 | policy-override | [siros-sdk-swift](https://github.com/sirosfoundation/siros-sdk-swift/network/dependencies) | SonarQube action — CI-only |
 | SonarSource/sonarqube-scan-action | 6.*.* | LGPL-3.0 | policy-override | [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) | SonarQube action — CI-only |
+| SonarSource/sonarqube-scan-action | d209202bc7d53ff1cc128f7f907dac145c9d6ae9 | LGPL-3.0 | policy-override | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | SonarQube action — CI-only |
 | Swatinem/rust-cache | 2.*.* | Apache-2.0 | policy-override | [r2ps-client](https://github.com/sirosfoundation/r2ps-client/network/dependencies) | Rust cache action — CI-only |
 | Swatinem/rust-cache | f0d9c3887740aee45f6153b24b3a6b815192ec16 | Apache-2.0 | policy-override | [r2ps-client](https://github.com/sirosfoundation/r2ps-client/network/dependencies) | Rust cache action — CI-only |
 | actions/attest-build-provenance | 4d101475d8b20a2381f78447822ac1eab6504dd8 | MIT | policy-override | [siros-wrpac-tool](https://github.com/sirosfoundation/siros-wrpac-tool/network/dependencies) | GitHub Actions — not in deliverable artifacts |
@@ -383,7 +417,9 @@ enabling audit of the dependency graph.
 | actions/dependency-review-action | 4901385134134e04cec5fbe5ddfe3b2c5bd5d976 | MIT | policy-override | [mini-oidc](https://github.com/sirosfoundation/mini-oidc/network/dependencies) | GitHub Actions — not in deliverable artifacts |
 | actions/dependency-review-action | 2031cfc080254a8a887f58cffee85186f0e49e48 | MIT | policy-override | [registry-cli](https://github.com/sirosfoundation/registry-cli/network/dependencies) | GitHub Actions — not in deliverable artifacts |
 | actions/download-artifact | 8.*.* | MIT | policy-override | [g119612](https://github.com/sirosfoundation/g119612/network/dependencies), [siros-sdk-swift](https://github.com/sirosfoundation/siros-sdk-swift/network/dependencies) | GitHub Actions — not in deliverable artifacts |
-| actions/download-artifact | 3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c | MIT | policy-override | [siros-wrpac-tool](https://github.com/sirosfoundation/siros-wrpac-tool/network/dependencies), [vc](https://github.com/sirosfoundation/vc/network/dependencies) | GitHub Actions — not in deliverable artifacts |
+| actions/download-artifact | 4.*.* | MIT | policy-override | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) | GitHub Actions — not in deliverable artifacts |
+| actions/download-artifact | 3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c | MIT | policy-override | [siros-wrpac-tool](https://github.com/sirosfoundation/siros-wrpac-tool/network/dependencies) | GitHub Actions — not in deliverable artifacts |
+| actions/download-artifact | 9000827ccba6bdab643e8b6fd33ac0654aef8333 | MIT | policy-override | [vc](https://github.com/sirosfoundation/vc/network/dependencies) | GitHub Actions — not in deliverable artifacts |
 | actions/setup-go | 7.*.* | MIT | policy-override | [facetec-api](https://github.com/sirosfoundation/facetec-api/network/dependencies), [go-cryptoutil](https://github.com/sirosfoundation/go-cryptoutil/network/dependencies), [go-grc](https://github.com/sirosfoundation/go-grc/network/dependencies), [go-tokenauth](https://github.com/sirosfoundation/go-tokenauth/network/dependencies), [go-trust](https://github.com/sirosfoundation/go-trust/network/dependencies), [go-wallet-backend](https://github.com/sirosfoundation/go-wallet-backend/network/dependencies), [go-wmp](https://github.com/sirosfoundation/go-wmp/network/dependencies), [siros-wrpac-tool](https://github.com/sirosfoundation/siros-wrpac-tool/network/dependencies) | GitHub Actions — not in deliverable artifacts |
 | actions/setup-go | 6.*.* | MIT | policy-override | [g119612](https://github.com/sirosfoundation/g119612/network/dependencies), [go-cryptoutil](https://github.com/sirosfoundation/go-cryptoutil/network/dependencies), [go-r2ps-service](https://github.com/sirosfoundation/go-r2ps-service/network/dependencies), [go-spocp](https://github.com/sirosfoundation/go-spocp/network/dependencies), [goFF](https://github.com/sirosfoundation/goFF/network/dependencies) | GitHub Actions — not in deliverable artifacts |
 | actions/setup-go | 924ae3a1cded613372ab5595356fb5720e22ba16 | MIT | policy-override | [go-invite-op](https://github.com/sirosfoundation/go-invite-op/network/dependencies) | GitHub Actions — not in deliverable artifacts |
@@ -395,11 +431,12 @@ enabling audit of the dependency graph.
 | actions/setup-node | 7.*.* | MIT | policy-override | [browser-log](https://github.com/sirosfoundation/browser-log/network/dependencies), [wallet-companion](https://github.com/sirosfoundation/wallet-companion/network/dependencies), [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | GitHub Actions — not in deliverable artifacts |
 | actions/setup-node | 4.*.* | MIT | policy-override | [dc-api](https://github.com/sirosfoundation/dc-api/network/dependencies) | GitHub Actions — not in deliverable artifacts |
 | actions/setup-node | 6.*.* | MIT | policy-override | [dc-api](https://github.com/sirosfoundation/dc-api/network/dependencies), [wmp-js](https://github.com/sirosfoundation/wmp-js/network/dependencies) | GitHub Actions — not in deliverable artifacts |
-| actions/setup-node | 820762786026740c76f36085b0efc47a31fe5020 | MIT | policy-override | [vc](https://github.com/sirosfoundation/vc/network/dependencies) | GitHub Actions — not in deliverable artifacts |
+| actions/setup-node | 949feb2413d6458794dcd2491c4babbbce0c15c1 | MIT | policy-override | [vc](https://github.com/sirosfoundation/vc/network/dependencies) | GitHub Actions — not in deliverable artifacts |
 | actions/upload-artifact | 7.*.* | MIT | policy-override | [g119612](https://github.com/sirosfoundation/g119612/network/dependencies), [siros-sdk-swift](https://github.com/sirosfoundation/siros-sdk-swift/network/dependencies) | GitHub Actions — not in deliverable artifacts |
 | actions/upload-artifact | 5d5d22a31266ced268874388b861e4b58bb5c2f3 | MIT | policy-override | [goxmldsig](https://github.com/sirosfoundation/goxmldsig/network/dependencies) | GitHub Actions — not in deliverable artifacts |
 | actions/upload-artifact | 4.*.* | MIT | policy-override | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies), [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies) | GitHub Actions — not in deliverable artifacts |
-| actions/upload-artifact | 043fb46d1a93c77aae656e7c1c64a875d1fc6a0a | MIT | policy-override | [siros-wrpac-tool](https://github.com/sirosfoundation/siros-wrpac-tool/network/dependencies), [vc](https://github.com/sirosfoundation/vc/network/dependencies) | GitHub Actions — not in deliverable artifacts |
+| actions/upload-artifact | 043fb46d1a93c77aae656e7c1c64a875d1fc6a0a | MIT | policy-override | [siros-wrpac-tool](https://github.com/sirosfoundation/siros-wrpac-tool/network/dependencies) | GitHub Actions — not in deliverable artifacts |
+| actions/upload-artifact | cf430e030ddbb5b0abf93d22962f4752f3646cd9 | MIT | policy-override | [vc](https://github.com/sirosfoundation/vc/network/dependencies) | GitHub Actions — not in deliverable artifacts |
 | codecov/codecov-action | 7.*.* | MIT | policy-override | [facetec-api](https://github.com/sirosfoundation/facetec-api/network/dependencies), [go-r2ps-service](https://github.com/sirosfoundation/go-r2ps-service/network/dependencies), [go-tokenauth](https://github.com/sirosfoundation/go-tokenauth/network/dependencies), [go-trust](https://github.com/sirosfoundation/go-trust/network/dependencies), [go-wallet-backend](https://github.com/sirosfoundation/go-wallet-backend/network/dependencies), [go-wmp](https://github.com/sirosfoundation/go-wmp/network/dependencies), [siros-sdk-swift](https://github.com/sirosfoundation/siros-sdk-swift/network/dependencies) | Codecov actions — CI-only |
 | codecov/codecov-action | fb8b3582c8e4def4969c97caa2f19720cb33a72f | MIT | policy-override | [go-invite-op](https://github.com/sirosfoundation/go-invite-op/network/dependencies), [mini-oidc](https://github.com/sirosfoundation/mini-oidc/network/dependencies), [siros-wrpac-tool](https://github.com/sirosfoundation/siros-wrpac-tool/network/dependencies) | Codecov actions — CI-only |
 | codecov/codecov-action | 6.*.* | MIT | policy-override | [go-spocp](https://github.com/sirosfoundation/go-spocp/network/dependencies), [goFF](https://github.com/sirosfoundation/goFF/network/dependencies) | Codecov actions — CI-only |
@@ -416,6 +453,7 @@ enabling audit of the dependency graph.
 | docker/setup-buildx-action | bb05f3f5519dd87d3ba754cc423b652a5edd6d2c | Apache-2.0 | policy-override | [mini-oidc](https://github.com/sirosfoundation/mini-oidc/network/dependencies) | Docker actions — CI-only |
 | docker/setup-buildx-action | f87e5991a6d7451dcb8d9637bfbc97413f497069 | Apache-2.0 | policy-override | [vc](https://github.com/sirosfoundation/vc/network/dependencies), [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Docker actions — CI-only |
 | docker/setup-qemu-action | 99012661954931238ded8c8b007157a8430204e1 | Apache-2.0 | policy-override | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | Docker actions — CI-only |
+| dtolnay/rust-toolchain | stable | MIT | policy-override | [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies) | Rust toolchain action — CI-only |
 | dtolnay/rust-toolchain | 4360b52568e2003a75bf9bc1d59f33a8e3fc893c | MIT | policy-override | [vc](https://github.com/sirosfoundation/vc/network/dependencies) | Rust toolchain action — CI-only |
 | editorconfig-checker/action-editorconfig-checker | 51f63319f592f97930c73d9c46184d20bd206393 | MIT | policy-override | [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies) | EditorConfig action — CI-only |
 | github/codeql-action/analyze | 4.*.* | MIT | policy-override | [browser-log](https://github.com/sirosfoundation/browser-log/network/dependencies), [dc-api](https://github.com/sirosfoundation/dc-api/network/dependencies), [facetec-api](https://github.com/sirosfoundation/facetec-api/network/dependencies), [g119612](https://github.com/sirosfoundation/g119612/network/dependencies), [go-cryptoutil](https://github.com/sirosfoundation/go-cryptoutil/network/dependencies), [go-grc](https://github.com/sirosfoundation/go-grc/network/dependencies), [go-r2ps-service](https://github.com/sirosfoundation/go-r2ps-service/network/dependencies), [go-spocp](https://github.com/sirosfoundation/go-spocp/network/dependencies), [go-tokenauth](https://github.com/sirosfoundation/go-tokenauth/network/dependencies), [go-trust](https://github.com/sirosfoundation/go-trust/network/dependencies), [go-wallet-backend](https://github.com/sirosfoundation/go-wallet-backend/network/dependencies), [go-wmp](https://github.com/sirosfoundation/go-wmp/network/dependencies), [goFF](https://github.com/sirosfoundation/goFF/network/dependencies), [siros-sdk-swift](https://github.com/sirosfoundation/siros-sdk-swift/network/dependencies), [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies), [wallet-companion](https://github.com/sirosfoundation/wallet-companion/network/dependencies), [wallet-frontend](https://github.com/sirosfoundation/wallet-frontend/network/dependencies), [wmp-js](https://github.com/sirosfoundation/wmp-js/network/dependencies) | GitHub official actions — CI-only |
@@ -438,7 +476,7 @@ enabling audit of the dependency graph.
 | github/codeql-action/upload-sarif | 4.*.* | MIT | policy-override | [dc-api](https://github.com/sirosfoundation/dc-api/network/dependencies), [facetec-api](https://github.com/sirosfoundation/facetec-api/network/dependencies), [g119612](https://github.com/sirosfoundation/g119612/network/dependencies), [go-cryptoutil](https://github.com/sirosfoundation/go-cryptoutil/network/dependencies), [go-grc](https://github.com/sirosfoundation/go-grc/network/dependencies), [go-invite-op](https://github.com/sirosfoundation/go-invite-op/network/dependencies), [go-r2ps-service](https://github.com/sirosfoundation/go-r2ps-service/network/dependencies), [go-spocp](https://github.com/sirosfoundation/go-spocp/network/dependencies), [go-tokenauth](https://github.com/sirosfoundation/go-tokenauth/network/dependencies), [go-trust](https://github.com/sirosfoundation/go-trust/network/dependencies), [go-wallet-backend](https://github.com/sirosfoundation/go-wallet-backend/network/dependencies), [go-wmp](https://github.com/sirosfoundation/go-wmp/network/dependencies), [goFF](https://github.com/sirosfoundation/goFF/network/dependencies), [r2ps-client](https://github.com/sirosfoundation/r2ps-client/network/dependencies), [registry-cli](https://github.com/sirosfoundation/registry-cli/network/dependencies), [siros-sdk-kotlin](https://github.com/sirosfoundation/siros-sdk-kotlin/network/dependencies), [siros-sdk-swift](https://github.com/sirosfoundation/siros-sdk-swift/network/dependencies), [siros-verifier-app](https://github.com/sirosfoundation/siros-verifier-app/network/dependencies), [siros-wrpac-tool](https://github.com/sirosfoundation/siros-wrpac-tool/network/dependencies), [wallet-companion](https://github.com/sirosfoundation/wallet-companion/network/dependencies), [wmp-js](https://github.com/sirosfoundation/wmp-js/network/dependencies) | GitHub official actions — CI-only |
 | github/codeql-action/upload-sarif | 60168efe1c415ce0f5521ea06d5c2062adbeed1b | MIT | policy-override | [goxmldsig](https://github.com/sirosfoundation/goxmldsig/network/dependencies) | GitHub official actions — CI-only |
 | github/codeql-action/upload-sarif | f205ea1c3313d32999d8d6a48b4f6530d4437b38 | MIT | policy-override | [mini-oidc](https://github.com/sirosfoundation/mini-oidc/network/dependencies) | GitHub official actions — CI-only |
-| github/codeql-action/upload-sarif | 2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 | MIT | policy-override | [vc](https://github.com/sirosfoundation/vc/network/dependencies) | GitHub official actions — CI-only |
+| github/codeql-action/upload-sarif | 9b3254085494b55a0f7c4c2b3d2d52cc712ce370 | MIT | policy-override | [vc](https://github.com/sirosfoundation/vc/network/dependencies) | GitHub official actions — CI-only |
 | golang/govulncheck-action | 1.*.* | BSD-3-Clause | policy-override | [go-spocp](https://github.com/sirosfoundation/go-spocp/network/dependencies), [go-trust](https://github.com/sirosfoundation/go-trust/network/dependencies), [goFF](https://github.com/sirosfoundation/goFF/network/dependencies), [registry-cli](https://github.com/sirosfoundation/registry-cli/network/dependencies), [siros-wrpac-tool](https://github.com/sirosfoundation/siros-wrpac-tool/network/dependencies) | Go actions — CI-only |
 | golangci/golangci-lint-action | 9.*.* | MIT | policy-override | [facetec-api](https://github.com/sirosfoundation/facetec-api/network/dependencies), [go-cryptoutil](https://github.com/sirosfoundation/go-cryptoutil/network/dependencies), [go-grc](https://github.com/sirosfoundation/go-grc/network/dependencies), [go-r2ps-service](https://github.com/sirosfoundation/go-r2ps-service/network/dependencies), [go-spocp](https://github.com/sirosfoundation/go-spocp/network/dependencies), [go-tokenauth](https://github.com/sirosfoundation/go-tokenauth/network/dependencies), [go-trust](https://github.com/sirosfoundation/go-trust/network/dependencies), [go-wallet-backend](https://github.com/sirosfoundation/go-wallet-backend/network/dependencies), [goFF](https://github.com/sirosfoundation/goFF/network/dependencies) | GolangCI actions — CI-only |
 | golangci/golangci-lint-action | ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a | MIT | policy-override | [go-invite-op](https://github.com/sirosfoundation/go-invite-op/network/dependencies), [mini-oidc](https://github.com/sirosfoundation/mini-oidc/network/dependencies), [siros-wrpac-tool](https://github.com/sirosfoundation/siros-wrpac-tool/network/dependencies) | GolangCI actions — CI-only |
@@ -472,6 +510,6 @@ enabling audit of the dependency graph.
 | github.com/opencontainers/go-digest | v1.0.0 | Apache-2.0 AND CC-BY-SA-4.0 | sbom | [vc](https://github.com/sirosfoundation/vc/network/dependencies) |  |
 
 
-_Last updated: 2026-11-03T06:36:44Z_
+_Last updated: 2026-11-04T06:36:51Z_
 
 _License policy: [sirosfoundation/compliance](https://github.com/sirosfoundation/compliance/blob/main/catalog/technical/license-policy.yaml)_
