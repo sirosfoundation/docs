@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-13T06:18:05Z",
+  "generated": "2026-11-13T14:11:10Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -296,6 +296,8 @@
       "image": "ghcr.io/sirosfoundation/wallet-frontend",
       "repo": "sirosfoundation/wallet-frontend",
       "tags": [
+        "unstable-907f239",
+        "unstable-254f230",
         "sirosid-rc-encryption.1",
         "unstable-2751c20",
         "unstable-1e2716f",
