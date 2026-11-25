@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-25T06:18:52Z",
+  "generated": "2026-11-25T14:11:39Z",
   "images": [
     {
       "image": "ghcr.io/sirosfoundation/go-trust",
@@ -311,6 +311,10 @@
       "image": "ghcr.io/sirosfoundation/wallet-frontend",
       "repo": "sirosfoundation/wallet-frontend",
       "tags": [
+        "unstable-c48a1ef",
+        "0.8.0",
+        "unstable-b51f2a5",
+        "unstable-908d590",
         "unstable-fb0a2aa",
         "unstable-09ee09b",
         "0.7.2",
@@ -605,6 +609,9 @@
       "image": "ghcr.io/sirosfoundation/vc/apigw",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "test-disable_verifier_window_fallback-1",
+        "test-disable_verifier_window_fallback-1-amd64",
+        "test-disable_verifier_window_fallback-1-arm64",
         "4e0ccf2",
         "0.8.0-sirosid.0",
         "4e0ccf2-amd64",
@@ -711,6 +718,9 @@
       "image": "ghcr.io/sirosfoundation/vc/issuer",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "test-disable_verifier_window_fallback-1",
+        "test-disable_verifier_window_fallback-1-amd64",
+        "test-disable_verifier_window_fallback-1-arm64",
         "4e0ccf2",
         "0.8.0-sirosid.0",
         "4e0ccf2-amd64",
@@ -836,6 +846,9 @@
       "image": "ghcr.io/sirosfoundation/vc/registry",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "test-disable_verifier_window_fallback-1",
+        "test-disable_verifier_window_fallback-1-amd64",
+        "test-disable_verifier_window_fallback-1-arm64",
         "4e0ccf2",
         "0.8.0-sirosid.0",
         "4e0ccf2-amd64",
@@ -957,6 +970,9 @@
       "image": "ghcr.io/sirosfoundation/vc/verifier",
       "repo": "sirosfoundation/vc",
       "tags": [
+        "test-disable_verifier_window_fallback-1",
+        "test-disable_verifier_window_fallback-1-amd64",
+        "test-disable_verifier_window_fallback-1-arm64",
         "4e0ccf2",
         "0.8.0-sirosid.0",
         "4e0ccf2-arm64",
